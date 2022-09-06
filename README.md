@@ -4,34 +4,35 @@
 
 ## Meet the Team
 
-### Nate Stringham - Team Lead
+### [Nate Stringham](https://github.com/nstringham) - Team Lead
 
 &lt;Nate's bio&gt;
 
-### Nathan Jumaah - Deputy Team Lead
+### [Nathan Jumaah](https://github.com/njumaah) - Deputy Team Lead
 
 &lt;Nathan's bio&gt;
 
-### Muaad Abdulaziz - Team Member
+### [Muaad Abdulaziz](https://github.com/Muaad2001) - Team Member
 
 &lt;Muaad's bio&gt;
 
-### Shunsuke Asai - Team Member
+### [Shunsuke Asai](https://github.com/SBAsai) - Team Member
 
 &lt;Shunsuke's bio&gt;
 
-### Zac Averbach - Team Member
+### [Zac Averbach](https://github.com/zaverbac) - Team Member
 
 &lt;Zac's bio&gt;
 
-### Giantte Chambers - Team Member
+### [Giantte Chambers](https://github.com/gchamb) - Team Member
 
 &lt;Giantte's bio&gt;
 
-### Cameron McClusky - Team Member
+<!-- TODO: replace with Cameron's Actual GiHub Username -->
+### [Cameron McClusky](https://github.com/cmcclusky) - Team Member
 
 &lt;Cameron's bio&gt;
 
-### Josh Salkeld - Team Member
+### [Josh Salkeld](https://github.com/mrjoshua520) - Team Member
 
 &lt;Josh's bio&gt;
