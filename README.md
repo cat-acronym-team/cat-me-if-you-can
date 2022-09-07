@@ -18,7 +18,7 @@ This is my last semester at EMU, majoring in Computer Science. I love programing
 
 ### [Shunsuke Asai](https://github.com/SBAsai) - Team Member
 
-&lt;Shunsuke's bio&gt;
+I am a 22 years old student at EMU and am currently studying computer science. I love watching and playing basketball and am avidly rooting for our Detroit Pistons to succeed... some day.
 
 ### [Zac Averbach](https://github.com/zaverbac) - Team Member
 
