@@ -6,7 +6,7 @@
 
 ### [Nate Stringham](https://github.com/nstringham) - Team Lead
 
-&lt;Nate's bio&gt;
+This is my last semester at EMU, majoring in Computer Science. I love programing in Typescript and Rust. I'm also a mentor of First Robotics Competition Team 6101.
 
 ### [Nathan Jumaah](https://github.com/njumaah) - Deputy Team Lead
 
