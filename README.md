@@ -26,7 +26,7 @@
 
 ### [Giantte Chambers](https://github.com/gchamb) - Team Member
 
-&lt;Giantte's bio&gt;
+Hi, my name is Giantte. I'm senior computer science student who enjoys ping pong, pool, football, and obviously coding. I mostly use Javascript and Python for most of my work.
 
 <!-- TODO: replace with Cameron's Actual GiHub Username -->
 ### [Cameron McClusky](https://github.com/cmcclusky) - Team Member
