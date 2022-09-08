@@ -28,10 +28,9 @@ My name is Zachary Averbach. Im a senior at Eastern Michigan, I'm 24 years old a
 
 Hi, my name is Giantte. I'm senior computer science student who enjoys ping pong, pool, football, and obviously coding. I mostly use Javascript and Python for most of my work.
 
-<!-- TODO: replace with Cameron's Actual GiHub Username -->
 ### [Cameron McClusky](https://github.com/cmcclusky) - Team Member
 
-&lt;Cameron's bio&gt;
+Hello my name is Cameron, I'm currently a Junior and am probably the least prepared for this class but I'll still try my best! I enjoy playing games with friends and am looking to learn new code! I mainly know java and have dabbled in languages like Python and JS in other classes but am pretty much fresh in most languages. Thanks for reading!
 
 ### [Josh Salkeld](https://github.com/mrjoshua520) - Team Member
 
