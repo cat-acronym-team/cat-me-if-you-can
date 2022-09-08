@@ -10,7 +10,7 @@ This is my last semester at EMU, majoring in Computer Science. I love programing
 
 ### [Nathan Jumaah](https://github.com/njumaah) - Deputy Team Lead
 
-&lt;Nathan's bio&gt;
+My name is Nathan Jumaah and I'm 23 years old. I will be graduating this semester, so I really wanted to do something truly exciting this semester. I am majoring in computer science and I am eager to work hard this semester.
 
 ### [Muaad Abdulaziz](https://github.com/Muaad2001) - Team Member
 
