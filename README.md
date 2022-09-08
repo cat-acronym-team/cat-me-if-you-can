@@ -22,7 +22,7 @@ I am a 22 years old student at EMU and am currently studying computer science. I
 
 ### [Zac Averbach](https://github.com/zaverbac) - Team Member
 
-&lt;Zac's bio&gt;
+My name is Zachary Averbach. Im a senior at Eastern Michigan, I'm 24 years old and am majoring in computer science I'm graduating this semester. I'm proficient in java, python, C, and C++. I'm open to learning new languages and am looking forward to working in this group. My Schedule at the moment is that I have school 9-5pm on M, W and am currently trying to find a part time job to help pay for college.
 
 ### [Giantte Chambers](https://github.com/gchamb) - Team Member
 
