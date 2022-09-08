@@ -14,7 +14,7 @@ This is my last semester at EMU, majoring in Computer Science. I love programing
 
 ### [Muaad Abdulaziz](https://github.com/Muaad2001) - Team Member
 
-&lt;Muaad's bio&gt;
+I am 20 years old and I'm a junior at EMU and I am currently pursuing a bachelors in computer science. I run Cross Country and Track and Field here at EMU. I love to play basketball, volleyball, ping pong, COC and Clash Royale. My favorite coding languages are Python and Javascript. 
 
 ### [Shunsuke Asai](https://github.com/SBAsai) - Team Member
 
