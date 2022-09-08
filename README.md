@@ -2,7 +2,7 @@
 
 Cat Me If You Can is a social deduction, mobile browser game where the players are cats on a dating app and must deduce which one player is designated the Catfish. The Catfish's objective is to deceive the other players into thinking they are one of them. Each round, players are paired up with another and each receives a prompt. These prompts will be categorized into subjects (Places, People, Food, ect.). Everyone will receive the same prompt, except the Catfish. The catfish would, however, receive a different prompt in the same category. At the end of each round, everyone's answers are shown. At which point, people must vote on who should be removed from the game.
 
-## Meet Team: Cat Acrnonym Team!
+## Meet Team: Cat Acronym Team!
 
 ### [Nate Stringham](https://github.com/nstringham) - Team Lead
 
