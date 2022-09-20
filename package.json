@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "emulators": "npm --prefix functions run build && npm --prefix client run build:dev && firebase emulators:start --project stage",
+    "emulators:preview": "npm --prefix functions run build && npm --prefix client run build:test && firebase emulators:start --project stage"
+  }
+}
