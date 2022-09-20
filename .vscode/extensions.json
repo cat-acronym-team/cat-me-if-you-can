@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "svelte.svelte-vscode",
+    "ms-playwright.playwright",
+    "toba.vsfire",
+    "vivaxy.vscode-conventional-commits",
+    "eamodio.gitlens"
+  ]
+}
