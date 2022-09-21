@@ -14,7 +14,7 @@ My name is Nathan Jumaah and I'm 23 years old. I will be graduating this semeste
 
 ### [Muaad Abdulaziz](https://github.com/Muaad2001) - Team Member
 
-I am 20 years old and I'm a junior at EMU and I am currently pursuing a bachelors in computer science. I run Cross Country and Track and Field here at EMU. I love to play basketball, volleyball, ping pong, COC and Clash Royale. My favorite coding languages are Python and Javascript. 
+I am 20 years old and I'm a junior at EMU and I am currently pursuing a bachelors in computer science. I run Cross Country and Track and Field here at EMU. I love to play basketball, volleyball, ping pong, COC and Clash Royale. My favorite coding languages are Python and Javascript.
 
 ### [Shunsuke Asai](https://github.com/SBAsai) - Team Member
 
@@ -34,4 +34,4 @@ Hello my name is Cameron, I'm currently a Junior and am probably the least prepa
 
 ### [Josh Salkeld](https://github.com/mrjoshua520) - Team Member
 
-I'll be graduating EMU in december if all ges well. I am most familar with c# and java however have used many other langauges in the past. In my free time I like to play D&D and also mentor a robotics team. 
+I'll be graduating EMU in december if all ges well. I am most familar with c# and java however have used many other langauges in the past. In my free time I like to play D&D and also mentor a robotics team.
