@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "cat-me-if-you-can-game-dev",
+    "stage": "cat-me-if-you-can-game-dev",
+    "prod": "cat-me-if-you-can-game"
+  }
+}

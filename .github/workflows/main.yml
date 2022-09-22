@@ -1,0 +1,194 @@
+name: CI/CD
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  prettier:
+    name: Prettier
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Check Prettier
+        run: npm run prettier
+
+  lint-functions:
+    name: Lint Functions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install Node Dependencies
+        run: npm --prefix functions ci
+
+      - name: Lint
+        run: npm --prefix functions run lint
+
+  build-functions:
+    name: Build Functions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install Node Dependencies
+        run: npm --prefix functions ci
+
+      - name: Build
+        run: npm --prefix functions run build
+
+  lint-client:
+    name: Lint Client
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install Node Dependencies
+        run: npm --prefix client ci
+
+      - name: Lint
+        run: npm --prefix client run lint
+
+  build-client:
+    name: Build Client
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install Node Dependencies
+        run: npm --prefix client ci
+
+      - name: Build
+        run: npm --prefix client run build:prod
+
+  playwright:
+    name: Playwright
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "adopt"
+          java-version: "11"
+
+      - name: Install Node Dependencies
+        run: |
+          npm --prefix functions ci
+          npm --prefix client ci
+
+      - name: Install firebase emulators
+        run: npm i -g firebase-tools
+
+      - name: Install Playwright
+        run: npx --prefix client playwright install --with-deps
+
+      - name: Test
+        run: npm --prefix client run test
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/development'
+    needs: [prettier, lint-functions, build-functions, lint-client, build-client, playwright]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install Node Dependencies
+        run: |
+          npm --prefix functions ci
+          npm --prefix client ci
+
+      - name: Build Functions
+        run: npm --prefix functions run build
+
+      - name: Build Client
+        run: npm --prefix client run build:stage
+
+      - name: Install firebase
+        run: npm i -g firebase-tools
+
+      - name: Deploy
+        run: firebase deploy --project stage --message "${{ github.event.head_commit.message }}"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/production'
+    needs: [prettier, lint-functions, build-functions, lint-client, build-client, playwright]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install Node Dependencies
+        run: |
+          npm --prefix functions ci
+          npm --prefix client ci
+
+      - name: Build Functions
+        run: npm --prefix functions run build
+
+      - name: Build Client
+        run: npm --prefix client run build:prod
+
+      - name: Install firebase
+        run: npm i -g firebase-tools
+
+      - name: Deploy
+        run: firebase deploy --project prod --message "${{ github.event.head_commit.message }}"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
