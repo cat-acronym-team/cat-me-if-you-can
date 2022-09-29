@@ -1,6 +1,8 @@
 import { PUBLIC_USE_EMULATORS, PUBLIC_FIREBASE_CONFIG } from "$env/static/public";
 import { initializeApp, type FirebaseOptions } from "firebase/app";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -36,4 +38,29 @@ export const db = getFirestore(app);
 
 if (PUBLIC_USE_EMULATORS === "true") {
   connectFirestoreEmulator(db, "localhost", 8080);
+}
+
+export const provider = new GoogleAuthProvider();
+export const auth = getAuth(app);
+
+export async function loginWithGoogle() {
+  signInWithPopup(auth, provider)
+    .then((result) => {
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token: unknown = credential.accessToken;
+      // The signed-in user info.
+      const user: unknown = result.user;
+      // ...
+    })
+    .catch((error) => {
+      // Handle Errors here.
+      const errorCode: unknown = error.code;
+      const errorMessage: unknown = error.message;
+      // The email of the user's account used.
+      const email: unknown = error.customData.email;
+      // The AuthCredential type that was used.
+      const credential: unknown = GoogleAuthProvider.credentialFromError(error);
+      // ...
+    });
 }
