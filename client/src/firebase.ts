@@ -1,6 +1,6 @@
 import { PUBLIC_USE_EMULATORS, PUBLIC_FIREBASE_CONFIG } from "$env/static/public";
 import { initializeApp, type FirebaseOptions } from "firebase/app";
-import { connectFirestoreEmulator, Firestore, getFirestore } from "firebase/firestore";
+import { connectFirestoreEmulator, doc, Firestore, getFirestore } from "firebase/firestore";
 import {
   getAuth,
   GoogleAuthProvider,
@@ -10,6 +10,8 @@ import {
   onAuthStateChanged,
   updateCurrentUser,
   updateProfile,
+  sendEmailVerification,
+  connectAuthEmulator,
 } from "firebase/auth";
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -44,16 +46,16 @@ if (PUBLIC_FIREBASE_CONFIG === "staging") {
 const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+const auth = getAuth(app);
 
 if (PUBLIC_USE_EMULATORS === "true") {
   connectFirestoreEmulator(db, "localhost", 8080);
+  connectAuthEmulator(auth, "http://localhost:9099");
 }
 
 //Google login/signup
 export async function loginWithGoogle() {
-  const provider = new GoogleAuthProvider();
-  const auth = getAuth(app);
-
   signInWithPopup(auth, provider)
     .then((result) => {
       // This gives you a Google Access Token. You can use it to access the Google API.
@@ -62,6 +64,10 @@ export async function loginWithGoogle() {
       // The signed-in user info.
       const user = result.user;
 
+      sendEmailVerification(user).then(() => {
+        // Email verification sent!
+        // ...
+      });
       // ...
     })
     .catch((error) => {
