@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { loginWithGoogle, loginWithMicrosoft, loginAnonymously } from "../../firebase";
+  import { loginWithGoogle, loginWithMicrosoft, loginAnonymously } from "../../lib/firebase/authfunctions";
 </script>
 
 <button class="google-button" on:click={loginWithGoogle}>sign in with google</button>
