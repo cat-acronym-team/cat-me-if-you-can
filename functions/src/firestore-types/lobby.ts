@@ -116,7 +116,7 @@ export type LobbyChatMessage = ChatMessage & {
 
 export function chatMessageValidator(displayName: string): { valid: true } | { valid: false; reason: string } {
   if (displayName.length == 0) {
-    return { valid: false, reason: "Chat message may not be empty." };
+    return { valid: false, reason: "Chat message may not be empty" };
   }
 
   if (displayName.length > 100) {
