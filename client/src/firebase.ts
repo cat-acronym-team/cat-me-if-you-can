@@ -35,7 +35,7 @@ if (PUBLIC_FIREBASE_CONFIG === "staging") {
 export const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
-const auth = getAuth(app);
+export const auth = getAuth(app);
 
 if (PUBLIC_USE_EMULATORS === "true") {
   connectFirestoreEmulator(db, "localhost", 8080);
