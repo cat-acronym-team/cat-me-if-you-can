@@ -5,38 +5,69 @@ import {
   OAuthProvider,
   signInWithPopup,
   signInAnonymously,
-  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
 } from "firebase/auth";
 
 // Google login/signup
 export async function loginWithGoogle() {
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
-  signInWithPopup(auth, provider).then((result) => {
-    // This gives you a Google Access Token. You can use it to access the Google API.
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    const token = credential!.accessToken;
-    // The signed-in user info.
-    const user = result.user;
-  });
+
+  try {
+    const user = await signInWithPopup(auth, provider);
+    localStorage.setItem("uid", user.user.uid); // Stores user logging ins uid in local storage
+    console.log(user);
+  } catch (error) {
+    console.log(error);
+  }
+  // onAuthStateChanged(auth, (user) => {
+  //   if (user) {
+  //     const uid = user.uid;
+  //     localStorage.setItem("name", uid);
+  //   } else {
+  //     return;
+  //   }
+  // });
 }
 
 // Microsoft login/signup
 export async function loginWithMicrosoft() {
   const auth = getAuth();
   const provider = new OAuthProvider("microsoft.com");
-
-  signInWithPopup(auth, provider);
+  try {
+    const user = await signInWithPopup(auth, provider);
+    localStorage.setItem("uid", user.user.uid); // Stores user logging ins uid in local storage
+    console.log(user);
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 // Anonymous login
-export function loginAnonymously() {
-  const auth = getAuth();
-  signInAnonymously(auth);
+export async function loginAnonymously() {
+  try {
+    const auth = getAuth();
+    const user = await signInAnonymously(auth);
+
+    localStorage.setItem("uid", user.user.uid); // Stores user logging ins uid in local storage
+    console.log(user);
+  } catch (error) {
+    error;
+  }
 }
 
 // export function loginWithEmail() {
 //   const auth = getAuth();
 
 //   signInWithEmailAndPassword(auth, email, password);
-// }
+
+export async function loginWithEmail() {
+  try {
+    const auth = getAuth();
+
+    // const user = await createUserWithEmailAndPassword(auth, email, password);
+    // console.log(user);
+  } catch (error) {
+    console.log(error);
+  }
+}
