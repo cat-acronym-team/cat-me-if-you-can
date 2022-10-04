@@ -1,10 +1,13 @@
 <script lang="ts">
   import question from "$lib/assets/question-mark.svg";
+  import Modal from "$lib/components/Modal.svelte";
   import { saveDisplayName, getDisplayName } from "$lib/firebase/splashFunctions";
   import { onMount } from "svelte";
   // import stores like user id, isLoggedIn, to query and update their doc
   // import { auth } from "../stores/auth";
 
+  let openRulesModal = false;
+  let openSignInModal = false;
   let name: string = "";
   // get name from database
   onMount(async () => {
@@ -21,14 +24,42 @@
   };
 </script>
 
+<!-- Rules Modal -->
+<Modal
+  open={openRulesModal}
+  onClosed={() => {
+    openRulesModal = false;
+  }}
+>
+  <div class="rules-heading">
+    <h1>Rules!</h1>
+  </div>
+  <div class="rules-body">
+    <!-- Rules Content Here -->
+  </div>
+</Modal>
+<!-- Sign In Modal -->
+<Modal
+  open={openSignInModal}
+  onClosed={() => {
+    openSignInModal = false;
+  }}
+>
+  <!-- Sign In Modal Content Here -->
+</Modal>
 <header class="cat-main-header">
   <div class="header-first-level">
-    <a class="question-container" href="/rules">
+    <div
+      class="question-container"
+      on:click={() => {
+        openRulesModal = true;
+      }}
+    >
       <img src={question} alt="question mark" />
-    </a>
+    </div>
     <div class="account-container">
       <!-- If you are not signed in show this  -->
-      <a class="account-signin" href="/signin">Sign in</a>
+      <a class="account-signin">Sign in</a>
       <!-- If you show account and dropdown -->
 
       <!-- Hover doesn't work on mobile -->
@@ -48,8 +79,8 @@
     </div>
     <div class="cat-main-buttons">
       <input type="text" placeholder="Enter in your display name" on:change={saveName} value={name} />
-      <a href="/create">Create Lobby</a>
-      <a href="/join">Join Lobby</a>
+      <a>Create Lobby</a>
+      <a>Join Lobby</a>
     </div>
   </div>
 </main>
