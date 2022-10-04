@@ -22,6 +22,8 @@ export type Player = {
   votes?: number;
 };
 
+export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
+
 /**
  * the type of documents `/lobbies/{code}`
  */
@@ -37,6 +39,11 @@ export type Lobby = {
    * @note uids[x] and players[x] belong to the same player
    */
   players: Player[];
+
+  /**
+   * the current state of the game
+   */
+  state: GameState;
 };
 
 /**
