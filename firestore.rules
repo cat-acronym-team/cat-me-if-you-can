@@ -6,4 +6,10 @@ service cloud.firestore {
           request.time < timestamp.date(2022, 10, 20);
     }
   }
+  match /users/{userId} {
+        // only allows the itself to write to the document
+        allow write: if request.auth.uid == userId;
+        // allows anyone to read that information
+        allow read;
+  }
 }
