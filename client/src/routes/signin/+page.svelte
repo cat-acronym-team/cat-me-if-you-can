@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { loginWithGoogle, loginWithMicrosoft } from "$lib/firebase/authfunctions";
+  import { loginWithGoogle, loginWithMicrosoft } from "$lib/firebase/auth";
 </script>
 
 <div class="container">
