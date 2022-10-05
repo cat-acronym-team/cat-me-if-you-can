@@ -1,23 +1,32 @@
-import { db } from "$lib/firebase/app";
-import { collection, doc, getDocs, setDoc } from "firebase/firestore";
+import { doc, getDocs, setDoc } from "firebase/firestore";
+import { lobbyCollection } from "./firestore-collections";
+import { auth } from "./app";
+import { FieldValue } from "@google-cloud/firestore";
 
 export async function createLobby() {
-  const code = createCode(); // Creates lobby code
+  const code = await createCode(); // Creates lobby code
+  const user = auth.currentUser?.uid;
 
-  await setDoc(doc(db, "lobbies", code), {
-    uids: [], // Somehow get uids
-    players: {
-      alive: true,
-      avatar: 1,
-      displayName: "default", // Change to real display name once display names exist
-      // votes
-    },
+  if (user === null || user === undefined) {
+    return; // Figure out later
+  } else {
+    await setDoc(doc(lobbyCollection, code), {
+      uids: [user.toString()], // Somehow get uids
+      players: [
+        {
+          alive: true,
+          avatar: 1,
+          displayName: "default", // Change to real display name once display names exist
+          // votes
+        },
+      ],
 
-    GameState: "WAIT",
-  });
+      state: "WAIT",
+    });
+  }
 }
 
-const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
+const characters = "abcdefghijklmnopqrstuvwxyz";
 
 async function createCode() {
   let code = " ";
@@ -27,11 +36,11 @@ async function createCode() {
     code += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
 
-  const checkCode = await getDocs(collection(db, "lobbies"));
+  const checkCode = await getDocs(lobbyCollection);
 
   checkCode.forEach((doc) => {
     /* Run check to see if lobby with code already exists */
-    if (code == doc.id) {
+    if (code === doc.id) {
       createCode();
     }
   });
@@ -39,4 +48,4 @@ async function createCode() {
   return code;
 }
 
-export async function getCode() {}
+// export async function getCode() {}
