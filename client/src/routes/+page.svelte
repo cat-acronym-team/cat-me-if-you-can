@@ -3,8 +3,13 @@
   import Modal from "$components/Modal.svelte";
   import { saveDisplayName, getDisplayName } from "$lib/firebase/splash";
   import { onMount } from "svelte";
+  import { getAuth } from "firebase/auth"
   // import stores like user id, isLoggedIn, to query and update their doc
   // import { auth } from "../stores/auth";
+  
+  const auth = getAuth();
+  const user = auth.currentUser;
+  //check if the user is logged in with getAuth
 
   let openRulesModal = false;
   let openSignInModal = false;
@@ -59,15 +64,19 @@
     </div>
     <div class="account-container">
       <!-- If you are not signed in show this  -->
+      {#if user == null}
       <a class="account-signin">Sign in</a>
+      {/if}
       <!-- If you show account and dropdown -->
-
+      {#if user !== null}
+      <a class="account-account">Account</a>
       <!-- Hover doesn't work on mobile -->
-      <!-- <div class="account-content">
+      <div class="account-content">
         <a href="/settings">Account Settings</a>
         <a href="/stats">Stats</a>
         <a href="/logout">Logout</a>
-      </div> -->
+      </div>
+      {/if} 
     </div>
   </div>
 </header>
@@ -112,6 +121,13 @@
     background-color: #151515;
     padding: 5px;
   }
+  .account-account {
+    text-decoration: none;
+    margin-right: 5px;
+    color: red;
+    background-color: #151515;
+    padding: 5px;
+  }
   .account-container button {
     background-color: #151515;
     color: red;
@@ -119,7 +135,7 @@
     font-size: 16px;
     border: none;
   }
-  /* 
+   
   .account-container {
     position: relative;
     display: inline-block;
@@ -141,17 +157,17 @@
     display: block;
   }
 
-  .account-content a:hover {
+  .account-content a:hover, .account-content a:active {
     background-color: #ddd;
   }
-
-  .account-container:hover .account-content {
+  /* Using active after hover should work for mobile */
+  .account-container.account-account:hover, .account-container.account-account:active .account-content {
     display: block;
   }
 
-  .account-container:hover button {
+  .account-container.account-account:hover button {
     background-color: red;
-  } */
+  } 
 
   .logo-container {
     width: 50%;
