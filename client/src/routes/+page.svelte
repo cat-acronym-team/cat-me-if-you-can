@@ -1,7 +1,7 @@
 <script lang="ts">
   import question from "$lib/assets/question-mark.svg";
-  import Modal from "$lib/components/Modal.svelte";
-  import { saveDisplayName, getDisplayName } from "$lib/firebase/splashFunctions";
+  import Modal from "$components/Modal.svelte";
+  import { saveDisplayName, getDisplayName } from "$lib/firebase/splash";
   import { onMount } from "svelte";
   // import stores like user id, isLoggedIn, to query and update their doc
   // import { auth } from "../stores/auth";
