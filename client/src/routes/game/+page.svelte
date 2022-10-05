@@ -1,6 +1,6 @@
 <script lang="ts">
   function startgame() {
-    return; //Placeholder return statement
+    return; // Placeholder return statement
   }
 </script>
 
