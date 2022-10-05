@@ -41,6 +41,24 @@ jobs:
       - name: Lint
         run: npm --prefix functions run lint
 
+  test-functions:
+    name: Test Functions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install Node Dependencies
+        run: npm --prefix functions ci
+
+      - name: Test
+        run: npm --prefix functions run test
+
   build-functions:
     name: Build Functions
     runs-on: ubuntu-latest
@@ -131,7 +149,7 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/development'
-    needs: [prettier, lint-functions, build-functions, lint-client, build-client, playwright]
+    needs: [prettier, lint-functions, test-functions, build-functions, lint-client, build-client, playwright]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -164,7 +182,7 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/production'
-    needs: [prettier, lint-functions, build-functions, lint-client, build-client, playwright]
+    needs: [prettier, lint-functions, test-functions, build-functions, lint-client, build-client, playwright]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
