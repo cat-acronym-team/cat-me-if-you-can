@@ -1,5 +1,5 @@
 import { auth } from "$lib/firebase/app";
-import { GoogleAuthProvider, OAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, OAuthProvider, signInAnonymously, signInWithPopup } from "firebase/auth";
 
 // Google login/signup
 export async function loginWithGoogle() {
@@ -33,4 +33,8 @@ export async function loginWithEmail() {
   } catch (error) {
     console.log(error);
   }
+}
+
+export function loginAnonymous() {
+  return signInAnonymously(auth);
 }
