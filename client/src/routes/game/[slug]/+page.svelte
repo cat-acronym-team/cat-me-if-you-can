@@ -1,4 +1,9 @@
 <script lang="ts">
+  import { page } from "$app/stores";
+
+  let code = $page.params.slug;
+  let url = window.location.href;
+
   function startgame() {
     return; // Placeholder return statement
   }
@@ -8,12 +13,21 @@
 <main>
   <div class="container">
     <div class="lobby-info">
-      <h3>Code:</h3>
+      <h3>Code: {code}</h3>
       <h3>Players:</h3>
     </div>
     <div class="lobby" />
     <div class="start">
       <button id="start-game" on:click={startgame}>Start Game</button>
+    </div>
+    <div class="invite-link">
+      <h3>Invite Link: {url}</h3>
+    </div>
+    <div class="copy-button">
+      <button id="copy">Copy Link</button>
+    </div>
+    <div class="share-button">
+      <button id="share">Share Link</button>
     </div>
   </div>
 </main>
@@ -35,7 +49,7 @@
       ". lobby lobby lobby lobby lobby ."
       ". lobby lobby lobby lobby lobby ."
       ". . . start . . ."
-      ". . . . . . .";
+      ". . . invite-link copy-button share-button .";
   }
   .lobby {
     grid-area: lobby;
@@ -60,5 +74,19 @@
 
   .lobby-info {
     grid-area: lobby-info;
+  }
+
+  .invite-link {
+    grid-area: invite-link;
+    width: 750px;
+    height: 100px;
+  }
+
+  .copy-button {
+    grid-area: copy-button;
+  }
+
+  .share-button {
+    grid-area: share-button;
   }
 </style>

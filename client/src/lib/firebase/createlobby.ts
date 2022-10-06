@@ -1,7 +1,6 @@
 import { doc, getDocs, setDoc } from "firebase/firestore";
 import { lobbyCollection } from "./firestore-collections";
 import { auth } from "./app";
-import { FieldValue } from "@google-cloud/firestore";
 
 export async function createLobby() {
   const code = await createCode(); // Creates lobby code
@@ -11,18 +10,19 @@ export async function createLobby() {
     return; // Figure out later
   } else {
     await setDoc(doc(lobbyCollection, code), {
-      uids: [user.toString()], // Somehow get uids
+      uids: [user.toString()],
       players: [
         {
           alive: true,
           avatar: 1,
-          displayName: "default", // Change to real display name once display names exist
+          displayName: "default",
           // votes
         },
       ],
-
       state: "WAIT",
     });
+
+    return code;
   }
 }
 
