@@ -1,6 +1,5 @@
 <script lang="ts">
   import Modal from "$components/Modal.svelte";
-  import QuestionMark from "$components/QuestionMark.svelte";
   import { saveDisplayName, getDisplayName } from "$lib/firebase/splash";
   import { onMount } from "svelte";
   import { getAuth } from "firebase/auth";
@@ -24,7 +23,9 @@
     saveDisplayName("userid", name);
   };
 
-  const createLobbyHandler = () => {};
+  const createLobbyHandler = () => {
+    console.log('To satify lint')
+  };
 </script>
 
 <!-- Sign In Modal -->
