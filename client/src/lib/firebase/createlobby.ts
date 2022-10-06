@@ -29,7 +29,7 @@ export async function createLobby() {
 const characters = "abcdefghijklmnopqrstuvwxyz";
 
 async function createCode() {
-  let code = " ";
+  let code = "";
   const charactersLength = characters.length;
 
   for (let i = 0; i < 5; i++) {

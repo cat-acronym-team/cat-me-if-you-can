@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from "$app/stores";
 
-  let code = $page.params.slug;
+  let code = $page.params.gameid;
   let url = window.location.href;
 
   function startgame() {
