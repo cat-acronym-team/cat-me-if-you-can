@@ -1,17 +1,14 @@
 <script lang="ts">
-  import question from "$lib/assets/question-mark.svg";
   import Modal from "$components/Modal.svelte";
+  import QuestionMark from "$components/QuestionMark.svelte";
   import { saveDisplayName, getDisplayName } from "$lib/firebase/splash";
   import { onMount } from "svelte";
   import { getAuth } from "firebase/auth";
-  // import stores like user id, isLoggedIn, to query and update their doc
-  // import { auth } from "../stores/auth";
 
   const auth = getAuth();
   const user = auth.currentUser;
   // check if the user is logged in with getAuth
 
-  let openRulesModal = false;
   let openSignInModal = false;
   let name: string = "";
   // get name from database
@@ -23,26 +20,13 @@
     }
     // if no name then it is empty
   });
-  const saveName = (e: any) => {
-    name = e.target.value as string;
+  const saveName = () => {
     saveDisplayName("userid", name);
   };
+
+  const createLobbyHandler = () => {};
 </script>
 
-<!-- Rules Modal -->
-<Modal
-  open={openRulesModal}
-  onClosed={() => {
-    openRulesModal = false;
-  }}
->
-  <div class="rules-heading">
-    <h1>Rules!</h1>
-  </div>
-  <div class="rules-body">
-    <!-- Rules Content Here -->
-  </div>
-</Modal>
 <!-- Sign In Modal -->
 <Modal
   open={openSignInModal}
@@ -50,18 +34,10 @@
     openSignInModal = false;
   }}
 >
-  <!-- Sign In Modal Content Here -->
+  <!-- TODO: Sign In Modal Content Here -->
 </Modal>
 <header class="cat-main-header">
   <div class="header-first-level">
-    <div
-      class="question-container"
-      on:click={() => {
-        openRulesModal = true;
-      }}
-    >
-      <img src={question} alt="question mark" />
-    </div>
     <div class="account-container">
       <!-- If you are not signed in show this  -->
       <!-- {#if user == null}
@@ -69,12 +45,13 @@
       {/if} -->
       <!-- If you show account and dropdown -->
       <!-- {#if user !== null} -->
-      <a class="account-account">Account</a>
+      <button class="account-account">Account</button>
       <!-- Hover doesn't work on mobile -->
       <div class="account-content">
-        <a href="/settings">Account Settings</a>
+        <!-- TODO: Account Hover Links -->
+        <!-- <a href="/settings">Account Settings</a>
         <a href="/stats">Stats</a>
-        <a href="/logout">Logout</a>
+        <a href="/logout">Logout</a> -->
       </div>
       <!-- {/if} -->
     </div>
@@ -87,9 +64,9 @@
       <img src="https://cataas.com/cat/says/hello%20world!" alt="our logo" />
     </div>
     <div class="cat-main-buttons">
-      <input type="text" placeholder="Enter in your display name" on:change={saveName} value={name} />
-      <a>Create Lobby</a>
-      <a>Join Lobby</a>
+      <input type="text" placeholder="Enter in your display name" on:change={saveName} bind:value={name} />
+      <button on:click={createLobbyHandler}>Create Lobby</button>
+      <button>Join Lobby</button>
     </div>
   </div>
 </main>
@@ -102,17 +79,8 @@
   .header-first-level {
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: right;
     align-items: center;
-  }
-
-  .question-container {
-    width: 7%;
-    padding: 5px;
-  }
-  .question-container img {
-    width: 100%;
-    object-fit: cover;
   }
   .account-signin {
     text-decoration: none;
@@ -132,7 +100,7 @@
     background-color: #151515;
     padding: 5px;
   }
-  .account-container a {
+  .account-container button {
     background-color: #151515;
     color: red;
     padding: 16px;
@@ -156,18 +124,8 @@
     text-decoration: none;
     display: block;
   }
-
-  /* .account-content a:hover,
-  .account-content a:active {
-    background-color: #ddd;
-  } */
-  /* Using active after hover should work for mobile */
   .account-container:hover .account-content {
     display: block;
-  }
-
-  .account-container:hover button {
-    background-color: red;
   }
 
   .logo-container {
@@ -205,7 +163,7 @@
     height: 25px;
     text-align: center;
   }
-  .cat-main-buttons a {
+  .cat-main-buttons button {
     display: flex;
     align-items: center;
     justify-content: center;
