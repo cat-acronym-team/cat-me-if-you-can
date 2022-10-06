@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createLobby } from "$lib/firebase/createlobby";
+  import { createLobby } from "$lib/firebase/create-lobby";
   import { goto } from "$app/navigation";
 
   async function tempCreate() {
