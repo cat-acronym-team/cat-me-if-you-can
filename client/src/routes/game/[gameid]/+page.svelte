@@ -3,5 +3,5 @@
 </script>
 
 <div>
-  <Lobby lobby />
+  <Lobby />
 </div>
