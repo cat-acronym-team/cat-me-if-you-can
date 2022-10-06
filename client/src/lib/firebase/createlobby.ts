@@ -47,5 +47,3 @@ async function createCode() {
 
   return code;
 }
-
-// export async function getCode() {}

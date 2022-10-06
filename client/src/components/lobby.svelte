@@ -5,7 +5,7 @@
   let url = window.location.href;
 
   function startgame() {
-    return; // Placeholder return statement
+    return; // TODO: Placeholder return statement
   }
 </script>
 
