@@ -1,4 +1,4 @@
-import { doc, getDocs, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { lobbyCollection } from "./firestore-collections";
 import { auth } from "./app";
 
