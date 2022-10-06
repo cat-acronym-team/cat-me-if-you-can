@@ -67,6 +67,32 @@ export type PrivatePlayer = {
 };
 
 /**
+ * the type of documents `/lobbies/{code}/promptAnswers/{uid}`
+ */
+export type PromptAnswer = {
+  /**
+   * the answer that the user has submitted
+   */
+  answer: string;
+};
+
+export function promptAnswerValidator(displayName: string): { valid: true } | { valid: false; reason: string } {
+  if (displayName.length == 0) {
+    return { valid: false, reason: "Prompt answer may not be empty" };
+  }
+
+  if (displayName.length > 50) {
+    return { valid: false, reason: "Prompt answer must be at most 50 characters long" };
+  }
+
+  if (displayName !== displayName.trim()) {
+    return { valid: false, reason: "Prompt answer must not contain leading or trailing whitespace" };
+  }
+
+  return { valid: true };
+}
+
+/**
  * the type of documents `/lobbies/{code}/votes/{uid}`
  */
 export type Vote = {
