@@ -1,5 +1,6 @@
+import { USERDOMAIN } from "$env/static/private";
 import { auth } from "$lib/firebase/app";
-import { GoogleAuthProvider, OAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, OAuthProvider, signInWithPopup, signInAnonymously } from "firebase/auth";
 
 // Google login/signup
 export async function loginWithGoogle() {
@@ -7,7 +8,6 @@ export async function loginWithGoogle() {
 
   try {
     const user = await signInWithPopup(auth, provider);
-    localStorage.setItem("uid", user.user.uid); // Stores user logging ins uid in local storage
     console.log(user);
   } catch (error) {
     console.log(error);
@@ -19,7 +19,6 @@ export async function loginWithMicrosoft() {
   const provider = new OAuthProvider("microsoft.com");
   try {
     const user = await signInWithPopup(auth, provider);
-    localStorage.setItem("uid", user.user.uid); // Stores user logging ins uid in local storage
     console.log(user);
   } catch (error) {
     console.log(error);
@@ -33,4 +32,9 @@ export async function loginWithEmail() {
   } catch (error) {
     console.log(error);
   }
+}
+
+export async function loginAnonymous() {
+  const user = await signInAnonymously(auth);
+  return user;
 }
