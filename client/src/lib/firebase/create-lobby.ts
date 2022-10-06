@@ -6,7 +6,7 @@ export async function createLobby(): Promise<string> {
   const code = await createCode(); // Creates lobby code
   const user = auth.currentUser?.uid;
 
-  if (user === null || user === undefined) {
+  if (user == undefined) {
     throw new Error("No user account defined"); // TODO: Set User to Anonomous User
   } else {
     for (let index = 0; index < 5; index++) {
