@@ -21,7 +21,7 @@ describe("prompts", () => {
     for (const category of catagories) {
       const prompts = promptsByCategory[category];
       const uniquePrompts = Array.from(new Set(prompts));
-      expect(prompts).to.equal(uniquePrompts);
+      expect(prompts).to.deep.equal(uniquePrompts);
     }
   });
 });
