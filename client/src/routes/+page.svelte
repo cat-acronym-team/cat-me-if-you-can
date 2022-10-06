@@ -1,30 +1,47 @@
 <script lang="ts">
   import Modal from "$components/Modal.svelte";
-  import { saveDisplayName, getDisplayName } from "$lib/firebase/splash";
+  import { saveDisplayName, getDisplayName, createAnonUser } from "$lib/firebase/splash";
+  import { loginAnonymous } from "$lib/firebase/auth";
   import { onMount } from "svelte";
   import { getAuth } from "firebase/auth";
+  import { goto } from "$app/navigation";
 
   const auth = getAuth();
   const user = auth.currentUser;
-  // check if the user is logged in with getAuth
-
+  // check if the user is logged in with getAuth 
   let openSignInModal = false;
   let name: string = "";
   // get name from database
   onMount(async () => {
-    const { displayName } = await getDisplayName(`userid`);
-    // assign name from database to name variable
-    if (displayName !== "") {
-      name = displayName;
+    if (user !== null) {
+      const { displayName } = await getDisplayName(user.uid);
+      // assign name from database to name variable
+      if (displayName !== "") {
+        name = displayName;
+      }
     }
+
     // if no name then it is empty
   });
   const saveName = () => {
-    saveDisplayName("userid", name);
+    if (user !== null && name !== "") {
+      saveDisplayName(user.uid, name);
+    }
   };
+  const createLobbyHandler = async () => {
+    // if user is null create anon user
+    // then create a document with the id of the anon user if it doesn't exist create one
+    if (user === null && name !== "") {
+      const { uid } = (await loginAnonymous()).user;
+      createAnonUser(uid, name);
+    }
 
-  const createLobbyHandler = () => {
-    console.log('To satify lint')
+    if (name !== "") {
+      // TODO: Create Function Here
+
+      // TODO: Push to game page with code
+      goto("/");
+    }
   };
 </script>
 
@@ -41,20 +58,24 @@
   <div class="header-first-level">
     <div class="account-container">
       <!-- If you are not signed in show this  -->
-      <!-- {#if user == null}
-        <a class="account-signin">Sign in</a>
-      {/if} -->
-      <!-- If you show account and dropdown -->
-      <!-- {#if user !== null} -->
-      <button class="account-account">Account</button>
-      <!-- Hover doesn't work on mobile -->
-      <div class="account-content">
-        <!-- TODO: Account Hover Links -->
-        <!-- <a href="/settings">Account Settings</a>
+      {#if user == null}
+        <button
+          on:click={() => {
+            openSignInModal = true;
+          }}
+          class="account-signin">Sign in</button
+        >
+        <!-- If you show account and dropdown -->
+      {:else}
+        <button class="account-account">Account</button>
+        <!-- Hover doesn't work on mobile -->
+        <div class="account-content">
+          <!-- TODO: Account Hover Links -->
+          <!-- <a href="/settings">Account Settings</a>
         <a href="/stats">Stats</a>
         <a href="/logout">Logout</a> -->
-      </div>
-      <!-- {/if} -->
+        </div>
+      {/if}
     </div>
   </div>
 </header>

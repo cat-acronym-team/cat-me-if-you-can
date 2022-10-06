@@ -1,6 +1,6 @@
 import { db } from "./app";
 import type { UserData } from "./firestore-types/users";
-import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
 
 // users collection
 //  - displayName
@@ -15,5 +15,13 @@ export const saveDisplayName = async (id: string, name: string) => {
   const user = doc(db, `/users/${id}`);
   await updateDoc(user, {
     displayName: name,
+  });
+};
+
+// create user document for anon user
+export const createAnonUser = async (uid: string, name: string) => {
+  await setDoc(doc(db, `/users/${uid}`), {
+    displayName: name,
+    avatar: 1,
   });
 };

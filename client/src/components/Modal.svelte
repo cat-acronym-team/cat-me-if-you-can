@@ -6,14 +6,13 @@
   // You will use this component as an html element
   // Put your content in bewteen the opening and closing elements
   // Examples: <Modal> Hello World! </Modal>
-  
 
   // Props
   export let open: boolean;
   export let onClosed: () => void;
 </script>
 
-<div class={open ? "dialog-backdrop" : "dialog-backdrop hide"} id="backdrop" on:click={onClosed}>
+<div class={open ? "dialog-backdrop" : "dialog-backdrop hide"} on:click={onClosed}>
   <dialog {open}>
     <slot />
   </dialog>
@@ -24,8 +23,10 @@
     display: block;
     position: fixed;
     overflow: hidden;
-    width: 100%;
-    height: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     background-color: rgba(0, 0, 0, 0.934);
     z-index: 1;
   }
