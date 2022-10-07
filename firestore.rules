@@ -1,9 +1,18 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if
-          request.time < timestamp.date(2022, 10, 20);
+    match /lobbies/{code} {
+      allow get: if true;
+
+      match /promptAnswers/{uid} {
+        function validAnswer() {
+          return request.resource.data.answer is string
+            && 0 < request.resource.data.answer.size() && request.resource.data.answer.size() <= 50
+            && request.resource.data.answer == request.resource.data.answer.trim();
+        }
+
+        allow create: if request.auth.uid == uid && validAnswer() && request.resource.data.keys().hasOnly(['answer']);
+      }
     }
   }
 }
