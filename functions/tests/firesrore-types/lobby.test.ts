@@ -66,11 +66,11 @@ describe("promptAnswerValidator", () => {
   });
 
   it("should not allow answers that end with a space", () => {
-    const message = "This message ends with a space. ";
+    const message = "This answer ends with a space. ";
 
     const expectedValidationResult = {
       valid: false,
-      reason: "Chat message must not contain leading or trailing whitespace",
+      reason: "Prompt answer must not contain leading or trailing whitespace",
     };
 
     const actualValidationResult = promptAnswerValidator(message);
