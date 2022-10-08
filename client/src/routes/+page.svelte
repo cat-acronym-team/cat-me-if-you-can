@@ -1,7 +1,9 @@
 <script lang="ts">
   import Modal from "$components/Modal.svelte";
   import { saveDisplayName, getDisplayName, createUser } from "$lib/firebase/splash";
+  import { createLobby } from "$lib/firebase/create-lobby";
   import { loginAnonymous } from "$lib/firebase/auth";
+  import type { UserData } from "$lib/firebase/firestore-types/users";
   import { onMount } from "svelte";
   import { getAuth } from "firebase/auth";
   import { goto } from "$app/navigation";
@@ -14,7 +16,7 @@
   // get name from database
   onMount(async () => {
     if (user !== null) {
-      const { displayName } = await getDisplayName(user.uid);
+      const { displayName } = (await getDisplayName(user.uid)) as UserData;
       // assign name from database to name variable
       if (displayName !== "") {
         name = displayName;
@@ -39,11 +41,10 @@
     }
     // creates user doc for any user or overwrite if it already exist
     createUser(user.uid, name);
-    
-    // TODO: Create Function Here
 
-    // TODO: Push to game page with code
-    goto("/");
+    const code = (await createLobby()) as string;
+
+    goto("/game/" + code);
   };
 </script>
 
