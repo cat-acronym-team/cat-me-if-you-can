@@ -1,6 +1,7 @@
 <script lang="ts">
   import Modal from "$components/Modal.svelte";
   import { saveDisplayName, getDisplayName, createUser } from "$lib/firebase/splash";
+  import { createLobby } from "$lib/firebase/create-lobby";
   import { loginAnonymous } from "$lib/firebase/auth";
   import { onMount } from "svelte";
   import { getAuth } from "firebase/auth";
@@ -39,11 +40,10 @@
     }
     // creates user doc for any user or overwrite if it already exist
     createUser(user.uid, name);
-    
-    // TODO: Create Function Here
 
-    // TODO: Push to game page with code
-    goto("/");
+    const code = (await createLobby()) as string;
+
+    goto("/game/" + code);
   };
 </script>
 
