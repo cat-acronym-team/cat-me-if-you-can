@@ -1,4 +1,3 @@
-import { USERDOMAIN } from "$env/static/private";
 import { auth } from "$lib/firebase/app";
 import { GoogleAuthProvider, OAuthProvider, signInWithPopup, signInAnonymously } from "firebase/auth";
 
@@ -34,7 +33,6 @@ export async function loginWithEmail() {
   }
 }
 
-export async function loginAnonymous() {
-  const user = await signInAnonymously(auth);
-  return user;
+export function loginAnonymous() {
+  return signInAnonymously(auth);
 }
