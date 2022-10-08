@@ -1,14 +1,14 @@
 <script lang="ts">
   import Modal from "$components/Modal.svelte";
-  import { saveDisplayName, getDisplayName, createAnonUser } from "$lib/firebase/splash";
+  import { saveDisplayName, getDisplayName, createUser } from "$lib/firebase/splash";
   import { loginAnonymous } from "$lib/firebase/auth";
   import { onMount } from "svelte";
   import { getAuth } from "firebase/auth";
   import { goto } from "$app/navigation";
 
   const auth = getAuth();
-  const user = auth.currentUser;
-  // check if the user is logged in with getAuth 
+  let user = auth.currentUser;
+  // check if the user is logged in with getAuth
   let openSignInModal = false;
   let name: string = "";
   // get name from database
@@ -29,19 +29,21 @@
     }
   };
   const createLobbyHandler = async () => {
+    if (name === "") {
+      return;
+    }
     // if user is null create anon user
     // then create a document with the id of the anon user if it doesn't exist create one
-    if (user === null && name !== "") {
-      const { uid } = (await loginAnonymous()).user;
-      createAnonUser(uid, name);
+    if (user === null) {
+      user = (await loginAnonymous()).user;
     }
+    // creates user doc for any user or overwrite if it already exist
+    createUser(user.uid, name);
+    
+    // TODO: Create Function Here
 
-    if (name !== "") {
-      // TODO: Create Function Here
-
-      // TODO: Push to game page with code
-      goto("/");
-    }
+    // TODO: Push to game page with code
+    goto("/");
   };
 </script>
 

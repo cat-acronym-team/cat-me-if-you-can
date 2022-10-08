@@ -19,9 +19,9 @@ export const saveDisplayName = async (id: string, name: string) => {
 };
 
 // create user document for anon user
-export const createAnonUser = async (uid: string, name: string) => {
+export const createUser = async (uid: string, name: string) => {
   await setDoc(doc(db, `/users/${uid}`), {
     displayName: name,
-    avatar: 1,
+    avatar: 0,
   });
 };

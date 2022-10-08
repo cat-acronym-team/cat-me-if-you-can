@@ -5,11 +5,22 @@ service cloud.firestore {
       allow read, write: if
           request.time < timestamp.date(2022, 10, 20);
     }
-  }
-  match /users/{userId} {
-        // only allows the itself to write to the document
-        allow write: if request.auth.uid == userId;
-        // allows anyone to read that information
-        allow read;
+    match /users/{userId} {
+       function validateAttrs(){
+        return (
+      		  request.resource.data.keys().hasOnly(['displayName', 'avatar']) &&
+        request.resource.data.displayName is string && request.resource.data.displayName.trim().size() >= 3 && request.resource.data.displayName.trim().size() <= 15 &&
+        // TODO: finish display name regex
+        // request.resource.data.displayName.match('/[0-9A-Za-z_-]/')
+        request.resource.data.avatar is number && request.resource.data.avatar >= 0 && request.resource.data.avatar <=12
+        );
+      }
+        // // only allows the itself to write to the document
+        // allow write: if request.auth.uid == userId;
+        // // allows anyone to read that information
+        // allow read;
+
+        allow create: if request.auth.uid == userId && validateAttrs();
+    }
   }
 }
