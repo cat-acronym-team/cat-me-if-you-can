@@ -9,10 +9,20 @@
 
   // Props
   export let open: boolean;
-  export let onClosed: () => void;
+  export let closeOnClick = false;
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  export let onClosed = () => {};
 </script>
 
-<div class={open ? "dialog-backdrop" : "dialog-backdrop hide"} on:click={onClosed}>
+<div
+  class={open ? "dialog-backdrop" : "dialog-backdrop hide"}
+  on:click={() => {
+    if (closeOnClick) {
+      return;
+    }
+    onClosed();
+  }}
+>
   <dialog {open}>
     <slot />
   </dialog>

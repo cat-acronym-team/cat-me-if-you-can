@@ -1,6 +1,6 @@
 <script lang="ts">
   import Modal from "$components/Modal.svelte";
-  import { saveDisplayName, getDisplayName, createUser } from "$lib/firebase/splash";
+  import { saveDisplayName, getUser, createUser } from "$lib/firebase/splash";
   import { createLobby } from "$lib/firebase/create-lobby";
   import { loginAnonymous } from "$lib/firebase/auth";
   import type { UserData } from "$lib/firebase/firestore-types/users";
@@ -16,7 +16,7 @@
   // get name from database
   onMount(async () => {
     if (user !== null) {
-      const { displayName } = (await getDisplayName(user.uid)) as UserData;
+      const { displayName } = (await getUser(user.uid)) as UserData;
       // assign name from database to name variable
       if (displayName !== "") {
         name = displayName;
@@ -45,6 +45,20 @@
     const code = (await createLobby()) as string;
 
     goto("/game/" + code);
+  };
+  const JoinLobbyHandler = async () => {
+    if (name === "") {
+      return;
+    }
+    // if user is null create anon user
+    // then create a document with the id of the anon user if it doesn't exist create one
+    if (user === null) {
+      user = (await loginAnonymous()).user;
+    }
+    // creates user doc for any user or overwrite if it already exist
+    createUser(user.uid, name);
+
+    goto("/join");
   };
 </script>
 
@@ -91,7 +105,7 @@
     <div class="cat-main-buttons">
       <input type="text" placeholder="Enter in your display name" on:change={saveName} bind:value={name} />
       <button on:click={createLobbyHandler}>Create Lobby</button>
-      <button>Join Lobby</button>
+      <button on:click={JoinLobbyHandler}>Join Lobby</button>
     </div>
   </div>
 </main>
