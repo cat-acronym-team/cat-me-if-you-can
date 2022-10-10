@@ -86,7 +86,7 @@
 <main class="cat-main-container">
   <div class="cat-main">
     <div class="logo-container">
-      <img src="https://cataas.com/cat/says/hello%20world!" alt="our logo" />
+      <img src="https://picsum.photos/500/300" alt="our logo" />
     </div>
     <div class="cat-main-buttons">
       <input type="text" placeholder="Enter in your display name" on:change={saveName} bind:value={name} />
