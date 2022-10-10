@@ -22,5 +22,6 @@ module.exports = {
   plugins: ["@typescript-eslint", "import"],
   rules: {
     "spaced-comment": "warn",
+    "no-warning-comments": "warn",
   },
 };
