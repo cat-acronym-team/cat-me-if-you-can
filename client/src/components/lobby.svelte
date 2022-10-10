@@ -1,8 +1,21 @@
 <script lang="ts">
+  import SelectAvatar from "./select-avatar.svelte";
   import { page } from "$app/stores";
 
   let code = $page.params.gameid;
   let url = window.location.href;
+
+  import type { Lobby } from "$lib/firebase/firestore-types/lobby";
+
+  const lobby: Lobby = {
+    uids: ["nate", "nathan"],
+    players: [
+      { alive: true, displayName: "Nate", avatar: 5 },
+      { alive: true, displayName: "Nathan", avatar: 3 },
+      { alive: true, displayName: "HHHHHHHHHH", avatar: 9 },
+    ],
+    state: "WAIT",
+  };
 
   function startgame() {
     return; // TODO: Placeholder return statement
@@ -16,7 +29,7 @@
       <h3>Code: {code}</h3>
       <h3>Players:</h3>
     </div>
-    <div class="lobby" />
+    <div class="lobby"><SelectAvatar {lobby} /></div>
     <div class="start">
       <button id="start-game" on:click={startgame}>Start Game</button>
     </div>
