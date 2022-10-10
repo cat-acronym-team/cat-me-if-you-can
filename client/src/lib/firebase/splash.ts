@@ -6,9 +6,9 @@ import { doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
 //  - displayName
 //  - avatar
 // get display name function to autofill the name input text
-export const getDisplayName = async (id: string) => {
+export const getUser = async (id: string) => {
   const user = await getDoc(doc(db, `/users/${id}`));
-  return user.data() as UserData;
+  return user.data() as UserData | undefined;
 };
 // allow user to changing after every keystroke
 export const saveDisplayName = async (id: string, name: string) => {

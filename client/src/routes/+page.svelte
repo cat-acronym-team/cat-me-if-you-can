@@ -1,30 +1,67 @@
 <script lang="ts">
   import Modal from "$components/Modal.svelte";
-  import { saveDisplayName, getDisplayName, createUser } from "$lib/firebase/splash";
+  import { saveDisplayName, createUser, getUser } from "$lib/firebase/splash";
   import { loginAnonymous } from "$lib/firebase/auth";
   import { onMount } from "svelte";
-  import { getAuth } from "firebase/auth";
+  import { auth } from "$lib/firebase/app";
   import { goto } from "$app/navigation";
+  import type { UserData } from "$lib/firebase/firestore-types/users";
 
-  const auth = getAuth();
   let user = auth.currentUser;
+  let userData: UserData | undefined;
   // check if the user is logged in with getAuth
   let openSignInModal = false;
   let name: string = "";
   // get name from database
   onMount(async () => {
     if (user !== null) {
-      const { displayName } = await getDisplayName(user.uid);
-      // assign name from database to name variable
-      if (displayName !== "") {
-        name = displayName;
+      userData = await getUser(user.uid);
+      // fixed error because it would try to look for the display name of a user that doesn't exist
+      if (userData !== undefined) {
+        // assign name from database to name variable
+        if (userData.displayName !== "") {
+          name = userData.displayName;
+        }
       }
     }
 
     // if no name then it is empty
   });
-  const saveName = () => {
-    if (user !== null && name !== "") {
+
+  /* 
+  Is called once user unfocuses the display name input field. It was 
+  created to avoid excessive writes to the database with the onchange event.
+  
+
+  removes user logic from buttons
+  when the user enters their display name
+
+  there are three type of situations that could happen
+  1. A Anon User without User Doc 
+    - create anon user and create user doc with display name
+  2. A User without User Doc
+    - create user doc with display name
+  3. A User with User Doc
+    - just update their display name
+  */
+  const saveOrCreate = async () => {
+    if (name === "") {
+      return;
+    }
+    // this is an anon user
+    // create anon user and user doc with display name
+    if (user === null && userData === undefined) {
+      const anon = (await loginAnonymous()).user;
+      createUser(anon.uid, name);
+    }
+    // this is a user without user doc
+    // create user doc with display name
+    if (user !== null && userData === undefined) {
+      createUser(user.uid, name);
+    }
+    // this is user with a user doc
+    // just update their current display name
+    if (user !== null && userData !== undefined) {
       saveDisplayName(user.uid, name);
     }
   };
@@ -32,14 +69,6 @@
     if (name === "") {
       return;
     }
-    // if user is null create anon user
-    // then create a document with the id of the anon user if it doesn't exist create one
-    if (user === null) {
-      user = (await loginAnonymous()).user;
-    }
-    // creates user doc for any user or overwrite if it already exist
-    createUser(user.uid, name);
-    
     // TODO: Create Function Here
 
     // TODO: Push to game page with code
@@ -85,10 +114,10 @@
 <main class="cat-main-container">
   <div class="cat-main">
     <div class="logo-container">
-      <img src="https://cataas.com/cat/says/hello%20world!" alt="our logo" />
+      <img src="" alt="our logo" />
     </div>
     <div class="cat-main-buttons">
-      <input type="text" placeholder="Enter in your display name" on:change={saveName} bind:value={name} />
+      <input type="text" placeholder="Enter in your display name" on:blur={saveOrCreate} bind:value={name} />
       <button on:click={createLobbyHandler}>Create Lobby</button>
       <button>Join Lobby</button>
     </div>
