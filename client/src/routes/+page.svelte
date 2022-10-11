@@ -46,9 +46,6 @@
     - just update their display name
   */
   const saveOrCreate = async () => {
-    if (name === "") {
-      return;
-    }
     // this is an anon user
     // create anon user and user doc with display name
     if (user === null && userData === undefined) {
@@ -70,16 +67,10 @@
     if (name === "") {
       return;
     }
-    // if user is null create anon user
-    // then create a document with the id of the anon user if it doesn't exist create one
-    if (user === null) {
-      user = (await loginAnonymous()).user;
-    }
-    // creates user doc for any user or overwrite if it already exist
-    createUser(user.uid, name);
-
-    const code = (await createLobby()) as string;
-
+    // Create User
+    saveOrCreate();
+    // Creat Lobby
+    const code = await createLobby();
     goto("/game/" + code);
   };
 </script>
@@ -125,7 +116,7 @@
       <img src="https://picsum.photos/500/300" alt="our logo" />
     </div>
     <div class="cat-main-buttons">
-      <input type="text" placeholder="Enter in your display name" on:blur={saveOrCreate} bind:value={name} />
+      <input type="text" placeholder="Enter in your display name" bind:value={name} />
       <button on:click={createLobbyHandler}>Create Lobby</button>
       <button>Join Lobby</button>
     </div>
