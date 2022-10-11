@@ -5,10 +5,15 @@
   import SigninPopup from "$components/SigninPopup.svelte";
   import { getUser } from "$lib/firebase/splash";
   import type { UserData } from "$lib/firebase/firestore-types/users";
+  import { goto } from "$app/navigation";
 
   // get current user
   const { currentUser } = auth;
   let isAnon: boolean = false;
+  let error = {
+    status: false,
+    message: "",
+  };
   let code: string;
 
   // check if they're a anon user
@@ -20,17 +25,28 @@
   });
 
   const joinLobby = async () => {
-    // get the user doc
     if (currentUser === null) {
       return;
     }
-
+    // get the current user info
     const { displayName, avatar } = (await getUser(currentUser.uid)) as UserData;
-    findAndJoinLobby(code, {
-      displayName,
-      avatar,
-      uid: currentUser.uid,
-    });
+    try {
+      // enter lobby with the user's info
+      await findAndJoinLobby(code, {
+        displayName,
+        avatar,
+        uid: currentUser.uid,
+      });
+      // go to game page
+      goto(`/game/${code}`);
+    } catch (err: any) {
+      // if the lobby doesn't exist then error is thrown
+      error = {
+        status: true,
+        message: err.message,
+      };
+      code = "";
+    }
   };
 </script>
 
@@ -41,6 +57,9 @@
 <!-- If not then show regular page -->
 <div class="cat-join-container">
   <h2>Join Lobby!</h2>
+  {#if error.status}
+    <p style="color:red;">{error.message}</p>
+  {/if}
   <form on:submit|preventDefault={joinLobby}>
     <input bind:value={code} />
     <button type="submit">Join</button>
