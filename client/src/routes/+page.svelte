@@ -1,11 +1,12 @@
 <script lang="ts">
   import Modal from "$components/Modal.svelte";
-  import { saveDisplayName, createUser, getUser } from "$lib/firebase/splash";
+  import { saveDisplayName, getUser, createUser } from "$lib/firebase/splash";
+  import { createLobby } from "$lib/firebase/create-lobby";
   import { loginAnonymous } from "$lib/firebase/auth";
+  import type { UserData } from "$lib/firebase/firestore-types/users";
   import { onMount } from "svelte";
   import { auth } from "$lib/firebase/app";
   import { goto } from "$app/navigation";
-  import type { UserData } from "$lib/firebase/firestore-types/users";
 
   let user = auth.currentUser;
   let userData: UserData | undefined;
@@ -69,10 +70,17 @@
     if (name === "") {
       return;
     }
-    // TODO: Create Function Here
+    // if user is null create anon user
+    // then create a document with the id of the anon user if it doesn't exist create one
+    if (user === null) {
+      user = (await loginAnonymous()).user;
+    }
+    // creates user doc for any user or overwrite if it already exist
+    createUser(user.uid, name);
 
-    // TODO: Push to game page with code
-    goto("/");
+    const code = (await createLobby()) as string;
+
+    goto("/game/" + code);
   };
 </script>
 
@@ -114,7 +122,7 @@
 <main class="cat-main-container">
   <div class="cat-main">
     <div class="logo-container">
-      <img src="" alt="our logo" />
+      <img src="https://picsum.photos/500/300" alt="our logo" />
     </div>
     <div class="cat-main-buttons">
       <input type="text" placeholder="Enter in your display name" on:blur={saveOrCreate} bind:value={name} />
