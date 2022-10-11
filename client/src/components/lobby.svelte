@@ -1,12 +1,12 @@
 <script lang="ts">
   import { page } from "$app/stores";
+  import type { Player } from "$lib/firebase/firestore-types/lobby";
+  // Props
+  export let players: Player[];
+  export let startGame: () => void;
 
   let code = $page.params.gameid;
   let url = $page.url.href;
-
-  function startgame() {
-    return; // TODO: Placeholder return statement
-  }
 </script>
 
 <link href="http://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css" />
@@ -14,11 +14,12 @@
   <div class="container">
     <div class="lobby-info">
       <h3>Code: {code}</h3>
-      <h3>Players:</h3>
+      <h3>Players: {players.length}</h3>
     </div>
+    <!-- TODO: Probably Display Users with their avatar and name -->
     <div class="lobby" />
     <div class="start">
-      <button id="start-game" on:click={startgame}>Start Game</button>
+      <button id="start-game" on:click={startGame}>Start Game</button>
     </div>
     <div class="invite-link">
       <h3>Invite Link: {url}</h3>
