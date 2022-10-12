@@ -2,7 +2,7 @@
   import { page } from "$app/stores";
 
   let code = $page.params.gameid;
-  let url = window.location.href;
+  let url = $page.url.href;
 
   function startgame() {
     return; // TODO: Placeholder return statement
