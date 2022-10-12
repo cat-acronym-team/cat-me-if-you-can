@@ -63,15 +63,21 @@
       saveDisplayName(user.uid, name);
     }
   };
-  const createLobbyHandler = async () => {
+  const createLobbyHandler = () => {
     if (name === "") {
       return;
     }
     // Create User
-    saveOrCreate();
-    // Creat Lobby
-    const code = await createLobby();
-    goto("/game/" + code);
+    // Used then and catch to force create lobby to wait for the user promise to resolve to create the lobby
+    // Trying to solve the race condition concern
+    saveOrCreate()
+      .then(() => {
+        // Create Lobby
+        return createLobby();
+      })
+      .then((code) => {
+        goto("/game/" + code);
+      });
   };
 </script>
 
