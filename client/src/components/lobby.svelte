@@ -1,11 +1,12 @@
 <script lang="ts">
   import { page } from "$app/stores";
   import type { Player } from "$lib/firebase/firestore-types/lobby";
+  import { changeGameState } from "$lib/firebase/game";
   // Props
   export let players: Player[];
-  export let startGame: () => void;
+  export let code: string;
 
-  let code = $page.params.gameid;
+  // let code = $page.params.gameid;
   let url = $page.url.href;
 </script>
 
@@ -19,7 +20,7 @@
     <!-- TODO: Probably Display Users with their avatar and name -->
     <div class="lobby" />
     <div class="start">
-      <button id="start-game" on:click={startGame}>Start Game</button>
+      <button id="start-game" on:click={() => changeGameState(code, "PROMPT")}>Start Game</button>
     </div>
     <div class="invite-link">
       <h3>Invite Link: {url}</h3>

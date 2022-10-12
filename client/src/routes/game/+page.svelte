@@ -5,17 +5,19 @@
   import { lobbyCollection } from "$lib/firebase/firestore-collections";
   import type { Lobby } from "$lib/firebase/firestore-types/lobby";
   import { page } from "$app/stores";
-  import { changeGameState } from "$lib/firebase/game";
+  import { auth } from "$lib/firebase/app";
 
-  // will hold the real time lobby data
   let lobbyData: Lobby = {
     uids: [],
     players: [],
     state: "WAIT",
   };
+  const { currentUser } = auth;
+  let code:string;
   onMount(async () => {
+    code = $page.url.search.split("=")[1];
     // subscribes the lobby
-    onSnapshot(doc(lobbyCollection, $page.params.gameid), (doc) => {
+    onSnapshot(doc(lobbyCollection, code), (doc) => {
       // will change lobbyData to the new doc data
       lobbyData = doc.data() as Lobby;
     });
@@ -23,11 +25,9 @@
 </script>
 
 <div>
-  <LobbyComponent
-    players={lobbyData.players}
-    startGame={() => {
-      // TODO: Change Game State From Waiting to the Next
-      changeGameState($page.params.gameid, "");
-    }}
-  />
+  {#if lobbyData.state === "WAIT"}
+    <LobbyComponent {code} players={lobbyData.players} />
+  {:else if lobbyData.state === "PROMPT"}
+    <p>PROPMPT PAGE</p>
+  {/if}
 </div>
