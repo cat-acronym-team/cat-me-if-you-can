@@ -22,7 +22,6 @@
   }
 </script>
 
-<link href="http://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css" />
 <main>
   <div class="container">
     <div class="lobby-info">
