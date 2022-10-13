@@ -5,16 +5,21 @@
   import { loginAnonymous } from "$lib/firebase/auth";
   import type { UserData } from "$lib/firebase/firestore-types/users";
   import { onMount } from "svelte";
-  import { auth } from "$lib/firebase/app";
   import { goto } from "$app/navigation";
+  import { loggedIn$ } from "$lib/firebase/app";
+  import type { User } from "firebase/auth";
 
-  let user = auth.currentUser;
+  let user: User | null = null;
   let userData: UserData | undefined;
   // check if the user is logged in with getAuth
   let openSignInModal = false;
   let name: string = "";
   // get name from database
   onMount(async () => {
+    // subscribes the user
+    loggedIn$.subscribe((u) => {
+      user = u;
+    });
     if (user !== null) {
       userData = await getUser(user.uid);
       // fixed error because it would try to look for the display name of a user that doesn't exist
@@ -46,6 +51,7 @@
     - just update their display name
   */
   const saveOrCreate = async () => {
+    console.log(user);
     // this is an anon user
     // create anon user and user doc with display name
     if (user === null && userData === undefined) {

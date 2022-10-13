@@ -2,6 +2,8 @@ import { PUBLIC_USE_EMULATORS, PUBLIC_FIREBASE_CONFIG } from "$env/static/public
 import { initializeApp, type FirebaseOptions } from "firebase/app";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { authState } from "rxfire/auth";
+import { filter } from "rxjs/operators";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -36,7 +38,7 @@ const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-
+export const loggedIn$ = authState(auth).pipe(filter((user) => !!user)); // Observable only return when user is logged in.
 if (PUBLIC_USE_EMULATORS === "true") {
   connectFirestoreEmulator(db, "localhost", 8080);
   connectAuthEmulator(auth, "http://localhost:9099");

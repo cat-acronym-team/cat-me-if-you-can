@@ -53,8 +53,8 @@ describe("displayNameValidator", () => {
     expect(actualValidationResult).to.deep.equal(expectedValidationResult);
   });
 
-  it("should allow 15 character names", () => {
-    const name = "Fifteen loooong";
+  it("should allow 12 character names", () => {
+    const name = "twelve loong";
 
     const expectedValidationResult = {
       valid: true,
@@ -64,12 +64,12 @@ describe("displayNameValidator", () => {
     expect(actualValidationResult).to.deep.equal(expectedValidationResult);
   });
 
-  it("should not allow 16 character names", () => {
-    const name = "Sixteen looooong";
+  it("should not allow 13 character names", () => {
+    const name = "twelve loongg";
 
     const expectedValidationResult = {
       valid: false,
-      reason: "Display name must be at most 15 characters long",
+      reason: "Display name must be at most 12 characters long",
     };
 
     const actualValidationResult = displayNameValidator(name);
@@ -78,7 +78,7 @@ describe("displayNameValidator", () => {
   });
 
   it("should not allow names that end with a space", () => {
-    const name = "space at end ";
+    const name = "spat end ";
 
     const expectedValidationResult = {
       valid: false,
@@ -91,7 +91,7 @@ describe("displayNameValidator", () => {
   });
 
   it("should not allow names that start with a space", () => {
-    const name = " space at start";
+    const name = " space a";
 
     const expectedValidationResult = {
       valid: false,

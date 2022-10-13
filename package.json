@@ -7,5 +7,9 @@
   },
   "devDependencies": {
     "prettier": "^2.7.1"
+  },
+  "dependencies": {
+    "rxfire": "^6.0.3",
+    "rxjs": "^7.5.7"
   }
 }
