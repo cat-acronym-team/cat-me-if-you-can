@@ -4,6 +4,23 @@
   let code = $page.params.gameid;
   let url = $page.url.href;
 
+  // Allows for shareable data with text description
+  const shareableData = {
+    title: "Cat Me if you Can!",
+    text: "Join us in a game of Cat Me if you Can!",
+    url: $page.url.href,
+  };
+
+  // Shares link with other players through click event
+  async function share() {
+    await navigator.share(shareableData);
+  }
+
+  // Copies URL to clipboard on click
+  function copyLink() {
+    navigator.clipboard.writeText(url);
+  }
+
   function startgame() {
     return; // TODO: Placeholder return statement
   }
@@ -24,10 +41,10 @@
       <h3>Invite Link: {url}</h3>
     </div>
     <div class="copy-button">
-      <button id="copy">Copy Link</button>
+      <button id="copy" on:click={copyLink}>Copy Link</button>
     </div>
     <div class="share-button">
-      <button id="share">Share Link</button>
+      <button id="share" on:click={share}>Share Link</button>
     </div>
   </div>
 </main>
