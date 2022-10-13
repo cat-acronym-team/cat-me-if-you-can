@@ -44,7 +44,9 @@
       <button id="copy" on:click={copyLink}>Copy Link</button>
     </div>
     <div class="share-button">
-      <button id="share" on:click={share}>Share Link</button>
+      {#if navigator.canShare?.(shareableData)}
+        <button id="share" on:click={share}>Share Link</button>
+      {/if}
     </div>
   </div>
 </main>
