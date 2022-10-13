@@ -24,6 +24,9 @@ export function avatarCheck(changeAvatarData: unknown): changeAvatarData is Chan
   if (!("lobbyCode" in changeAvatarData)) {
     return false;
   }
+  if (Object.keys(changeAvatarData).length !== 2) {
+    return false;
+  }
   const intArr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   if (!intArr.includes((changeAvatarData as ChangeAvatarData).avatar)) {
     return false;

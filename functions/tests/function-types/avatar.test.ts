@@ -82,4 +82,9 @@ describe("avatarCheck", () => {
     const returnedValue = avatarCheck({ avatar: 5, lobbyCode: "1234567" });
     expect(returnedValue).to.be.false;
   });
+
+  it("should return false if object has extra keys", () => {
+    const returnedValue = avatarCheck({ avatar: 5, lobbyCode: "123456", extraKey: "extraValue" });
+    expect(returnedValue).to.be.false;
+  });
 });
