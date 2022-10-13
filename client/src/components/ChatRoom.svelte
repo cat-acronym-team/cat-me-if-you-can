@@ -1,26 +1,21 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { ChatRoomAssocation } from "./Chat.svelte";
   import { auth } from "$lib/firebase/app";
-  import { doc, onSnapshot } from "firebase/firestore";
-  import { chatRoomCollection } from "$lib/firebase/firestore-collections";
+  import { onSnapshot } from "firebase/firestore";
   import type { ChatMessage } from "$lib/firebase/firestore-types/lobby";
+  import { findChatRoom } from "$lib/firebase/chat";
+  import { getChatRoomMessages } from "$lib/firebase/firestore-collections";
 
-  export let chatRoomIds: ChatRoomAssocation;
-
-
+  export let lobbyId: string;
   let chatMessages: ChatMessage[];
-  onMount(() => {
-    // figure out which one the current user is apart of
+  onMount(async () => {
+    // Query for their chatroom
     if (auth.currentUser !== null) {
-      for (const roomId in chatRoomIds) {
-        if (auth.currentUser.uid in chatRoomIds[roomId]) {
-          // subscribe the user to chatmessages
-          onSnapshot(doc(chatRoomCollection, roomId, "chatMessages"), (doc) => {
-            console.log(doc);
-          });
-        }
-      }
+      const room = await findChatRoom(lobbyId, auth.currentUser.uid);
+      // subscribe the chat messages
+      onSnapshot(getChatRoomMessages(room.ref), (doc) => {
+        chatMessages = doc.docs.map((doc) => doc.data());
+      });
     }
   });
 </script>

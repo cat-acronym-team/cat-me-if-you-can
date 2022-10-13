@@ -1,7 +1,8 @@
 <script lang="ts" context="module">
-  import type { Player } from "$lib/firebase/firestore-types/lobby";
+  import type { Lobby } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { createChatRoom } from "$lib/firebase/chat";
+  import { generatePairChatrooms } from "$lib/firebase/chat";
+  import ChatRoom from "./ChatRoom.svelte";
   /*
   Expect players from lobby page
   Pair those players up randomly
@@ -14,59 +15,40 @@
   Display a timer for how long they can chat
   After chat phase is over delete the document
   */
-  export let players: Player[];
-  export let uids: string[];
-
-  export type ChatRoomAssocation = {
-    [index: string]: { one: string; two: string };
-  };
-  let stalker: string;
-  let pairs: { one: string; two: string }[];
-  let chatroomIds: ChatRoomAssocation;
+  export let lobbyData: Lobby & { id: string };
+  let inChatRoom: boolean;
   onMount(() => {
-    // Create Pairs
-    // Check if there are even or odd number of players
-    const tempUids = [...uids];
-    if (tempUids.length % 2 !== 0) {
-      while (tempUids.length !== 1) {
-        // get random pair
-        let pairOne = tempUids[Math.floor(Math.random() * tempUids.length)];
-        let pairTwo = tempUids[Math.floor(Math.random() * tempUids.length)];
-        // generate a random player if the current pairs are equal
-        while (pairOne === pairTwo) {
-          pairTwo = tempUids[Math.floor(Math.random() * tempUids.length)];
-        }
-        // organize the pairs
-        pairs.push({ one: pairOne, two: pairTwo });
-        // delete them from temp array
-        tempUids.splice(tempUids.indexOf(pairOne), 1);
-        tempUids.splice(tempUids.indexOf(pairTwo), 1);
-      }
-      // the last person in the temp uids will be the stalker
-      stalker = tempUids[0];
-    }
-    // even number of players
-    else {
-      while (tempUids.length !== 0) {
-        // get random pair
-        let pairOne = tempUids[Math.floor(Math.random() * tempUids.length)];
-        let pairTwo = tempUids[Math.floor(Math.random() * tempUids.length)];
-        // generate a random player if the current pairs are equal
-        while (pairOne === pairTwo) {
-          pairTwo = tempUids[Math.floor(Math.random() * tempUids.length)];
-        }
-        // organize the pairs
-        pairs.push({ one: pairOne, two: pairTwo });
-        // delete them from temp array
-        tempUids.splice(tempUids.indexOf(pairOne), 1);
-        tempUids.splice(tempUids.indexOf(pairTwo), 1);
-      }
-    }
-
-    // Once pairs are generated then assocate chatroom ids to pairs
-    pairs.forEach(async ({ one, two }) => {
-      const chatRoomId = await createChatRoom([one, two]);
-      chatroomIds[chatRoomId] = { one, two };
-    });
+    generatePairChatrooms(lobbyData.id, lobbyData.uids);
+    setTimeout(() => {
+      inChatRoom = true;
+    }, 6000);
   });
 </script>
+
+{#if inChatRoom}
+  <ChatRoom lobbyId={lobbyData.id} />
+{:else}
+  <h1>Time for chatting!</h1>
+  <div class="players">
+    {#each lobbyData.players as player}
+      <div class="player">
+        <div class="avatar-holder" />
+        <p>{player.displayName}</p>
+      </div>
+    {/each}
+  </div>
+{/if}
+
+<style>
+  .players {
+    display: flex;
+    flex-wrap: wrap;
+    width: 75%;
+    text-align: center;
+  }
+  .avatar-holder {
+    width: 50px;
+    height: 50px;
+    background-color: rgb(249, 116, 116);
+  }
+</style>
