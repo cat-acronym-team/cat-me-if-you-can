@@ -6,8 +6,7 @@
   export let players: Player[];
   export let code: string;
 
-  // let code = $page.params.gameid;
-  let url = $page.url.href;
+  const url = $page.url.href;
 </script>
 
 <link href="http://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css" />

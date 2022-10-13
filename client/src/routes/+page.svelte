@@ -44,7 +44,7 @@
 
     goto("/game?code=" + code);
   };
-  const JoinLobbyHandler = async () => {
+  const joinLobbyHandler = async () => {
     if (name === "") {
       return;
     }
@@ -54,7 +54,7 @@
       user = (await loginAnonymous()).user;
     }
     // creates user doc for any user or overwrite if it already exist
-    createUser(user.uid, name);
+    await createUser(user.uid, name);
 
     goto("/join");
   };
@@ -74,7 +74,7 @@
     <div class="cat-main-buttons">
       <input type="text" placeholder="Enter in your display name" on:change={saveName} bind:value={name} />
       <button on:click={createLobbyHandler}>Create Lobby</button>
-      <button on:click={JoinLobbyHandler}>Join Lobby</button>
+      <button on:click={joinLobbyHandler}>Join Lobby</button>
     </div>
   </div>
 </main>
