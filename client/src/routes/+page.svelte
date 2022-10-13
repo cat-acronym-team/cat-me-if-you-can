@@ -4,22 +4,18 @@
   import { createLobby } from "$lib/firebase/create-lobby";
   import { loginAnonymous } from "$lib/firebase/auth";
   import type { UserData } from "$lib/firebase/firestore-types/users";
-  import { onMount } from "svelte";
   import { goto } from "$app/navigation";
-  import { loggedIn$ } from "$lib/firebase/app";
-  import type { User } from "firebase/auth";
+  import { authStore } from "$stores/auth";
 
-  let user: User | null = null;
   let userData: UserData | undefined;
   // check if the user is logged in with getAuth
   let openSignInModal = false;
   let name: string = "";
-  // get name from database
-  onMount(async () => {
-    // subscribes the user
-    loggedIn$.subscribe((u) => {
-      user = u;
-    });
+
+  // update user once auth store changes
+  $: user = $authStore;
+  // this function will find user if the auth isnt null
+  async function findUser() {
     if (user !== null) {
       userData = await getUser(user.uid);
       // fixed error because it would try to look for the display name of a user that doesn't exist
@@ -30,10 +26,11 @@
         }
       }
     }
-
-    // if no name then it is empty
-  });
-
+  }
+  // will call the above function if the user isn't null
+  $: if (user !== null) {
+    findUser();
+  }
   /* 
   Is called once user unfocuses the display name input field. It was 
   created to avoid excessive writes to the database with the onchange event.
@@ -51,7 +48,6 @@
     - just update their display name
   */
   const saveOrCreate = async () => {
-    console.log(user);
     // this is an anon user
     // create anon user and user doc with display name
     if (user === null && userData === undefined) {
