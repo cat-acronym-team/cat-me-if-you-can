@@ -17,10 +17,10 @@
     await navigator.share(shareableData);
   }
 
-  onMount( () => {
+  onMount(() => {
     canShare = navigator.canShare?.(shareableData);
-  })
-  
+  });
+
   // Copies URL to clipboard on click
   function copyLink() {
     navigator.clipboard.writeText(url);
