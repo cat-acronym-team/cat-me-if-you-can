@@ -1,17 +1,13 @@
 <script lang="ts">
-  import type { PrivatePlayer } from "$lib/firebase/firestore-types/lobby"
   import { getAuth } from "firebase/auth";
-  import { getPrivatePlayerCollection } from "./firestore-collections";
   import { doc, getDoc } from "firebase/firestore";
-  import { lobbyCollection } from "$lib/firebase/firestore-collections";
+  import { lobbyCollection, privPlayerCollection } from "$lib/firebase/firestore-collections";
   import { page } from "$app/stores";
 
   const auth = getAuth();
   const user = auth.currentUser;
   const currentUid:string = user!.uid;
-  let code: string;
-
-  code = $page.url.search.split("=")[1];
+  let code: string = $page.url.search.split("=")[1];
   
   let end:string = "";
   let aliveCount = 0;
@@ -28,12 +24,18 @@
 
   const { uids, players } = validLobby.data();
 
+  displayname = players[uids.indexOf(currentUid)].displayName;
+
   // function to count the number of players currently alive
     for(let i = 0; i < uids.length; i++) {
       if(players[i].alive == true) {
         aliveCount++;
         // count the number of remaining players who are alive
-        if(uids[i].Role == "CAT") {
+        let privatePlayer = doc(privPlayerCollection, uids[i]);
+        let validPlayer = await getDoc(privatePlayer);
+
+        let { role } = validPlayer.data();
+        if(role == "CAT") {
           aliveCatCount++;
           // within the alive players, count the number that are cats
         }
@@ -42,8 +44,12 @@
   let aliveCatFishCount = aliveCount - aliveCatCount;
   // any other player who is alive and not a cat is a catfish
   
+  let currentPlayer = doc(privPlayerCollection, currentUid);
+  let validCurrent = await getDoc(currentPlayer);
+
+  let { role } = validCurrent.data();
   // set conditions for the game to be declared a win or loss
-    if(uids[uids.indexOf(currentUid)].Role == "CAT") {
+    if(role == "CAT") {
       if(aliveCatFishCount == 0) {
         end = "Cat Win";
       }
@@ -63,7 +69,7 @@
 </script>
 
 <div class="container">
-  
+  <!-- Check the user's role and display the correct win or loss page accordingly -->
   {#if end = "Cat Win"}
   <div class="banner">
     <h2>Hooray!</h2>
@@ -73,7 +79,7 @@
     <div class="image"></div>
 
     <div class="displayname">
-      <h2>(bind:value={displayname}) was sentenced to 9 lives in purrison!</h2>
+      <h2>{displayname} was sentenced to 9 lives in purrison!</h2>
     </div>
   {/if}
   {#if end = "Cat Lose"}
@@ -85,7 +91,7 @@
     <div class="image"></div>
 
     <div class="displayname">
-      <h2>bind:value={displayname} has taken over the litter!</h2>
+      <h2>{displayname} has taken over the litter!</h2>
     </div>
   {/if}
   {#if end = "Catfish Win"}
