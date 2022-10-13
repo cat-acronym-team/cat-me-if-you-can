@@ -19,12 +19,12 @@
   const { currentUser } = auth;
   let code: string;
   onMount(async () => {
+    code = $page.url.search.split("=")[1];
     if (currentUser === null) {
       goto(`/join?code=${code}`, {
         replaceState: true,
       });
     } else {
-      code = $page.url.search.split("=")[1];
       // subscribes the lobby
       onSnapshot(doc(lobbyCollection, code), (doc) => {
         // will change lobbyData to the new doc data
