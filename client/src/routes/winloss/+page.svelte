@@ -1,33 +1,53 @@
 <script lang="ts">
-  import type { Player, Lobby, PrivatePlayer } from "$lib/firebase/firestore-types/lobby"
+  import type { PrivatePlayer } from "$lib/firebase/firestore-types/lobby"
+  import { getAuth } from "firebase/auth";
+  import { getPrivatePlayerCollection } from "./firestore-collections";
+  import { doc, setDoc, getDoc } from "firebase/firestore";
+  import { lobbyCollection } from "$lib/firebase/firestore-collections";
+  import { page } from "$app/stores";
 
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const currentUid:string = user!.uid;
+  let code: string;
+
+  code = $page.url.search.split("=")[1];
+  
   let end:string = "";
   let aliveCount = 0;
   let aliveCatCount = 0;
   let displayname = "";
 
-  /*
+  async function validLobby() {
+    const lobby = doc(lobbyCollection, code);
+    const validLobby = await getDoc(lobby);
+
+    if (!validLobby.exists()) {
+      throw new Error("Invalid Lobby");
+    }
+  }
+
+  const { uids } = validLobby.data();
+
   // function to count the number of players currently alive
-  function numAlive {
-    for(let i = 0; i < Lobby.Player.count; i++) {
-      if(players:Player[i].alive == true) {
+  function numAlive() {
+    for(let i = 0; i < uids.count; i++) {
+      if(uids[i].alive == true) {
         aliveCount++;
         // count the number of remaining players who are alive
-        if(PrivatePlayer[i].Role = "CAT") {
+        if(uids[i].role == "CAT") {
           aliveCatCount++;
           // within the alive players, count the number that are cats
         }
       }
     }
   }
-
   let aliveCatFishCount = aliveCount - aliveCatCount;
   // any other player who is alive and not a cat is a catfish
-  */
-  /*
+  
   // set conditions for the game to be declared a win or loss
-  function winCondition {
-    if(// current player is cat) {
+  function winScreenCondition() {
+    if(uids[currentUid].role == "CAT") {
       if(aliveCatFishCount == 0) {
         end = "Cat Win";
       }
@@ -44,28 +64,29 @@
       }
     }
   }
-  */
+  
 </script>
 
 <div class="container">
-
+{numAlive()};
+{winScreenCondition()};
+  
+  {#if end = "Cat Win"}
   <div class="banner">
-    <!--{#if end = "Cat Win"}-->
-    <!--
-   <h2>Hooray!</h2>
-   <h2>You have sniffed out the cat fish!</h2>
-   </div>
+    <h2>Hooray!</h2>
+    <h2>You have sniffed out the cat fish!</h2>
+  </div>
 
     <div class="image"></div>
 
     <div class="displayname">
       <h2>(bind:value={displayname}) was sentenced to 9 lives in purrison!</h2>
     </div>
-  -->
-  <!--(#if end = "Cat Lose")-->
-  <!--
-    <h2>You have cat to be kitten me!</h2>
-    <h2>The impawster was not caught!</h2>
+  {/if}
+  {#if end = "Cat Lose"}
+    <div class="banner">
+      <h2>You have cat to be kitten me!</h2>
+      <h2>The impawster was not caught!</h2>
    </div>
 
     <div class="image"></div>
@@ -73,11 +94,11 @@
     <div class="displayname">
       <h2>bind:value={displayname} has taken over the litter!</h2>
     </div>
-  -->
-  <!--(#if end = "Catfish Win")-->
-    <!-- 
-    <h2>O-fish-ally the greatest!</h2>
-    <h2>Way to deceive your furry friends!</h2>
+  {/if}
+  {#if end = "Catfish Win"}
+    <div class="banner">
+      <h2>O-fish-ally the greatest!</h2>
+      <h2>Way to deceive your furry friends!</h2>
    </div>
 
     <div class="image"></div>
@@ -85,12 +106,12 @@
     <div class="displayname">
       <h2>You have successfully taken over the litter!</h2>
     </div> 
-  -->
-
-  <!--(#if end = "Catfish Lose")-->
-  <!--     
-    <h2>You have been caught (and released)!</h2>
-    <h2>Might as well have been a <span>clown</span> fish...</h2>
+ 
+  {/if}
+  {#if end = "Catfish Lose"}
+    <div class="banner">
+      <h2>You have been caught (and released)!</h2>
+      <h2>Might as well have been a <span>clown</span> fish...</h2>
    </div>
 
     <div class="image"></div>
@@ -98,7 +119,7 @@
     <div class="displayname">
       <h2>You should go back to your sea ani-anim-aneme... home</h2>
     </div> 
-    -->
+  {/if}
 </div>
 
 <style>
