@@ -1,5 +1,5 @@
 <script lang="ts">
-  import SelectAvatar from "./select-avatar.svelte";
+  import SelectAvatar from "./SelectAvatar.svelte";
   import { page } from "$app/stores";
 
   let code = $page.params.gameid;

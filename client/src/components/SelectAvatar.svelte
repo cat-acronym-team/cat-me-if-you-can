@@ -42,7 +42,7 @@
     height: 100%;
   }
 
-  @media (orientation: portrait) {
+  @media (max-width: 400px) {
     .grid {
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(4, 1fr);
