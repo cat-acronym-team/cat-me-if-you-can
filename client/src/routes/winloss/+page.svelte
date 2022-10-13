@@ -2,7 +2,7 @@
   import type { PrivatePlayer } from "$lib/firebase/firestore-types/lobby"
   import { getAuth } from "firebase/auth";
   import { getPrivatePlayerCollection } from "./firestore-collections";
-  import { doc, setDoc, getDoc } from "firebase/firestore";
+  import { doc, getDoc } from "firebase/firestore";
   import { lobbyCollection } from "$lib/firebase/firestore-collections";
   import { page } from "$app/stores";
 
@@ -18,36 +18,32 @@
   let aliveCatCount = 0;
   let displayname = "";
 
-  async function validLobby() {
+  async function checkLobby() {
     const lobby = doc(lobbyCollection, code);
     const validLobby = await getDoc(lobby);
 
     if (!validLobby.exists()) {
       throw new Error("Invalid Lobby");
     }
-  }
 
-  const { uids } = validLobby.data();
+  const { uids, players } = validLobby.data();
 
   // function to count the number of players currently alive
-  function numAlive() {
-    for(let i = 0; i < uids.count; i++) {
-      if(uids[i].alive == true) {
+    for(let i = 0; i < uids.length; i++) {
+      if(players[i].alive == true) {
         aliveCount++;
         // count the number of remaining players who are alive
-        if(uids[i].role == "CAT") {
+        if(uids[i].Role == "CAT") {
           aliveCatCount++;
           // within the alive players, count the number that are cats
         }
       }
     }
-  }
   let aliveCatFishCount = aliveCount - aliveCatCount;
   // any other player who is alive and not a cat is a catfish
   
   // set conditions for the game to be declared a win or loss
-  function winScreenCondition() {
-    if(uids[currentUid].role == "CAT") {
+    if(uids[uids.indexOf(currentUid)].Role == "CAT") {
       if(aliveCatFishCount == 0) {
         end = "Cat Win";
       }
@@ -63,13 +59,10 @@
         end = "Catfish Win";
       }
     }
-  }
-  
+}
 </script>
 
 <div class="container">
-{numAlive()};
-{winScreenCondition()};
   
   {#if end = "Cat Win"}
   <div class="banner">
