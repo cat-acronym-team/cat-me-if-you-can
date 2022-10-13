@@ -1,9 +1,10 @@
 <script lang="ts">
   import { page } from "$app/stores";
+  import { onMount } from "svelte";
 
   let code = $page.params.gameid;
   let url = $page.url.href;
-
+  let canShare = false;
   // Allows for shareable data with text description
   const shareableData = {
     title: "Cat Me if you Can!",
@@ -16,6 +17,10 @@
     await navigator.share(shareableData);
   }
 
+  onMount( () => {
+    canShare = navigator.canShare?.(shareableData);
+  })
+  
   // Copies URL to clipboard on click
   function copyLink() {
     navigator.clipboard.writeText(url);
@@ -44,7 +49,7 @@
       <button id="copy" on:click={copyLink}>Copy Link</button>
     </div>
     <div class="share-button">
-      {#if navigator.canShare?.(shareableData)}
+      {#if canShare}
         <button id="share" on:click={share}>Share Link</button>
       {/if}
     </div>
