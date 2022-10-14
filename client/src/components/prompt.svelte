@@ -43,7 +43,7 @@
   <lable class="question" for="prompt-answer">{prompt}</lable>
 
   <div class="input">
-    <input id="prompt-answer" type="text" bind:value={answer} minlength="1" maxlength="50" />
+    <input id="prompt-answer" type="text" bind:value={answer} />
     <lable class="error" for="prompt-answer">{error ?? ""}</lable>
     <button type="submit" disabled={error != undefined}>Done</button>
   </div>
