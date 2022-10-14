@@ -2,12 +2,34 @@
   import { page } from "$app/stores";
   import type { Player } from "$lib/firebase/firestore-types/lobby";
   import { changeGameState } from "$lib/firebase/game";
+  import { onMount } from "svelte";
+
   // Props
   export let players: Player[];
   export let code: string;
 
-  // let code = $page.params.gameid;
   let url = $page.url.href;
+  let canShare = false;
+  // Allows for shareable data with text description
+  const shareableData = {
+    title: "Cat Me if you Can!",
+    text: "Join us in a game of Cat Me if you Can!",
+    url: $page.url.href,
+  };
+
+  // Shares link with other players through click event
+  async function share() {
+    await navigator.share(shareableData);
+  }
+
+  onMount(() => {
+    canShare = navigator.canShare?.(shareableData);
+  });
+
+  // Copies URL to clipboard on click
+  function copyLink() {
+    navigator.clipboard.writeText(url);
+  }
 </script>
 
 <link href="http://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css" />
@@ -26,10 +48,12 @@
       <h3>Invite Link: {url}</h3>
     </div>
     <div class="copy-button">
-      <button id="copy">Copy Link</button>
+      <button id="copy" on:click={copyLink}>Copy Link</button>
     </div>
     <div class="share-button">
-      <button id="share">Share Link</button>
+      {#if canShare}
+        <button id="share" on:click={share}>Share Link</button>
+      {/if}
     </div>
   </div>
 </main>

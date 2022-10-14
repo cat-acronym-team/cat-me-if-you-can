@@ -7,7 +7,6 @@ export async function loginWithGoogle() {
 
   try {
     const user = await signInWithPopup(auth, provider);
-    console.log(user);
   } catch (error) {
     console.log(error);
   }
