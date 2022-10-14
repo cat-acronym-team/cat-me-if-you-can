@@ -4,6 +4,8 @@ service cloud.firestore {
     match /lobbies/{code} {
       allow get: if true;
 
+      allow write: if true; // TODO: make an actual rule
+
       match /privatePlayers/{uid} {
         allow get: if request.auth.uid == uid;
       }
