@@ -41,6 +41,7 @@ export const auth = getAuth(app);
 auth.onAuthStateChanged((user) => {
   authStore.set(user);
 });
+
 if (PUBLIC_USE_EMULATORS === "true") {
   connectFirestoreEmulator(db, "localhost", 8080);
   connectAuthEmulator(auth, "http://localhost:9099");
