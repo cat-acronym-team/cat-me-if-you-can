@@ -27,11 +27,10 @@
   });
 
   const joinLobby = async () => {
-    //If current user is null, give them an anonymous account
+    // If current user is null, give them an anonymous account
     if (currentUser === null) {
       currentUser = (await loginAnonymous()).user;
-
-      createUser(currentUser.uid, name);
+      await createUser(currentUser.uid, name);
     }
     // get the current user info
     const { displayName, avatar } = (await getUser(currentUser.uid)) as UserData;
