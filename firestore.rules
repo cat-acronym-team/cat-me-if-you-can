@@ -14,5 +14,21 @@ service cloud.firestore {
         allow create: if request.auth.uid == uid && validAnswer() && request.resource.data.keys().hasOnly(['answer']);
       }
     }
+    match /users/{userId} {
+       function validateAttrs(){
+        return (
+          request.resource.data.keys().hasOnly(['displayName', 'avatar']) &&
+          request.resource.data.displayName is string && request.resource.data.displayName.trim().size() >= 3 
+          && request.resource.data.displayName.trim().size() <= 15 && 
+          request.resource.data.displayName.matches('[A-Za-z0-9-_]+') &&
+          request.resource.data.avatar is number &&  int(request.resource.data.avatar) == request.resource.data.avatar 
+          &&  request.resource.data.avatar >= 0 && request.resource.data.avatar <=12
+        );
+      }
+        // // allows anyone to read that information
+        allow read;
+        allow create, update: if request.auth.uid == userId && validateAttrs();
+
+    }
   }
 }
