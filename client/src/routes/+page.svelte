@@ -6,7 +6,6 @@
   import type { UserData } from "$lib/firebase/firestore-types/users";
   import { goto } from "$app/navigation";
   import { authStore } from "$stores/auth";
-  import { onDestroy } from "svelte";
 
   let userData: UserData | undefined;
   // check if the user is logged in with getAuth
@@ -32,11 +31,6 @@
   $: if (user !== null) {
     findUser();
   }
-
-  // When the component is destroyed then authStore stops subscribing from onAuthChanged
-  onDestroy(() => {
-    authStore.unsubFromAuth();
-  });
   /* 
   Is called once user unfocuses the display name input field. It was 
   created to avoid excessive writes to the database with the onchange event.

@@ -37,7 +37,8 @@ const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-export const unsubscribe = auth.onAuthStateChanged((user) => {
+
+auth.onAuthStateChanged((user) => {
   authStore.set(user);
 });
 if (PUBLIC_USE_EMULATORS === "true") {
