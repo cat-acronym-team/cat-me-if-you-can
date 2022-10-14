@@ -4,6 +4,10 @@ service cloud.firestore {
     match /lobbies/{code} {
       allow get: if true;
 
+      match /privatePlayers/{uid} {
+        allow get: if request.auth.uid == uid;
+      }
+
       match /promptAnswers/{uid} {
         function validAnswer() {
           return request.resource.data.answer is string
