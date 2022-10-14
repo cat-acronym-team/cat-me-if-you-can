@@ -1,8 +1,8 @@
 <script lang="ts">
   import SigninButton from "$components/SigninButton.svelte";
-  import { auth } from "$lib/firebase/app";
+  import { authStore as user } from "$stores/auth";
   import { findAndJoinLobby } from "$lib/firebase/join-lobby";
-  import { getUser, saveDisplayName, createUser } from "$lib/firebase/splash";
+  import { getUser, createUser } from "$lib/firebase/splash";
   import type { UserData } from "$lib/firebase/firestore-types/users";
   import { loginAnonymous } from "$lib/firebase/auth";
   import { goto } from "$app/navigation";
@@ -10,7 +10,6 @@
   import { page } from "$app/stores";
 
   let name: string = "";
-  let { currentUser } = auth;
   let error = {
     status: false,
     message: "",
@@ -19,6 +18,8 @@
 
   // Checks to see if the join page has the code query paramter
   onMount(() => {
+    // gets code from url search
+    // the svelte magic with searchparams wasnt working
     const queryCode = $page.url.search.split("=")[1];
     // sets it the code var for two way binding
     if (queryCode !== undefined) {
@@ -28,18 +29,18 @@
 
   const joinLobby = async () => {
     // If current user is null, give them an anonymous account
-    if (currentUser === null) {
-      currentUser = (await loginAnonymous()).user;
-      await createUser(currentUser.uid, name);
+    if ($user === null) {
+      $user = (await loginAnonymous()).user;
+      await createUser($user.uid, name);
     }
     // get the current user info
-    const { displayName, avatar } = (await getUser(currentUser.uid)) as UserData;
+    const { displayName, avatar } = await getUser($user.uid) as UserData;
     try {
       // enter lobby with the user's info
       await findAndJoinLobby(code, {
         displayName,
         avatar,
-        uid: currentUser.uid,
+        uid: $user.uid,
       });
       // go to game page
       goto(`/game?=${code}`);
@@ -64,7 +65,7 @@
     <p style="color:red;">{error.message}</p>
   {/if}
   <form on:submit|preventDefault={joinLobby}>
-    {#if currentUser === null}
+    {#if $user === null}
       <input type="text" placeholder="Enter in your display name" bind:value={name} />
     {/if}
     <input bind:value={code} />

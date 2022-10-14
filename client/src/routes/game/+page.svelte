@@ -1,62 +1,56 @@
 <script lang="ts">
   import LobbyComponent from "$components/Lobby.svelte";
-  import { onSnapshot, doc } from "firebase/firestore";
+  import { onSnapshot, doc, getDoc } from "firebase/firestore";
   import { onMount } from "svelte";
   import { lobbyCollection } from "$lib/firebase/firestore-collections";
   import type { Lobby } from "$lib/firebase/firestore-types/lobby";
   import { page } from "$app/stores";
-  import { auth } from "$lib/firebase/app";
+  import { authStore as user } from "$stores/auth";
   import { goto } from "$app/navigation";
-  import { getUser } from "$lib/firebase/splash";
-  import type { UserData } from "$lib/firebase/firestore-types/users";
-  import { findAndJoinLobby } from "$lib/firebase/join-lobby";
+  import type { Unsubscribe } from "firebase/auth";
 
-  let lobbyData: Lobby = {
-    uids: [],
-    players: [],
-    state: "WAIT",
-  };
-  const { currentUser } = auth;
+  let lobbyData: Lobby;
   let code: string;
+  // in case we want to unsub from lobby
+  let unsubscribeLobby: Unsubscribe;
+
   onMount(async () => {
+    // gets code from url search
+    // the svelte magic with searchparams wasnt working
     code = $page.url.search.split("=")[1];
-    if (currentUser === null) {
+    // We want to get the document immediately because if we wait there's a short delay in getting
+    // the new doc from subscribing below. This makes the redirect slow since we want to check if the user isn't in this lobby
+    const lobbyDoc = await getDoc(doc(lobbyCollection, code));
+    if (!lobbyDoc.exists()) {
+      goto("/join");
+    }
+    // gets the lobby data
+    lobbyData = lobbyDoc.data() as Lobby;
+    // if the user isn't signed in or not apart of this lobby then redirect them
+    if ($user === null || !lobbyData.uids.includes($user.uid)) {
+      // then return to join
       goto(`/join?code=${code}`, {
         replaceState: true,
       });
-    } else {
-      // subscribes the lobby
-      onSnapshot(doc(lobbyCollection, code), (doc) => {
-        // will change lobbyData to the new doc data
-        lobbyData = doc.data() as Lobby;
-      });
-      // If the lobby does not include the player trying to join, Add them to the lobby. This should only apply to players joining off a direct link
-      if (!lobbyData.uids.includes(currentUser.uid)) {
-        const { displayName, avatar } = (await getUser(currentUser.uid)) as UserData;
-        try {
-          // enter lobby with the user's info
-          await findAndJoinLobby(code, {
-            displayName,
-            avatar,
-            uid: currentUser.uid,
-          });
-        } catch (err: any) {
-          if (err.message == "You are already in the lobby!") {
-            return;
-          }
-          if (err.message == "Lobby doesn't exist!") {
-            goto(`/game?=${code}`);
-          }
-        }
-      }
+      return;
     }
+    // We want them to subscribe to the lobby on mount
+    unsubscribeLobby = onSnapshot(lobbyDoc.ref, (doc) => {
+      // will change lobbyData to the new doc data
+      lobbyData = doc.data() as Lobby;
+    });
   });
 </script>
 
-<div>
-  {#if lobbyData.state === "WAIT"}
-    <LobbyComponent {code} players={lobbyData.players} />
-  {:else if lobbyData.state === "PROMPT"}
-    <p>PROPMPT PAGE</p>
-  {/if}
-</div>
+<!-- I do this check because the html was rendering the Lobby component before the onmount happened due to lobbyData having default values -->
+<!-- So the code was displaying undefined in the Lobby Component -->
+<!-- We could have a loading animation until the lobbyData is not undefined -->
+{#if lobbyData !== undefined}
+  <div>
+    {#if lobbyData.state === "WAIT"}
+      <LobbyComponent {code} players={lobbyData.players} />
+    {:else if lobbyData.state === "PROMPT"}
+      <p>PROPMPT PAGE</p>
+    {/if}
+  </div>
+{/if}

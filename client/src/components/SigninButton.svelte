@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { auth } from "$lib/firebase/app";
   import Modal from "./Modal.svelte";
+  import { authStore as user } from "$stores/auth";
 
-  const { currentUser } = auth;
   // check if the user is logged in with getAuth
   let openSignInModal = false;
 </script>
@@ -18,7 +17,7 @@
 </Modal>
 <div class="account-container">
   <!-- If you are not signed in show this  -->
-  {#if currentUser == null}
+  {#if $user == null}
     <button
       on:click={() => {
         openSignInModal = true;

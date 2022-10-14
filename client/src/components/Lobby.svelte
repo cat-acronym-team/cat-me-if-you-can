@@ -7,14 +7,15 @@
   // Props
   export let players: Player[];
   export let code: string;
-
-  let url = $page.url.href;
+  // better link to share since it's redirecting to this page anyways
+  // Josh's suggestion that I agreed on
+  let url = `${$page.url.origin}/join?code=${code}`;
   let canShare = false;
   // Allows for shareable data with text description
   const shareableData = {
     title: "Cat Me if you Can!",
     text: "Join us in a game of Cat Me if you Can!",
-    url: $page.url.href,
+    url,
   };
 
   // Shares link with other players through click event
