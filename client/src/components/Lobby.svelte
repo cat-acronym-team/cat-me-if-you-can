@@ -1,8 +1,11 @@
 <script lang="ts">
   import { page } from "$app/stores";
   import { onMount } from "svelte";
+  import type { Lobby } from "$lib/firebase/firestore-types/lobby";
 
-  let code = $page.params.gameid;
+  export let lobbyCode: string;
+  export let lobby: Lobby;
+
   let url = $page.url.href;
   let canShare = false;
   // Allows for shareable data with text description
@@ -35,7 +38,7 @@
 <main>
   <div class="container">
     <div class="lobby-info">
-      <h3>Code: {code}</h3>
+      <h3>Code: {lobbyCode}</h3>
       <h3>Players:</h3>
     </div>
     <div class="lobby" />
