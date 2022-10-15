@@ -3,7 +3,7 @@ import { doc, updateDoc, getDoc } from "firebase/firestore";
 import type { UserData } from "./firestore-types/users";
 import type { Player } from "./firestore-types/lobby";
 
-export const findAndJoinLobby = async (id: string, allUserInfo: UserData & { uid: string }) => {
+export async function findAndJoinLobby(id: string, allUserInfo: UserData & { uid: string }) {
   // lobby doc
   const lobby = doc(lobbyCollection, id);
   // check if this lobby exists
@@ -28,4 +28,4 @@ export const findAndJoinLobby = async (id: string, allUserInfo: UserData & { uid
       },
     ],
   });
-};
+}

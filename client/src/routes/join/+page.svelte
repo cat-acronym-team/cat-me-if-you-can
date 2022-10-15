@@ -20,7 +20,7 @@
   onMount(() => {
     // gets code from url search
     // the svelte magic with searchparams wasnt working
-    const queryCode = $page.url.search.split("=")[1];
+    const queryCode = $page.url.search.split("code=")[1];
     // sets it the code var for two way binding
     if (queryCode !== undefined) {
       code = queryCode;
@@ -34,7 +34,7 @@
       await createUser($user.uid, name);
     }
     // get the current user info
-    const { displayName, avatar } = await getUser($user.uid) as UserData;
+    const { displayName, avatar } = (await getUser($user.uid)) as UserData;
     try {
       // enter lobby with the user's info
       await findAndJoinLobby(code, {
@@ -43,7 +43,7 @@
         uid: $user.uid,
       });
       // go to game page
-      goto(`/game?=${code}`);
+      goto(`/game?code=${code}`);
     } catch (err: any) {
       // if the lobby doesn't exist then error is thrown
       error = {
@@ -65,9 +65,7 @@
     <p style="color:red;">{error.message}</p>
   {/if}
   <form on:submit|preventDefault={joinLobby}>
-    {#if $user === null}
-      <input type="text" placeholder="Enter in your display name" bind:value={name} />
-    {/if}
+    <input type="text" placeholder="Enter in your display name" bind:value={name} />
     <input bind:value={code} />
     <button type="submit" placeholder="Enter the lobby code">Join</button>
   </form>

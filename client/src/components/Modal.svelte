@@ -10,8 +10,9 @@
   // Props
   export let open: boolean;
   export let closeOnClick = false;
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  export let onClosed = () => {};
+  export let onClosed = () => {
+    // Do nothing by default
+  };
 </script>
 
 <div
