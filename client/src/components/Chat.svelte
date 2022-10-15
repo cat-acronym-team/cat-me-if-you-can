@@ -20,7 +20,7 @@
   export let lobbyData: Lobby & { id: string };
   let inChatRoom: boolean = false;
   onMount(async () => {
-    // Checks if the user is already in a chat room 
+    // Checks if the user is already in a chat room
     // If not then generate pairs and chatrooms
     // If so then return because they could've generated multiple chatrooms on refresh
     let notInChat = await isInChatRoom(lobbyData.id, ($user as User).uid);
@@ -37,7 +37,7 @@
 </script>
 
 {#if inChatRoom}
-  <ChatRoom lobbyId={lobbyData.id} />
+  <ChatRoom {lobbyData} />
 {:else}
   <h1 style="text-align: center;">Time for chatting!</h1>
   <div class="players">

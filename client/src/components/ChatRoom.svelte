@@ -1,41 +1,135 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { authStore as user } from "$stores/auth";
+  import { onMount, onDestroy } from "svelte";
+  import { authStore } from "$stores/auth";
   import { onSnapshot, QueryDocumentSnapshot } from "firebase/firestore";
-  import type { ChatMessage, ChatRoom } from "$lib/firebase/firestore-types/lobby";
-  import { findChatRoom, addMessage } from "$lib/firebase/chat";
+  import type { ChatMessage, ChatRoom, Lobby } from "$lib/firebase/firestore-types/lobby";
+  import { findChatRoom, addMessage, deleteChatRoom } from "$lib/firebase/chat";
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
   import type { User } from "firebase/auth";
-
-  export let lobbyId: string;
-
+  import type { UserData } from "../../../functions/src/firestore-types/users";
+  // props
+  export let lobbyData: Lobby & { id: string };
+  // variables
+  let user = $authStore as User;
+  let userInfo: UserData;
+  let partnerInfo: UserData;
   let chatRoomInfo: QueryDocumentSnapshot<ChatRoom>;
   let chatMessages: ChatMessage[] = [];
   let message: string = "";
+  let timer: ReturnType<typeof setInterval>;
+  let countdown = 60;
+
   onMount(async () => {
     // Query for their chatroom
-    chatRoomInfo = await findChatRoom(lobbyId, ($user as User).uid);
+    chatRoomInfo = await findChatRoom(lobbyData.id, user.uid);
     // subscribe the chat messages
-    onSnapshot(getChatRoomMessagesCollection(lobbyId, chatRoomInfo.id), (collection) => {
-      chatMessages = collection.docs.map((doc) => doc.data());
+    onSnapshot(getChatRoomMessagesCollection(lobbyData.id, chatRoomInfo.id), (collection) => {
+      chatMessages = collection.docs.map((doc) => doc.data()).sort((a, b) => a.timestamp.seconds - b.timestamp.seconds);
     });
+    // Get userInfo
+    userInfo = lobbyData.players[lobbyData.uids.indexOf(user.uid)];
+    // Get partnerInfo
+    const [partner] = chatRoomInfo.data().pair.filter((u) => {
+      return user.uid !== u;
+    });
+    partnerInfo = lobbyData.players[lobbyData.uids.indexOf(partner)];
+    // create timer
+    timer = setInterval(() => {
+      countdown -= 1;
+    }, 1000);
   });
-
+  onDestroy(() => {
+    clearInterval(timer);
+  });
   // Function will create document with new message
   function submitMessage() {
-    addMessage(lobbyId, chatRoomInfo.id, ($user as User).uid, message);
+    if (message === "") {
+      return;
+    }
+    console.log(lobbyData.id, chatRoomInfo.id, user.uid, message);
+    addMessage(lobbyData.id, chatRoomInfo.id, user.uid, message);
     message = "";
+  }
+  // Checks if the sender is the current user
+  function isUser(uid: string) {
+    return (user as User).uid === uid;
+  }
+  // Reactive Calls
+  $: if (countdown === 0) {
+    clearInterval(timer);
+    deleteChatRoom(lobbyData.id);
+    // TODO: Switch game state
   }
 </script>
 
-<div>
-  {#if chatMessages.length > 0}
-    {#each chatMessages as message}
-      <li>{message.sender}{message.text}</li>
-    {/each}
+<div class="chatroom">
+  <p class="countdown">{countdown}</p>
+  {#if partnerInfo !== undefined}
+    <div>MATCHED WITH {partnerInfo.displayName.toUpperCase()}</div>
   {/if}
+  <div class="messages">
+    {#if chatMessages.length > 0}
+      {#each chatMessages as message}
+        {#if isUser(message.sender)}
+          <p class="user-msg">{message.text}</p>
+        {:else}
+          <p class="partner-msg">{message.text}</p>
+        {/if}
+      {/each}
+    {/if}
+  </div>
   <form on:submit|preventDefault={submitMessage}>
     <input type="text" bind:value={message} />
     <button type="submit">Send</button>
   </form>
 </div>
+
+<style>
+  .chatroom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    width: 90%;
+    height: 100%;
+    margin: auto;
+    text-align: center;
+  }
+  .countdown {
+    font-size: 3em;
+    font-weight: bold;
+  }
+  .messages {
+    width: 100%;
+    height: 65%;
+    overflow-y: scroll;
+  }
+  .user-msg {
+    text-align: right;
+    background-color: skyblue;
+    width: fit-content;
+    margin-left: auto;
+    padding: 5px;
+    border-radius: 15px;
+  }
+  .partner-msg {
+    text-align: left;
+    background-color: red;
+    width: fit-content;
+    padding: 5px;
+    border-radius: 15px;
+  }
+  .chatroom form,
+  input {
+    width: 75%;
+    margin: auto;
+    height: 45px;
+  }
+  button {
+    height: 50px;
+  }
+</style>

@@ -1,6 +1,7 @@
-import { addDoc, query, where, getDocs, Timestamp } from "firebase/firestore";
+import { addDoc, query, where, getDocs, Timestamp, deleteDoc } from "firebase/firestore";
 import { getChatRoomCollection, getChatRoomMessagesCollection } from "./firestore-collections";
 
+// TODO: below function on server
 /**
  * Create pairs and create chatrooms from those pairs
  */
@@ -55,17 +56,23 @@ export async function findChatRoom(lobbyId: string, playerId: string) {
   return queryChatRoom.docs[0];
 }
 
+// TODO: below function on server
 /**
  * Creates a chatroom with the indicated pairs and lobby id
  */
-export const createChatRoom = async (lobbyId: string, pair: [string, string]) => {
+export async function createChatRoom(lobbyId: string, pair: [string, string]) {
   const chatroom = await addDoc(getChatRoomCollection(lobbyId), {
     pair,
     viewers: [],
   });
 
   return chatroom;
-};
+}
+
+export async function deleteChatRoom(lobbyId: string) {
+  const chatRooms = await getDocs(getChatRoomCollection(lobbyId));
+  chatRooms.docs.map(async (r) => await deleteDoc(r.ref));
+}
 
 /**
  * Checks if the user is in a chatroom
