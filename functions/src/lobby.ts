@@ -9,13 +9,13 @@ export const collectPromptAnswers = functions.firestore
 
     const lobbyDocRef = lobbyCollection.doc(code);
 
-    return db.runTransaction(async (t) => {
-      const lobbyDoc = await t.get(lobbyDocRef);
+    return db.runTransaction(async (transaction) => {
+      const lobbyDoc = await transaction.get(lobbyDocRef);
 
       const lobbyData = lobbyDoc.data();
 
       if (lobbyData == undefined || lobbyData.state !== "PROMPT" || !lobbyData.uids.includes(uid)) {
-        t.delete(change.ref);
+        transaction.delete(change.ref);
         return;
       }
 
@@ -23,7 +23,7 @@ export const collectPromptAnswers = functions.firestore
 
       const promptAnswerCollection = getPromptAnswerCollection(lobbyDocRef);
 
-      const promptAnswerDocs = await t.get(promptAnswerCollection);
+      const promptAnswerDocs = await transaction.get(promptAnswerCollection);
 
       for (const promptAnswerDoc of promptAnswerDocs.docs) {
         missingUids.delete(promptAnswerDoc.id);
@@ -37,10 +37,10 @@ export const collectPromptAnswers = functions.firestore
 
       for (const promptAnswerDoc of promptAnswerDocs.docs) {
         promptAnswers.set(promptAnswerDoc.id, promptAnswerDoc.data().answer);
-        t.delete(promptAnswerDoc.ref);
+        transaction.delete(promptAnswerDoc.ref);
       }
 
-      t.update(lobbyDocRef, { state: "CHAT" });
+      transaction.update(lobbyDocRef, { state: "CHAT" });
 
       functions.logger.log(promptAnswers);
 
