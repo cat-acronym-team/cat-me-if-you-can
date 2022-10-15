@@ -1,6 +1,9 @@
-import { addDoc, query, where, getDocs } from "firebase/firestore";
-import { getChatRoomCollection } from "./firestore-collections";
+import { addDoc, query, where, getDocs, Timestamp } from "firebase/firestore";
+import { getChatRoomCollection, getChatRoomMessagesCollection } from "./firestore-collections";
 
+/**
+ * Create pairs and create chatrooms from those pairs
+ */
 export function generatePairChatrooms(lobbyId: string, uids: string[]) {
   const pairs: { one: string; two: string; stalker?: string }[] = [];
   let pairOne, pairTwo, stalker: string;
@@ -44,11 +47,17 @@ export function generatePairChatrooms(lobbyId: string, uids: string[]) {
     await createChatRoom(lobbyId, [one, two]);
   });
 }
+/**
+ * Checks if the user is in a chatroom then returns their chatroom doc
+ */
 export async function findChatRoom(lobbyId: string, playerId: string) {
   const queryChatRoom = await getDocs(query(getChatRoomCollection(lobbyId), where("pair", "array-contains", playerId)));
   return queryChatRoom.docs[0];
 }
 
+/**
+ * Creates a chatroom with the indicated pairs and lobby id
+ */
 export const createChatRoom = async (lobbyId: string, pair: [string, string]) => {
   const chatroom = await addDoc(getChatRoomCollection(lobbyId), {
     pair,
@@ -57,3 +66,22 @@ export const createChatRoom = async (lobbyId: string, pair: [string, string]) =>
 
   return chatroom;
 };
+
+/**
+ * Checks if the user is in a chatroom
+ */
+export async function isInChatRoom(lobbyId: string, playerId: string) {
+  const queryChatRoom = await getDocs(query(getChatRoomCollection(lobbyId), where("pair", "array-contains", playerId)));
+  return queryChatRoom.empty;
+}
+
+/**
+ * Create a doc with the submitted message
+ */
+export async function addMessage(lobbyId: string, roomId: string, sender: string, text: string) {
+  addDoc(getChatRoomMessagesCollection(lobbyId, roomId), {
+    sender,
+    text,
+    timestamp: Timestamp.now(),
+  });
+}

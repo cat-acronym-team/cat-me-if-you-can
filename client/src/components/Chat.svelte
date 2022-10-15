@@ -1,8 +1,10 @@
-<script lang="ts" context="module">
+<script lang="ts">
+  import ChatRoom from "./ChatRoom.svelte";
   import type { Lobby } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { generatePairChatrooms } from "$lib/firebase/chat";
-  import ChatRoom from "./ChatRoom.svelte";
+  import { generatePairChatrooms, isInChatRoom } from "$lib/firebase/chat";
+  import { authStore as user } from "$stores/auth";
+  import type { User } from "firebase/auth";
   /*
   Expect players from lobby page
   Pair those players up randomly
@@ -16,19 +18,28 @@
   After chat phase is over delete the document
   */
   export let lobbyData: Lobby & { id: string };
-  let inChatRoom: boolean;
-  onMount(() => {
+  let inChatRoom: boolean = false;
+  onMount(async () => {
+    // Checks if the user is already in a chat room 
+    // If not then generate pairs and chatrooms
+    // If so then return because they could've generated multiple chatrooms on refresh
+    let notInChat = await isInChatRoom(lobbyData.id, ($user as User).uid);
+    if (!notInChat) {
+      return;
+    }
     generatePairChatrooms(lobbyData.id, lobbyData.uids);
-    setTimeout(() => {
-      inChatRoom = true;
-    }, 6000);
   });
+  setTimeout(() => {
+    console.log("timeout called");
+    inChatRoom = true;
+  }, 2500);
+  console.log(inChatRoom);
 </script>
 
 {#if inChatRoom}
   <ChatRoom lobbyId={lobbyData.id} />
 {:else}
-  <h1>Time for chatting!</h1>
+  <h1 style="text-align: center;">Time for chatting!</h1>
   <div class="players">
     {#each lobbyData.players as player}
       <div class="player">
@@ -44,7 +55,9 @@
     display: flex;
     flex-wrap: wrap;
     width: 75%;
+    margin: auto;
     text-align: center;
+    justify-content: space-evenly;
   }
   .avatar-holder {
     width: 50px;

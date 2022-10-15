@@ -1,4 +1,4 @@
-import { collection, DocumentReference, type CollectionReference } from "firebase/firestore";
+import { collection, type CollectionReference } from "firebase/firestore";
 import { db } from "$lib/firebase/app";
 import type { ChatMessage, ChatRoom, Lobby } from "$lib/firebase/firestore-types/lobby";
 import type { UserData } from "./firestore-types/users";
@@ -9,7 +9,6 @@ export const userCollection = collection(db, "users") as CollectionReference<Use
 export function getChatRoomCollection(lobbyId: string) {
   return collection(lobbyCollection, lobbyId, "chatRooms") as CollectionReference<ChatRoom>;
 }
-
-export function getChatRoomMessages(ref: DocumentReference<ChatRoom>) {
-  return collection(ref, "chatMessages") as CollectionReference<ChatMessage>;
+export function getChatRoomMessagesCollection(lobbyId: string, roomId: string) {
+  return collection(getChatRoomCollection(lobbyId), roomId, "chatMessages") as CollectionReference<ChatMessage>;
 }
