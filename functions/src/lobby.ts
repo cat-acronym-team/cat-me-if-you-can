@@ -1,6 +1,58 @@
+import { firestore } from "firebase-admin";
 import * as functions from "firebase-functions";
 import { db } from "./app";
-import { getPromptAnswerCollection, lobbyCollection } from "./firestore-collections";
+import { getPrivatePlayerCollection, getPromptAnswerCollection, lobbyCollection } from "./firestore-collections";
+import { Lobby } from "./firestore-types/lobby";
+import { getRandomPromptPair } from "./prompts";
+
+// TODO: replace with the correct trigger
+export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate(async (change, context) => {
+  const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
+  const lobby = change.after.data() as Lobby;
+  const oldLobby = change.before.data() as Lobby;
+
+  if (lobby.state == "PROMPT" && oldLobby.state != "PROMPT") {
+    await startPrompt(lobbyDocRef);
+  }
+});
+
+function startPrompt(lobbyDocRef: firestore.DocumentReference<Lobby>) {
+  const [catPrompt, catfishPrompt] = getRandomPromptPair();
+
+  const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
+
+  return db.runTransaction(async (transaction) => {
+    const lobbyDoc = await transaction.get(lobbyDocRef);
+
+    const lobbyData = lobbyDoc.data();
+
+    if (!lobbyData) {
+      throw new Error("Lobby not found");
+    }
+
+    await Promise.all(
+      lobbyData.uids.map(async (uid) => {
+        const privatePlayerDocRef = privatePlayerCollection.doc(uid);
+
+        const privatePlayerDoc = await transaction.get(privatePlayerDocRef);
+
+        const privatePlayerData = privatePlayerDoc.data();
+
+        if (!privatePlayerData) {
+          throw new Error(`Private player not found for uid ${uid}`);
+        }
+
+        transaction.set(
+          privatePlayerDocRef,
+          { prompt: privatePlayerData.role == "CAT" ? catPrompt : catfishPrompt },
+          { merge: true }
+        );
+      })
+    );
+
+    transaction.set(lobbyDocRef, { state: "PROMPT" }, { merge: true });
+  });
+}
 
 export const collectPromptAnswers = functions.firestore
   .document("/lobbies/{code}/promptAnswers/{uid}")
