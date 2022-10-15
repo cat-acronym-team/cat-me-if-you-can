@@ -20,8 +20,8 @@ export function displayNameValidator(displayName: string): { valid: true } | { v
     return { valid: false, reason: "Display name must be at least 3 characters long" };
   }
 
-  if (displayName.length > 15) {
-    return { valid: false, reason: "Display name must be at most 15 characters long" };
+  if (displayName.length > 12) {
+    return { valid: false, reason: "Display name must be at most 12 characters long" };
   }
 
   if (displayName !== displayName.trim()) {
