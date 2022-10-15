@@ -11,7 +11,7 @@ export async function createLobby(): Promise<string> {
   }
 
   for (let index = 0; index < 5; index++) {
-    const code = await createCode(); // Creates lobby code
+    const code = createCode(); // Creates lobby code
     try {
       await setDoc(doc(lobbyCollection, code), {
         uids: [user.toString()],
