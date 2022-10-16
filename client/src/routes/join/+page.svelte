@@ -2,14 +2,16 @@
   import SigninButton from "$components/SigninButton.svelte";
   import { authStore as user } from "$stores/auth";
   import { findAndJoinLobby } from "$lib/firebase/join-lobby";
-  import { getUser, createUser, saveDisplayName } from "$lib/firebase/splash";
+  import { saveOrCreate } from "$lib/firebase/splash";
+  import { getUser } from "$lib/firebase/splash";
   import type { UserData } from "$lib/firebase/firestore-types/users";
-  import { loginAnonymous } from "$lib/firebase/auth";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import { page } from "$app/stores";
+  import type { User } from "firebase/auth";
 
   let name: string = "";
+  let userData: UserData | undefined;
   let error = {
     status: false,
     message: "",
@@ -18,7 +20,6 @@
 
   // Checks to see if the join page has the code query paramter
   onMount(async () => {
-    console.log(history.state);
     if ("errorMessage" in history.state) {
       const { errorMessage } = history.state;
       error = {
@@ -29,16 +30,40 @@
       goto("/join", { replaceState: true });
     }
     // gets code from url search
-    // the svelte magic with searchparams wasnt working
-    const queryCode = $page.url.search.split("code=")[1];
+    const queryCode = $page.url.searchParams.get("code");
+
     // sets it the code var for two way binding
-    if (queryCode !== undefined) {
+    if (queryCode !== null) {
       code = queryCode;
     }
-    // Since we're are displaying the input for anyone
-    // We should show they're display name in the field already if they have one
+  });
+  const joinLobby = async () => {
+    await saveOrCreate($user, userData, name);
+    // get the current user info
+    const { displayName, avatar } = (await getUser(($user as User).uid)) as UserData;
+    try {
+      // enter lobby with the user's info
+      await findAndJoinLobby(code, {
+        displayName,
+        avatar,
+        uid: ($user as User).uid,
+      });
+      // go to game page
+      goto(`/game?code=${code}`);
+    } catch (err) {
+      // if the lobby doesn't exist then error is thrown
+      error = {
+        status: true,
+        message: err instanceof Error ? err.message : String(err),
+      };
+      code = "";
+    }
+  };
+
+  // this function will find user if the auth isnt null
+  async function findUser() {
     if ($user !== null) {
-      const userData = await getUser($user.uid);
+      userData = await getUser($user.uid);
       // fixed error because it would try to look for the display name of a user that doesn't exist
       if (userData !== undefined) {
         // assign name from database to name variable
@@ -47,38 +72,11 @@
         }
       }
     }
-  });
-
-  const joinLobby = async () => {
-    // If current user is null, give them an anonymous account
-    if ($user === null) {
-      $user = (await loginAnonymous()).user;
-      await createUser($user.uid, name);
-    } else {
-      // save the name then
-      await saveDisplayName($user.uid, name);
-    }
-    // get the current user info
-    const { displayName, avatar } = (await getUser($user.uid)) as UserData;
-    try {
-      // enter lobby with the user's info
-      await findAndJoinLobby(code, {
-        displayName,
-        avatar,
-        uid: $user.uid,
-      });
-      // go to game page
-      goto(`/game?code=${code}`);
-    } catch (err) {
-      // if the lobby doesn't exist then error is thrown
-      const myError = err as Error;
-      error = {
-        status: true,
-        message: myError.message,
-      };
-      code = "";
-    }
-  };
+  }
+  // will call the above function if the user isn't null
+  $: if ($user !== null) {
+    findUser();
+  }
 </script>
 
 <!-- If not then show regular page -->

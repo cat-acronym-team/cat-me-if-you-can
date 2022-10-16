@@ -10,15 +10,15 @@
   import type { Unsubscribe } from "firebase/auth";
 
   let lobbyData: Lobby;
-  let code: string;
+  let code: string | null;
   // in case we want to unsub from lobby
   let unsubscribeLobby: Unsubscribe;
 
   onMount(async () => {
     // gets code from url search
     // the svelte magic with searchparams wasnt working
-    code = $page.url.search.split("code=")[1];
-    if (code === undefined) {
+    code = $page.url.searchParams.get("code");
+    if (code === null) {
       errorToJoin("Code is invalid!");
       return;
     }

@@ -1,9 +1,9 @@
 <script lang="ts">
   import { page } from "$app/stores";
-  import type { Player } from "$lib/firebase/firestore-types/lobby";
-  import { changeGameState } from "$lib/firebase/game";
+  import type { Player, ChangeState, ChangeStateResponse } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
-
+  import { functions } from "$lib/firebase/app";
+  import { httpsCallable } from "firebase/functions";
   // Props
   export let players: Player[];
   export let code: string;
@@ -11,6 +11,7 @@
   // Josh's suggestion that I agreed on
   let url = `${$page.url.origin}/join?code=${code}`;
   let canShare = false;
+  const startGame = httpsCallable<ChangeState, ChangeStateResponse>(functions, "changeState");
   // Allows for shareable data with text description
   const shareableData = {
     title: "Cat Me if you Can!",
@@ -43,7 +44,12 @@
     <!-- TODO: Probably Display Users with their avatar and name -->
     <div class="lobby" />
     <div class="start">
-      <button id="start-game" on:click={() => changeGameState(code, "PROMPT")}>Start Game</button>
+      <button
+        id="start-game"
+        on:click={async () => {
+          await startGame({ code, state: "PROMPT" });
+        }}>Start Game</button
+      >
     </div>
     <div class="invite-link">
       <h3>Invite Link: {url}</h3>

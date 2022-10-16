@@ -1,7 +1,8 @@
 import { lobbyCollection } from "./firestore-collections";
-import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { doc,  getDoc } from "firebase/firestore";
 import type { UserData } from "./firestore-types/users";
-import type { Player } from "./firestore-types/lobby";
+import { httpsCallable } from "firebase/functions";
+import { functions }from '$lib/firebase/app';
 
 export async function findAndJoinLobby(id: string, allUserInfo: UserData & { uid: string }) {
   // lobby doc
@@ -11,21 +12,14 @@ export async function findAndJoinLobby(id: string, allUserInfo: UserData & { uid
   if (!validLobby.exists()) {
     throw new Error("Lobby doesn't exist!");
   }
-  // get existing lobby data and add the new user
   // First, check if they're already in the lobby
-  const { uids, players } = validLobby.data();
+  const { uids } = validLobby.data();
   if (uids.includes(allUserInfo.uid)) {
     throw new Error("You are already in the lobby!");
   }
-  await updateDoc(lobby, {
-    uids: [...uids, allUserInfo.uid],
-    players: [
-      ...players,
-      {
-        displayName: allUserInfo.displayName,
-        avatar: allUserInfo.avatar as Player["avatar"],
-        alive: true,
-      },
-    ],
-  });
+  // make request to server
+  const {data} = await httpsCallable<UserData & {uid: string, code:string}, {error?:string}>(functions, 'addPlayer')({...allUserInfo, code:id});
+  if (data.error !== undefined) {
+    throw data.error;
+  }
 }

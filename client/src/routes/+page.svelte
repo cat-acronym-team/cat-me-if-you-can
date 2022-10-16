@@ -1,8 +1,7 @@
 <script lang="ts">
   import SigninButton from "$components/SigninButton.svelte";
-  import { saveDisplayName, getUser, createUser } from "$lib/firebase/splash";
+  import { getUser, saveOrCreate } from "$lib/firebase/splash";
   import { createLobby } from "$lib/firebase/create-lobby";
-  import { loginAnonymous } from "$lib/firebase/auth";
   import type { UserData } from "$lib/firebase/firestore-types/users";
   import { goto } from "$app/navigation";
   import { authStore } from "$stores/auth";
@@ -46,30 +45,13 @@
   3. A User with User Doc
     - just update their display name
   */
-  const saveOrCreate = async () => {
-    // this is an anon user
-    // create anon user and user doc with display name
-    if (user === null && userData === undefined) {
-      const anon = (await loginAnonymous()).user;
-      createUser(anon.uid, name);
-    }
-    // this is a user without user doc
-    // create user doc with display name
-    if (user !== null && userData === undefined) {
-      createUser(user.uid, name);
-    }
-    // this is user with a user doc
-    // just update their current display name
-    if (user !== null && userData !== undefined) {
-      saveDisplayName(user.uid, name);
-    }
-  };
+
   const createLobbyHandler = async () => {
     if (name === "") {
       return;
     }
     // Create User
-    await saveOrCreate();
+    await saveOrCreate(user, userData, name);
     // Create Lobby
     const code = await createLobby();
     // Go to game page
@@ -80,7 +62,7 @@
       return;
     }
     // Create User
-    await saveOrCreate();
+    await saveOrCreate(user, userData, name);
     // go to join page
     goto("/join");
   };
