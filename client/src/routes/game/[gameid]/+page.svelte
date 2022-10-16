@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Prompt from "$components/prompt.svelte";
+  import Prompt from "$components/Prompt.svelte";
   import Lobby from "$components/Lobby.svelte";
 
   import { page } from "$app/stores";
