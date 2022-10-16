@@ -13,7 +13,7 @@ import { loginAnonymous } from "$lib/firebase/auth";
   3. A User with User Doc
     - just update their display name
 */
-export const saveOrCreate = async (user: User | null, userData: UserData | undefined, name: string) => {
+export async function saveOrCreate(user: User | null, userData: UserData | undefined, name: string) {
   // this is an anon user
   // create anon user and user doc with display name
   if (user === null && userData === undefined) {
@@ -30,7 +30,7 @@ export const saveOrCreate = async (user: User | null, userData: UserData | undef
   if (user !== null && userData !== undefined) {
     saveDisplayName(user.uid, name);
   }
-};
+}
 // users collection
 //  - displayName
 //  - avatar

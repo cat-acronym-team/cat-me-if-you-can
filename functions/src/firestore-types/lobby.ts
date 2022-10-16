@@ -23,9 +23,6 @@ export type Player = {
 };
 
 export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
-export type ChangeState = { code: string; state: GameState };
-export type ChangeStateResponse = { error?: string };
-
 /**
  * the type of documents `/lobbies/{code}`
  */
