@@ -6,7 +6,6 @@ import type { UserData } from "./firestore-types/users";
 
 export const lobbyCollection = collection(db, "lobbies") as CollectionReference<Lobby>;
 export const userCollection = collection(db, "users") as CollectionReference<UserData>;
-export const privPlayerCollection = collection(db, "private players") as CollectionReference<PrivatePlayer>
 
 export function getPrivatePlayerCollection(lobbyDoc: DocumentReference<Lobby>): CollectionReference<PrivatePlayer> {
   return collection(lobbyDoc, "privatePlayers") as CollectionReference<PrivatePlayer>;
