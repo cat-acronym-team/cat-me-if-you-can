@@ -17,12 +17,17 @@
   onMount(async () => {
     // gets code from url search
     // the svelte magic with searchparams wasnt working
-    code = $page.url.search.split("=")[1];
+    code = $page.url.search.split("code=")[1];
+    if (code === undefined) {
+      errorToJoin("Code is invalid!");
+      return;
+    }
     // We want to get the document immediately because if we wait there's a short delay in getting
     // the new doc from subscribing below. This makes the redirect slow since we want to check if the user isn't in this lobby
     const lobbyDoc = await getDoc(doc(lobbyCollection, code));
-    if (!lobbyDoc.exists()) {
-      goto("/join");
+    if (lobbyDoc.exists() === false) {
+      errorToJoin("Lobby doesnt exist!");
+      return;
     }
     // gets the lobby data
     lobbyData = lobbyDoc.data() as Lobby;
@@ -40,6 +45,13 @@
       lobbyData = doc.data() as Lobby;
     });
   });
+
+  function errorToJoin(errorMessage: string) {
+    goto("/join", {
+      replaceState: true,
+      state: { errorMessage: errorMessage },
+    });
+  }
 </script>
 
 <!-- I do this check because the html was rendering the Lobby component before the onmount happened due to lobbyData having default values -->

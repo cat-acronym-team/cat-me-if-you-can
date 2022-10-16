@@ -2,7 +2,7 @@
   import SigninButton from "$components/SigninButton.svelte";
   import { authStore as user } from "$stores/auth";
   import { findAndJoinLobby } from "$lib/firebase/join-lobby";
-  import { getUser, createUser } from "$lib/firebase/splash";
+  import { getUser, createUser, saveDisplayName } from "$lib/firebase/splash";
   import type { UserData } from "$lib/firebase/firestore-types/users";
   import { loginAnonymous } from "$lib/firebase/auth";
   import { goto } from "$app/navigation";
@@ -17,13 +17,35 @@
   let code: string;
 
   // Checks to see if the join page has the code query paramter
-  onMount(() => {
+  onMount(async () => {
+    console.log(history.state);
+    if ("errorMessage" in history.state) {
+      const { errorMessage } = history.state;
+      error = {
+        status: true,
+        message: errorMessage,
+      };
+      // do this to remove the errorMessage property in state
+      goto("/join", { replaceState: true });
+    }
     // gets code from url search
     // the svelte magic with searchparams wasnt working
     const queryCode = $page.url.search.split("code=")[1];
     // sets it the code var for two way binding
     if (queryCode !== undefined) {
       code = queryCode;
+    }
+    // Since we're are displaying the input for anyone
+    // We should show they're display name in the field already if they have one
+    if ($user !== null) {
+      const userData = await getUser($user.uid);
+      // fixed error because it would try to look for the display name of a user that doesn't exist
+      if (userData !== undefined) {
+        // assign name from database to name variable
+        if (userData.displayName !== "") {
+          name = userData.displayName;
+        }
+      }
     }
   });
 
@@ -32,6 +54,9 @@
     if ($user === null) {
       $user = (await loginAnonymous()).user;
       await createUser($user.uid, name);
+    } else {
+      // save the name then
+      await saveDisplayName($user.uid, name);
     }
     // get the current user info
     const { displayName, avatar } = (await getUser($user.uid)) as UserData;
@@ -44,11 +69,12 @@
       });
       // go to game page
       goto(`/game?code=${code}`);
-    } catch (err: any) {
+    } catch (err) {
       // if the lobby doesn't exist then error is thrown
+      const myError = err as Error;
       error = {
         status: true,
-        message: err.message,
+        message: myError.message,
       };
       code = "";
     }
