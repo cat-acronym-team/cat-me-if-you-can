@@ -40,11 +40,11 @@
 </script>
 
 <form class="wraper" on:submit|preventDefault={submitAnswer}>
-  <lable class="question" for="prompt-answer">{prompt}</lable>
+  <label class="question" for="prompt-answer">{prompt}</label>
 
   <div class="input">
     <input id="prompt-answer" type="text" bind:value={answer} />
-    <lable class="error" for="prompt-answer">{error ?? ""}</lable>
+    <label class="error" for="prompt-answer">{error ?? ""}</label>
     <button type="submit" disabled={error != undefined}>Done</button>
   </div>
 </form>
