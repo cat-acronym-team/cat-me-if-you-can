@@ -1,7 +1,7 @@
 import { lobbyCollection } from "./firestore-collections";
 import { doc, getDoc } from "firebase/firestore";
 import type { UserData } from "./firestore-types/users";
-import { addPlayer } from "./firestore-functions";
+import { joinLobby } from "./firestore-functions";
 
 export async function findAndJoinLobby(id: string, allUserInfo: UserData & { uid: string }) {
   // lobby doc
@@ -17,7 +17,7 @@ export async function findAndJoinLobby(id: string, allUserInfo: UserData & { uid
     throw new Error("You are already in the lobby!");
   }
   // make request to server
-  const { data } = await addPlayer({ code: lobby.id });
+  const { data } = await joinLobby({ code: lobby.id });
   if (data.error !== undefined) {
     throw new Error(data.error);
   }

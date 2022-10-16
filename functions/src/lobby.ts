@@ -1,12 +1,17 @@
 import * as functions from "firebase-functions";
 import { lobbyCollection, userCollection } from "./firestore-collections";
+import { codeCheck, LobbyRequest } from "./firestore-functions-types";
 import { Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 
-export const startGame = functions.https.onCall(async (data: { code: string }, context) => {
+export const startGame = functions.https.onCall(async (data: LobbyRequest, context) => {
   // no auth then you shouldn't be here
   if (context.auth === undefined) {
     return { error: "Not Signed In" };
+  }
+  // validate code
+  if (codeCheck(data.code) === false) {
+    return { error: "Invalid lobby code!" };
   }
   // get lobby doc
   const lobby = await lobbyCollection.doc(data.code).get();
@@ -22,10 +27,14 @@ export const startGame = functions.https.onCall(async (data: { code: string }, c
   return lobbyCollection.doc(data.code).update({ state: "PROMPT" });
 });
 
-export const addPlayer = functions.https.onCall(async (data: { code: string }, context) => {
+export const joinLobby = functions.https.onCall(async (data: LobbyRequest, context) => {
   // no auth then you shouldn't be here
   if (context.auth === undefined) {
     return { error: "Not Signed In" };
+  }
+  // validate code
+  if (codeCheck(data.code) === false) {
+    return { error: "Invalid lobby code!" };
   }
   // lobby doc
   const lobby = lobbyCollection.doc(data.code);

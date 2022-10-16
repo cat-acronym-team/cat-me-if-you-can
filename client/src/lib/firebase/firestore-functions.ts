@@ -1,6 +1,6 @@
 import { functions } from "$lib/firebase/app";
 import { httpsCallable } from "firebase/functions";
-import type { ErrorResponse } from "./firestore-functions-types";
+import type { LobbyRequest, ErrorResponse } from "./firestore-functions-types";
 
-export const startGame = httpsCallable<{ code: string }, ErrorResponse>(functions, "startGame");
-export const addPlayer = httpsCallable<{ code: string }, ErrorResponse>(functions, "addPlayer");
+export const startGame = httpsCallable<LobbyRequest, ErrorResponse>(functions, "startGame");
+export const joinLobby = httpsCallable<LobbyRequest, ErrorResponse>(functions, "joinLobby");
