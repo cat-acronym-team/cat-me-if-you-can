@@ -4,6 +4,15 @@ import type { User } from "firebase/auth";
 import type { UserData } from "./firestore-types/users";
 import { loginAnonymous } from "$lib/firebase/auth";
 
+/*
+  there are three type of situations that could happen
+  1. A Anon User without User Doc 
+    - create anon user and create user doc with display name
+  2. A User without User Doc
+    - create user doc with display name
+  3. A User with User Doc
+    - just update their display name
+*/
 export const saveOrCreate = async (user: User | null, userData: UserData | undefined, name: string) => {
   // this is an anon user
   // create anon user and user doc with display name

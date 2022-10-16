@@ -29,22 +29,6 @@
   $: if (user !== null) {
     findUser();
   }
-  /* 
-  Is called once user unfocuses the display name input field. It was 
-  created to avoid excessive writes to the database with the onchange event.
-  
-
-  removes user logic from buttons
-  when the user enters their display name
-
-  there are three type of situations that could happen
-  1. A Anon User without User Doc 
-    - create anon user and create user doc with display name
-  2. A User without User Doc
-    - create user doc with display name
-  3. A User with User Doc
-    - just update their display name
-  */
 
   const createLobbyHandler = async () => {
     if (name === "") {
