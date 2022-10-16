@@ -25,7 +25,12 @@
   <div class="container">
     <div class="header">Time to find your purrfect match!</div>
     <div class="role">
-      You are a <span>{getRole.role}</span>
+      {#if getRole.role == "CAT"}
+      You are a <span class = "green">{getRole.role}</span>
+      {:else}
+      You are a <span class = "red">{getRole.role}</span>
+      {/if}
+
       <p><i>Insert Image</i></p>
     </div>
   </div>
@@ -68,7 +73,11 @@
     color: blue;
   }
 
-  span {
+  .green {
+    color: green;
+  }
+
+  .red {
     color: red;
   }
 </style>
