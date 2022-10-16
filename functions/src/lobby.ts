@@ -3,7 +3,6 @@ import { lobbyCollection, userCollection } from "./firestore-collections";
 import { Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 
-
 export const startGame = functions.https.onCall(async (data: { code: string }, context) => {
   // no auth then you shouldn't be here
   if (context.auth === undefined) {
