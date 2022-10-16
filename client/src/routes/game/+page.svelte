@@ -57,7 +57,7 @@
 <!-- I do this check because the html was rendering the Lobby component before the onmount happened due to lobbyData having default values -->
 <!-- So the code was displaying undefined in the Lobby Component -->
 <!-- We could have a loading animation until the lobbyData is not undefined -->
-{#if lobbyData !== undefined}
+{#if lobbyData !== undefined && code !== null}
   <div>
     {#if lobbyData.state === "WAIT"}
       <LobbyComponent {code} players={lobbyData.players} />
