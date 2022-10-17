@@ -14,11 +14,9 @@
   let lobbyCode: string | null = null;
 
   let lobby: Lobby | undefined = undefined;
-  // in case we want to unsub from lobby
   let unsubscribeLobby: Unsubscribe | undefined = undefined;
 
   let privatePlayer: PrivatePlayer | undefined = undefined;
-  // in case we want to unsub from lobby
   let unsubscribePrivatePlayer: Unsubscribe | undefined = undefined;
 
   onMount(async () => {
