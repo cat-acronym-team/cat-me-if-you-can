@@ -102,25 +102,3 @@ function createChatRooms(lobbyDoc: firestore.DocumentReference<Lobby>, lobbyData
     await getChatRoomMessagesCollection(room).add({ sender: two, text: twoAnswer, timestamp: Timestamp.now() });
   });
 }
-export const deleteChatRooms = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    return { error: "Not Signed In" };
-  }
-  if (!isLobbyRequest(data)) {
-    return { error: "Invalid lobby code!" };
-  }
-
-  // get lobby doc, and check if the lobby exist
-  const lobby = lobbyCollection.doc(data.code);
-  const lobbyData = await lobby.get();
-  if (!lobbyData.exists) {
-    return { error: "Lobby doesn't exist!" };
-  }
-  // delete all chatrooms
-  const chatRooms = await getChatRoomCollection(lobby).listDocuments();
-  for (const room of chatRooms) {
-    await room.delete();
-  }
-  // change game state
-  return lobby.set({ state: "VOTE" }, { merge: true });
-});

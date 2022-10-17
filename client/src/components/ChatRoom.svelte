@@ -8,11 +8,11 @@
     type ChatRoom,
     type Lobby,
   } from "$lib/firebase/firestore-types/lobby";
-  import { findChatRoom, addMessage } from "$lib/firebase/chat";
+  import { findChatRoom, findViewer } from "$lib/firebase/chat";
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
   import type { User } from "firebase/auth";
   import type { UserData } from "../../../functions/src/firestore-types/users";
-  import { deleteChatRooms } from "$lib/firebase/firestore-functions";
+  import { addChatMessage, deleteChatRooms } from "$lib/firebase/firestore-functions";
   // props
   export let lobbyData: Lobby & { id: string };
   // variables
@@ -56,6 +56,7 @@
     if (message === "") {
       return;
     }
+    // validate message
     const validate = chatMessageValidator(message);
     if (!validate.valid) {
       error = {
@@ -65,7 +66,8 @@
       message = "";
       return;
     }
-    addMessage(lobbyData.id, chatRoomInfo.id, user.uid, message);
+    // add Message
+    addChatMessage({ code: lobbyData.id, roomId: chatRoomInfo.id, message });
     message = "";
   }
   // Checks if the sender is the current user
@@ -76,7 +78,7 @@
   $: if (countdown === 0) {
     clearInterval(timer);
     // Deletes all the chatrooms and switches game state
-    // deleteChatRooms({ code: lobbyData.id });
+    deleteChatRooms({ code: lobbyData.id });
   }
 </script>
 
