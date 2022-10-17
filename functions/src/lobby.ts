@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions";
 import { lobbyCollection, userCollection } from "./firestore-collections";
-import { codeCheck, LobbyRequest } from "./firestore-functions-types";
+import { isLobbyRequest, LobbyRequest } from "./firestore-functions-types";
 import { Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 
@@ -10,7 +10,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context) =
     return { error: "Not Signed In" };
   }
   // validate code
-  if (!codeCheck(data)) {
+  if (!isLobbyRequest(data)) {
     return { error: "Invalid lobby code!" };
   }
   // get lobby doc
@@ -33,7 +33,7 @@ export const joinLobby = functions.https.onCall(async (data: unknown, context) =
     return { error: "Not Signed In" };
   }
   // validate code
-  if (!codeCheck(data)) {
+  if (!isLobbyRequest(data)) {
     return { error: "Invalid lobby code!" };
   }
   // lobby doc
