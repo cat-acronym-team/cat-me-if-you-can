@@ -22,7 +22,7 @@
     }
 
     if (trimmed.length < 3) {
-      return "Your answer must be at least 3 characters";
+      return "Answer must be at least 3 characters";
     }
 
     if (trimmed.length > 50) {
