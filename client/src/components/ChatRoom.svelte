@@ -2,11 +2,17 @@
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
   import { onSnapshot, QueryDocumentSnapshot } from "firebase/firestore";
-  import type { ChatMessage, ChatRoom, Lobby } from "$lib/firebase/firestore-types/lobby";
-  import { findChatRoom, addMessage, deleteChatRoom } from "$lib/firebase/chat";
+  import {
+    chatMessageValidator,
+    type ChatMessage,
+    type ChatRoom,
+    type Lobby,
+  } from "$lib/firebase/firestore-types/lobby";
+  import { findChatRoom, addMessage } from "$lib/firebase/chat";
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
   import type { User } from "firebase/auth";
   import type { UserData } from "../../../functions/src/firestore-types/users";
+  import { deleteChatRooms } from "$lib/firebase/firestore-functions";
   // props
   export let lobbyData: Lobby & { id: string };
   // variables
@@ -18,6 +24,10 @@
   let message: string = "";
   let timer: ReturnType<typeof setInterval>;
   let countdown = 60;
+  let error = {
+    status: false,
+    message: "",
+  };
 
   onMount(async () => {
     // Query for their chatroom
@@ -46,7 +56,15 @@
     if (message === "") {
       return;
     }
-    console.log(lobbyData.id, chatRoomInfo.id, user.uid, message);
+    const validate = chatMessageValidator(message);
+    if (!validate.valid) {
+      error = {
+        status: true,
+        message: validate.reason,
+      };
+      message = "";
+      return;
+    }
     addMessage(lobbyData.id, chatRoomInfo.id, user.uid, message);
     message = "";
   }
@@ -57,8 +75,8 @@
   // Reactive Calls
   $: if (countdown === 0) {
     clearInterval(timer);
-    deleteChatRoom(lobbyData.id);
-    // TODO: Switch game state
+    // Deletes all the chatrooms and switches game state
+    // deleteChatRooms({ code: lobbyData.id });
   }
 </script>
 
@@ -81,6 +99,9 @@
   <form on:submit|preventDefault={submitMessage}>
     <input type="text" bind:value={message} />
     <button type="submit">Send</button>
+    {#if error.status}
+      <p class="error">{error.message}</p>
+    {/if}
   </form>
 </div>
 
@@ -131,5 +152,8 @@
   }
   button {
     height: 50px;
+  }
+  .error {
+    color: salmon;
   }
 </style>

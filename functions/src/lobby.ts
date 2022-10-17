@@ -1,8 +1,16 @@
+import { firestore } from "firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
 import * as functions from "firebase-functions";
-import { lobbyCollection, userCollection } from "./firestore-collections";
+import {
+  getChatRoomCollection,
+  getChatRoomMessagesCollection,
+  lobbyCollection,
+  userCollection,
+} from "./firestore-collections";
 import { isLobbyRequest } from "./firestore-functions-types";
 import { Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
+import { generatePairs } from "./util";
 
 export const startGame = functions.https.onCall(async (data: unknown, context) => {
   // no auth then you shouldn't be here
@@ -62,4 +70,57 @@ export const joinLobby = functions.https.onCall(async (data: unknown, context) =
     players: [...players, { ...userInfo, alive: true }],
     uids: [...uids, context.auth.uid],
   });
+});
+
+// Temporary Function
+// Will run everytime lobby updates
+export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate((change, context) => {
+  const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
+  const lobby = change.after.data() as Lobby;
+  const oldLobby = change.before.data() as Lobby;
+
+  if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {
+    // await startPrompt(lobbyDocRef);
+    createChatRooms(lobbyDocRef, lobby);
+  }
+});
+
+// Code inside this function will be under nates code for getting prompt answers
+function createChatRooms(lobbyDoc: firestore.DocumentReference<Lobby>, lobbyData: Lobby) {
+  const pairs = generatePairs(lobbyData);
+  // create a chatroom for each pair
+  pairs.forEach(async ({ one, two }) => {
+    const room = await getChatRoomCollection(lobbyDoc).add({ pair: [one, two], viewers: [] });
+    // get answers of the pair
+    // const oneAnswer = promptAnswers.get(one);
+    // const twoAnswer = promptAnswers.get(two);
+
+    const oneAnswer = "Pair One Answer";
+    const twoAnswer = "Pair Two Answer";
+    // place answers in chatMessages inside their room
+    await getChatRoomMessagesCollection(room).add({ sender: one, text: oneAnswer, timestamp: Timestamp.now() });
+    await getChatRoomMessagesCollection(room).add({ sender: two, text: twoAnswer, timestamp: Timestamp.now() });
+  });
+}
+export const deleteChatRooms = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    return { error: "Not Signed In" };
+  }
+  if (!isLobbyRequest(data)) {
+    return { error: "Invalid lobby code!" };
+  }
+
+  // get lobby doc, and check if the lobby exist
+  const lobby = lobbyCollection.doc(data.code);
+  const lobbyData = await lobby.get();
+  if (!lobbyData.exists) {
+    return { error: "Lobby doesn't exist!" };
+  }
+  // delete all chatrooms
+  const chatRooms = await getChatRoomCollection(lobby).listDocuments();
+  for (const room of chatRooms) {
+    await room.delete();
+  }
+  // change game state
+  return lobby.set({ state: "VOTE" }, { merge: true });
 });

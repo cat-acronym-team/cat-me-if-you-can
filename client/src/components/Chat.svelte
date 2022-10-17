@@ -1,10 +1,6 @@
 <script lang="ts">
   import ChatRoom from "./ChatRoom.svelte";
   import type { Lobby } from "$lib/firebase/firestore-types/lobby";
-  import { onMount } from "svelte";
-  import { generatePairChatrooms, isInChatRoom } from "$lib/firebase/chat";
-  import { authStore as user } from "$stores/auth";
-  import type { User } from "firebase/auth";
   /*
   Expect players from lobby page
   Pair those players up randomly
@@ -19,21 +15,10 @@
   */
   export let lobbyData: Lobby & { id: string };
   let inChatRoom: boolean = false;
-  onMount(async () => {
-    // Checks if the user is already in a chat room
-    // If not then generate pairs and chatrooms
-    // If so then return because they could've generated multiple chatrooms on refresh
-    let notInChat = await isInChatRoom(lobbyData.id, ($user as User).uid);
-    if (!notInChat) {
-      return;
-    }
-    generatePairChatrooms(lobbyData.id, lobbyData.uids);
-  });
   setTimeout(() => {
     console.log("timeout called");
     inChatRoom = true;
   }, 2500);
-  console.log(inChatRoom);
 </script>
 
 {#if inChatRoom}
