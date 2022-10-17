@@ -1,19 +1,56 @@
 <script lang="ts">
   import Modal from "./Modal.svelte";
   import { authStore as user } from "$stores/auth";
+  import { loginWithGoogle, loginWithMicrosoft, loginWithEmail } from "$lib/firebase/auth";
 
   // check if the user is logged in with getAuth
   let openSignInModal = false;
+  let password = "";
+  let email = "";
+  let clickedButton = false;
+  function submitLogin() {
+    if (password == "") {
+      return;
+    }
+    if (email == "") {
+      return;
+    }
+    loginWithEmail(email, password);
+  }
+  function clickedEmailButton() {
+    clickedButton = !clickedButton;
+  }
 </script>
 
 <!-- Sign In Modal -->
-<Modal
-  open={openSignInModal}
-  onClosed={() => {
-    openSignInModal = false;
-  }}
->
+<Modal open={openSignInModal}>
   <!-- TODO: Sign In Modal Content Here -->
+
+  <div class="container">
+    <div class="google">
+      <button id="google-button" on:click={loginWithGoogle}>sign in with google</button>
+    </div>
+    <div class="microsoft">
+      <button id="microsoft-button" on:click={loginWithMicrosoft}>sign in with Microsoft</button>
+    </div>
+    <div class="email">
+      <button class="" on:click={clickedEmailButton}>Sign In</button>
+      {#if clickedButton}
+        <form class="formContainer" on:submit|preventDefault={submitLogin}>
+          <div class="formGroup">
+            <label for="email"><b>Email</b></label>
+            <input type="text" bind:value={email} placeholder="Enter Username" name="email" required />
+          </div>
+          <div class="formGroup">
+            <label for="password"><b>Password</b></label>
+            <input type="text" bind:value={password} placeholder="Enter Password" name="password" required />
+          </div>
+          <button type="submit">Login</button>
+        </form>
+      {/if}
+    </div>
+    <div id="input" />
+  </div>
 </Modal>
 <div class="account-container">
   <!-- If you are not signed in show this  -->
@@ -82,5 +119,36 @@
   }
   .account-container:hover .account-content {
     display: block;
+  }
+  .container {
+    text-align: center;
+  }
+  .container button {
+    border: none;
+    cursor: pointer;
+    width: 25%;
+    height: 50px;
+    margin-top: 10px;
+  }
+
+  .formContainer {
+    display: flex;
+    width: 80%;
+    margin: auto;
+    margin-top: 20px;
+  }
+  .formGroup {
+    display: flex;
+    flex-direction: column;
+    width: 40%;
+    margin: auto;
+  }
+  .formGroup label {
+    text-align: left;
+  }
+
+  .formGroup input {
+    width: 100%;
+    height: 25px;
   }
 </style>

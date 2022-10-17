@@ -1,5 +1,16 @@
 <script lang="ts">
-  import { loginWithGoogle, loginWithMicrosoft } from "$lib/firebase/auth";
+  import { loginWithGoogle, loginWithMicrosoft, loginWithEmail } from "$lib/firebase/auth";
+  let password = """;
+  let email = "";
+  function submitLogin(){
+    if (password == ""){
+      return;
+    }
+    if (email == ""){
+      return;
+    }
+    loginWithEmail(email, password);
+  }
 </script>
 
 <div class="container">
@@ -10,7 +21,16 @@
     <button id="microsoft-button" on:click={loginWithMicrosoft}>sign in with Microsoft</button>
   </div>
   <div class="email">
-    <button id="email-button">Sign in With Email</button>
+    <div class="dropdown">
+      <button class="dropbtn">Dropdown</button>
+      <div class="dropdown-content">
+        <label for="email"><b>Email</b></label>
+        <input type="text" bind:value={email} placeholder="Enter Username" name="email" required />
+        <label for="password"><b>Password</b></label>
+        <input type="text" bind:value={password} placeholder="Enter Password" name="password" required />
+        <button on:click={submitLogin}>Login</button>
+      </div>
+    </div>
   </div>
   <div id="input" />
 </div>
@@ -69,5 +89,38 @@
   #email-input {
     grid-area: input;
     align-items: center;
+  }
+
+  .dropbtn {
+    background-color: grey;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+  }
+
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: grey;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+  }
+
+  .dropdown-content a:hover {
+    background-color: #ddd;
+  }
+
+  .dropdown:hover .dropdown-content {
+    display: block;
+  }
+
+  .dropdown:hover .dropbtn {
+    background-color: grey;
   }
 </style>
