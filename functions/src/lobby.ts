@@ -86,7 +86,7 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
 
 // Code inside this function will be under nates code for getting prompt answers
 function createChatRooms(lobbyDoc: firestore.DocumentReference<Lobby>, lobbyData: Lobby) {
-  const pairs = generatePairs(lobbyData);
+  const { pairs } = generatePairs(lobbyData);
   // create a chatroom for each pair
   pairs.forEach(async ({ one, two }) => {
     const room = await getChatRoomCollection(lobbyDoc).add({ pair: [one, two], viewers: [] });
