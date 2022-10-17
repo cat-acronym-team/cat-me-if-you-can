@@ -1,5 +1,12 @@
 import { auth } from "$lib/firebase/app";
-import { GoogleAuthProvider, OAuthProvider, signInWithPopup, signInAnonymously, signOut } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  OAuthProvider,
+  signInWithPopup,
+  createUserWithEmailAndPassword,
+  signInAnonymously,
+  signOut,
+} from "firebase/auth";
 
 // Google login/signup
 export async function loginWithGoogle() {
@@ -25,10 +32,10 @@ export async function loginWithMicrosoft() {
 }
 
 // Login with email and password
-export async function loginWithEmail() {
+export async function loginWithEmail(email: string, password: string) {
   try {
-    // const user = await createUserWithEmailAndPassword(auth, email, password);
-    // console.log(user);
+    const user = await createUserWithEmailAndPassword(auth, email, password);
+    console.log(user);
   } catch (error) {
     console.log(error);
   }

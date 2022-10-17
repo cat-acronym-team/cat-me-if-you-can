@@ -17,6 +17,8 @@
     }
     await loginWithEmail(email, password);
     openSignInModal = false;
+    password = "";
+    email = "";
   }
   function clickedEmailButton() {
     clickedButton = !clickedButton;
@@ -35,27 +37,38 @@
 <!-- Sign In Modal -->
 <Modal open={openSignInModal}>
   <!-- TODO: Sign In Modal Content Here -->
-
+  <button class="close" on:click={() => (openSignInModal = false)}
+    ><img src="/images/stuff2.svg" alt="closeButton" /></button
+  >
   <div class="container">
-    <div class="google">
-      <button id="google-button" on:click={googleLogin}>sign in with google</button>
+    <h2>Sign In</h2>
+    <div>
+      <button class="loginButton" on:click={googleLogin}>
+        <img src="/images/google.png" alt="googleButton" />
+      </button>
     </div>
-    <div class="microsoft">
-      <button id="microsoft-button" on:click={microsoftLogin}>sign in with Microsoft</button>
+    <div>
+      <button class="loginButton" on:click={microsoftLogin}>
+        <img src="/images/microsoft.png" alt="microsoftButton" />
+      </button>
     </div>
     <div class="email">
-      <button class="" on:click={clickedEmailButton}>Sign In</button>
+      <button on:click={clickedEmailButton}>Sign In</button>
       {#if clickedButton}
         <form class="formContainer" on:submit|preventDefault={submitLogin}>
-          <div class="formGroup">
-            <label for="email"><b>Email</b></label>
-            <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
+          <div class="groupContainer">
+            <div class="formGroup">
+              <label for="email"><b>Email</b></label>
+              <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
+            </div>
+            <div class="formGroup">
+              <label for="password"><b>Password</b></label>
+              <input type="text" bind:value={password} placeholder="Enter Password" name="password" required />
+            </div>
           </div>
-          <div class="formGroup">
-            <label for="password"><b>Password</b></label>
-            <input type="text" bind:value={password} placeholder="Enter Password" name="password" required />
+          <div class="formButton">
+            <button type="submit">Login</button>
           </div>
-          <button type="submit">Login</button>
         </form>
       {/if}
     </div>
@@ -85,6 +98,20 @@
 </div>
 
 <style>
+  .loginButton img {
+    width: 100%;
+  }
+  /* .microsoft-button {
+    background: url(images/sign-in-with-microsoft.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+  .google-button {
+    background: url(images/btn_google_signin_dark_normal_web@2x.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+  } */
+
   .account-container {
     position: relative;
     display: inline-block;
@@ -136,17 +163,25 @@
   .container button {
     border: none;
     cursor: pointer;
-    width: 25%;
-    height: 50px;
-    margin-top: 10px;
+    width: 35%;
+    background: none;
   }
 
-  .formContainer {
-    display: flex;
-    width: 80%;
-    margin: auto;
-    margin-top: 20px;
+  .close {
+    cursor: pointer;
+    background: none;
+    border: none;
+    width: 5%;
   }
+  .close img {
+    width: 100%;
+  }
+
+  .groupContainer {
+    display: flex;
+    width: 100%;
+  }
+
   .formGroup {
     display: flex;
     flex-direction: column;
@@ -160,5 +195,13 @@
   .formGroup input {
     width: 100%;
     height: 25px;
+  }
+  .formContainer button {
+    margin: auto;
+    margin-top: 10px;
+  }
+
+  .btnColor {
+    background-color: white;
   }
 </style>
