@@ -10,7 +10,7 @@
 
   let answer = "";
 
-  $: anserDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
+  $: answerDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
 
   $: error = getErrorMessage(answer);
 
@@ -35,7 +35,7 @@
       return;
     }
 
-    setDoc(anserDoc, { answer });
+    setDoc(answerDoc, { answer });
   }
 </script>
 
