@@ -10,11 +10,11 @@ export const startGame = functions.https.onCall(async (data: unknown, context) =
     return { error: "Not Signed In" };
   }
   // validate code
-  if (codeCheck(data) === false) {
+  if (!codeCheck(data)) {
     return { error: "Invalid lobby code!" };
   }
   // get lobby doc
-  const lobby = await lobbyCollection.doc((data as LobbyRequest).code).get();
+  const lobby = await lobbyCollection.doc(data.code).get();
   if (lobby.exists === false) {
     return { error: "Lobby doesn't exist!" };
   }
@@ -24,7 +24,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context) =
     return { error: "Not allowed to start game!" };
   }
 
-  return lobbyCollection.doc((data as LobbyRequest).code).update({ state: "PROMPT" });
+  return lobbyCollection.doc(data.code).update({ state: "PROMPT" });
 });
 
 export const joinLobby = functions.https.onCall(async (data: unknown, context) => {
@@ -33,11 +33,11 @@ export const joinLobby = functions.https.onCall(async (data: unknown, context) =
     return { error: "Not Signed In" };
   }
   // validate code
-  if (codeCheck(data) === false) {
+  if (!codeCheck(data)) {
     return { error: "Invalid lobby code!" };
   }
   // lobby doc
-  const lobby = lobbyCollection.doc((data as LobbyRequest).code);
+  const lobby = lobbyCollection.doc(data.code);
   const lobbyInfo = await lobby.get();
   // extra validation to make sure it exist
   if (lobbyInfo.exists === false) {
