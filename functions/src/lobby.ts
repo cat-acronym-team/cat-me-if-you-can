@@ -1,5 +1,4 @@
 import { firestore } from "firebase-admin";
-import { Timestamp } from "firebase-admin/firestore";
 import * as functions from "firebase-functions";
 import {
   getChatRoomCollection,
@@ -98,7 +97,15 @@ function createChatRooms(lobbyDoc: firestore.DocumentReference<Lobby>, lobbyData
     const oneAnswer = "Pair One Answer";
     const twoAnswer = "Pair Two Answer";
     // place answers in chatMessages inside their room
-    await getChatRoomMessagesCollection(room).add({ sender: one, text: oneAnswer, timestamp: Timestamp.now() });
-    await getChatRoomMessagesCollection(room).add({ sender: two, text: twoAnswer, timestamp: Timestamp.now() });
+    await getChatRoomMessagesCollection(room).add({
+      sender: one,
+      text: oneAnswer,
+      timestamp: firestore.Timestamp.now(),
+    });
+    await getChatRoomMessagesCollection(room).add({
+      sender: two,
+      text: twoAnswer,
+      timestamp: firestore.Timestamp.now(),
+    });
   });
 }

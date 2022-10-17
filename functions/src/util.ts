@@ -21,7 +21,7 @@ export function generatePairs(lobbyData: Lobby) {
       lobbyData.uids.splice(lobbyData.uids.indexOf(pairOne), 1);
       lobbyData.uids.splice(lobbyData.uids.indexOf(pairTwo), 1);
     }
-    //TODO: Make this guy a stalker somehow
+    // TODO: Make this guy a stalker somehow
     // stalker = lobbyData.uids[0];
   }
   // even number of players

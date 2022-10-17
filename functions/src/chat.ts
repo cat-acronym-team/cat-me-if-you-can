@@ -1,4 +1,4 @@
-import { Timestamp } from "firebase-admin/firestore";
+import { firestore } from "firebase-admin";
 import * as functions from "firebase-functions";
 import { getChatRoomCollection, getChatRoomMessagesCollection, lobbyCollection } from "./firestore-collections";
 import { isChatRequest, isLobbyRequest } from "./firestore-functions-types";
@@ -34,7 +34,7 @@ export const addChatMessage = functions.https.onCall(async (data: unknown, conte
   return getChatRoomMessagesCollection(roomDoc).add({
     sender: context.auth.uid,
     text: data.message,
-    timestamp: Timestamp.now(),
+    timestamp: firestore.Timestamp.now(),
   });
 });
 
