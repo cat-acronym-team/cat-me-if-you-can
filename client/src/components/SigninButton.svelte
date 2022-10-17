@@ -1,7 +1,7 @@
 <script lang="ts">
   import Modal from "./Modal.svelte";
   import { authStore as user } from "$stores/auth";
-  import { loginWithGoogle, loginWithMicrosoft, loginWithEmail } from "$lib/firebase/auth";
+  import { loginWithGoogle, loginWithMicrosoft, loginWithEmail, onSignOut } from "$lib/firebase/auth";
 
   // check if the user is logged in with getAuth
   let openSignInModal = false;
@@ -79,7 +79,7 @@
       <!-- TODO: Account Hover Links -->
       <!-- <a href="/settings">Account Settings</a>
         <a href="/stats">Stats</a> -->
-      <a href="/logout">Logout</a>
+      <a href="" on:click={onSignOut}>Logout</a>
     </div>
   {/if}
 </div>
