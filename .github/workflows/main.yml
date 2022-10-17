@@ -144,6 +144,8 @@ jobs:
 
       - name: Test
         run: npm --prefix client run test
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
   deploy-staging:
     name: Deploy to Staging

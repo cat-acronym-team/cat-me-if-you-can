@@ -23,5 +23,6 @@ module.exports = {
   rules: {
     "spaced-comment": "warn",
     "no-warning-comments": "warn",
+    "no-throw-literal": "warn",
   },
 };
