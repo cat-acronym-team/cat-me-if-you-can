@@ -3,7 +3,7 @@ import { lobbyCollection } from "./firestore-collections";
 import { auth } from "./app";
 import { loginAnonymous } from "./auth";
 
-export async function createLobby(): Promise<string> {
+export async function createLobby(name: string): Promise<string> {
   let user = auth.currentUser?.uid;
 
   if (user == undefined) {
@@ -19,7 +19,7 @@ export async function createLobby(): Promise<string> {
           {
             alive: true,
             avatar: 1,
-            displayName: "default",
+            displayName: name,
           },
         ],
         state: "WAIT",
