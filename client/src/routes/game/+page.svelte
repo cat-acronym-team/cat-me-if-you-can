@@ -57,7 +57,7 @@
       lobby = doc.data();
     });
 
-    // We want them to subscribe to the privatPlayer on mount
+    // We want them to subscribe to the privatePlayer on mount
     unsubscribePrivatePlayer = onSnapshot(privatePlayerDocRef, (doc) => {
       // will change privatePlayer to the new doc data
       privatePlayer = doc.data();
