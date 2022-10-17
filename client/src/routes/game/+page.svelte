@@ -1,7 +1,6 @@
 <script lang="ts">
   import Prompt from "$components/Prompt.svelte";
   import LobbyComponent from "$components/Lobby.svelte";
-  import Chat from "$components/Chat.svelte";
   import { onSnapshot, doc, getDoc } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
   import { getPrivatePlayerCollection, lobbyCollection } from "$lib/firebase/firestore-collections";
@@ -10,6 +9,7 @@
   import { authStore as user } from "$stores/auth";
   import { goto } from "$app/navigation";
   import type { Unsubscribe } from "firebase/auth";
+    import ChatRoom from "$components/ChatRoom.svelte";
 
   let lobbyCode: string | null = null;
 
@@ -92,7 +92,7 @@
   {:else if lobby.state === "PROMPT"}
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
   {:else if lobby.state === "CHAT"}
-    <Chat lobbyData={{ ...lobby, id: lobbyCode }} />
+    <ChatRoom lobbyData={{ ...lobby, id: lobbyCode }} />
   {:else}
     unknown lobby state: {lobby.state}
   {/if}
