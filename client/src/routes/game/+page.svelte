@@ -83,7 +83,7 @@
 <!-- So the code was displaying undefined in the Lobby Component -->
 <!-- We could have a loading animation until the lobby is not undefined -->
 <div>
-  {#if $user == undefined || lobby == undefined || lobbyCode == null}
+  {#if $user == null || lobby == undefined || lobbyCode == null}
     Loading... <!-- TODO: make a Nice Loading spinner -->
   {:else if lobby.state === "WAIT"}
     <LobbyComponent {lobbyCode} {lobby} />
