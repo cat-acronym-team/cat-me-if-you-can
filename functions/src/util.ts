@@ -2,7 +2,9 @@ import { Lobby } from "./firestore-types/lobby";
 
 export function generatePairs(lobbyData: Lobby) {
   const pairs: { one: string; two: string }[] = [];
-  let pairOne, pairTwo, stalker: string;
+  let pairOne, pairTwo;
+  // stalker: string;
+
   // Check if the lobby is uneven to find stalker
   if (lobbyData.uids.length % 2 !== 0) {
     while (lobbyData.uids.length !== 1) {
@@ -20,7 +22,7 @@ export function generatePairs(lobbyData: Lobby) {
       lobbyData.uids.splice(lobbyData.uids.indexOf(pairTwo), 1);
     }
     //TODO: Make this guy a stalker somehow
-    stalker = lobbyData.uids[0];
+    // stalker = lobbyData.uids[0];
   }
   // even number of players
   else {
