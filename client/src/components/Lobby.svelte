@@ -1,15 +1,16 @@
 <script lang="ts">
   import { page } from "$app/stores";
-  import type { Player } from "$lib/firebase/firestore-types/lobby";
+  import type { Lobby } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
   import { startGame } from "$lib/firebase/firestore-functions";
 
   // Props
-  export let players: Player[];
-  export let code: string;
+  export let lobbyCode: string;
+  export let lobby: Lobby;
+
   // better link to share since it's redirecting to this page anyways
   // Josh's suggestion that I agreed on
-  let url = `${$page.url.origin}/join?code=${code}`;
+  let url = `${$page.url.origin}/join?code=${lobbyCode}`;
   let canShare = false;
   // Allows for shareable data with text description
   const shareableData = {
@@ -37,8 +38,8 @@
 <main>
   <div class="container">
     <div class="lobby-info">
-      <h3>Code: {code}</h3>
-      <h3>Players: {players.length}</h3>
+      <h3>Code: {lobbyCode}</h3>
+      <h3>Players: {lobby.players.length}</h3>
     </div>
     <!-- TODO: Probably Display Users with their avatar and name -->
     <div class="lobby" />
@@ -46,7 +47,7 @@
       <button
         id="start-game"
         on:click={async () => {
-          startGame({ code });
+          startGame({ code: lobbyCode });
         }}>Start Game</button
       >
     </div>
