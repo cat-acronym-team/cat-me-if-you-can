@@ -11,7 +11,7 @@ export type ChangeAvatarData = {
   lobbyCode: string;
 };
 
-export function avatarCheck(changeAvatarData: unknown): changeAvatarData is ChangeAvatarData {
+export function isChangeAvatarData(changeAvatarData: unknown): changeAvatarData is ChangeAvatarData {
   if (typeof changeAvatarData !== "object") {
     return false;
   }
