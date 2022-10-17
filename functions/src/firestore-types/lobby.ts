@@ -23,6 +23,7 @@ export type Player = {
 };
 
 export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
+
 /**
  * the type of documents `/lobbies/{code}`
  */

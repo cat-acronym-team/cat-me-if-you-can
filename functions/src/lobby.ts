@@ -4,17 +4,17 @@ import { codeCheck, LobbyRequest } from "./firestore-functions-types";
 import { Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 
-export const startGame = functions.https.onCall(async (data: LobbyRequest, context) => {
+export const startGame = functions.https.onCall(async (data: unknown, context) => {
   // no auth then you shouldn't be here
   if (context.auth === undefined) {
     return { error: "Not Signed In" };
   }
   // validate code
-  if (codeCheck(data.code) === false) {
+  if (codeCheck(data) === false) {
     return { error: "Invalid lobby code!" };
   }
   // get lobby doc
-  const lobby = await lobbyCollection.doc(data.code).get();
+  const lobby = await lobbyCollection.doc((data as LobbyRequest).code).get();
   if (lobby.exists === false) {
     return { error: "Lobby doesn't exist!" };
   }
@@ -24,20 +24,20 @@ export const startGame = functions.https.onCall(async (data: LobbyRequest, conte
     return { error: "Not allowed to start game!" };
   }
 
-  return lobbyCollection.doc(data.code).update({ state: "PROMPT" });
+  return lobbyCollection.doc((data as LobbyRequest).code).update({ state: "PROMPT" });
 });
 
-export const joinLobby = functions.https.onCall(async (data: LobbyRequest, context) => {
+export const joinLobby = functions.https.onCall(async (data: unknown, context) => {
   // no auth then you shouldn't be here
   if (context.auth === undefined) {
     return { error: "Not Signed In" };
   }
   // validate code
-  if (codeCheck(data.code) === false) {
+  if (codeCheck(data) === false) {
     return { error: "Invalid lobby code!" };
   }
   // lobby doc
-  const lobby = lobbyCollection.doc(data.code);
+  const lobby = lobbyCollection.doc((data as LobbyRequest).code);
   const lobbyInfo = await lobby.get();
   // extra validation to make sure it exist
   if (lobbyInfo.exists === false) {
