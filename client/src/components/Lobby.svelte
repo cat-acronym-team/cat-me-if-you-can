@@ -41,7 +41,7 @@
       <h3>Code: {lobbyCode}</h3>
       <h3>Players: {lobby.players.length}</h3>
     </div>
-    <SelectAvatar {lobby} />
+    <SelectAvatar {lobby} {lobbyCode} />
     <div class="start">
       <button
         id="start-game"

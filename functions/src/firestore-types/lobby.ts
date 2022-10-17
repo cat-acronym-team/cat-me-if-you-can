@@ -1,5 +1,7 @@
 import type { Timestamp } from "firebase-admin/firestore";
 
+export type Avatar = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+
 export type Player = {
   /**
    * true if the player has not bean voted out yet
@@ -9,7 +11,7 @@ export type Player = {
   /**
    * the cat profile picture that the user has selected
    */
-  avatar: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+  avatar: Avatar;
 
   /**
    * the name of the user that should be displayed

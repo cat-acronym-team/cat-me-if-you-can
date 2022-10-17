@@ -1,15 +1,17 @@
 <script lang="ts">
-  import type { Lobby, Player } from "$lib/firebase/firestore-types/lobby";
+  import { changeAvatar } from "$lib/firebase/firestore-functions";
+  import type { Lobby, Avatar } from "$lib/firebase/firestore-types/lobby";
 
+  export let lobbyCode: string;
   export let lobby: Lobby;
 
   $: avatarChoices = updateAvatarChoices(lobby);
 
   function updateAvatarChoices(lobby: Lobby) {
-    const newAvatarChoices: { avatar: number; displayName?: string }[] = [];
+    const newAvatarChoices: { avatar: Avatar; displayName?: string }[] = [];
 
     for (let i = 1; i <= 12; i++) {
-      newAvatarChoices.push({ avatar: i });
+      newAvatarChoices.push({ avatar: i as Avatar });
     }
 
     for (const player of lobby.players) {
@@ -18,11 +20,19 @@
 
     return newAvatarChoices;
   }
+
+  function selectAvatar(avatar: Avatar) {
+    try {
+      changeAvatar({ lobbyCode, avatar });
+    } catch (err) {
+      console.error(err);
+    }
+  }
 </script>
 
 <div class="grid">
   {#each avatarChoices as { avatar, displayName }}
-    <button class="avatar">
+    <button class="avatar" on:click={() => selectAvatar(avatar)}>
       <img src="/avatars/{1}.webp" alt="cat picture {avatar}" />
       <span class="name">{displayName ?? ""}</span>
     </button>
