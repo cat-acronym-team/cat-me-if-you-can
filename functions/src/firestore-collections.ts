@@ -1,6 +1,9 @@
 import type { Lobby, PrivatePlayer, PromptAnswer } from "./firestore-types/lobby";
+import { UserData } from "./firestore-types/users";
 import type { CollectionReference, DocumentReference } from "firebase-admin/firestore";
 import { db } from "./app";
+
+export const userCollection = db.collection("users") as CollectionReference<UserData>;
 
 export const lobbyCollection = db.collection("lobbies") as CollectionReference<Lobby>;
 
