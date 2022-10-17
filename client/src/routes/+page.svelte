@@ -1,15 +1,13 @@
 <script lang="ts">
-  import Modal from "$components/Modal.svelte";
-  import { saveDisplayName, getUser, createUser } from "$lib/firebase/splash";
+  import SigninButton from "$components/SigninButton.svelte";
+  import { getUser, saveOrCreate } from "$lib/firebase/splash";
   import { createLobby } from "$lib/firebase/create-lobby";
-  import { loginAnonymous } from "$lib/firebase/auth";
   import type { UserData } from "$lib/firebase/firestore-types/users";
   import { goto } from "$app/navigation";
   import { authStore } from "$stores/auth";
 
   let userData: UserData | undefined;
   // check if the user is logged in with getAuth
-  let openSignInModal = false;
   let name: string = "";
 
   // update user once auth store changes
@@ -31,85 +29,32 @@
   $: if (user !== null) {
     findUser();
   }
-  /* 
-  Is called once user unfocuses the display name input field. It was 
-  created to avoid excessive writes to the database with the onchange event.
-  
 
-  removes user logic from buttons
-  when the user enters their display name
-
-  there are three type of situations that could happen
-  1. A Anon User without User Doc 
-    - create anon user and create user doc with display name
-  2. A User without User Doc
-    - create user doc with display name
-  3. A User with User Doc
-    - just update their display name
-  */
-  const saveOrCreate = async () => {
-    // this is an anon user
-    // create anon user and user doc with display name
-    if (user === null && userData === undefined) {
-      const anon = (await loginAnonymous()).user;
-      createUser(anon.uid, name);
-    }
-    // this is a user without user doc
-    // create user doc with display name
-    if (user !== null && userData === undefined) {
-      createUser(user.uid, name);
-    }
-    // this is user with a user doc
-    // just update their current display name
-    if (user !== null && userData !== undefined) {
-      saveDisplayName(user.uid, name);
-    }
-  };
   const createLobbyHandler = async () => {
     if (name === "") {
       return;
     }
     // Create User
-    await saveOrCreate();
+    await saveOrCreate(user, userData, name);
     // Create Lobby
-    const code = await createLobby();
+    const code = await createLobby(name);
     // Go to game page
-    goto("/game/" + code);
+    goto("/game?code=" + code);
+  };
+  const joinLobbyHandler = async () => {
+    if (name === "") {
+      return;
+    }
+    // Create User
+    await saveOrCreate(user, userData, name);
+    // go to join page
+    goto("/join");
   };
 </script>
 
-<!-- Sign In Modal -->
-<Modal
-  open={openSignInModal}
-  onClosed={() => {
-    openSignInModal = false;
-  }}
->
-  <!-- TODO: Sign In Modal Content Here -->
-</Modal>
 <header class="cat-main-header">
   <div class="header-first-level">
-    <div class="account-container">
-      <!-- If you are not signed in show this  -->
-      {#if user == null}
-        <button
-          on:click={() => {
-            openSignInModal = true;
-          }}
-          class="account-signin">Sign in</button
-        >
-        <!-- If you show account and dropdown -->
-      {:else}
-        <button class="account-account">Account</button>
-        <!-- Hover doesn't work on mobile -->
-        <div class="account-content">
-          <!-- TODO: Account Hover Links -->
-          <!-- <a href="/settings">Account Settings</a>
-        <a href="/stats">Stats</a>
-        <a href="/logout">Logout</a> -->
-        </div>
-      {/if}
-    </div>
+    <SigninButton />
   </div>
 </header>
 
@@ -121,7 +66,7 @@
     <div class="cat-main-buttons">
       <input type="text" placeholder="Enter in your display name" bind:value={name} />
       <button on:click={createLobbyHandler}>Create Lobby</button>
-      <button>Join Lobby</button>
+      <button on:click={joinLobbyHandler}>Join Lobby</button>
     </div>
   </div>
 </main>
@@ -136,51 +81,6 @@
     display: flex;
     justify-content: right;
     align-items: center;
-  }
-  .account-signin {
-    text-decoration: none;
-    margin-right: 5px;
-    color: red;
-    background-color: #151515;
-    padding: 5px;
-  }
-  .account-container {
-    position: relative;
-    display: inline-block;
-  }
-  .account-account {
-    text-decoration: none;
-    margin-right: 5px;
-    color: red;
-    background-color: #151515;
-    padding: 5px;
-  }
-  .account-container button {
-    background-color: #151515;
-    color: red;
-    padding: 16px;
-    font-size: 16px;
-    border: none;
-  }
-
-  .account-content {
-    display: none;
-    position: absolute;
-    right: 5px;
-    background-color: #151515;
-    min-width: 160px;
-    /* box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2); */
-    z-index: 1;
-  }
-
-  .account-content a {
-    color: red;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-  }
-  .account-container:hover .account-content {
-    display: block;
   }
 
   .logo-container {
