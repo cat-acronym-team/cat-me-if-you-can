@@ -2,7 +2,7 @@
   import { getPromptAnswerCollection } from "$lib/firebase/firestore-collections";
   import { doc, setDoc } from "firebase/firestore";
 
-  export let prompt: string;
+  export let prompt: string | undefined;
 
   export let uid: string;
 
@@ -40,7 +40,7 @@
 </script>
 
 <form class="wraper" on:submit|preventDefault={submitAnswer}>
-  <label class="question" for="prompt-answer">{prompt}</label>
+  <label class="question" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
 
   <div class="input">
     <input id="prompt-answer" type="text" bind:value={answer} />
