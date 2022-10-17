@@ -19,6 +19,13 @@ service cloud.firestore {
 
         allow create: if request.auth.uid == uid && validAnswer() && request.resource.data.keys().hasOnly(['answer']);
       }
+
+      match /chatRooms/{roomId} {
+        allow read: if true;
+        match /chatMessages/{messageId}{
+          allow read: if true;
+        }
+      }
     }
 
     match /users/{userId} {

@@ -16,7 +16,6 @@
   export let lobbyData: Lobby & { id: string };
   let inChatRoom: boolean = false;
   setTimeout(() => {
-    console.log("timeout called");
     inChatRoom = true;
   }, 2500);
 </script>

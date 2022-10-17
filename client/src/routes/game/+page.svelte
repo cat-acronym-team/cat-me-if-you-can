@@ -10,7 +10,6 @@
   import { authStore as user } from "$stores/auth";
   import { goto } from "$app/navigation";
   import type { Unsubscribe } from "firebase/auth";
-  import ChatRoom from "$components/ChatRoom.svelte";
 
   let lobbyCode: string | null = null;
 
