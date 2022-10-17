@@ -8,17 +8,27 @@
   let password = "";
   let email = "";
   let clickedButton = false;
-  function submitLogin() {
+  async function submitLogin() {
     if (password == "") {
       return;
     }
     if (email == "") {
       return;
     }
-    loginWithEmail(email, password);
+    await loginWithEmail(email, password);
+    openSignInModal = false;
   }
   function clickedEmailButton() {
     clickedButton = !clickedButton;
+  }
+  async function googleLogin() {
+    await loginWithGoogle();
+    openSignInModal = false;
+  }
+
+  async function microsoftLogin() {
+    await loginWithMicrosoft();
+    openSignInModal = false;
   }
 </script>
 
@@ -28,10 +38,10 @@
 
   <div class="container">
     <div class="google">
-      <button id="google-button" on:click={loginWithGoogle}>sign in with google</button>
+      <button id="google-button" on:click={googleLogin}>sign in with google</button>
     </div>
     <div class="microsoft">
-      <button id="microsoft-button" on:click={loginWithMicrosoft}>sign in with Microsoft</button>
+      <button id="microsoft-button" on:click={microsoftLogin}>sign in with Microsoft</button>
     </div>
     <div class="email">
       <button class="" on:click={clickedEmailButton}>Sign In</button>
@@ -39,7 +49,7 @@
         <form class="formContainer" on:submit|preventDefault={submitLogin}>
           <div class="formGroup">
             <label for="email"><b>Email</b></label>
-            <input type="text" bind:value={email} placeholder="Enter Username" name="email" required />
+            <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
           </div>
           <div class="formGroup">
             <label for="password"><b>Password</b></label>
@@ -68,8 +78,8 @@
     <div class="account-content">
       <!-- TODO: Account Hover Links -->
       <!-- <a href="/settings">Account Settings</a>
-        <a href="/stats">Stats</a>
-        <a href="/logout">Logout</a> -->
+        <a href="/stats">Stats</a> -->
+      <a href="/logout">Logout</a>
     </div>
   {/if}
 </div>
