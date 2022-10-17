@@ -152,11 +152,14 @@ export const collectPromptAnswers = functions.firestore
         return;
       }
 
+      const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
+
       const promptAnswers = new Map<string, string>();
 
       for (const promptAnswerDoc of promptAnswerDocs.docs) {
         promptAnswers.set(promptAnswerDoc.id, promptAnswerDoc.data().answer);
         transaction.delete(promptAnswerDoc.ref);
+        transaction.update(privatePlayerCollection.doc(promptAnswerDoc.id), { prompt: firestore.FieldValue.delete() });
       }
 
       transaction.update(lobbyDocRef, { state: "CHAT" });

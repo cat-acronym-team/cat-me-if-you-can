@@ -15,11 +15,9 @@
   let lobbyCode: string | null = null;
 
   let lobby: Lobby | undefined = undefined;
-  // in case we want to unsub from lobby
   let unsubscribeLobby: Unsubscribe | undefined = undefined;
 
   let privatePlayer: PrivatePlayer | undefined = undefined;
-  // in case we want to unsub from lobby
   let unsubscribePrivatePlayer: Unsubscribe | undefined = undefined;
 
   onMount(async () => {
@@ -60,7 +58,7 @@
       lobby = doc.data();
     });
 
-    // We want them to subscribe to the privatPlayer on mount
+    // We want them to subscribe to the privatePlayer on mount
     unsubscribePrivatePlayer = onSnapshot(privatePlayerDocRef, (doc) => {
       // will change privatePlayer to the new doc data
       privatePlayer = doc.data();
@@ -86,7 +84,7 @@
 <!-- So the code was displaying undefined in the Lobby Component -->
 <!-- We could have a loading animation until the lobby is not undefined -->
 <div>
-  {#if $user == undefined || lobby == undefined || lobbyCode == null}
+  {#if $user == null || lobby == undefined || lobbyCode == null}
     Loading... <!-- TODO: make a Nice Loading spinner -->
   {:else if lobby.state === "WAIT"}
     <LobbyComponent {lobbyCode} {lobby} />

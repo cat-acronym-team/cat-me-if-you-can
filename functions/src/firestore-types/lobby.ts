@@ -68,7 +68,7 @@ export type PrivatePlayer = {
   /**
    * the prompt that the user will be shown (this varies on the role)
    */
-  prompt: string;
+  prompt?: string;
 };
 
 /**

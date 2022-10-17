@@ -2,7 +2,7 @@
   import { getPromptAnswerCollection } from "$lib/firebase/firestore-collections";
   import { doc, setDoc } from "firebase/firestore";
 
-  export let prompt: string;
+  export let prompt: string | undefined;
 
   export let uid: string;
 
@@ -10,7 +10,7 @@
 
   let answer = "";
 
-  $: anserDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
+  $: answerDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
 
   $: error = getErrorMessage(answer);
 
@@ -19,10 +19,6 @@
 
     if (trimmed.length === 0) {
       return "Please enter an answer";
-    }
-
-    if (trimmed.length < 3) {
-      return "Your answer must be at least 3 characters";
     }
 
     if (trimmed.length > 50) {
@@ -35,12 +31,12 @@
       return;
     }
 
-    setDoc(anserDoc, { answer });
+    setDoc(answerDoc, { answer });
   }
 </script>
 
 <form class="wraper" on:submit|preventDefault={submitAnswer}>
-  <label class="question" for="prompt-answer">{prompt}</label>
+  <label class="question" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
 
   <div class="input">
     <input id="prompt-answer" type="text" bind:value={answer} />
