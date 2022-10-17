@@ -4,7 +4,6 @@ import { auth } from "./app";
 import { loginAnonymous } from "./auth";
 
 export async function createLobby(): Promise<string> {
-  const code = await createCode(); // Creates lobby code
   let user = auth.currentUser?.uid;
 
   if (user == undefined) {
@@ -12,6 +11,7 @@ export async function createLobby(): Promise<string> {
   }
 
   for (let index = 0; index < 5; index++) {
+    const code = createCode(); // Creates lobby code
     try {
       await setDoc(doc(lobbyCollection, code), {
         uids: [user.toString()],
@@ -35,7 +35,7 @@ export async function createLobby(): Promise<string> {
 
 const characters = "abcdefghijklmnopqrstuvwxyz";
 
-async function createCode() {
+function createCode() {
   let code = "";
   const charactersLength = characters.length;
 
