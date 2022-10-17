@@ -1,5 +1,5 @@
 import * as functions from "firebase-functions";
-import { isChangeAvatarData } from "./function-types/avatar";
+import { isChangeAvatarData } from "./functions-types/avatar";
 import { lobbyCollection } from "./firestore-collections";
 import { db } from "./app";
 
