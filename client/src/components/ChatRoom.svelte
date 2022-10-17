@@ -8,7 +8,7 @@
     type ChatRoom,
     type Lobby,
   } from "$lib/firebase/firestore-types/lobby";
-  import { findChatRoom, findViewer } from "$lib/firebase/chat";
+  import { findChatRoom } from "$lib/firebase/chat";
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
   import type { User } from "firebase/auth";
   import type { UserData } from "../../../functions/src/firestore-types/users";
