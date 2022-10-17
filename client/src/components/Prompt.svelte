@@ -21,10 +21,6 @@
       return "Please enter an answer";
     }
 
-    if (trimmed.length < 3) {
-      return "Answer must be at least 3 characters";
-    }
-
     if (trimmed.length > 50) {
       return "Answer must be less than 50 characters";
     }
