@@ -25,6 +25,18 @@ describe("isLobbyRequest", () => {
     expect(isLobbyRequest(data)).to.be.false;
   });
 
+  it("should not allow if data is null", () => {
+    const data = null;
+
+    expect(isLobbyRequest(data)).to.be.false;
+  });
+
+  it("should not allow if data is undefined", () => {
+    const data = undefined;
+
+    expect(isLobbyRequest(data)).to.be.false;
+  });
+
   it("should not allow if data is a string", () => {
     const data = "123456";
 
