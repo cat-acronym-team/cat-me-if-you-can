@@ -9,6 +9,7 @@
   let userData: UserData | undefined;
   // check if the user is logged in with getAuth
   let name: string = "";
+  let errorMessage: string = "";
 
   // update user once auth store changes
   $: user = $authStore;
@@ -31,24 +32,26 @@
   }
 
   const createLobbyHandler = async () => {
-    if (name === "") {
-      return;
+    try {
+      // Create User
+      await saveOrCreate(user, userData, name);
+      // Create Lobby
+      const code = await createLobby(name);
+      // go to game page
+      goto("/game?code=" + code);
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
     }
-    // Create User
-    await saveOrCreate(user, userData, name);
-    // Create Lobby
-    const code = await createLobby(name);
-    // Go to game page
-    goto("/game?code=" + code);
   };
   const joinLobbyHandler = async () => {
-    if (name === "") {
-      return;
+    try {
+      // Create User
+      await saveOrCreate(user, userData, name);
+      // go to join page
+      goto("/join");
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
     }
-    // Create User
-    await saveOrCreate(user, userData, name);
-    // go to join page
-    goto("/join");
   };
 </script>
 
@@ -64,14 +67,20 @@
       <img src="https://picsum.photos/500/300" alt="our logo" />
     </div>
     <div class="cat-main-buttons">
+      {#if errorMessage !== ""}
+        <p class="error">{errorMessage}</p>
+      {/if}
       <input type="text" placeholder="Enter in your display name" bind:value={name} />
-      <button on:click={createLobbyHandler}>Create Lobby</button>
-      <button on:click={joinLobbyHandler}>Join Lobby</button>
+      <button on:click={createLobbyHandler} disabled={name === ""}>Create Lobby</button>
+      <button on:click={joinLobbyHandler} disabled={name === ""}>Join Lobby</button>
     </div>
   </div>
 </main>
 
 <style>
+  .error {
+    color: salmon;
+  }
   /* Phone Styles */
   .cat-main-header {
     width: 100%;

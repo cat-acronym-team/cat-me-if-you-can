@@ -12,25 +12,20 @@
 
   let name: string = "";
   let userData: UserData | undefined;
-  let error = {
-    status: false,
-    message: "",
-  };
-  let code: string;
+  let errorMessage: string = "";
+  let queryCode: string | null;
+  let code: string = "";
 
   // Checks to see if the join page has the code query paramter
   onMount(async () => {
     if ("errorMessage" in history.state) {
-      const { errorMessage } = history.state;
-      error = {
-        status: true,
-        message: errorMessage,
-      };
+      const { errorMessage: stateError } = history.state;
+      errorMessage = stateError;
       // do this to remove the errorMessage property in state
       goto("/join", { replaceState: true });
     }
     // gets code from url search
-    const queryCode = $page.url.searchParams.get("code");
+    queryCode = $page.url.searchParams.get("code");
 
     // sets it the code var for two way binding
     if (queryCode !== null) {
@@ -38,10 +33,10 @@
     }
   });
   const joinLobby = async () => {
-    await saveOrCreate($user, userData, name);
-    // get the current user info
-    const { displayName, avatar } = (await getUser(($user as User).uid)) as UserData;
     try {
+      await saveOrCreate($user, userData, name);
+      // get the current user info
+      const { displayName, avatar } = (await getUser(($user as User).uid)) as UserData;
       // enter lobby with the user's info
       await findAndJoinLobby(code, {
         displayName,
@@ -52,11 +47,12 @@
       goto(`/game?code=${code}`);
     } catch (err) {
       // if the lobby doesn't exist then error is thrown
-      error = {
-        status: true,
-        message: err instanceof Error ? err.message : String(err),
-      };
-      code = "";
+      errorMessage = err instanceof Error ? err.message : String(err);
+      // this checks if the query code is set
+      // fixes the issue of the code going empty after an error
+      if (queryCode === undefined) {
+        code = "";
+      }
     }
   };
 
@@ -85,13 +81,13 @@
 </nav>
 <div class="cat-join-container">
   <h2>Join Lobby!</h2>
-  {#if error.status}
-    <p style="color:red;">{error.message}</p>
+  {#if errorMessage !== ""}
+    <p style="color:red;">{errorMessage}</p>
   {/if}
   <form on:submit|preventDefault={joinLobby}>
     <input type="text" placeholder="Enter in your display name" bind:value={name} />
     <input bind:value={code} />
-    <button type="submit" placeholder="Enter the lobby code">Join</button>
+    <button type="submit" placeholder="Enter the lobby code" disabled={name === "" || code === ""}>Join</button>
   </form>
 </div>
 
