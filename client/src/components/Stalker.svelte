@@ -8,7 +8,7 @@
   export let lobby: Lobby;
   export let lobbyCode: string;
 
-  let chatrooms: ChatRoom[];
+  let chatrooms: ChatRoom[] = [];
 
   onMount(async () => {
     const chatSnapshot = await getDocs(getChatRoomCollection(lobbyCode));
