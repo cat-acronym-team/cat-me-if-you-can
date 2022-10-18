@@ -2,7 +2,7 @@ import { firestore } from "firebase-admin";
 import * as functions from "firebase-functions";
 import { getChatRoomCollection, getChatRoomMessagesCollection, lobbyCollection } from "./firestore-collections";
 import { isChatRequest, isLobbyRequest } from "./firestore-functions-types";
-import { chatMessageValidator, ChatRoom } from "./firestore-types/lobby";
+import { chatMessageValidator, ChatRoom, Lobby } from "./firestore-types/lobby";
 
 export const addChatMessage = functions.https.onCall(async (data: unknown, context) => {
   if (!context.auth) {
@@ -51,6 +51,11 @@ export const deleteChatRooms = functions.https.onCall(async (data: unknown, cont
   const lobbyData = await lobby.get();
   if (!lobbyData.exists) {
     return { error: "Lobby doesn't exist!" };
+  }
+  // only allow the request coming from host to delete the chatrooms
+  const { uids } = lobbyData.data() as Lobby;
+  if (context.auth.uid !== uids[0]) {
+    return { error: "Not allowed to delete chatrooms" };
   }
   // delete all chatrooms
   const chatRooms = await getChatRoomCollection(lobby).listDocuments();
