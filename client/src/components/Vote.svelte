@@ -11,18 +11,18 @@
   import { vote } from "$lib/firebase/vote";
   import { authStore as user } from "$stores/auth";
 
-  export let code: string;
-  export let lobbyData: Lobby;
+  export let lobbyCode: string;
+  export let lobby: Lobby;
 </script>
 
 <body>
   <p>Vote:</p>
   <div class="btn-group" style="width:100%">
-    {#each lobbyData.players as votees, i}
+    {#each lobby.players as votees, i}
       {#if i === 4}
         <div class="btn-group" style="width:100%" />
       {/if}
-      <button style="width:15%" on:click={() => vote(i, lobbyData, code, $user.uid)}>{votees.displayName}</button>
+      <button style="width:15%" on:click={() => vote(i, lobby, lobbyCode, $user.uid)}>{votees.displayName}</button>
     {/each}
   </div>
 </body>

@@ -9,6 +9,7 @@
   import { authStore as user } from "$stores/auth";
   import { goto } from "$app/navigation";
   import type { Unsubscribe } from "firebase/auth";
+  import VoteComponent from "$components/Vote.svelte";
 
   let lobbyCode: string | null = null;
 
@@ -90,6 +91,8 @@
     Loading... <!-- TODO: make a Nice Loading spinner -->
   {:else if lobby.state === "PROMPT"}
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
+  {:else if lobby.state === "VOTE"}
+    <VoteComponent {lobby} {lobbyCode} />
   {:else}
     unknown lobby state: {lobby.state}
   {/if}

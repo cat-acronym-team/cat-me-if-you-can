@@ -81,6 +81,12 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   if (lobby.state == "PROMPT" && oldLobby.state != "PROMPT") {
     await startPrompt(lobbyDocRef);
   }
+  /* if (lobby.state == "VOTE" && oldLobby.state != "VOTE") {
+    for (let i = 0; i < lobby.players.length; i++){
+      return lobby.players[i].set({
+        votes: 0 }, { merge: true });
+    }
+  } */
 });
 
 function startPrompt(lobbyDocRef: firestore.DocumentReference<Lobby>) {
