@@ -14,16 +14,16 @@ function getLobby(code: string) {
 export const getPrivatePlayer = async (code: string, id: string) => {
   const privatePlayer = await getDoc(doc(getPrivatePlayerCollection(getLobby(code)), id));
   return privatePlayer.data();
-}
+};
 
 export const getCurrentPlayer = async (code: string, id: string) => {
   const currentPlayer = await getDoc(doc(getPrivatePlayerCollection(getLobby(code)), id));
   return currentPlayer.data();
-}
+};
 
 export const lobbyReturn = async (code: string) => {
   const lobbyData = await getLobbyData(code);
-  if(lobbyData !== undefined) {
-  lobbyData.state = "WAIT";
+  if (lobbyData !== undefined) {
+    lobbyData.state = "WAIT";
   }
-}
+};
