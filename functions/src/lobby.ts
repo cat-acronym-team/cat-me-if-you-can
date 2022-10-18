@@ -82,7 +82,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context) => {
 
     // add player
     return transaction.update(lobby, {
-      players: [...players, { ...userInfo, alive: true }],
+      players: [...players, { displayName: userInfo.displayName, avatar: userInfo.avatar, alive: true }],
       uids: [...uids, auth.uid],
     });
   });
