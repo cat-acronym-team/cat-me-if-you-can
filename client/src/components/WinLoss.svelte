@@ -2,48 +2,46 @@
   import { authStore as user } from "$stores/auth";
   import type { PrivatePlayer, Lobby } from "../../../functions/src/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { getCurrentPlayer, getLobbyData, getPrivatePlayer, lobbyReturn } from "$lib/firebase/winloss";
+  import { getPrivatePlayer, lobbyReturn } from "$lib/firebase/winloss";
 
   export let lobbyCode: string;
-  let lobbyData: Lobby | undefined;
-  let currentRole: PrivatePlayer | undefined;
+  export let privatePlayer: PrivatePlayer | undefined;
+  export let lobby: Lobby | undefined;
   let lobbyRoles: PrivatePlayer | undefined;
 
   let end: "Cat Win" | "Cat Lose" | "Catfish Lose" | "Catfish Win" | null = null;
-  let catfishDisplayname:string[] = []; // catfish's dislplay name used in the html lobbyCode
-  let catfishList:string = "";
+  let catfishDisplayname: string[] = []; // catfish's dislplay name used in the html lobbyCode
+  let catfishList: string = "";
+  let catfishCounter = 0;
 
-  onMount (async () => {
-    lobbyData = await getLobbyData(lobbyCode);
-
-    let aliveCount = 0;
+  onMount(async () => {
     let aliveCatCount = 0;
     // function to count the number of players currently alive
-    if (lobbyData !== undefined) {
-      for (let i = 0; i < lobbyData.uids.length; i++) {
-        if (lobbyData.players[i].alive == true) {
-          aliveCount++;
+    if (lobby !== undefined) {
+      for (let i = 0; i < lobby.uids.length; i++) {
+        if (lobby.players[i].alive == true) {
           // count the number of remaining players who are alive
-          lobbyRoles = await getPrivatePlayer(lobbyCode, lobbyData.uids[i]);
+          lobbyRoles = await getPrivatePlayer(lobbyCode, lobby.uids[i]);
           if (lobbyRoles !== undefined) {
             if (lobbyRoles.role == "CAT") {
               aliveCatCount++;
               // within the alive players, count the number that are cats
             } else {
-              catfishDisplayname[i] = lobbyData.players[i].displayName; // create a list of catfishes
+              catfishDisplayname[catfishCounter] = lobby.players[i].displayName; // create a list of catfishes
+              catfishCounter++;
             }
           }
         }
       }
     }
-    let aliveCatFishCount = aliveCount - aliveCatCount;
-    catfishList = [catfishDisplayname.slice(0, -1).join(', '), catfishDisplayname.slice(-1)[0]].join(catfishDisplayname.length < 2 ? '' : ' and ');
+    let aliveCatFishCount = catfishCounter + 1;
+    const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
+    catfishList = formatter.format(catfishDisplayname);
     // any other player who is alive and not a cat is a catfish
     if ($user !== null) {
-        currentRole = await getCurrentPlayer(lobbyCode, $user.uid); // grab the current user's role
       // set conditions for the game to be declared a win or loss
-      if(currentRole !== undefined) {
-        if (currentRole.role == "CAT") {
+      if (privatePlayer !== undefined) {
+        if (privatePlayer.role == "CAT") {
           if (aliveCatFishCount == 0) {
             end = "Cat Win";
           } else if (aliveCatCount == aliveCatFishCount) {
@@ -58,7 +56,7 @@
         }
       }
     }
-  } )
+  });
 </script>
 
 <div class="container">
@@ -73,12 +71,13 @@
 
     <div class="displayname">
       {#if catfishDisplayname.length > 1}
-      <h2>{catfishList} were sentenced to 9 lives in purrison!</h2>
+        <h2>{catfishList} were sentenced to 9 lives in purrison!</h2>
       {:else}
-      <h2>{catfishList} was sentenced to 9 lives in purrison!</h2>
+        <h2>{catfishList} was sentenced to 9 lives in purrison!</h2>
       {/if}
-      {#if lobbyData !== undefined}
-      <button on:click={()=>lobbyReturn(lobbyCode)}>Return to Lobby</button>
+      {#if lobby !== undefined}
+        <button on:click={() => lobbyReturn(lobbyCode)}>Return to Lobby</button>
+        <!-- TODO: invoke function properly -->
       {/if}
     </div>
   {:else if (end = "Cat Lose")}
@@ -91,7 +90,7 @@
 
     <div class="displayname">
       <h2>{catfishList} has taken over the litter!</h2>
-      <button on:click={()=>lobbyReturn(lobbyCode)}>>Return to Lobby</button>
+      <button on:click={() => lobbyReturn(lobbyCode)}>>Return to Lobby</button>
     </div>
   {:else if (end = "Catfish Win")}
     <div class="banner">
@@ -103,7 +102,7 @@
 
     <div class="displayname">
       <h2>You have successfully taken over the litter!</h2>
-      <button on:click={()=>lobbyReturn(lobbyCode)}>Return to Lobby</button>
+      <button on:click={() => lobbyReturn(lobbyCode)}>Return to Lobby</button>
     </div>
   {:else if (end = "Catfish Lose")}
     <div class="banner">
@@ -115,7 +114,7 @@
 
     <div class="displayname">
       <h2>You should go back to your sea ani-anim-aneme... home</h2>
-      <button on:click={()=>lobbyReturn}>Return to Lobby</button>
+      <button on:click={() => lobbyReturn}>Return to Lobby</button>
     </div>
   {/if}
 </div>

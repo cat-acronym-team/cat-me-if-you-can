@@ -93,7 +93,7 @@
   {:else if lobby.state === "PROMPT"}
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
   {:else if lobby.state === "END"}
-    <WinLoss {lobbyCode} />
+    <WinLoss {lobbyCode} {lobby} {privatePlayer} />
   {:else}
     unknown lobby state: {lobby.state}
   {/if}

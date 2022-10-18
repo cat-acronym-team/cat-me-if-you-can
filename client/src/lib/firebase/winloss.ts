@@ -1,4 +1,4 @@
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { getPrivatePlayerCollection, lobbyCollection } from "./firestore-collections";
 
 export const getLobbyData = async (code: string) => {
@@ -22,8 +22,9 @@ export const getCurrentPlayer = async (code: string, id: string) => {
 };
 
 export const lobbyReturn = async (code: string) => {
-  const lobbyData = await getLobbyData(code);
-  if (lobbyData !== undefined) {
-    lobbyData.state = "WAIT";
-  }
+  await setDoc(doc(lobbyCollection, code), {
+    uids: [],
+    players: [],
+    state: "WAIT",
+  });
 };
