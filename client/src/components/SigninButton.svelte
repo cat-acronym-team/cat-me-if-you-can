@@ -15,8 +15,18 @@
     }
     if (email == "") {
       return;
-    } else await loginWithEmail(email, password);
-
+    } else
+      try {
+        await loginWithEmail(email, password);
+      } catch (err) {
+        let errorMessage: string;
+        if (err instanceof Error) {
+          errorMessage = err.message;
+        } else {
+          errorMessage = String(err);
+        }
+        console.error("Username or Password is invalid", errorMessage);
+      }
     openSignInModal = false;
     password = "";
     email = "";
