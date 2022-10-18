@@ -21,7 +21,3 @@ export function getChatRoomMessagesCollection(roomDoc: firestore.DocumentReferen
 export function getPromptAnswerCollection(lobbyDoc: DocumentReference<Lobby>): CollectionReference<PromptAnswer> {
   return lobbyDoc.collection("promptAnswers") as CollectionReference<PromptAnswer>;
 }
-
-export function getChatRoomCollection(lobbyDoc: DocumentReference<Lobby>): CollectionReference<ChatRoom> {
-  return lobbyDoc.collection("chatRooms") as CollectionReference<ChatRoom>;
-}

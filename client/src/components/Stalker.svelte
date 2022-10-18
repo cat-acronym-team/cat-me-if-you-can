@@ -1,22 +1,19 @@
 <script lang="ts">
   import type { ChatRoom, Lobby } from "$lib/firebase/firestore-types/lobby";
   import { stalkChatroom } from "$lib/firebase/firestore-functions";
-  export let lobby: Lobby;
+  import { getChatRoomCollection } from "$lib/firebase/firestore-collections";
+  import { getDocs } from "firebase/firestore";
+  import { onMount } from "svelte/types/runtime/internal/lifecycle";
 
-  const chatrooms: ChatRoom[] = [
-    {
-      pair: ["player1", "player3"],
-      viewers: ["monkey"],
-    },
-    {
-      pair: ["player5", "player2"],
-      viewers: ["gorilla"],
-    },
-    {
-      pair: ["player4", "player6"],
-      viewers: ["ape"],
-    },
-  ];
+  export let lobby: Lobby;
+  export let lobbyCode: string;
+
+  let chatrooms: ChatRoom[];
+
+  onMount(async () => {
+    const chatSnapshot = await getDocs(getChatRoomCollection(lobbyCode));
+    chatrooms = chatSnapshot.docs.map((room) => room.data());
+  });
 
   /**
    * takes uid of single user, then uses the index of uid to find and return display name
@@ -30,12 +27,14 @@
 
 <div class="container">
   <h1>Stalk a chat:</h1>
-  {#each chatrooms as chatroom}
-    <!-- add onClickChat function created in script which uses stalkChatroom function -->
-    <button class="chatRoom">
-      <span class="pair">{findDisplayName(chatroom.pair[0]) + " & " + findDisplayName(chatroom.pair[1])}</span>
-    </button><br />
-  {/each}
+  {#if chatrooms != undefined}
+    {#each chatrooms as chatroom}
+      <!-- add onClickChat function created in script which uses stalkChatroom function -->
+      <button class="chatRoom">
+        <span class="pair">{findDisplayName(chatroom.pair[0]) + " & " + findDisplayName(chatroom.pair[1])}</span>
+      </button><br />
+    {/each}
+  {/if}
 </div>
 
 <style>
