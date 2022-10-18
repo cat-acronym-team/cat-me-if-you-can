@@ -2,6 +2,9 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /lobbies/{code} {
+      function isHost(){
+        return request.auth.uid == resource.data.uids[0];
+      }
       allow get: if true;
 
       allow write: if true; // TODO: make an actual rule
@@ -34,6 +37,7 @@ service cloud.firestore {
         // firestore didn't like me using the above function for chatroom
         // I think its because the info is in the resource object
         allow read: if request.auth.uid in resource.data.pair || request.auth.uid in resource.data.viewers ;
+        allow delete: if isHost();
         match /chatMessages/{messageId}{
           allow read: if canRead();
           allow write: if isPair();
