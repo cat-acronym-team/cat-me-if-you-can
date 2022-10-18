@@ -33,7 +33,7 @@
 <div class="grid">
   {#each avatarChoices as { avatar, displayName }}
     <button class="avatar" on:click={() => selectAvatar(avatar)}>
-      <img src="/avatars/{1}.webp" alt="cat picture {avatar}" />
+      <img src="/avatars/{avatar}.webp" alt="cat picture {avatar}" />
       <span class="name">{displayName ?? ""}</span>
     </button>
   {/each}
