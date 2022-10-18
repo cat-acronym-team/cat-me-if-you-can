@@ -166,8 +166,7 @@ export const collectPromptAnswers = functions.firestore
       }
 
       transaction.update(lobbyDocRef, { state: "CHAT" });
-
-      functions.logger.log(promptAnswers);
+      
       // TODO: check if we have a stalker
       const { pairs } = generatePairs(lobbyData);
       // create a chatroom for each pair

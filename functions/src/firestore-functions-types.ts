@@ -20,3 +20,8 @@ export function isChatRequest(data: unknown): data is ChatRequest {
     typeof (data as ChatRequest).message === "string"
   );
 }
+
+export type GeneratedPairs = {
+  pairs: { one: string; two: string }[];
+  stalker?: string;
+};
