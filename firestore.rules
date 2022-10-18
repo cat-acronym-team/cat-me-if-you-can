@@ -1,26 +1,59 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if
-          request.time < timestamp.date(2022, 10, 20);
-    }
-    match /users/{userId} {
-       function validateAttrs(){
-        return (
-      		  request.resource.data.keys().hasOnly(['displayName', 'avatar']) &&
-        request.resource.data.displayName is string && request.resource.data.displayName.trim().size() >= 3 && request.resource.data.displayName.trim().size() <= 15 &&
-        // TODO: finish display name regex
-        // request.resource.data.displayName.match('/[0-9A-Za-z_-]/')
-        request.resource.data.avatar is number && request.resource.data.avatar >= 0 && request.resource.data.avatar <=12
-        );
-      }
-        // // only allows the itself to write to the document
-        // allow write: if request.auth.uid == userId;
-        // // allows anyone to read that information
-        // allow read;
+    match /lobbies/{code} {
+      allow get: if true;
 
-        allow create: if request.auth.uid == userId && validateAttrs();
+      allow write: if true; // TODO: make an actual rule
+
+      match /privatePlayers/{uid} {
+        allow get: if request.auth.uid == uid;
+      }
+
+      match /promptAnswers/{uid} {
+        function validAnswer() {
+          return request.resource.data.answer is string
+            && 0 < request.resource.data.answer.size() && request.resource.data.answer.size() <= 50
+            && request.resource.data.answer == request.resource.data.answer.trim();
+        }
+
+        allow create: if request.auth.uid == uid && validAnswer() && request.resource.data.keys().hasOnly(['answer']);
+      }
+
+      match /chatRooms/{roomId} {
+        // functions to use in chatmessages
+        function roomData(){
+          return get(/databases/$(database)/documents/lobbies/$(code)/chatRooms/$(roomId)).data
+        }
+        function isPair(){
+          return request.auth.uid in roomData().pair 
+        }
+        function canRead(){
+          return isPair() || request.auth.uid in roomData().viewers ;
+        }
+        // firestore didn't like me using the above function for chatroom
+        // I think its because the info is in the resource object
+        allow read: if request.auth.uid in resource.data.pair || request.auth.uid in resource.data.viewers ;
+        match /chatMessages/{messageId}{
+          allow read: if canRead();
+          allow write: if isPair();
+        }
+      }
+    }
+
+    match /users/{userId} {
+      function validateAttrs(){
+        return request.resource.data.keys().hasOnly(['displayName', 'avatar'])
+          && request.resource.data.displayName is string && request.resource.data.displayName.trim().size() >= 3 
+          && request.resource.data.displayName.trim().size() <= 15 
+          && request.resource.data.displayName.matches('[A-Za-z0-9-_]+')
+          && request.resource.data.avatar is number && int(request.resource.data.avatar) == request.resource.data.avatar 
+          && request.resource.data.avatar >= 0 && request.resource.data.avatar <=12;
+      }
+
+      // allows anyone to read that information
+      allow read;
+      allow create, update: if request.auth.uid == userId && validateAttrs();
     }
   }
 }
