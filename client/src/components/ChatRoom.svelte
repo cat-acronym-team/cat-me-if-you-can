@@ -1,29 +1,30 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
-  import { onSnapshot, QueryDocumentSnapshot } from "firebase/firestore";
+  import { getDocs, onSnapshot, orderBy, query, QueryDocumentSnapshot } from "firebase/firestore";
   import {
     chatMessageValidator,
     type ChatMessage,
     type ChatRoom,
     type Lobby,
+    type Player,
   } from "$lib/firebase/firestore-types/lobby";
   import { findChatRoom } from "$lib/firebase/chat";
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
   import type { User } from "firebase/auth";
-  import type { UserData } from "../../../functions/src/firestore-types/users";
   import { addChatMessage, deleteChatRooms } from "$lib/firebase/firestore-functions";
   // props
   export let lobbyData: Lobby & { id: string };
   // variables
   let user = $authStore as User;
-  let userInfo: UserData;
-  let partnerInfo: UserData;
+  let userInfo: Player;
+  let partnerInfo: Player;
   let chatRoomInfo: QueryDocumentSnapshot<ChatRoom>;
   let chatMessages: ChatMessage[] = [];
-  let message: string = "";
   let timer: ReturnType<typeof setInterval>;
-  let countdown = 60;
+  let countdown: number = 60;
+  let end = Date.now() + 60000;
+  let message: string = "";
   let error = {
     status: false,
     message: "",
@@ -33,9 +34,12 @@
     // Query for their chatroom
     chatRoomInfo = await findChatRoom(lobbyData.id, user.uid);
     // subscribe the chat messages
-    onSnapshot(getChatRoomMessagesCollection(lobbyData.id, chatRoomInfo.id), (collection) => {
-      chatMessages = collection.docs.map((doc) => doc.data()).sort((a, b) => a.timestamp.seconds - b.timestamp.seconds);
-    });
+    onSnapshot(
+      query(getChatRoomMessagesCollection(lobbyData.id, chatRoomInfo.id), orderBy("timestamp", "asc")),
+      async (collection) => {
+        chatMessages = collection.docs.map((message) => message.data());
+      }
+    );
     // Get userInfo
     userInfo = lobbyData.players[lobbyData.uids.indexOf(user.uid)];
     // Get partnerInfo
@@ -45,8 +49,9 @@
     partnerInfo = lobbyData.players[lobbyData.uids.indexOf(partner)];
     // create timer
     timer = setInterval(() => {
-      countdown -= 1;
-    }, 1000);
+      const diff = Math.floor((end - Date.now()) / 1000);
+      countdown = diff;
+    }, 500);
   });
   onDestroy(() => {
     clearInterval(timer);
@@ -88,19 +93,17 @@
     <div>MATCHED WITH {partnerInfo.displayName.toUpperCase()}</div>
   {/if}
   <div class="messages">
-    {#if chatMessages.length > 0}
-      {#each chatMessages as message}
-        {#if isUser(message.sender)}
-          <p class="user-msg">{message.text}</p>
-        {:else}
-          <p class="partner-msg">{message.text}</p>
-        {/if}
-      {/each}
-    {/if}
+    {#each chatMessages as message}
+      {#if isUser(message.sender)}
+        <p class="user-msg">{message.text}</p>
+      {:else}
+        <p class="partner-msg">{message.text}</p>
+      {/if}
+    {/each}
   </div>
   <form on:submit|preventDefault={submitMessage}>
     <input type="text" bind:value={message} />
-    <button type="submit">Send</button>
+    <button type="submit" disabled={message === ""}>Send</button>
     {#if error.status}
       <p class="error">{error.message}</p>
     {/if}

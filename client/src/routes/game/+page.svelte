@@ -3,6 +3,7 @@
   import LobbyComponent from "$components/Lobby.svelte";
   import Stalker from "$components/Stalker.svelte";
 
+  import ChatRoom from "$components/ChatRoom.svelte";
   import { onSnapshot, doc, getDoc } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
   import { getPrivatePlayerCollection, lobbyCollection } from "$lib/firebase/firestore-collections";
@@ -62,7 +63,7 @@
     // We want them to subscribe to the privatePlayer on mount
     unsubscribePrivatePlayer = onSnapshot(privatePlayerDocRef, (doc) => {
       // will change privatePlayer to the new doc data
-      privatePlayer = doc.data() as PrivatePlayer;
+      privatePlayer = doc.data();
     });
   });
 

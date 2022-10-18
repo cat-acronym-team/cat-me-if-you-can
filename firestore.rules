@@ -21,9 +21,22 @@ service cloud.firestore {
       }
 
       match /chatRooms/{roomId} {
-        allow read: if true;
+        // functions to use in chatmessages
+        function roomData(){
+          return get(/databases/$(database)/documents/lobbies/$(code)/chatRooms/$(roomId)).data
+        }
+        function isPair(){
+          return request.auth.uid in roomData().pair 
+        }
+        function canRead(){
+          return isPair() || request.auth.uid in roomData().viewers ;
+        }
+        // firestore didn't like me using the above function for chatroom
+        // I think its because the info is in the resource object
+        allow read: if request.auth.uid in resource.data.pair || request.auth.uid in resource.data.viewers ;
         match /chatMessages/{messageId}{
-          allow read: if true;
+          allow read: if canRead();
+          allow write: if isPair();
         }
       }
     }
