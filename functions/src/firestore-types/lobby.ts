@@ -1,6 +1,8 @@
 import type { Timestamp } from "firebase-admin/firestore";
 
-export type Avatar = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+export const avatars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
+
+export type Avatar = typeof avatars[number];
 
 export type Player = {
   /**

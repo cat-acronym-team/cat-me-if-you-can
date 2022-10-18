@@ -2,6 +2,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { lobbyCollection } from "./firestore-collections";
 import { auth } from "./app";
 import { loginAnonymous } from "./auth";
+import { avatars } from "./firestore-types/lobby";
 
 export async function createLobby(): Promise<string> {
   let user = auth.currentUser?.uid;
@@ -18,7 +19,7 @@ export async function createLobby(): Promise<string> {
         players: [
           {
             alive: true,
-            avatar: 1,
+            avatar: avatars[Math.floor(Math.random() * avatars.length)],
             displayName: "default",
           },
         ],
