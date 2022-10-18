@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PrivatePlayer } from "$lib/firebase/firestore-types/lobby";
   import { getPrivatePlayerCollection } from "$lib/firebase/firestore-collections";
-  import { doc, setDoc, getDoc } from "firebase/firestore";
+  import { doc, getDoc } from "firebase/firestore";
   import { lobbyCollection } from "$lib/firebase/firestore-collections";
   import { onMount } from "svelte";
   import { assignRole } from "$lib/firebase/role";
