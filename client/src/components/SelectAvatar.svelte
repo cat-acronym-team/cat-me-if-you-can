@@ -46,16 +46,17 @@
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    place-items: stretch;
+    grid-template-columns: repeat(4, auto);
+    grid-template-rows: repeat(3, auto);
+    place-content: center;
+    gap: 12px 24px;
     height: 100%;
   }
 
-  @media (max-width: 400px) {
+  @media (max-width: 600px) {
     .grid {
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(4, 1fr);
+      grid-template-columns: repeat(3, auto);
+      grid-template-rows: repeat(4, auto);
     }
   }
 
@@ -67,13 +68,13 @@
 
     display: grid;
     grid-template-rows: auto 16px;
-    place-content: center;
+    gap: 12px;
     place-items: center;
   }
 
   .avatar img {
-    height: 15vmin;
-    width: 15vmin;
+    height: 18vmin;
+    width: 18vmin;
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
