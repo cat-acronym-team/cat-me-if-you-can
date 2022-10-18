@@ -2,7 +2,7 @@
   import { authStore as user } from "$stores/auth";
   import type { PrivatePlayer, Lobby } from "../../../functions/src/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { getPrivatePlayer, lobbyReturn } from "$lib/firebase/winloss";
+  import { getPrivatePlayer, lobbyReturn } from "../../../functions/src/winloss";
 
   export let lobbyCode: string;
   export let privatePlayer: PrivatePlayer | undefined;
@@ -27,7 +27,9 @@
               aliveCatCount++;
               // within the alive players, count the number that are cats
             } else {
-              catfishDisplayname[catfishCounter] = lobby.players[i].displayName; // create a list of catfishes
+              let temp: string = "";
+              temp = lobby.players[i].displayName;
+              catfishDisplayname.push(temp);
               catfishCounter++;
             }
           }
@@ -76,8 +78,11 @@
         <h2>{catfishList} was sentenced to 9 lives in purrison!</h2>
       {/if}
       {#if lobby !== undefined}
-        <button on:click={() => lobbyReturn(lobbyCode)}>Return to Lobby</button>
-        <!-- TODO: invoke function properly -->
+        <button
+          on:click={async () => {
+            lobbyReturn(lobbyCode);
+          }}>Return to Lobby</button
+        >
       {/if}
     </div>
   {:else if (end = "Cat Lose")}
@@ -90,7 +95,11 @@
 
     <div class="displayname">
       <h2>{catfishList} has taken over the litter!</h2>
-      <button on:click={() => lobbyReturn(lobbyCode)}>>Return to Lobby</button>
+      <button
+        on:click={async () => {
+          lobbyReturn(lobbyCode);
+        }}>>Return to Lobby</button
+      >
     </div>
   {:else if (end = "Catfish Win")}
     <div class="banner">
@@ -102,7 +111,11 @@
 
     <div class="displayname">
       <h2>You have successfully taken over the litter!</h2>
-      <button on:click={() => lobbyReturn(lobbyCode)}>Return to Lobby</button>
+      <button
+        on:click={async () => {
+          lobbyReturn(lobbyCode);
+        }}>Return to Lobby</button
+      >
     </div>
   {:else if (end = "Catfish Lose")}
     <div class="banner">
@@ -114,7 +127,11 @@
 
     <div class="displayname">
       <h2>You should go back to your sea ani-anim-aneme... home</h2>
-      <button on:click={() => lobbyReturn}>Return to Lobby</button>
+      <button
+        on:click={async () => {
+          lobbyReturn(lobbyCode);
+        }}>Return to Lobby</button
+      >
     </div>
   {/if}
 </div>
