@@ -1,5 +1,6 @@
 <script lang="ts">
   import Prompt from "$components/Prompt.svelte";
+  import Role from "$components/ReceiveRole.svelte";
   import LobbyComponent from "$components/Lobby.svelte";
 
   import { onSnapshot, doc, getDoc } from "firebase/firestore";
@@ -91,6 +92,8 @@
     Loading... <!-- TODO: make a Nice Loading spinner -->
   {:else if lobby.state === "PROMPT"}
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
+  {:else if lobby.state === "ROLE"}
+    <Role {lobbyCode} />
   {:else}
     unknown lobby state: {lobby.state}
   {/if}

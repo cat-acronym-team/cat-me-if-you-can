@@ -7,12 +7,12 @@
   import { assignRole } from "$lib/firebase/role";
   import { authStore as user } from "$stores/auth";
 
-  export let code: string;
+  export let lobbyCode: string;
   let getRole: PrivatePlayer;
-
+  alert("Hello!");
   // Runs the assignRole function using the lobby to assign every user a role. Then pulls the current user's uid and their data.
   onMount(async () => {
-    const lobby = doc(lobbyCollection, code);
+    const lobby = doc(lobbyCollection, lobbyCode);
     await assignRole(lobby);
     if ($user !== null) {
       const getRoleDoc = await getDoc(doc(getPrivatePlayerCollection(lobby), $user.uid));
@@ -26,9 +26,9 @@
     <div class="header">Time to find your purrfect match!</div>
     <div class="role">
       {#if getRole.role == "CAT"}
-      You are a <span class = "green">{getRole.role}</span>
+        You are a <span class="green">{getRole.role}</span>
       {:else}
-      You are a <span class = "red">{getRole.role}</span>
+        You are a <span class="red">{getRole.role}</span>
       {/if}
 
       <p><i>Insert Image</i></p>

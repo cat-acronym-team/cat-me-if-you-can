@@ -22,7 +22,7 @@ export type Player = {
   votes?: number;
 };
 
-export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
+export type GameState = "WAIT" | "ROLE" | "PROMPT" | "CHAT" | "VOTE" | "END";
 
 /**
  * the type of documents `/lobbies/{code}`
