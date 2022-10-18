@@ -1,6 +1,7 @@
 <script lang="ts">
   import Prompt from "$components/Prompt.svelte";
   import LobbyComponent from "$components/Lobby.svelte";
+  import ChatRoom from "$components/ChatRoom.svelte";
   import { onSnapshot, doc, getDoc } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
   import { getPrivatePlayerCollection, lobbyCollection } from "$lib/firebase/firestore-collections";
@@ -9,7 +10,6 @@
   import { authStore as user } from "$stores/auth";
   import { goto } from "$app/navigation";
   import type { Unsubscribe } from "firebase/auth";
-    import ChatRoom from "$components/ChatRoom.svelte";
 
   let lobbyCode: string | null = null;
 
@@ -60,7 +60,7 @@
     // We want them to subscribe to the privatePlayer on mount
     unsubscribePrivatePlayer = onSnapshot(privatePlayerDocRef, (doc) => {
       // will change privatePlayer to the new doc data
-      privatePlayer = doc.data() as PrivatePlayer;
+      privatePlayer = doc.data();
     });
   });
 
