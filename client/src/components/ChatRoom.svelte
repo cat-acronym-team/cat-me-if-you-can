@@ -22,7 +22,7 @@
   let chatRoomInfo: QueryDocumentSnapshot<ChatRoom>;
   let chatMessages: ChatMessage[] = [];
   let timer: ReturnType<typeof setInterval>;
-  let countdown: number = 59;
+  let countdown: number = 60;
   let end = Date.now() + 60000;
   let message: string = "";
   let error = {
@@ -34,10 +34,12 @@
     // Query for their chatroom
     chatRoomInfo = await findChatRoom(lobbyData.id, user.uid);
     // subscribe the chat messages
-    onSnapshot(getChatRoomMessagesCollection(lobbyData.id, chatRoomInfo.id), async (collection) => {
-      const messages = await getDocs(query(collection.query, orderBy("timestamp", "asc")));
-      chatMessages = messages.docs.map((message) => message.data());
-    });
+    onSnapshot(
+      query(getChatRoomMessagesCollection(lobbyData.id, chatRoomInfo.id), orderBy("timestamp", "asc")),
+      async (collection) => {
+        chatMessages = collection.docs.map((message) => message.data());
+      }
+    );
     // Get userInfo
     userInfo = lobbyData.players[lobbyData.uids.indexOf(user.uid)];
     // Get partnerInfo
@@ -49,7 +51,7 @@
     timer = setInterval(() => {
       const diff = Math.floor((end - Date.now()) / 1000);
       countdown = diff;
-    }, 1000);
+    }, 500);
   });
   onDestroy(() => {
     clearInterval(timer);
