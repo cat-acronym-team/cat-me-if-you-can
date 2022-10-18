@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ChatRoom, Lobby } from "$lib/firebase/firestore-types/lobby";
-
+  import { stalkChatroom } from "$lib/firebase/firestore-functions";
   export let lobby: Lobby;
 
   const chatrooms: ChatRoom[] = [
@@ -24,11 +24,14 @@
   function findDisplayName(uid: string): string {
     return lobby.players[lobby.uids.indexOf(uid)].displayName;
   }
+
+  // function onClickChat()
 </script>
 
 <div class="container">
   <h1>Stalk a chat:</h1>
   {#each chatrooms as chatroom}
+    <!-- add onClickChat function created in script which uses stalkChatroom function -->
     <button class="chatRoom">
       <span class="pair">{findDisplayName(chatroom.pair[0]) + " & " + findDisplayName(chatroom.pair[1])}</span>
     </button><br />
