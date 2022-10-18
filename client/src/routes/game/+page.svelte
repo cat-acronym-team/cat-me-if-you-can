@@ -1,5 +1,6 @@
 <script lang="ts">
   import LobbyComponent from "$components/Lobby.svelte";
+  import VoteComponent from "$components/Vote.svelte";
   import { onSnapshot, doc, getDoc } from "firebase/firestore";
   import { onMount } from "svelte";
   import { lobbyCollection } from "$lib/firebase/firestore-collections";
@@ -63,6 +64,8 @@
       <LobbyComponent {code} players={lobbyData.players} />
     {:else if lobbyData.state === "PROMPT"}
       <p>PROPMPT PAGE</p>
+    {:else if lobbyData.state === "VOTE"}
+      <VoteComponent {lobbyData} {code} />
     {/if}
   </div>
 {/if}
