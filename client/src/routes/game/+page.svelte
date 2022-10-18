@@ -12,7 +12,6 @@
   import { authStore as user } from "$stores/auth";
   import { goto } from "$app/navigation";
   import type { Unsubscribe } from "firebase/auth";
-  import ChatRoom from "$components/ChatRoom.svelte";
 
   let lobbyCode: string | null = null;
 
@@ -95,7 +94,7 @@
   {:else if lobby.state === "PROMPT"}
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
   {:else if lobby.state === "CHAT" && privatePlayer.stalker === true}
-    <Stalker {lobby} />
+    <Stalker {lobby} {lobbyCode} />
   {:else if lobby.state === "CHAT"}
     <ChatRoom lobbyData={{ ...lobby, id: lobbyCode }} />
   {:else}
