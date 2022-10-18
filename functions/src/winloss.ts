@@ -1,4 +1,4 @@
-import { doc, updateDoc, getDoc } from "../../client/node_modules/@firebase/firestore";
+import { doc, updateDoc, getDoc } from "../../client/node_modules/firebase/firestore";
 import { getPrivatePlayerCollection, lobbyCollection } from "../../client/src/lib/firebase/firestore-collections";
 
 export const lobbyReturn = async (code: string) => {
