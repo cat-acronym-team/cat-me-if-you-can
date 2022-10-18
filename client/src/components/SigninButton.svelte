@@ -2,6 +2,7 @@
   import Modal from "./Modal.svelte";
   import { authStore as user } from "$stores/auth";
   import { loginWithGoogle, loginWithMicrosoft, loginWithEmail, onSignOut } from "$lib/firebase/auth";
+  import { error } from "@sveltejs/kit";
 
   // check if the user is logged in with getAuth
   let openSignInModal = false;
@@ -14,13 +15,13 @@
     }
     if (email == "") {
       return;
-    }
-    await loginWithEmail(email, password);
+    } else await loginWithEmail(email, password);
+
     openSignInModal = false;
     password = "";
     email = "";
   }
-  function clickedEmailButton() {
+  function signInWithEmailAndPassword() {
     clickedButton = !clickedButton;
   }
   async function googleLogin() {
@@ -53,7 +54,7 @@
       </button>
     </div>
     <div class="email">
-      <button on:click={clickedEmailButton}>Sign In</button>
+      <button on:click={signInWithEmailAndPassword}>Sign In</button>
       {#if clickedButton}
         <form class="formContainer" on:submit|preventDefault={submitLogin}>
           <div class="groupContainer">
@@ -92,7 +93,7 @@
       <!-- TODO: Account Hover Links -->
       <!-- <a href="/settings">Account Settings</a>
         <a href="/stats">Stats</a> -->
-      <a href="" on:click={onSignOut}>Logout</a>
+      <button class="signOut" on:click={onSignOut}>Logout</button>
     </div>
   {/if}
 </div>
@@ -112,6 +113,9 @@
     background-repeat: no-repeat;
   } */
 
+  .signOut:hover {
+    cursor: pointer;
+  }
   .account-container {
     position: relative;
     display: inline-block;
