@@ -31,7 +31,7 @@
     findUser();
   }
 
-  const createLobbyHandler = async () => {
+  async function createLobbyHandler() {
     try {
       // Create User
       await saveOrCreate(user, userData, name);
@@ -42,8 +42,8 @@
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : String(err);
     }
-  };
-  const joinLobbyHandler = async () => {
+  }
+  async function joinLobbyHandler() {
     try {
       // Create User
       await saveOrCreate(user, userData, name);
@@ -52,7 +52,7 @@
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : String(err);
     }
-  };
+  }
 </script>
 
 <header class="cat-main-header">

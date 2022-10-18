@@ -32,7 +32,7 @@
       code = queryCode;
     }
   });
-  const joinLobby = async () => {
+  async function joinLobby() {
     try {
       await saveOrCreate($user, userData, name);
       // get the current user info
@@ -54,7 +54,7 @@
         code = "";
       }
     }
-  };
+  }
 
   // this function will find user if the auth isnt null
   async function findUser() {

@@ -39,17 +39,17 @@ export async function saveOrCreate(user: User | null, userData: UserData | undef
 //  - displayName
 //  - avatar
 // get display name function to autofill the name input text
-export const getUser = async (id: string) => {
+export async function getUser(id: string) {
   const user = await getDoc(doc(userCollection, id));
   return user.data();
-};
+}
 // allow user to changing after every keystroke
-export const saveDisplayName = async (id: string, name: string) => {
+export async function saveDisplayName(id: string, name: string) {
   const user = doc(userCollection, id);
   await updateDoc(user, {
     displayName: name,
   });
-};
+}
 
 // create user document for anon user
 export const createUser = async (uid: string, name: string) => {
