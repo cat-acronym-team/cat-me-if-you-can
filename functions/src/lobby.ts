@@ -7,7 +7,7 @@ import {
   lobbyCollection,
   userCollection,
 } from "./firestore-collections";
-import { Lobby } from "./firestore-types/lobby";
+import { avatars, Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { isLobbyRequest } from "./firestore-functions-types";
 import { getRandomPromptPair } from "./prompts";
@@ -40,40 +40,51 @@ export const startGame = functions.https.onCall(async (data: unknown, context) =
   return lobbyCollection.doc(data.code).update({ state: "PROMPT" });
 });
 
-export const joinLobby = functions.https.onCall(async (data: unknown, context) => {
+export const joinLobby = functions.https.onCall((data: unknown, context) => {
+  const auth = context.auth;
   // no auth then you shouldn't be here
-  if (context.auth === undefined) {
+  if (auth === undefined) {
     return { error: "Not Signed In" };
   }
   // validate code
   if (!isLobbyRequest(data)) {
     return { error: "Invalid lobby code!" };
   }
-  // lobby doc
-  const lobby = lobbyCollection.doc(data.code);
-  const lobbyInfo = await lobby.get();
-  // extra validation to make sure it exist
-  if (lobbyInfo.exists === false) {
-    return { error: "Lobby doesn't exist!" };
-  }
-  // user doc
-  const user = await userCollection.doc(context.auth.uid).get();
-  // make sure this user has a doc with a displayName and avatar
-  if (user.exists === false) {
-    return { error: "You need to have a displayName and avatar!" };
-  }
-  // user data
-  const userInfo = user.data() as UserData;
 
-  // get lobby data
-  const { players, uids } = lobbyInfo.data() as Lobby;
-  if (uids.includes(context.auth.uid)) {
-    return { error: "You are already in the lobby!" };
-  }
-  // add player
-  return lobby.update({
-    players: [...players, { ...userInfo, alive: true }],
-    uids: [...uids, context.auth.uid],
+  return db.runTransaction(async (transaction) => {
+    // lobby doc
+    const lobby = lobbyCollection.doc(data.code);
+    const lobbyInfo = await transaction.get(lobby);
+    // extra validation to make sure it exist
+    if (lobbyInfo.exists === false) {
+      return { error: "Lobby doesn't exist!" };
+    }
+    // user doc
+    const user = await transaction.get(userCollection.doc(auth.uid));
+    // make sure this user has a doc with a displayName and avatar
+    if (user.exists === false) {
+      return { error: "You need to have a displayName and avatar!" };
+    }
+    // user data
+    const userInfo = user.data() as UserData;
+
+    // get lobby data
+    const { players, uids } = lobbyInfo.data() as Lobby;
+    if (uids.includes(auth.uid)) {
+      return { error: "You are already in the lobby!" };
+    }
+
+    // change avatar randomly if it is already taken
+    const takenAvatars = players.map((player) => player.avatar);
+    while (userInfo.avatar == 0 || takenAvatars.includes(userInfo.avatar)) {
+      userInfo.avatar = avatars[Math.floor(Math.random() * avatars.length)];
+    }
+
+    // add player
+    return transaction.update(lobby, {
+      players: [...players, { ...userInfo, alive: true }],
+      uids: [...uids, auth.uid],
+    });
   });
 });
 
