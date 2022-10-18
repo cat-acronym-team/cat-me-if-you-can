@@ -32,6 +32,11 @@ export const startGame = functions.https.onCall(async (data: unknown, context) =
     return { error: "Not allowed to start game!" };
   }
 
+  const privatePlayerCollection = getPrivatePlayerCollection(lobby.ref);
+  for (const uid of uids) {
+    privatePlayerCollection.doc(uid).create({ role: "CAT" });
+  }
+
   return lobbyCollection.doc(data.code).update({ state: "PROMPT" });
 });
 
