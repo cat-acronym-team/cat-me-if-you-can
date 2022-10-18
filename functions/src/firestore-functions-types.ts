@@ -19,3 +19,18 @@ export function isStalkChatroomRequest(data: unknown): data is StalkChatroomRequ
     typeof (data as StalkChatroomRequest).chatId === "string"
   );
 }
+
+export type ChatRequest = { code: string; roomId: string; message: string };
+
+export function isChatRequest(data: unknown): data is ChatRequest {
+  return (
+    data != null &&
+    typeof data === "object" &&
+    "code" in data &&
+    typeof (data as ChatRequest).code === "string" &&
+    "roomId" in data &&
+    typeof (data as ChatRequest).roomId === "string" &&
+    "message" in data &&
+    typeof (data as ChatRequest).message === "string"
+  );
+}

@@ -1,15 +1,18 @@
 import { firestore } from "firebase-admin";
 import * as functions from "firebase-functions";
-import { db } from "./app";
 import {
+  getChatRoomCollection,
+  getChatRoomMessagesCollection,
   getPrivatePlayerCollection,
   getPromptAnswerCollection,
   lobbyCollection,
   userCollection,
 } from "./firestore-collections";
+import { isLobbyRequest } from "./firestore-functions-types";
 import { Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
-import { isLobbyRequest } from "./firestore-functions-types";
+import { generatePairs } from "./util";
+import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 
 export const startGame = functions.https.onCall(async (data: unknown, context) => {
@@ -165,7 +168,25 @@ export const collectPromptAnswers = functions.firestore
       transaction.update(lobbyDocRef, { state: "CHAT" });
 
       functions.logger.log(promptAnswers);
-
-      // TODO #32 create a one on one chat and store the promptAnswers in it
+      // TODO: check if we have a stalker
+      const { pairs } = generatePairs(lobbyData);
+      // create a chatroom for each pair
+      pairs.forEach(async ({ one, two }) => {
+        const room = await getChatRoomCollection(lobbyDocRef).add({ pair: [one, two], viewers: [] });
+        // get answers of the pair
+        const oneAnswer = promptAnswers.get(one) as string;
+        const twoAnswer = promptAnswers.get(two) as string;
+        // place answers in chatMessages inside their room
+        await getChatRoomMessagesCollection(room).add({
+          sender: one,
+          text: oneAnswer,
+          timestamp: firestore.Timestamp.now(),
+        });
+        await getChatRoomMessagesCollection(room).add({
+          sender: two,
+          text: twoAnswer,
+          timestamp: firestore.Timestamp.now(),
+        });
+      });
     });
   });
