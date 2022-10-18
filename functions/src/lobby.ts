@@ -1,4 +1,4 @@
-import { firestore } from "firebase-admin";
+import { FieldValue, DocumentReference } from "firebase-admin/firestore";
 import * as functions from "firebase-functions";
 import { db } from "./app";
 import {
@@ -90,7 +90,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context) => {
 
 // TODO: replace with the correct trigger
 export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate(async (change, context) => {
-  const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
+  const lobbyDocRef = change.after.ref as DocumentReference<Lobby>;
   const lobby = change.after.data() as Lobby;
   const oldLobby = change.before.data() as Lobby;
 
@@ -99,7 +99,7 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   }
 });
 
-function startPrompt(lobbyDocRef: firestore.DocumentReference<Lobby>) {
+function startPrompt(lobbyDocRef: DocumentReference<Lobby>) {
   const [catPrompt, catfishPrompt] = getRandomPromptPair();
 
   const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
@@ -175,7 +175,9 @@ export const collectPromptAnswers = functions.firestore
       for (const promptAnswerDoc of promptAnswerDocs.docs) {
         promptAnswers.set(promptAnswerDoc.id, promptAnswerDoc.data().answer);
         transaction.delete(promptAnswerDoc.ref);
-        transaction.update(privatePlayerCollection.doc(promptAnswerDoc.id), { prompt: firestore.FieldValue.delete() });
+        console.log(FieldValue);
+
+        transaction.update(privatePlayerCollection.doc(promptAnswerDoc.id), { prompt: FieldValue.delete() });
       }
 
       transaction.update(lobbyDocRef, { state: "CHAT" });
