@@ -32,7 +32,7 @@ describe("displayNameValidator", () => {
 
     const expectedValidationResult = {
       valid: false,
-      reason: "Display name must be at least 3 characters long",
+      reason: "Display name must not be empty",
     };
 
     const actualValidationResult = displayNameValidator(name);
