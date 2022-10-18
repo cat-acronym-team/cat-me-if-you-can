@@ -1,7 +1,7 @@
 import { userCollection } from "./firestore-collections";
 import { doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
 import type { User } from "firebase/auth";
-import type { UserData } from "./firestore-types/users";
+import { displayNameValidator, type UserData } from "./firestore-types/users";
 import { loginAnonymous } from "$lib/firebase/auth";
 
 /*
@@ -14,6 +14,10 @@ import { loginAnonymous } from "$lib/firebase/auth";
     - just update their display name
 */
 export async function saveOrCreate(user: User | null, userData: UserData | undefined, name: string) {
+  const isValid = displayNameValidator(name);
+  if (!isValid.valid) {
+    throw new Error(isValid.reason);
+  }
   // this is an anon user
   // create anon user and user doc with display name
   if (user === null && userData === undefined) {

@@ -16,6 +16,9 @@ export type UserData = {
 };
 
 export function displayNameValidator(displayName: string): { valid: true } | { valid: false; reason: string } {
+  if (displayName === "") {
+    return { valid: false, reason: "Display name must not be empty" };
+  }
   if (displayName.length < 3) {
     return { valid: false, reason: "Display name must be at least 3 characters long" };
   }
