@@ -4,7 +4,7 @@ import { auth } from "./app";
 import { loginAnonymous } from "./auth";
 import { avatars } from "./firestore-types/lobby";
 
-export async function createLobby(): Promise<string> {
+export async function createLobby(name: string): Promise<string> {
   let user = auth.currentUser?.uid;
 
   if (user == undefined) {
@@ -20,7 +20,7 @@ export async function createLobby(): Promise<string> {
           {
             alive: true,
             avatar: avatars[Math.floor(Math.random() * avatars.length)],
-            displayName: "default",
+            displayName: name,
           },
         ],
         state: "WAIT",

@@ -37,7 +37,7 @@
     // Create User
     await saveOrCreate(user, userData, name);
     // Create Lobby
-    const code = await createLobby();
+    const code = await createLobby(name);
     // Go to game page
     goto("/game?code=" + code);
   };
