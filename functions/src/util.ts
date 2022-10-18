@@ -2,8 +2,8 @@ import { GeneratedPairs } from "./firestore-functions-types";
 import { Lobby } from "./firestore-types/lobby";
 
 export function generatePairs(lobbyData: Lobby): GeneratedPairs {
-  const pairs: { one: string; two: string }[] = [];
-  let pairOne, pairTwo;
+  const pairs: GeneratedPairs["pairs"] = [];
+  let pairOne: string, pairTwo: string;
   let stalker: string | undefined;
 
   // Check if the lobby is uneven to find stalker
