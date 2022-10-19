@@ -2,7 +2,7 @@
   import type { ChatRoom, Lobby } from "$lib/firebase/firestore-types/lobby";
   import { stalkChatroom } from "$lib/firebase/firestore-functions";
   import { getChatRoomCollection } from "$lib/firebase/firestore-collections";
-  import { getDocs, onSnapshot } from "firebase/firestore";
+  import { onSnapshot } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
   import type { Unsubscribe } from "firebase/auth";
 
@@ -11,19 +11,21 @@
 
   let unsubscribeChatrooms: Unsubscribe | undefined = undefined;
   let chatrooms: ChatRoom[] = [];
+  let chatroomsIds: string[] = [];
 
   onMount(async () => {
     const chatCollection = getChatRoomCollection(lobbyCode);
-
     unsubscribeChatrooms = onSnapshot(chatCollection, (chatSnapshot) => {
+      chatroomsIds = chatSnapshot.docs.map((room) => room.id);
       chatrooms = chatSnapshot.docs.map((room) => room.data());
     });
   });
 
   onDestroy(() => {
-    // unsub from lobby
+    // unsub from chatroom
     unsubscribeChatrooms?.();
   });
+
   /**
    * takes uid of single user, then uses the index of uid to find and return display name
    */
@@ -31,14 +33,18 @@
     return lobby.players[lobby.uids.indexOf(uid)].displayName;
   }
 
-  // function onClickChat()
+  // takes chatid to send a stalk chatroom request
+  function onClickChat(chatId: string) {
+    const stalkChatroomRequest = { code: lobbyCode, chatId: chatId };
+    stalkChatroom(stalkChatroomRequest);
+    return null;
+  }
 </script>
 
 <div class="container">
   <h1>Stalk a chat:</h1>
-  {#each chatrooms as chatroom}
-    <!-- add onClickChat function created in script which uses stalkChatroom function -->
-    <button class="chatRoom">
+  {#each chatrooms as chatroom, i}
+    <button on:click={onClickChat(chatroomsIds[i])} class="chatRoom">
       <span class="pair">{findDisplayName(chatroom.pair[0]) + " & " + findDisplayName(chatroom.pair[1])}</span>
     </button><br />
   {/each}
