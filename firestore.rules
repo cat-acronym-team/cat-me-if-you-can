@@ -8,9 +8,6 @@ service cloud.firestore {
 
       match /privatePlayers/{uid} {
         allow get: if request.auth.uid == uid;
-        function isStalker(){
-          return resource.data.stalker == true;
-        }
       }
 
       match /promptAnswers/{uid} {
@@ -30,6 +27,9 @@ service cloud.firestore {
         }
         function isPair(){
           return request.auth.uid in roomData().pair 
+        }
+        function isStalker(){
+          return get(/databases/$(database)/documents/lobbies/$(code)/privatePlayers/$(request.auth.uid)).data.stalker == true;
         }
         function canRead(){
           return isPair() || request.auth.uid in roomData().viewers ;
