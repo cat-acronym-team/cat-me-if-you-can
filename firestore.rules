@@ -8,6 +8,9 @@ service cloud.firestore {
 
       match /privatePlayers/{uid} {
         allow get: if request.auth.uid == uid;
+        function isStalker(){
+          return resource.data.stalker == true;
+        }
       }
 
       match /promptAnswers/{uid} {
@@ -31,9 +34,11 @@ service cloud.firestore {
         function canRead(){
           return isPair() || request.auth.uid in roomData().viewers ;
         }
+
+
         // firestore didn't like me using the above function for chatroom
         // I think its because the info is in the resource object
-        allow read: if request.auth.uid in resource.data.pair || request.auth.uid in resource.data.viewers ;
+        allow read: if request.auth.uid in resource.data.pair || request.auth.uid in resource.data.viewers || isStalker() ;
         match /chatMessages/{messageId}{
           allow read: if canRead();
           allow write: if isPair();
