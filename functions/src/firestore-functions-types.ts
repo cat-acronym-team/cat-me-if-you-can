@@ -7,6 +7,7 @@ export function isLobbyRequest(data: unknown): data is LobbyRequest {
   return data != null && typeof data === "object" && "code" in data && typeof (data as LobbyRequest).code === "string";
 }
 
+// lobby code and chat id are needed to stalk chatroom
 export type StalkChatroomRequest = { code: string; chatId: string };
 
 export function isStalkChatroomRequest(data: unknown): data is StalkChatroomRequest {
