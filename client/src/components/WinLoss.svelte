@@ -2,41 +2,25 @@
   import { authStore as user } from "$stores/auth";
   import type { PrivatePlayer, Lobby } from "../../../functions/src/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { getPrivatePlayer, lobbyReturn } from "../../../functions/src/winloss";
+  import { getLobbyRoles } from "../../../functions/src/winloss";
+  import { lobbyReturn } from "$lib/firebase/firestore-functions";
 
   export let lobbyCode: string;
   export let privatePlayer: PrivatePlayer | undefined;
   export let lobby: Lobby | undefined;
-  let lobbyRoles: PrivatePlayer | undefined;
 
   let end: "Cat Win" | "Cat Lose" | "Catfish Lose" | "Catfish Win" | null = null;
   let catfishDisplayname: string[] = []; // catfish's dislplay name used in the html lobbyCode
   let catfishList: string = "";
-  let catfishCounter = 0;
+  let aliveCatCount = 0;
 
   onMount(async () => {
-    let aliveCatCount = 0;
-    // function to count the number of players currently alive
+    // // function to count the number of players currently alive
     if (lobby !== undefined) {
-      for (let i = 0; i < lobby.uids.length; i++) {
-        if (lobby.players[i].alive == true) {
-          // count the number of remaining players who are alive
-          lobbyRoles = await getPrivatePlayer(lobbyCode, lobby.uids[i]);
-          if (lobbyRoles !== undefined) {
-            if (lobbyRoles.role == "CAT") {
-              aliveCatCount++;
-              // within the alive players, count the number that are cats
-            } else {
-              let temp: string = "";
-              temp = lobby.players[i].displayName;
-              catfishDisplayname.push(temp);
-              catfishCounter++;
-            }
-          }
-        }
-      }
+      getLobbyRoles(lobby, lobbyCode);
     }
-    let aliveCatFishCount = catfishCounter + 1;
+    
+    let aliveCatFishCount = catfishDisplayname.length;
     const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
     catfishList = formatter.format(catfishDisplayname);
     // any other player who is alive and not a cat is a catfish
@@ -80,7 +64,7 @@
       {#if lobby !== undefined}
         <button
           on:click={async () => {
-            lobbyReturn(lobbyCode);
+            lobbyReturn({ code:lobbyCode });
           }}>Return to Lobby</button
         >
       {/if}
@@ -97,7 +81,7 @@
       <h2>{catfishList} has taken over the litter!</h2>
       <button
         on:click={async () => {
-          lobbyReturn(lobbyCode);
+          lobbyReturn({ code:lobbyCode });
         }}>>Return to Lobby</button
       >
     </div>
@@ -113,7 +97,7 @@
       <h2>You have successfully taken over the litter!</h2>
       <button
         on:click={async () => {
-          lobbyReturn(lobbyCode);
+          lobbyReturn({ code:lobbyCode });
         }}>Return to Lobby</button
       >
     </div>
@@ -129,7 +113,7 @@
       <h2>You should go back to your sea ani-anim-aneme... home</h2>
       <button
         on:click={async () => {
-          lobbyReturn(lobbyCode);
+          lobbyReturn({ code: lobbyCode });
         }}>Return to Lobby</button
       >
     </div>

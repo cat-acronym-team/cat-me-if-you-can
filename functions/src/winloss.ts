@@ -1,19 +1,58 @@
-import { doc, updateDoc, getDoc } from "../../client/node_modules/firebase/firestore";
-import { getPrivatePlayerCollection, lobbyCollection } from "../../client/src/lib/firebase/firestore-collections";
+import { firestore } from "firebase-admin";
+import * as functions from "firebase-functions";
+import { db } from "./app";
+import { getPrivatePlayerCollection, lobbyCollection } from "./firestore-collections";
+import { isLobbyRequest } from "./firestore-functions-types";
+import { Lobby, PrivatePlayer } from "./firestore-types/lobby";
 
-export const lobbyReturn = async (code: string) => {
-  await updateDoc(doc(lobbyCollection, code), {
-    state: "WAIT",
-  });
-};
+export const lobbyReturn = functions.https.onCall(async (data: unknown) => {
+
+  // validate code
+  if (!isLobbyRequest(data)) {
+    return { error: "Invalid lobby code!" };
+  }
+  // get lobby doc
+  const lobby = await lobbyCollection.doc(data.code).get();
+  if (lobby.exists === false) {
+    return { error: "Lobby doesn't exist!" };
+  }
+  return lobbyCollection.doc(data.code).update({ state: "WAIT" });
+});
 
 function getLobby(code: string) {
-  const lobbyDocRef = doc(lobbyCollection, code);
+  const lobbyDocRef = lobbyCollection.doc(code);
   return lobbyDocRef;
 }
 
-export const getPrivatePlayer = async (code: string, id: string) => {
-  const privatePlayerSnap = await getDoc(doc(getPrivatePlayerCollection(getLobby(code)), id));
-  const privatePlayer = privatePlayerSnap.data();
-  return privatePlayer;
+function getPrivatePlayer(lobbyDocRef: firestore.DocumentReference<Lobby>, id: string ) {
+  let privatePlayerData: PrivatePlayer | undefined;
+  const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
+
+  db.runTransaction(async (transaction) => {
+    const privatePlayerDocRef = privatePlayerCollection.doc(id);
+    const privatePlayerDoc = await transaction.get(privatePlayerDocRef);
+    privatePlayerData = privatePlayerDoc.data();
+  }); 
+  return privatePlayerData; 
 };
+
+export async function getLobbyRoles(lobby: Lobby, lobbyCode: string) {
+    let aliveCatCount = 0;
+    const catfishDisplayname: string[] = [];
+    for (let i = 0; i < lobby.uids.length; i++) {
+      if (lobby.players[i].alive == true) {
+        // count the number of remaining players who are alive
+        const lobbyRoles = await getPrivatePlayer(getLobby(lobbyCode), lobby.uids[i]);
+        if (lobbyRoles !== undefined) {
+          if (lobbyRoles.role == "CAT") {
+            aliveCatCount++;
+            // within the alive players, count the number that are cats
+          } else {
+            let temp = "";
+            temp = lobby.players[i].displayName;
+            catfishDisplayname.push(temp);
+          }
+        }
+      }
+    }
+}
