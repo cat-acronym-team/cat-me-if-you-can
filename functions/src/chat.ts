@@ -1,6 +1,11 @@
 import { firestore } from "firebase-admin";
 import * as functions from "firebase-functions";
-import { getChatRoomCollection, getChatRoomMessagesCollection, lobbyCollection } from "./firestore-collections";
+import {
+  getChatRoomCollection,
+  getChatRoomMessagesCollection,
+  getPrivatePlayerCollection,
+  lobbyCollection,
+} from "./firestore-collections";
 import { isChatRequest, isLobbyRequest } from "./firestore-functions-types";
 import { chatMessageValidator, ChatRoom, Lobby } from "./firestore-types/lobby";
 
@@ -61,6 +66,11 @@ export const deleteChatRooms = functions.https.onCall(async (data: unknown, cont
   const chatRooms = await getChatRoomCollection(lobby).listDocuments();
   for (const room of chatRooms) {
     await room.delete();
+  }
+  // delete stalker
+  const stalkers = await getPrivatePlayerCollection(lobby).where("stalker", "==", true).get();
+  for (const stalker of stalkers.docs) {
+    await stalker.ref.update({ stalker: false });
   }
   // change game state
   return lobby.set({ state: "VOTE" }, { merge: true });

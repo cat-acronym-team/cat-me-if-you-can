@@ -167,8 +167,12 @@ export const collectPromptAnswers = functions.firestore
 
       transaction.update(lobbyDocRef, { state: "CHAT" });
 
-      // TODO: check if we have a stalker
-      const { pairs } = generatePairs(lobbyData);
+      const { pairs, stalker } = generatePairs(lobbyData);
+      functions.logger.info(stalker);
+
+      if (stalker != undefined) {
+        privatePlayerCollection.doc(stalker).update({ stalker: true });
+      }
       // create a chatroom for each pair
       pairs.forEach(async ({ one, two }) => {
         const room = await getChatRoomCollection(lobbyDocRef).add({ pair: [one, two], viewers: [] });
