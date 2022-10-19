@@ -52,14 +52,23 @@ export const deleteChatRooms = functions.https.onCall(async (data: unknown, cont
   if (!lobbyData.exists) {
     return { error: "Lobby doesn't exist!" };
   }
-  // only allow the request coming from host to delete the chatrooms
+  // only allow the request coming from host or co-host to delete the chatrooms
   const { uids } = lobbyData.data() as Lobby;
-  if (context.auth.uid !== uids[0]) {
+  if (![uids[0], uids[1]].includes(context.auth.uid)) {
     return { error: "Not allowed to delete chatrooms" };
   }
   // delete all chatrooms
   const chatRooms = await getChatRoomCollection(lobby).listDocuments();
+  // possibility that the host and co-host are deleting at the same time
+  //  if one already deleted the chatrooms no need to try to delete them again
+  if (chatRooms.length === 0) {
+    return { error: "There's nothing to delete!" };
+  }
   for (const room of chatRooms) {
+    // delete all of the messages within collection
+    const messageCollection = getChatRoomMessagesCollection(room);
+    (await messageCollection.listDocuments()).forEach((m) => m.delete());
+    // delete chatroom
     await room.delete();
   }
   // change game state

@@ -2,8 +2,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /lobbies/{code} {
+      // to combat the delete room issue where the host is potentially stalker
+      // allow the second player in the lobby to be co-host 
+      // since in the future the second player in the lobby might become host if the host leaves
       function isHost(){
-        return request.auth.uid == resource.data.uids[0];
+        return request.auth.uid == resource.data.uids[0] || request.auth.uid == resource.data.uids[1];
       }
       allow get: if true;
 
