@@ -6,7 +6,6 @@ import { isLobbyRequest } from "./firestore-functions-types";
 import { Lobby, PrivatePlayer } from "./firestore-types/lobby";
 
 export const lobbyReturn = functions.https.onCall(async (data: unknown) => {
-
   // validate code
   if (!isLobbyRequest(data)) {
     return { error: "Invalid lobby code!" };
@@ -24,7 +23,7 @@ function getLobby(code: string) {
   return lobbyDocRef;
 }
 
-function getPrivatePlayer(lobbyDocRef: firestore.DocumentReference<Lobby>, id: string ) {
+function getPrivatePlayer(lobbyDocRef: firestore.DocumentReference<Lobby>, id: string) {
   let privatePlayerData: PrivatePlayer | undefined;
   const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
 
@@ -32,27 +31,32 @@ function getPrivatePlayer(lobbyDocRef: firestore.DocumentReference<Lobby>, id: s
     const privatePlayerDocRef = privatePlayerCollection.doc(id);
     const privatePlayerDoc = await transaction.get(privatePlayerDocRef);
     privatePlayerData = privatePlayerDoc.data();
-  }); 
-  return privatePlayerData; 
-};
+  });
+  return privatePlayerData;
+}
 
 export async function getLobbyRoles(lobby: Lobby, lobbyCode: string) {
-    let aliveCatCount = 0;
-    const catfishDisplayname: string[] = [];
-    for (let i = 0; i < lobby.uids.length; i++) {
-      if (lobby.players[i].alive == true) {
-        // count the number of remaining players who are alive
-        const lobbyRoles = await getPrivatePlayer(getLobby(lobbyCode), lobby.uids[i]);
-        if (lobbyRoles !== undefined) {
-          if (lobbyRoles.role == "CAT") {
-            aliveCatCount++;
-            // within the alive players, count the number that are cats
-          } else {
-            let temp = "";
-            temp = lobby.players[i].displayName;
-            catfishDisplayname.push(temp);
-          }
+  let aliveCatCount = 0;
+  const catfishDisplayname: string[] = [];
+  for (let i = 0; i < lobby.uids.length; i++) {
+    if (lobby.players[i].alive == true) {
+      // count the number of remaining players who are alive
+      const lobbyRoles = await getPrivatePlayer(getLobby(lobbyCode), lobby.uids[i]);
+      if (lobbyRoles !== undefined) {
+        if (lobbyRoles.role == "CAT") {
+          aliveCatCount++;
+          // within the alive players, count the number that are cats
+        } else {
+          let temp = "";
+          temp = lobby.players[i].displayName;
+          catfishDisplayname.push(temp);
         }
       }
     }
+  }
+  // returns both the number of cats that are alive and the catfish display name array
+  return {
+    aliveCatCount: aliveCatCount,
+    catfishDisplayname: catfishDisplayname,
+  };
 }

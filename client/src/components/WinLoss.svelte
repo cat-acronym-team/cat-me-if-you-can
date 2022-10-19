@@ -10,34 +10,35 @@
   export let lobby: Lobby | undefined;
 
   let end: "Cat Win" | "Cat Lose" | "Catfish Lose" | "Catfish Win" | null = null;
-  let catfishDisplayname: string[] = []; // catfish's dislplay name used in the html lobbyCode
   let catfishList: string = "";
-  let aliveCatCount = 0;
+  let catfishDisplayname: string[] = [];
 
   onMount(async () => {
-    // // function to count the number of players currently alive
+    // function to count the number of players currently alive
     if (lobby !== undefined) {
-      getLobbyRoles(lobby, lobbyCode);
-    }
-    
-    let aliveCatFishCount = catfishDisplayname.length;
-    const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
-    catfishList = formatter.format(catfishDisplayname);
-    // any other player who is alive and not a cat is a catfish
-    if ($user !== null) {
-      // set conditions for the game to be declared a win or loss
-      if (privatePlayer !== undefined) {
-        if (privatePlayer.role == "CAT") {
-          if (aliveCatFishCount == 0) {
-            end = "Cat Win";
-          } else if (aliveCatCount == aliveCatFishCount) {
-            end = "Cat Lose";
-          }
-        } else {
-          if (aliveCatFishCount == 0) {
-            end = "Catfish Lose";
-          } else if (aliveCatCount == aliveCatFishCount) {
-            end = "Catfish Win";
+      let gameInfo = getLobbyRoles(lobby, lobbyCode); // grabs return statement from function as an object
+      let aliveCatCount = (await gameInfo).aliveCatCount; // number of cats that are currently alive
+      let catfishDisplayname = (await gameInfo).catfishDisplayname; // catfish's dislplay name used in the html lobbyCode
+
+      let aliveCatFishCount = catfishDisplayname.length;
+      const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
+      catfishList = formatter.format(catfishDisplayname);
+      // any other player who is alive and not a cat is a catfish
+      if ($user !== null) {
+        // set conditions for the game to be declared a win or loss
+        if (privatePlayer !== undefined) {
+          if (privatePlayer.role == "CAT") {
+            if (aliveCatFishCount == 0) {
+              end = "Cat Win";
+            } else if (aliveCatCount == aliveCatFishCount) {
+              end = "Cat Lose";
+            }
+          } else {
+            if (aliveCatFishCount == 0) {
+              end = "Catfish Lose";
+            } else if (aliveCatCount == aliveCatFishCount) {
+              end = "Catfish Win";
+            }
           }
         }
       }
@@ -64,7 +65,7 @@
       {#if lobby !== undefined}
         <button
           on:click={async () => {
-            lobbyReturn({ code:lobbyCode });
+            lobbyReturn({ code: lobbyCode });
           }}>Return to Lobby</button
         >
       {/if}
@@ -81,7 +82,7 @@
       <h2>{catfishList} has taken over the litter!</h2>
       <button
         on:click={async () => {
-          lobbyReturn({ code:lobbyCode });
+          lobbyReturn({ code: lobbyCode });
         }}>>Return to Lobby</button
       >
     </div>
@@ -97,7 +98,7 @@
       <h2>You have successfully taken over the litter!</h2>
       <button
         on:click={async () => {
-          lobbyReturn({ code:lobbyCode });
+          lobbyReturn({ code: lobbyCode });
         }}>Return to Lobby</button
       >
     </div>
