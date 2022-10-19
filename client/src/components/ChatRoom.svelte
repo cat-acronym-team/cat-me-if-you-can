@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
-  import { getDocs, onSnapshot, orderBy, query, QueryDocumentSnapshot } from "firebase/firestore";
+  import { onSnapshot, orderBy, query, QueryDocumentSnapshot } from "firebase/firestore";
   import {
     chatMessageValidator,
     type ChatMessage,
@@ -25,10 +25,7 @@
   let countdown: number = 60;
   let end = Date.now() + 60000;
   let message: string = "";
-  let error = {
-    status: false,
-    message: "",
-  };
+  let errorMessage: string = "";
 
   onMount(async () => {
     // Query for their chatroom
@@ -64,10 +61,7 @@
     // validate message
     const validate = chatMessageValidator(message);
     if (!validate.valid) {
-      error = {
-        status: true,
-        message: validate.reason,
-      };
+      errorMessage = validate.reason;
       message = "";
       return;
     }
@@ -104,8 +98,8 @@
   <form on:submit|preventDefault={submitMessage}>
     <input type="text" bind:value={message} />
     <button type="submit" disabled={message === ""}>Send</button>
-    {#if error.status}
-      <p class="error">{error.message}</p>
+    {#if errorMessage !== ""}
+      <p class="error">{errorMessage}</p>
     {/if}
   </form>
 </div>
