@@ -1,5 +1,5 @@
 import { firestore } from "firebase-admin";
-import * as functions from "firebase-functions";
+import * as functions from "../node_modules/firebase-functions";
 import { db } from "./app";
 import { getPrivatePlayerCollection, lobbyCollection } from "./firestore-collections";
 import { isLobbyRequest } from "./firestore-functions-types";
