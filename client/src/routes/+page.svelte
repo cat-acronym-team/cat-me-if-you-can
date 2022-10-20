@@ -16,11 +16,17 @@
   async function findUser() {
     if (user !== null) {
       userData = await getUser(user.uid);
-      // fixed error because it would try to look for the display name of a user that doesn't exist
+      // if they have a user doc
       if (userData !== undefined) {
         // assign name from database to name variable
         if (userData.displayName !== "") {
           name = userData.displayName;
+        }
+      } 
+      // if they dont have a user doc and used sign in with google/microsoft
+      else {
+        if (user.displayName !== null) {
+          name = user.displayName;
         }
       }
     }
