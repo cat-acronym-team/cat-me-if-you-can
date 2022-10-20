@@ -10,6 +10,7 @@
   let confirmPass = "";
   let clickedButton = false;
   let clickedButton2 = false;
+  let errorMessage = "";
   async function createAccount() {
     if (password == "") {
       return;
@@ -20,9 +21,15 @@
     if (email == "") {
       return;
     } else {
-      await createUser(email, password);
+      try {
+        await createUser(email, password);
+      } catch (err) {
+        errorMessage = "Invalid Username or Password";
+      }
     }
-    openSignInModal = false;
+    if (errorMessage == "") {
+      openSignInModal = false;
+    }
     email = "";
     password = "";
     confirmPass = "";
@@ -37,15 +44,11 @@
       try {
         await loginWithEmail(email, password);
       } catch (err) {
-        let errorMessage;
-        if (err instanceof Error) {
-          errorMessage = err.message;
-        } else {
-          errorMessage = String(err);
-        }
-        console.error("Username or Password is invalid", errorMessage);
+        errorMessage = "Invalid Username or Password";
       }
-    openSignInModal = false;
+    if (errorMessage == "") {
+      openSignInModal = false;
+    }
     password = "";
     email = "";
   }
@@ -86,54 +89,55 @@
         <img src="/images/microsoft.png" alt="microsoftButton" />
       </button>
     </div>
-    <div class="email">
-      <button on:click={signInWithEmailAndPassword}>Sign In</button>
-      {#if clickedButton}
-        <form class="formContainer" on:submit|preventDefault={submitLogin}>
-          <div class="groupContainer">
-            <div class="formGroup">
-              <label for="email"><b>Email</b></label>
-              <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
-            </div>
-            <div class="formGroup">
-              <label for="password"><b>Password</b></label>
-              <input type="text" bind:value={password} placeholder="Enter Password" name="password" required />
-            </div>
+    <button on:click={signInWithEmailAndPassword}>Sign In</button>
+    {#if clickedButton}
+      <form class="formContainer" on:submit|preventDefault={submitLogin}>
+        <div class="groupContainer">
+          <div class="formGroup">
+            <label for="email"><b>Email</b></label>
+            <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
           </div>
-          <div class="formButton">
-            <button type="submit">Login</button>
+          <div class="formGroup">
+            <label for="password"><b>Password</b></label>
+            <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
           </div>
-        </form>
-      {/if}
-      <button on:click={createWithEmailAndPassword}>Create Account</button>
-      {#if clickedButton2}
-        <form class="formContainer" on:submit|preventDefault={createAccount}>
-          <div class="groupContainer">
-            <div class="formGroup">
-              <label for="email"><b>Email</b></label>
-              <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
-            </div>
-            <div class="formGroup">
-              <label for="password"><b>Password</b></label>
-              <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
-            </div>
-            <div class="formGroup">
-              <label for="confirmPass"><b>Confirm Password</b></label>
-              <input
-                type="password"
-                bind:value={confirmPass}
-                placeholder="Confirm Password"
-                name="confirmPass"
-                required
-              />
-            </div>
+        </div>
+        <div class="formButton">
+          <button type="submit">Login</button>
+        </div>
+      </form>
+    {/if}
+    <button on:click={createWithEmailAndPassword}>Create Account</button>
+    {#if clickedButton2}
+      <form class="formContainer" on:submit|preventDefault={createAccount}>
+        <div class="groupContainer">
+          <div class="formGroup">
+            <label for="email"><b>Email</b></label>
+            <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
           </div>
-          <div class="formButton">
-            <button type="submit">Create Account</button>
+          <div class="formGroup">
+            <label for="password"><b>Password</b></label>
+            <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
           </div>
-        </form>
-      {/if}
-    </div>
+          <div class="formGroup">
+            <label for="confirmPass"><b>Confirm Password</b></label>
+            <input
+              type="password"
+              bind:value={confirmPass}
+              placeholder="Confirm Password"
+              name="confirmPass"
+              required
+            />
+          </div>
+        </div>
+        <div class="formButton">
+          <button type="submit">Create Account</button>
+        </div>
+      </form>
+    {/if}
+    {#if errorMessage !== ""}
+      <p class="error">{errorMessage}</p>
+    {/if}
     <div id="input" />
   </div>
 </Modal>
@@ -214,7 +218,9 @@
     width: 35%;
     background: none;
   }
-
+  .error {
+    color: salmon;
+  }
   .close {
     cursor: pointer;
     background: none;
