@@ -37,7 +37,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context) =
 
   const privatePlayerCollection = getPrivatePlayerCollection(lobby.ref);
   for (const uid of uids) {
-    privatePlayerCollection.doc(uid).create({ role: "CAT" });
+    privatePlayerCollection.doc(uid).create({ role: "CAT", stalker: false });
   }
 
   return lobbyCollection.doc(data.code).update({ state: "PROMPT" });
