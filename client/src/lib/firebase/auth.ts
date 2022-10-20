@@ -6,6 +6,7 @@ import {
   createUserWithEmailAndPassword,
   signInAnonymously,
   signOut,
+  signInWithEmailAndPassword,
 } from "firebase/auth";
 
 // Google login/signup
@@ -33,12 +34,11 @@ export async function loginWithMicrosoft() {
 
 // Login with email and password
 export async function loginWithEmail(email: string, password: string) {
-  try {
-    const user = await createUserWithEmailAndPassword(auth, email, password);
-    console.log(user);
-  } catch (error) {
-    console.log(error);
-  }
+  return await signInWithEmailAndPassword(auth, email, password);
+}
+
+export async function createUser(email: string, password: string) {
+  return await createUserWithEmailAndPassword(auth, email, password);
 }
 
 export function loginAnonymous() {
@@ -47,11 +47,5 @@ export function loginAnonymous() {
 
 // Sign out
 export function onSignOut() {
-  signOut(auth)
-    .then(() => {
-      // Sign-out successful.
-    })
-    .catch((error) => {
-      // An error happened.
-    });
+  signOut(auth);
 }

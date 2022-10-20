@@ -1,14 +1,32 @@
 <script lang="ts">
   import Modal from "./Modal.svelte";
   import { authStore as user } from "$stores/auth";
-  import { loginWithGoogle, loginWithMicrosoft, loginWithEmail, onSignOut } from "$lib/firebase/auth";
-  import { error } from "@sveltejs/kit";
+  import { loginWithGoogle, loginWithMicrosoft, loginWithEmail, onSignOut, createUser } from "$lib/firebase/auth";
 
   // check if the user is logged in with getAuth
   let openSignInModal = false;
-  let password = "";
   let email = "";
+  let password = "";
+  let confirmPass = "";
   let clickedButton = false;
+  let clickedButton2 = false;
+  async function createAccount() {
+    if (password == "") {
+      return;
+    }
+    if (password != confirmPass) {
+      return;
+    }
+    if (email == "") {
+      return;
+    } else {
+      await createUser(email, password);
+    }
+    openSignInModal = false;
+    email = "";
+    password = "";
+    confirmPass = "";
+  }
   async function submitLogin() {
     if (password == "") {
       return;
@@ -19,7 +37,7 @@
       try {
         await loginWithEmail(email, password);
       } catch (err) {
-        let errorMessage: string;
+        let errorMessage;
         if (err instanceof Error) {
           errorMessage = err.message;
         } else {
@@ -33,6 +51,11 @@
   }
   function signInWithEmailAndPassword() {
     clickedButton = !clickedButton;
+    clickedButton2 = false;
+  }
+  function createWithEmailAndPassword() {
+    clickedButton2 = !clickedButton2;
+    clickedButton = false;
   }
   async function googleLogin() {
     await loginWithGoogle();
@@ -82,6 +105,34 @@
           </div>
         </form>
       {/if}
+      <button on:click={createWithEmailAndPassword}>Create Account</button>
+      {#if clickedButton2}
+        <form class="formContainer" on:submit|preventDefault={createAccount}>
+          <div class="groupContainer">
+            <div class="formGroup">
+              <label for="email"><b>Email</b></label>
+              <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
+            </div>
+            <div class="formGroup">
+              <label for="password"><b>Password</b></label>
+              <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
+            </div>
+            <div class="formGroup">
+              <label for="confirmPass"><b>Confirm Password</b></label>
+              <input
+                type="password"
+                bind:value={confirmPass}
+                placeholder="Confirm Password"
+                name="confirmPass"
+                required
+              />
+            </div>
+          </div>
+          <div class="formButton">
+            <button type="submit">Create Account</button>
+          </div>
+        </form>
+      {/if}
     </div>
     <div id="input" />
   </div>
@@ -112,17 +163,6 @@
   .loginButton img {
     width: 100%;
   }
-  /* .microsoft-button {
-    background: url(images/sign-in-with-microsoft.png);
-    background-size: cover;
-    background-repeat: no-repeat;
-  }
-  .google-button {
-    background: url(images/btn_google_signin_dark_normal_web@2x.png);
-    background-size: cover;
-    background-repeat: no-repeat;
-  } */
-
   .signOut:hover {
     cursor: pointer;
   }
@@ -162,12 +202,6 @@
     z-index: 1;
   }
 
-  .account-content a {
-    color: red;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-  }
   .account-container:hover .account-content {
     display: block;
   }
@@ -213,9 +247,5 @@
   .formContainer button {
     margin: auto;
     margin-top: 10px;
-  }
-
-  .btnColor {
-    background-color: white;
   }
 </style>
