@@ -2,8 +2,8 @@
   import { authStore as user } from "$stores/auth";
   import type { PrivatePlayer, Lobby } from "../../../functions/src/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { getLobbyRoles } from "../../../functions/src/winloss";
-  import { lobbyReturn } from "$lib/firebase/firestore-functions";
+  import { lobbyReturn, getLobbyRole } from "$lib/firebase/firestore-functions";
+  import type { ErrorResponse, LobbyRoleResponse } from "$lib/firebase/firestore-functions-types";
 
   export let lobbyCode: string;
   export let privatePlayer: PrivatePlayer | undefined;
@@ -13,12 +13,42 @@
   let catfishList: string = "";
   let catfishDisplayname: string[] = [];
 
+  function findResult(privatePlayer: PrivatePlayer, catCount: number, catfishCount: number) {
+    const { role } = privatePlayer;
+    if (role == "CAT") {
+      if (catfishCount == 0) {
+        return "Cat Win";
+      }
+      if (catCount == catfishCount) {
+        return "Cat Lose";
+      }
+      if (catCount < catfishCount) {
+        return "Cat Lose";
+      }
+    } else {
+      if (catCount == 0) {
+        return "Catfish Win";
+      }
+      if (catfishCount == catCount) {
+        return "Catfish Win";
+      }
+      if (catfishCount == 0) {
+        return "Catfish Lose";
+      }
+    }
+    return null;
+  }
+
   onMount(async () => {
     // function to count the number of players currently alive
     if (lobby !== undefined) {
-      let gameInfo = getLobbyRoles(lobby, lobbyCode); // grabs return statement from function as an object
-      let aliveCatCount = (await gameInfo).aliveCatCount; // number of cats that are currently alive
-      let catfishDisplayname = (await gameInfo).catfishDisplayname; // catfish's dislplay name used in the html lobbyCode
+      let gameInfo = await getLobbyRole({ code: lobbyCode }); // grabs return statement from function as an object
+      if ("error" in (gameInfo.data as ErrorResponse)) {
+        console.log("Error occurred!");
+      }
+      const response = gameInfo.data as LobbyRoleResponse;
+      let aliveCatCount = response.aliveCatCount; // number of cats that are currently alive
+      let catfishDisplayname = response.catfishDisplayname; // catfish's dislplay name used in the html lobbyCode
 
       let aliveCatFishCount = catfishDisplayname.length;
       const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
@@ -27,20 +57,9 @@
       if ($user !== null) {
         // set conditions for the game to be declared a win or loss
         if (privatePlayer !== undefined) {
-          if (privatePlayer.role == "CAT") {
-            if (aliveCatFishCount == 0) {
-              end = "Cat Win";
-            } else if (aliveCatCount == aliveCatFishCount) {
-              end = "Cat Lose";
-            }
-          } else {
-            if (aliveCatFishCount == 0) {
-              end = "Catfish Lose";
-            } else if (aliveCatCount == aliveCatFishCount) {
-              end = "Catfish Win";
-            }
-          }
+          end = findResult(privatePlayer, aliveCatCount, aliveCatFishCount);
         }
+        console.log(end);
       }
     }
   });
@@ -48,7 +67,7 @@
 
 <div class="container">
   <!-- Check the user's role and display the correct win or loss page accordingly -->
-  {#if (end = "Cat Win")}
+  {#if end == "Cat Win"}
     <div class="banner">
       <h2>Hooray!</h2>
       <h2>You have sniffed out the cat fish!</h2>
@@ -70,7 +89,7 @@
         >
       {/if}
     </div>
-  {:else if (end = "Cat Lose")}
+  {:else if end == "Cat Lose"}
     <div class="banner">
       <h2>You have cat to be kitten me!</h2>
       <h2>The impawster was not caught!</h2>
@@ -83,10 +102,10 @@
       <button
         on:click={async () => {
           lobbyReturn({ code: lobbyCode });
-        }}>>Return to Lobby</button
+        }}>Return to Lobby</button
       >
     </div>
-  {:else if (end = "Catfish Win")}
+  {:else if end == "Catfish Win"}
     <div class="banner">
       <h2>O-fish-ally the greatest!</h2>
       <h2>Way to deceive your furry friends!</h2>
@@ -102,7 +121,7 @@
         }}>Return to Lobby</button
       >
     </div>
-  {:else if (end = "Catfish Lose")}
+  {:else if end == "Catfish Lose"}
     <div class="banner">
       <h2>You have been caught (and released)!</h2>
       <h2>Might as well have been a <b>clown</b> fish...</h2>
