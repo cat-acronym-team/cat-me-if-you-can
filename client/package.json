@@ -21,6 +21,7 @@
     "@playwright/test": "^1.25.0",
     "@smui/button": "^7.0.0-beta.0",
     "@smui/icon-button": "^7.0.0-beta.0",
+    "@smui/textfield": "^7.0.0-beta.0",
     "@sveltejs/adapter-static": "^1.0.0-next.43",
     "@sveltejs/kit": "next",
     "@typescript-eslint/eslint-plugin": "^5.27.0",
