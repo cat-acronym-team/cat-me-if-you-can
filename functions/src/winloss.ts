@@ -26,8 +26,8 @@ export const lobbyReturn = functions.https.onCall(async (data: unknown, context)
 
   // bring everyone back alive
   // TODO: Fix this and test
-  for(let i = 0; i < players.length; i++) {
-    if(players[i].alive == false) {
+  for (let i = 0; i < players.length; i++) {
+    if (players[i].alive == false) {
       players[i].alive == true;
     }
   }
