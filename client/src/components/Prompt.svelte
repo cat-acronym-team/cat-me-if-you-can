@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Button, { Label } from "@smui/button";
   import { getPromptAnswerCollection } from "$lib/firebase/firestore-collections";
   import { doc, setDoc } from "firebase/firestore";
 
@@ -41,7 +42,7 @@
   <div class="input">
     <input id="prompt-answer" type="text" bind:value={answer} />
     <label class="error" for="prompt-answer">{error ?? ""}</label>
-    <button type="submit" disabled={error != undefined}>Done</button>
+    <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
   </div>
 </form>
 

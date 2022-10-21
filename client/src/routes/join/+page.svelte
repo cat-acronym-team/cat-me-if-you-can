@@ -1,5 +1,6 @@
 <script lang="ts">
   import SigninButton from "$components/SigninButton.svelte";
+  import Button, { Label } from "@smui/button";
   import { authStore as user } from "$stores/auth";
   import { findAndJoinLobby } from "$lib/firebase/join-lobby";
   import { saveOrCreate } from "$lib/firebase/splash";
@@ -91,7 +92,7 @@
   <form on:submit|preventDefault={joinLobby}>
     <input type="text" placeholder="Enter in your display name" bind:value={name} />
     <input bind:value={code} />
-    <button type="submit" placeholder="Enter the lobby code">Join</button>
+    <Button><Label>Join</Label></Button>
   </form>
 </div>
 

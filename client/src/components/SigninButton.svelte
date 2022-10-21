@@ -1,5 +1,6 @@
 <script lang="ts">
   import Modal from "./Modal.svelte";
+  import Button, { Label } from "@smui/button";
   import { authStore as user } from "$stores/auth";
 
   // check if the user is logged in with getAuth
@@ -18,15 +19,14 @@
 <div class="account-container">
   <!-- If you are not signed in show this  -->
   {#if $user == null}
-    <button
+    <Button
       on:click={() => {
         openSignInModal = true;
-      }}
-      class="account-signin">Sign in</button
+      }}><Label>Sign in</Label></Button
     >
     <!-- If you show account and dropdown -->
   {:else}
-    <button class="account-button">Account</button>
+    <Button><Label>Account</Label></Button>
     <!-- Hover doesn't work on mobile -->
     <div class="account-content">
       <!-- TODO: Account Hover Links -->
@@ -42,27 +42,6 @@
     position: relative;
     display: inline-block;
   }
-  .account-signin {
-    text-decoration: none;
-    margin-right: 5px;
-    color: red;
-    background-color: #151515;
-    padding: 5px;
-  }
-  .account-button {
-    text-decoration: none;
-    margin-right: 5px;
-    color: red;
-    background-color: #151515;
-    padding: 5px;
-  }
-  .account-container button {
-    background-color: #151515;
-    color: red;
-    padding: 16px;
-    font-size: 16px;
-    border: none;
-  }
 
   .account-content {
     display: none;
@@ -74,12 +53,6 @@
     z-index: 1;
   }
 
-  .account-content a {
-    color: red;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-  }
   .account-container:hover .account-content {
     display: block;
   }
