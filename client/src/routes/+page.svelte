@@ -1,5 +1,6 @@
 <script lang="ts">
   import SigninButton from "$components/SigninButton.svelte";
+  import Button, { Label } from "@smui/button";
   import { getUser, saveOrCreate } from "$lib/firebase/splash";
   import { createLobby } from "$lib/firebase/create-lobby";
   import type { UserData } from "$lib/firebase/firestore-types/users";
@@ -65,8 +66,8 @@
     </div>
     <div class="cat-main-buttons">
       <input type="text" placeholder="Enter in your display name" bind:value={name} />
-      <button on:click={createLobbyHandler}>Create Lobby</button>
-      <button on:click={joinLobbyHandler}>Join Lobby</button>
+      <Button on:click={createLobbyHandler}><Label>Create Lobby</Label></Button>
+      <Button on:click={joinLobbyHandler}><Label>Join Lobby</Label></Button>
     </div>
   </div>
 </main>
@@ -118,17 +119,7 @@
     height: 25px;
     text-align: center;
   }
-  .cat-main-buttons button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    margin-top: 20px;
-    background-color: #151515;
-    color: red;
-    width: 100%;
-    height: 45px;
-  }
+
   /* Tablet Styles */
   @media only screen and (min-width: 700px) {
     .account-container {
