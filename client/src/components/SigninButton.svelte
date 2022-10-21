@@ -16,6 +16,9 @@
       return;
     }
     if (password != confirmPass) {
+      errorMessage = "Password does not match";
+      password = "";
+      confirmPass = "";
       return;
     }
     if (email == "") {
@@ -23,10 +26,12 @@
     } else {
       try {
         await createUser(email, password);
+        errorMessage = "";
       } catch (err) {
         errorMessage = "Invalid Username or Password";
       }
     }
+
     if (errorMessage == "") {
       openSignInModal = false;
     }
@@ -43,6 +48,7 @@
     } else
       try {
         await loginWithEmail(email, password);
+        errorMessage = "";
       } catch (err) {
         errorMessage = "Invalid Username or Password";
       }
