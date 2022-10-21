@@ -41,11 +41,11 @@ export async function createUser(email: string, password: string) {
   return await createUserWithEmailAndPassword(auth, email, password);
 }
 
-export function loginAnonymous() {
-  return signInAnonymously(auth);
+export async function loginAnonymous() {
+  return await signInAnonymously(auth);
 }
 
 // Sign out
-export function onSignOut() {
-  signOut(auth);
+export async function onSignOut() {
+  return await signOut(auth);
 }

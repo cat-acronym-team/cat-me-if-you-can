@@ -8,80 +8,70 @@
   let email = "";
   let password = "";
   let confirmPass = "";
-  let clickedButton = false;
-  let clickedButton2 = false;
-  let errorMessage = "";
+  let signInButton = false;
+  let createAccountButton = false;
+  let errorMessage: string = "";
   async function createAccount() {
-    if (password == "") {
-      return;
-    }
     if (password != confirmPass) {
-      errorMessage = "Password does not match";
       password = "";
       confirmPass = "";
-      return;
+      return (errorMessage = "Passwords do not match");
     }
-    if (email == "") {
-      return;
-    } else {
-      try {
-        await createUser(email, password);
-        errorMessage = "";
-      } catch (err) {
-        errorMessage = "Invalid Username or Password";
-      }
+    try {
+      await createUser(email, password);
+      errorMessage = "";
+    } catch (err) {
+      return (errorMessage = err instanceof Error ? err.message : String(err));
     }
-
-    if (errorMessage == "") {
-      openSignInModal = false;
-    }
+    openSignInModal = false;
     email = "";
     password = "";
     confirmPass = "";
   }
   async function submitLogin() {
-    if (password == "") {
-      return;
+    try {
+      await loginWithEmail(email, password);
+      errorMessage = "";
+    } catch (err) {
+      return (errorMessage = err instanceof Error ? err.message : String(err));
     }
-    if (email == "") {
-      return;
-    } else
-      try {
-        await loginWithEmail(email, password);
-        errorMessage = "";
-      } catch (err) {
-        errorMessage = "Invalid Username or Password";
-      }
-    if (errorMessage == "") {
-      openSignInModal = false;
-    }
+    openSignInModal = false;
     password = "";
     email = "";
   }
-  function signInWithEmailAndPassword() {
-    clickedButton = !clickedButton;
-    clickedButton2 = false;
+  function signInDropDown() {
+    signInButton = !signInButton;
+    createAccountButton = false;
   }
-  function createWithEmailAndPassword() {
-    clickedButton2 = !clickedButton2;
-    clickedButton = false;
+  function createAccountDropDown() {
+    createAccountButton = !createAccountButton;
+    signInButton = false;
   }
   async function googleLogin() {
-    await loginWithGoogle();
+    try {
+      await loginWithGoogle();
+      errorMessage = "";
+    } catch (err) {
+      return (errorMessage = err instanceof Error ? err.message : String(err));
+    }
     openSignInModal = false;
   }
 
   async function microsoftLogin() {
-    await loginWithMicrosoft();
+    try {
+      await loginWithMicrosoft();
+      errorMessage = "";
+    } catch (err) {
+      return (errorMessage = err instanceof Error ? err.message : String(err));
+    }
     openSignInModal = false;
   }
 </script>
 
 <!-- Sign In Modal -->
 <Modal open={openSignInModal}>
-  <!-- TODO: Sign In Modal Content Here -->
   <button class="close" on:click={() => (openSignInModal = false)}
-    ><img src="/images/stuff2.svg" alt="closeButton" /></button
+    ><img src="/images/closeOutButton.svg" alt="closeButton" /></button
   >
   <div class="container">
     <h2>Sign In</h2>
@@ -95,8 +85,8 @@
         <img src="/images/microsoft.png" alt="microsoftButton" />
       </button>
     </div>
-    <button on:click={signInWithEmailAndPassword}>Sign In</button>
-    {#if clickedButton}
+    <button on:click={signInDropDown}>Sign In</button>
+    {#if signInButton}
       <form class="formContainer" on:submit|preventDefault={submitLogin}>
         <div class="groupContainer">
           <div class="formGroup">
@@ -113,8 +103,8 @@
         </div>
       </form>
     {/if}
-    <button on:click={createWithEmailAndPassword}>Create Account</button>
-    {#if clickedButton2}
+    <button on:click={createAccountDropDown}>Create Account</button>
+    {#if createAccountButton}
       <form class="formContainer" on:submit|preventDefault={createAccount}>
         <div class="groupContainer">
           <div class="formGroup">
