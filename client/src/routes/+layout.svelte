@@ -1,5 +1,5 @@
 <script lang="ts">
-  import QuestionMark from "$components/QuestionMark.svelte";
+  import IconButton from "@smui/icon-button";
   import Modal from "$components/Modal.svelte";
 
   let openModal = false;
@@ -19,11 +19,12 @@
   </div>
 </Modal>
 
-<QuestionMark
-  on:clicked={() => {
+<IconButton
+  class="material-icons"
+  on:click={() => {
     openModal = true;
-  }}
-/>
+  }}>help</IconButton
+>
 
 <slot />
 
