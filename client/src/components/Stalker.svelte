@@ -1,23 +1,38 @@
 <script lang="ts">
-  import type { ChatRoom, Lobby } from "$lib/firebase/firestore-types/lobby";
+  import type { ChatRoom as ChatRoomType, ChatMessage, Lobby } from "$lib/firebase/firestore-types/lobby";
   import { stalkChatroom } from "$lib/firebase/firestore-functions";
-  import { getChatRoomCollection } from "$lib/firebase/firestore-collections";
-  import { onSnapshot } from "firebase/firestore";
+  import { getChatRoomCollection, getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
+  import { onSnapshot, query, orderBy, collection } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
   import type { Unsubscribe } from "firebase/auth";
+  // import { auth } from "$lib/firebase/app";
+  import { authStore as user } from "$stores/auth";
+  import ChatRoom from "./ChatRoom.svelte";
 
   export let lobby: Lobby;
   export let lobbyCode: string;
 
   let unsubscribeChatrooms: Unsubscribe | undefined = undefined;
-  let chatrooms: ChatRoom[] = [];
+  let chatrooms: ChatRoomType[] = [];
   let chatroomsIds: string[] = [];
+  let chatMessages: ChatMessage[] = [];
 
   onMount(async () => {
     const chatCollection = getChatRoomCollection(lobbyCode);
     unsubscribeChatrooms = onSnapshot(chatCollection, (chatSnapshot) => {
       chatroomsIds = chatSnapshot.docs.map((room) => room.id);
       chatrooms = chatSnapshot.docs.map((room) => room.data());
+
+      const [room] = chatSnapshot.docs.filter((chatDoc) => {
+        return chatDoc.data().viewers.includes($user!.uid);
+      });
+      console.log(room);
+      onSnapshot(
+        query(getChatRoomMessagesCollection(lobbyCode, room.id), orderBy("timestamp", "asc")),
+        (collection) => {
+          chatMessages = collection.docs.map((d) => d.data());
+        }
+      );
     });
   });
 
@@ -35,20 +50,30 @@
 
   // takes chatid to send a stalk chatroom request
   function onClickChat(chatId: string) {
-    const stalkChatroomRequest = { code: lobbyCode, chatId: chatId };
-    stalkChatroom(stalkChatroomRequest);
-    return null;
+    const stalkChatroomRequest = { code: lobbyCode, chatId };
+    return stalkChatroom(stalkChatroomRequest);
   }
+
+  // onsnapshot subscribe to list of all chatrooms where you a viewer, if not empty switch to show chatroom
 </script>
 
-<div class="container">
-  <h1>Stalk a chat:</h1>
-  {#each chatrooms as chatroom, i}
-    <button on:click={onClickChat(chatroomsIds[i])} class="chatRoom">
-      <span class="pair">{findDisplayName(chatroom.pair[0]) + " & " + findDisplayName(chatroom.pair[1])}</span>
-    </button><br />
-  {/each}
-</div>
+{#if chatMessages.length == 0}
+  <div class="container">
+    <h1>Stalk a chat:</h1>
+    {#each chatrooms as chatroom, i}
+      <button
+        on:click={() => {
+          onClickChat(chatroomsIds[i]);
+        }}
+        class="chatRoom"
+      >
+        <span class="pair">{findDisplayName(chatroom.pair[0]) + " & " + findDisplayName(chatroom.pair[1])}</span>
+      </button><br />
+    {/each}
+  </div>
+{:else}
+  <ChatRoom lobbyData={{ ...lobby, id: lobbyCode }} />
+{/if}
 
 <style>
   .container {
