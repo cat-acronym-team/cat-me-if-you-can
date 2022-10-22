@@ -14,9 +14,9 @@ export const stalkChatroom = functions.https.onCall((data: unknown, context) => 
   }
 
   const lobbyDocRef = lobbyCollection.doc(data.code);
-
   return db.runTransaction(async (transaction) => {
     const chatRooms = getChatRoomCollection(lobbyDocRef);
+    const chatRoomsRef = chatRooms.doc(data.chatId);
     const chatRoomsSnapshot = await transaction.get(chatRooms.where("viewers", "array-contains", auth.uid));
     if (!chatRoomsSnapshot.empty) {
       throw new functions.https.HttpsError("already-exists", "User already stalking a chat");
@@ -27,6 +27,6 @@ export const stalkChatroom = functions.https.onCall((data: unknown, context) => 
       throw new functions.https.HttpsError("not-found", "Chatroom not found");
     }
     chatRoomData.viewers.push(auth.uid);
-    transaction.update(lobbyDocRef, chatRoomData);
+    transaction.update(chatRoomsRef, chatRoomData);
   });
 });
