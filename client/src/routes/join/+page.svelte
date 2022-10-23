@@ -48,6 +48,9 @@
     } catch (err) {
       // if the lobby doesn't exist then error is thrown
       errorMessage = err instanceof Error ? err.message : String(err);
+      if (errorMessage == "You are already in the lobby!") {
+        goto(`/game?code=${code}`);
+      }
       // this checks if the query code is set
       // fixes the issue of the code going empty after an error
       if (queryCode === undefined) {
