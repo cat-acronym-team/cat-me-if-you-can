@@ -7,6 +7,10 @@ export const userCollection = db.collection("users") as CollectionReference<User
 
 export const lobbyCollection = db.collection("lobbies") as CollectionReference<Lobby>;
 
+export function getLobbyChatCollection(lobbyDoc: DocumentReference<Lobby>) {
+  return lobbyDoc.collection("chatMessages") as CollectionReference<ChatMessage>;
+}
+
 export function getChatRoomCollection(lobbyDoc: DocumentReference<Lobby>) {
   return lobbyDoc.collection("chatRooms") as CollectionReference<ChatRoom>;
 }

@@ -12,7 +12,7 @@ import { isLobbyRequest } from "./firestore-functions-types";
 import { avatars, Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
-import { db } from "./app";
+import { adminFunctions, db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 
 export const startGame = functions.https.onCall(async (data: unknown, context) => {
@@ -99,6 +99,14 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
 
   if (lobby.state == "PROMPT" && oldLobby.state != "PROMPT") {
     await startPrompt(lobbyDocRef);
+  }
+  if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {
+    // Testing the enqueue
+    const queue = adminFunctions.taskQueue("testTask");
+    queue.enqueue({
+      scheduleDelaySeconds: 10,
+      // dispatchDeadlineSeconds: 60 * 5 // 5 minutes
+    });
   }
 });
 
