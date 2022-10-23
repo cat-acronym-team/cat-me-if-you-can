@@ -53,7 +53,7 @@
     right: 15%;
     width: 60%;
     height: 40%;
-    background-color: rgb(154, 0, 0);
+    background-color: grey;
     border: 0;
     overflow: scroll;
   }

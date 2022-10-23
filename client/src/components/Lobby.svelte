@@ -1,4 +1,5 @@
 <script lang="ts">
+  import LobbyChat from "./LobbyChat.svelte";
   import SelectAvatar from "./SelectAvatar.svelte";
   import { page } from "$app/stores";
   import type { Lobby } from "$lib/firebase/firestore-types/lobby";
@@ -41,6 +42,9 @@
       <h3>Code: {lobbyCode}</h3>
       <h3>Players: {lobby.players.length}</h3>
     </div>
+    <div class="lobbyChat-level">
+      <LobbyChat />
+    </div>
     <SelectAvatar {lobby} {lobbyCode} />
     <div class="start">
       <button
@@ -80,5 +84,11 @@
 
   .invite-link {
     margin: 0;
+  }
+  .lobbyChat-level {
+    width: 100%;
+    display: flex;
+    justify-content: left;
+    align-items: center;
   }
 </style>
