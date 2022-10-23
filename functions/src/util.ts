@@ -3,27 +3,36 @@ import { Lobby } from "./firestore-types/lobby";
 
 export function generatePairs(lobbyData: Lobby): GeneratedPairs {
   const pairs: GeneratedPairs["pairs"] = [];
-  let pairOne: string, pairTwo: string;
   let stalker: string | undefined;
+  
+  // get only the uids of alive players
+  let aliveUids: string[] = [];
+  lobbyData.players.forEach((player, playerIndex) => {
+    if (player.alive) {
+      aliveUids.push(lobbyData.uids[playerIndex]);
+    }
+  });
 
-  // Check if the lobby is uneven to find stalker
-  while (lobbyData.uids.length > 1) {
+  // pairs up on the alive players
+  while (aliveUids.length > 1) {
     // get random pair
-    pairOne = lobbyData.uids[Math.floor(Math.random() * lobbyData.uids.length)];
-    pairTwo = lobbyData.uids[Math.floor(Math.random() * lobbyData.uids.length)];
+    const one = aliveUids[Math.floor(Math.random() * aliveUids.length)];
+    let two = aliveUids[Math.floor(Math.random() * aliveUids.length)];
     // generate a random player if the current pairs are equal
     do {
-      pairTwo = lobbyData.uids[Math.floor(Math.random() * lobbyData.uids.length)];
-    } while (pairOne === pairTwo);
+      two = aliveUids[Math.floor(Math.random() * aliveUids.length)];
+    } while (one === two);
     // organize the pairs
-    pairs.push({ one: pairOne, two: pairTwo });
-    // delete them from temp array
-    lobbyData.uids.splice(lobbyData.uids.indexOf(pairOne), 1);
-    lobbyData.uids.splice(lobbyData.uids.indexOf(pairTwo), 1);
+    pairs.push({ one, two });
+    // delete them from array
+    aliveUids = aliveUids.filter((uid) => {
+      return ![one, two].includes(uid);
+    });
   }
+
   // Make this guy a stalker somehow
-  if (lobbyData.uids.length !== 0) {
-    stalker = lobbyData.uids[0];
+  if (aliveUids.length !== 0) {
+    stalker = aliveUids[0];
   }
 
   return { pairs, stalker };
