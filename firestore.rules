@@ -31,19 +31,26 @@ service cloud.firestore {
         function roomData(){
           return get(/databases/$(database)/documents/lobbies/$(code)/chatRooms/$(roomId)).data
         }
-        function isPair(){
+        function inPair(){
           return request.auth.uid in roomData().pair 
         }
         function canRead(){
-          return isPair() || request.auth.uid in roomData().viewers ;
+          return inPair() || request.auth.uid in roomData().viewers ;
         }
         // firestore didn't like me using the above function for chatroom
         // I think its because the info is in the resource object
         allow read: if request.auth.uid in resource.data.pair || request.auth.uid in resource.data.viewers ;
-        allow delete: if isHost();
         match /chatMessages/{messageId}{
+
+          function validateChatMessage() {
+            return request.resource.data.keys().hasOnly(['sender','text', 'timestamp'])
+            && request.resource.data.sender == request.auth.uid && request.resource.data.text is string 
+            && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 100
+            && request.resource.data.text.trim() == request.resource.data.text
+            && request.resource.data.timestamp is timestamp && request.resource.data.timestamp == request.time;
+          }
           allow read: if canRead();
-          allow write: if isPair();
+          allow write: if inPair() && validateChatMessage();
         }
       }
     }

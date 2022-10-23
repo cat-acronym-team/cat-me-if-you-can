@@ -2,17 +2,10 @@
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
   import { onSnapshot, orderBy, query, QueryDocumentSnapshot } from "firebase/firestore";
-  import {
-    chatMessageValidator,
-    type ChatMessage,
-    type ChatRoom,
-    type Lobby,
-    type Player,
-  } from "$lib/firebase/firestore-types/lobby";
-  import { findChatRoom } from "$lib/firebase/chat";
+  import { type ChatMessage, type ChatRoom, type Lobby, type Player } from "$lib/firebase/firestore-types/lobby";
+  import { findChatRoom, addChatMessage } from "$lib/firebase/chat";
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
   import type { User } from "firebase/auth";
-  import { addChatMessage, deleteChatRooms } from "$lib/firebase/firestore-functions";
   // props
   export let lobbyData: Lobby & { id: string };
   // variables
@@ -54,20 +47,23 @@
     clearInterval(timer);
   });
   // Function will create document with new message
-  function submitMessage() {
+  async function submitMessage() {
     if (message === "") {
       return;
     }
-    // validate message
-    const validate = chatMessageValidator(message);
-    if (!validate.valid) {
-      errorMessage = validate.reason;
+    try {
+      // add Message
+      await addChatMessage(lobbyData.id, chatRoomInfo.id, user.uid, message);
+      // clear the input
       message = "";
-      return;
+      // if there's an error message then clear it
+      if (errorMessage !== "") {
+        errorMessage = "";
+      }
+    } catch (err) {
+      // catch and display erro
+      errorMessage = err instanceof Error ? err.message : String(err);
     }
-    // add Message
-    addChatMessage({ code: lobbyData.id, roomId: chatRoomInfo.id, message });
-    message = "";
   }
   // Checks if the sender is the current user
   function isUser(uid: string) {
@@ -76,8 +72,6 @@
   // Reactive Calls
   $: if (countdown === 0) {
     clearInterval(timer);
-    // Deletes all the chatrooms and switches game state
-    deleteChatRooms({ code: lobbyData.id });
   }
 </script>
 
@@ -125,7 +119,7 @@
   }
   .messages {
     width: 100%;
-    height: 65%;
+    height: 60%;
     overflow-y: scroll;
   }
   .user-msg {
