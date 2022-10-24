@@ -26,6 +26,8 @@
       case "Firebase: Error (auth/wrong-password).":
         errorMessage = "Incorrect Password.";
         return;
+      default:
+        return;
     }
   }
 
