@@ -189,10 +189,6 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx --prefix client playwright install --with-deps
 
-      - name: Install Playwright's Dependencies
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx --prefix client playwright install-deps
-
       - name: Test
         run: npm --prefix client run test
         env:
