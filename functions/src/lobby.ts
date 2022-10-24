@@ -15,7 +15,6 @@ import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 import { deleteChatRooms } from "./chat";
-import { Timestamp } from "firebase-admin/firestore";
 
 export const startGame = functions.https.onCall(async (data: unknown, context) => {
   // no auth then you shouldn't be here
@@ -103,7 +102,7 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
     await startPrompt(lobbyDocRef);
   }
   if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {
-    const expiration = Timestamp.fromMillis(Timestamp.now().toMillis() + 30000);
+    const expiration = firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 30000);
     lobbyDocRef.set({ expiration }, { merge: true });
   }
 });
