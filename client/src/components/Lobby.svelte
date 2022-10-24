@@ -49,7 +49,7 @@
     <div class="start">
       <button
         id="start-game"
-        on:click={async () => {
+        on:click={() => {
           startGame({ code: lobbyCode });
         }}>Start Game</button
       >
