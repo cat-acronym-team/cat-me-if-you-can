@@ -16,6 +16,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+          cache: npm
+          cache-dependency-path: package-lock.json
 
       - name: Install Node Dependencies
         run: npm ci
@@ -34,6 +36,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
 
       - name: Install Node Dependencies
         run: npm --prefix functions ci
@@ -52,6 +56,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
 
       - name: Install Node Dependencies
         run: npm --prefix functions ci
@@ -70,6 +76,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
 
       - name: Install Node Dependencies
         run: npm --prefix functions ci
@@ -88,6 +96,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+          cache: npm
+          cache-dependency-path: client/package-lock.json
 
       - name: Install Node Dependencies
         run: npm --prefix client ci
@@ -106,6 +116,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+          cache: npm
+          cache-dependency-path: client/package-lock.json
 
       - name: Install Node Dependencies
         run: npm --prefix client ci
@@ -124,6 +136,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            functions/package-lock.json
 
       - name: Install Java
         uses: actions/setup-java@v3
@@ -160,6 +176,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            functions/package-lock.json
 
       - name: Install Node Dependencies
         run: |
@@ -193,6 +213,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            functions/package-lock.json
 
       - name: Install Node Dependencies
         run: |
