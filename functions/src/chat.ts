@@ -1,4 +1,4 @@
-import { DocumentReference } from "firebase-admin/firestore";
+import type { DocumentReference } from "firebase-admin/firestore";
 import { db } from "./app";
 import { getChatRoomCollection, getChatRoomMessagesCollection, getLobbyChatCollection } from "./firestore-collections";
 import { Lobby } from "./firestore-types/lobby";

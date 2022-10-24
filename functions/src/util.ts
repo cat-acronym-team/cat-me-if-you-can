@@ -4,7 +4,7 @@ import { Lobby } from "./firestore-types/lobby";
 export function generatePairs(lobbyData: Lobby): GeneratedPairs {
   const pairs: GeneratedPairs["pairs"] = [];
   let stalker: string | undefined;
-  
+
   // get only the uids of alive players
   let aliveUids: string[] = [];
   lobbyData.players.forEach((player, playerIndex) => {
