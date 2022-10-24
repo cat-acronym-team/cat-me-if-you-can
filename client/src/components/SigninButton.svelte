@@ -11,6 +11,10 @@
   let signInButton = false;
   let createAccountButton = false;
   let errorMessage: string = "";
+  function clearFields() {
+    email = "";
+    password = "";
+  }
   function outputErrorMessage() {
     switch (errorMessage) {
       case "Firebase: Error (auth/user-not-found).":
@@ -40,6 +44,7 @@
       outputErrorMessage();
       return;
     }
+    createAccountButton = false;
     openSignInModal = false;
     email = "";
     password = "";
@@ -54,15 +59,18 @@
       outputErrorMessage();
       return;
     }
+    signInButton = false;
     openSignInModal = false;
     password = "";
     email = "";
   }
   function signInDropDown() {
+    errorMessage = "";
     signInButton = !signInButton;
     createAccountButton = false;
   }
   function createAccountDropDown() {
+    errorMessage = "";
     createAccountButton = !createAccountButton;
     signInButton = false;
   }
@@ -108,8 +116,9 @@
         <img src="/images/microsoft.png" alt="microsoftButton" />
       </button>
     </div>
+
     <div>
-      <button on:click={signInDropDown}>Sign In</button>
+      <button on:click={signInDropDown} on:click={clearFields}>Sign In</button>
       {#if signInButton}
         <form class="formContainer" on:submit|preventDefault={submitLogin}>
           <div class="groupContainer">
@@ -122,13 +131,16 @@
               <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
             </div>
           </div>
+          {#if errorMessage !== ""}
+            <p class="error">{errorMessage}</p>
+          {/if}
           <div class="formButton">
             <button type="submit">Login</button>
           </div>
         </form>
       {/if}
     </div>
-    <button on:click={createAccountDropDown}>Create Account</button>
+    <button on:click={createAccountDropDown} on:click={clearFields}>Create Account</button>
     {#if createAccountButton}
       <form class="formContainer" on:submit|preventDefault={createAccount}>
         <div class="groupContainer">
@@ -151,14 +163,15 @@
             />
           </div>
         </div>
+        {#if errorMessage !== ""}
+          <p class="error">{errorMessage}</p>
+        {/if}
         <div class="formButton">
-          <button type="submit">Create Account</button>
+          <button type="submit">Register Account</button>
         </div>
       </form>
     {/if}
-    {#if errorMessage !== ""}
-      <p class="error">{errorMessage}</p>
-    {/if}
+
     <div id="input" />
   </div>
 </Modal>
