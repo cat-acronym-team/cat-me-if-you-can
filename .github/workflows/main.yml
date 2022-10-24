@@ -17,7 +17,10 @@ jobs:
         with:
           node-version: 16
           cache: npm
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+            functions/package-lock.json
 
       - name: Install Node Dependencies
         run: npm ci
@@ -37,7 +40,10 @@ jobs:
         with:
           node-version: 16
           cache: npm
-          cache-dependency-path: functions/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+            functions/package-lock.json
 
       - name: Install Node Dependencies
         run: npm --prefix functions ci
@@ -57,7 +63,10 @@ jobs:
         with:
           node-version: 16
           cache: npm
-          cache-dependency-path: functions/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+            functions/package-lock.json
 
       - name: Install Node Dependencies
         run: npm --prefix functions ci
@@ -77,7 +86,10 @@ jobs:
         with:
           node-version: 16
           cache: npm
-          cache-dependency-path: functions/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+            functions/package-lock.json
 
       - name: Install Node Dependencies
         run: npm --prefix functions ci
@@ -97,7 +109,10 @@ jobs:
         with:
           node-version: 16
           cache: npm
-          cache-dependency-path: client/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+            functions/package-lock.json
 
       - name: Install Node Dependencies
         run: npm --prefix client ci
@@ -117,7 +132,10 @@ jobs:
         with:
           node-version: 16
           cache: npm
-          cache-dependency-path: client/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+            functions/package-lock.json
 
       - name: Install Node Dependencies
         run: npm --prefix client ci
@@ -138,6 +156,7 @@ jobs:
           node-version: 16
           cache: npm
           cache-dependency-path: |
+            package-lock.json
             client/package-lock.json
             functions/package-lock.json
 
@@ -178,6 +197,7 @@ jobs:
           node-version: 16
           cache: npm
           cache-dependency-path: |
+            package-lock.json
             client/package-lock.json
             functions/package-lock.json
 
@@ -215,6 +235,7 @@ jobs:
           node-version: 16
           cache: npm
           cache-dependency-path: |
+            package-lock.json
             client/package-lock.json
             functions/package-lock.json
 
