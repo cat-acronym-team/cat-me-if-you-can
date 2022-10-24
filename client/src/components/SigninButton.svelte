@@ -11,17 +11,34 @@
   let signInButton = false;
   let createAccountButton = false;
   let errorMessage: string = "";
+  function outputErrorMessage() {
+    switch (errorMessage) {
+      case "Firebase: Error (auth/user-not-found).":
+        errorMessage = "The email you entered is not registered, please create an account.";
+        return;
+      case "Firebase: Error (auth/popup-closed-by-user).":
+        errorMessage = "";
+        return;
+      case "Firebase: Error (auth/wrong-password).":
+        errorMessage = "Incorrect Password.";
+        return;
+    }
+  }
+
   async function createAccount() {
     if (password != confirmPass) {
       password = "";
       confirmPass = "";
-      return (errorMessage = "Passwords do not match");
+      errorMessage = "Passwords do not match";
+      return;
     }
     try {
       await createUser(email, password);
       errorMessage = "";
     } catch (err) {
-      return (errorMessage = err instanceof Error ? err.message : String(err));
+      errorMessage = err instanceof Error ? err.message : String(err);
+      outputErrorMessage();
+      return;
     }
     openSignInModal = false;
     email = "";
@@ -33,7 +50,9 @@
       await loginWithEmail(email, password);
       errorMessage = "";
     } catch (err) {
-      return (errorMessage = err instanceof Error ? err.message : String(err));
+      errorMessage = err instanceof Error ? err.message : String(err);
+      outputErrorMessage();
+      return;
     }
     openSignInModal = false;
     password = "";
@@ -52,7 +71,9 @@
       await loginWithGoogle();
       errorMessage = "";
     } catch (err) {
-      return (errorMessage = err instanceof Error ? err.message : String(err));
+      errorMessage = err instanceof Error ? err.message : String(err);
+      outputErrorMessage();
+      return;
     }
     openSignInModal = false;
   }
@@ -62,7 +83,9 @@
       await loginWithMicrosoft();
       errorMessage = "";
     } catch (err) {
-      return (errorMessage = err instanceof Error ? err.message : String(err));
+      errorMessage = err instanceof Error ? err.message : String(err);
+      outputErrorMessage();
+      return;
     }
     openSignInModal = false;
   }
@@ -85,24 +108,26 @@
         <img src="/images/microsoft.png" alt="microsoftButton" />
       </button>
     </div>
-    <button on:click={signInDropDown}>Sign In</button>
-    {#if signInButton}
-      <form class="formContainer" on:submit|preventDefault={submitLogin}>
-        <div class="groupContainer">
-          <div class="formGroup">
-            <label for="email"><b>Email</b></label>
-            <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
+    <div>
+      <button on:click={signInDropDown}>Sign In</button>
+      {#if signInButton}
+        <form class="formContainer" on:submit|preventDefault={submitLogin}>
+          <div class="groupContainer">
+            <div class="formGroup">
+              <label for="email"><b>Email</b></label>
+              <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
+            </div>
+            <div class="formGroup">
+              <label for="password"><b>Password</b></label>
+              <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
+            </div>
           </div>
-          <div class="formGroup">
-            <label for="password"><b>Password</b></label>
-            <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
+          <div class="formButton">
+            <button type="submit">Login</button>
           </div>
-        </div>
-        <div class="formButton">
-          <button type="submit">Login</button>
-        </div>
-      </form>
-    {/if}
+        </form>
+      {/if}
+    </div>
     <button on:click={createAccountDropDown}>Create Account</button>
     {#if createAccountButton}
       <form class="formContainer" on:submit|preventDefault={createAccount}>

@@ -12,24 +12,13 @@ import {
 // Google login/signup
 export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
-
-  try {
-    const user = await signInWithPopup(auth, provider);
-    console.log(user);
-  } catch (error) {
-    console.log(error);
-  }
+  await signInWithPopup(auth, provider);
 }
 
 // Microsoft login/signup
 export async function loginWithMicrosoft() {
   const provider = new OAuthProvider("microsoft.com");
-  try {
-    const user = await signInWithPopup(auth, provider);
-    console.log(user);
-  } catch (error) {
-    console.log(error);
-  }
+  await signInWithPopup(auth, provider);
 }
 
 // Login with email and password
