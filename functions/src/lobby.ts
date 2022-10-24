@@ -8,12 +8,14 @@ import {
   lobbyCollection,
   userCollection,
 } from "./firestore-collections";
-import { isLobbyRequest } from "./firestore-functions-types";
+import { isExpirationRequest, isLobbyRequest } from "./firestore-functions-types";
 import { avatars, Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
-import { adminFunctions, db } from "./app";
+import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
+import { deleteChatRooms } from "./chat";
+import { Timestamp } from "firebase-admin/firestore";
 
 export const startGame = functions.https.onCall(async (data: unknown, context) => {
   // no auth then you shouldn't be here
@@ -101,12 +103,8 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
     await startPrompt(lobbyDocRef);
   }
   if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {
-    // Testing the enqueue
-    const queue = adminFunctions.taskQueue("testTask");
-    queue.enqueue({
-      scheduleDelaySeconds: 10,
-      // dispatchDeadlineSeconds: 60 * 5 // 5 minutes
-    });
+    const expiration = Timestamp.fromMillis(Timestamp.now().toMillis() + 30000);
+    lobbyDocRef.set({ expiration }, { merge: true });
   }
 });
 
@@ -213,3 +211,40 @@ export const collectPromptAnswers = functions.firestore
       });
     });
   });
+
+export const verifyExpiration = functions.https.onCall(async (data, context) => {
+  // check auth
+  if (context.auth == undefined) {
+    throw new functions.https.HttpsError("permission-denied", "User is not Authenticated");
+  }
+  // check the data request
+  if (!isExpirationRequest(data)) {
+    throw new functions.https.HttpsError("invalid-argument", "Data is not of ExpirationRequest type.");
+  }
+  // get lobby doc
+  const lobbyDocRef = lobbyCollection.doc(data.code);
+
+  // start transaction
+  return db.runTransaction(async (transaction) => {
+    const lobbyDoc = await transaction.get(lobbyDocRef);
+    const lobby = lobbyDoc.data();
+    if (lobby === undefined) {
+      throw new functions.https.HttpsError("not-found", "Lobby does not exist.");
+    }
+    // if the time sent is less than expiration
+    if (data.time.seconds < lobby.expiration.seconds) {
+      throw new functions.https.HttpsError("invalid-argument", "Too early to make request.");
+    }
+    // if the timer sent is equal or greater than
+    // change to the next phase
+
+    // TODO: potential if checks for other states that require a timer
+    // if the state is chat then delete chatrooms
+    if (lobby.state === "CHAT") {
+      deleteChatRooms(lobbyDoc.ref);
+      return transaction.update(lobbyDocRef, { state: "VOTE" });
+    }
+
+    return;
+  });
+});

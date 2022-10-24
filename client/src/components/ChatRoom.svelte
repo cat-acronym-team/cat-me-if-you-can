@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
-  import { onSnapshot, orderBy, query, QueryDocumentSnapshot } from "firebase/firestore";
+  import { onSnapshot, orderBy, query, QueryDocumentSnapshot, Timestamp } from "firebase/firestore";
   import { type ChatMessage, type ChatRoom, type Lobby, type Player } from "$lib/firebase/firestore-types/lobby";
   import { findChatRoom, addChatMessage } from "$lib/firebase/chat";
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
   import type { User } from "firebase/auth";
+  import { verifyExpiration } from "$lib/firebase/firestore-functions";
   // props
   export let lobbyData: Lobby & { id: string };
   // variables
@@ -15,8 +16,7 @@
   let chatRoomInfo: QueryDocumentSnapshot<ChatRoom>;
   let chatMessages: ChatMessage[] = [];
   let timer: ReturnType<typeof setInterval>;
-  let countdown: number = 60;
-  let end = Date.now() + 60000;
+  let countdown: number;
   let message: string = "";
   let errorMessage: string = "";
 
@@ -30,6 +30,8 @@
         chatMessages = collection.docs.map((message) => message.data());
       }
     );
+    // set countdown
+    countdown = Math.floor((lobbyData.expiration.toMillis() - Date.now()) / 1000);
     // Get userInfo
     userInfo = lobbyData.players[lobbyData.uids.indexOf(user.uid)];
     // Get partnerInfo
@@ -39,7 +41,7 @@
     partnerInfo = lobbyData.players[lobbyData.uids.indexOf(partner)];
     // create timer
     timer = setInterval(() => {
-      const diff = Math.floor((end - Date.now()) / 1000);
+      const diff = Math.floor((lobbyData.expiration.toMillis() - Date.now()) / 1000);
       countdown = diff;
     }, 500);
   });
@@ -70,13 +72,20 @@
     return (user as User).uid === uid;
   }
   // Reactive Calls
-  $: if (countdown === 0) {
+  $: if (countdown === 0 && lobbyData.uids[0] === user.uid) {
     clearInterval(timer);
+    verifyExpiration({ time: Timestamp.now(), code: lobbyData.id });
+  }
+  $: if (countdown < 0) {
+    clearInterval(timer);
+    verifyExpiration({ time: Timestamp.now(), code: lobbyData.id });
   }
 </script>
 
 <div class="chatroom">
-  <p class="countdown">{countdown}</p>
+  {#if countdown !== undefined}
+    <p class="countdown">{countdown}</p>
+  {/if}
   {#if partnerInfo !== undefined}
     <div>MATCHED WITH {partnerInfo.displayName.toUpperCase()}</div>
   {/if}
