@@ -166,6 +166,17 @@ jobs:
           distribution: "adopt"
           java-version: "11"
 
+      - name: Get Playwright Version
+        id: playwright-version
+        run: echo "::set-output name=version::$(node -e "console.log(require('./client/package-lock.json').dependencies['@playwright/test'].version)")"
+
+      - name: Cache Playwright
+        uses: actions/cache@v3
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
+
       - name: Install Node Dependencies
         run: |
           npm --prefix functions ci
@@ -174,8 +185,13 @@ jobs:
       - name: Install firebase emulators
         run: npm i -g firebase-tools
 
-      - name: Install Playwright
+      - name: Install Playwright and it's Dependencies
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx --prefix client playwright install --with-deps
+
+      - name: Install Playwright's Dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx --prefix client playwright install-deps
 
       - name: Test
         run: npm --prefix client run test
