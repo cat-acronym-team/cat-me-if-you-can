@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@material/typography/mdc-typography.scss";
   import IconButton from "@smui/icon-button";
   import Modal from "$components/Modal.svelte";
 
