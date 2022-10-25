@@ -1,27 +1,27 @@
 <script lang="ts">
-  import Modal from "./Modal.svelte";
   import Button, { Label } from "@smui/button";
+  import Dialog, { Header, Title, Content } from "@smui/dialog";
   import { authStore as user } from "$stores/auth";
 
   // check if the user is logged in with getAuth
-  let openSignInModal = false;
+  let showSignInDialog = false;
 </script>
 
 <!-- Sign In Modal -->
-<Modal
-  open={openSignInModal}
-  onClosed={() => {
-    openSignInModal = false;
-  }}
->
-  <!-- TODO: Sign In Modal Content Here -->
-</Modal>
+<Dialog bind:open={showSignInDialog} aria-labelledby="signin-dialog-title" aria-describedby="signin-dialog-content">
+  <Header>
+    <Title id="signin-dialog-title">Sign In</Title>
+  </Header>
+  <Content id="signin-dialog-content">
+    <!-- TODO: Sign In Modal Content Here -->
+  </Content>
+</Dialog>
 <div class="account-container">
   <!-- If you are not signed in show this  -->
   {#if $user == null}
     <Button
       on:click={() => {
-        openSignInModal = true;
+        showSignInDialog = true;
       }}><Label>Sign in</Label></Button
     >
     <!-- If you show account and dropdown -->
