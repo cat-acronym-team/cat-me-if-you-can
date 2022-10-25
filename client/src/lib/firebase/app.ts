@@ -46,6 +46,6 @@ auth.onAuthStateChanged((user) => {
 
 if (PUBLIC_USE_EMULATORS === "true") {
   connectFirestoreEmulator(db, "localhost", 8080);
-  connectAuthEmulator(auth, "http://localhost:9099");
+  connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
   connectFunctionsEmulator(functions, "localhost", 5001);
 }
