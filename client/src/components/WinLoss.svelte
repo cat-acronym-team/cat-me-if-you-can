@@ -82,7 +82,7 @@
       {/if}
       {#if isHost}
         <button
-          on:click={async () => {
+          on:click={() => {
             lobbyReturn({ code: lobbyCode });
           }}>Return to Lobby</button
         >
@@ -104,7 +104,7 @@
       <!-- If the player is the host, show the return button -->
       {#if isHost}
         <button
-          on:click={async () => {
+          on:click={() => {
             lobbyReturn({ code: lobbyCode });
           }}>Return to Lobby</button
         >
@@ -127,7 +127,7 @@
       <h2>You have successfully taken over the litter!</h2>
       {#if isHost}
         <button
-          on:click={async () => {
+          on:click={() => {
             lobbyReturn({ code: lobbyCode });
           }}>Return to Lobby</button
         >
@@ -149,7 +149,7 @@
       <h2>You should go back to your sea ani-anim-aneme... home</h2>
       {#if isHost}
         <button
-          on:click={async () => {
+          on:click={() => {
             lobbyReturn({ code: lobbyCode });
           }}>Return to Lobby</button
         >
