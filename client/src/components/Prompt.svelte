@@ -40,7 +40,7 @@
 </script>
 
 <form class="wraper" on:submit|preventDefault={submitAnswer}>
-  <label class="question" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
+  <label class="mdc-typography--headline5" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
 
   <div class="input">
     <Textfield input$id="prompt-answer" bind:value={answer} bind:dirty invalid={dirty && error != undefined}>
@@ -56,10 +56,5 @@
     display: grid;
     grid-template-rows: 1fr 1fr 1fr;
     place-items: center;
-  }
-
-  .question {
-    font-size: 2rem;
-    font-weight: bold;
   }
 </style>

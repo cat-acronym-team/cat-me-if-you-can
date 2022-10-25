@@ -34,7 +34,7 @@
   {#each avatarChoices as { avatar, displayName }}
     <button class="avatar" on:click={() => selectAvatar(avatar)}>
       <img src="/avatars/{avatar}.webp" alt="cat picture {avatar}" />
-      <span class="name">{displayName ?? ""}</span>
+      <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
     </button>
   {/each}
 </div>
@@ -79,9 +79,5 @@
     background-position: center;
     background-repeat: no-repeat;
     border: 1px black solid;
-  }
-
-  .avatar .name {
-    font-size: 2vmin;
   }
 </style>

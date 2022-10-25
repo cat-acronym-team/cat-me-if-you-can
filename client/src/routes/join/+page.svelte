@@ -86,7 +86,7 @@
   <SigninButton />
 </nav>
 <div class="cat-join-container">
-  <h2>Join Lobby!</h2>
+  <h2 class="mdc-typography--headline2">Join Lobby!</h2>
   {#if error.status}
     <p style="color:red;">{error.message}</p>
   {/if}
