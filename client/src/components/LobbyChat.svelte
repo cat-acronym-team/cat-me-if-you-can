@@ -3,12 +3,26 @@
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
   import { onSnapshot, orderBy, query, QueryDocumentSnapshot } from "firebase/firestore";
+  import { type ChatMessage, type ChatRoom, type Lobby, type Player } from "$lib/firebase/firestore-types/lobby";
   import type { User } from "firebase/auth";
+  import { getLobbyChatCollection } from "$lib/firebase/firestore-collections";
 
-  //export let lobbyData: Lobby & { id: string };
+  export let lobbyData: Lobby & { id: string };
+
+  let user = $authStore as User;
+  let userInfo: Player;
   let openSignInModal = false;
   let message: string = "";
   let errorMessage: string = "";
+
+  onMount(async () => {
+    onSnapshot(
+      query(getLobbyChatCollection(lobbyData.id), orderBy("timestamp", "asc")),
+      async((collection) => {
+        lobbyChatMessages = collection.docs.map((messages) => message.data());
+      })
+    );
+  });
 
   async function submitMessage() {
     if (message === "") {
@@ -26,11 +40,21 @@
       //errorMessage = err instanceOf Error ? err.message : String(err);
     }
   }
+  function isUser(uid: string) {
+    return (user as User).uid === uid;
+  }
 </script>
 
 <main>
   <Modal open={openSignInModal}>
     <button class="close" on:click={() => (openSignInModal = false)}>X</button>
+    {#each lobbyChatMessage as message}
+      {#if isUser(message.sender)}
+        <p class="user-msg">{message.text}</p>
+      {:else}
+        <p class="lobby-msg">{message.txt}</p>
+      {/if}
+    {/each}
     <div class="chatRoom">
       <form on:submit|preventDefault={submitMessage}>
         <input type="text" bind:value={message} />
@@ -50,6 +74,21 @@
   .formGroup {
     position: absolute;
     bottom: 0px;
+  }
+  .user-msg {
+    text-align: right;
+    background-color: skyblue;
+    width: fit-content;
+    margin-left: auto;
+    padding: 5px;
+    border-radius: 15px;
+  }
+  .partner-msg {
+    text-align: left;
+    background-color: red;
+    width: fit-content;
+    padding: 5px;
+    border-radius: 15px;
   }
   /* .chatRoom {
     position: fixed;
