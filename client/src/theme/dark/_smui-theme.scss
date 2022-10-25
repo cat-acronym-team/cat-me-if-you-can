@@ -11,6 +11,10 @@
   $error: color-palette.$red-700
 );
 
+:root {
+  color-scheme: dark;
+}
+
 html,
 body {
   background-color: #000;

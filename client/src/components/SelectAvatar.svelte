@@ -70,6 +70,7 @@
     grid-template-rows: auto 16px;
     gap: 12px;
     place-items: center;
+    color: unset;
   }
 
   .avatar img {
@@ -78,6 +79,6 @@
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
-    border: 1px black solid;
+    border: 1px currentColor solid;
   }
 </style>

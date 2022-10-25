@@ -11,6 +11,10 @@
   $error: color-palette.$red-900
 );
 
+:root {
+  color-scheme: light;
+}
+
 html,
 body {
   background-color: theme.$surface;
