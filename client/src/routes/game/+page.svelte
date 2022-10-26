@@ -1,6 +1,7 @@
 <script lang="ts">
   import Prompt from "$components/Prompt.svelte";
   import LobbyComponent from "$components/Lobby.svelte";
+  import CircularProgress from "@smui/circular-progress";
 
   import { onSnapshot, doc, getDoc } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
@@ -84,11 +85,15 @@
 <!-- We could have a loading animation until the lobby is not undefined -->
 <main>
   {#if $user == null || lobby == undefined || lobbyCode == null}
-    Loading... <!-- TODO: make a Nice Loading spinner -->
+    <div class="spinner-wraper">
+      <CircularProgress indeterminate />
+    </div>
   {:else if lobby.state === "WAIT"}
     <LobbyComponent {lobbyCode} {lobby} />
   {:else if privatePlayer == undefined}
-    Loading... <!-- TODO: make a Nice Loading spinner -->
+    <div class="spinner-wraper">
+      <CircularProgress indeterminate />
+    </div>
   {:else if lobby.state === "PROMPT"}
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
   {:else}
@@ -100,5 +105,14 @@
   main {
     height: 100%;
     overflow: auto;
+  }
+
+  .spinner-wraper {
+    height: 100%;
+    display: grid;
+    place-content: center;
+    grid-template-columns: 128px;
+    grid-template-rows: 128px;
+    place-items: stretch;
   }
 </style>
