@@ -30,9 +30,9 @@
     <!-- Hover doesn't work on mobile -->
     <div class="account-content">
       <!-- TODO: Account Hover Links -->
-      <!-- <a href="/settings">Account Settings</a>
-        <a href="/stats">Stats</a>
-        <a href="/logout">Logout</a> -->
+      <a href="/settings">Account Settings</a>
+      <a href="/stats">Stats</a>
+      <button>Logout</button>
     </div>
   {/if}
 </div>
