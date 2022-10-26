@@ -23,7 +23,6 @@
     },
   ];
 
-  // check if the user is logged in with getAuth
   let showSignInDialog = false;
 </script>
 
