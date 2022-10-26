@@ -24,15 +24,22 @@
 {#if getRole !== undefined}
   <div class="container">
     <div class="header">Time to find your purrfect match!</div>
-    <div class="role">
+    
       {#if getRole.role == "CAT"}
+      <div class="role">
         You are a <span class="green">{getRole.role}</span>
+      </div>
+      <p class="description">Use your inner Purrlock Holmes and find the catfish!</p>
+      <!-- TODO: Use different cat picture -->
+      <img src="https://media.istockphoto.com/photos/front-view-of-british-shorthair-cat-7-months-old-sitting-picture-id104355461?k=20&m=104355461&s=612x612&w=0&h=9KPbuZ6tTUxqi-_WZT8zrjNrf1W8XBuXIw8ZIM_YQuI=" alt="cat">
       {:else}
+      <div class="role">
         You are a <span class="red">{getRole.role}</span>
+      </div>
+      <p class="description">Try to cat-mo-flauge with the rest of the cats!</p>
+      <!-- TODO: Use different catfish picture -->
+        <img src="https://media.istockphoto.com/photos/channel-catfish-picture-id503331450?k=20&m=503331450&s=612x612&w=0&h=_ciR7YrmZN1EIooeMl1mo0aVJ3bGTXGVoFzBWVlTyts=" alt="catfish">
       {/if}
-
-      <p><i>Insert Image</i></p>
-    </div>
   </div>
 {/if}
 
@@ -49,28 +56,36 @@
     font-size: 4em;
     font-weight: bold;
     left: 25%;
-    top: 10%;
+    top: 5%;
     text-align: center;
   }
 
   .role {
     position: absolute;
-    width: 20%;
+    width: 50%;
     height: 30%;
-    left: 40%;
+    left: 25%;
     top: 25%;
     font-size: 4em;
     text-align: center;
   }
 
-  p {
+  .description {
     position: absolute;
-    width: 80%;
-    left: 10%;
-    top: 40%;
+    font-size: 2.6em;
+    width: 75%;
+    left: 15%;
+    top: 70%;
+    text-align: center;
+  }
+
+  img {
+    position: absolute;
+    width: 30%;
+    left: 35%;
+    top: 35%;
     border: 2px solid black;
-    height: 80%;
-    color: blue;
+    height: 35%;
   }
 
   .green {
