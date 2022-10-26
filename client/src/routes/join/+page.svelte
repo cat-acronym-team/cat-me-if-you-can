@@ -19,7 +19,7 @@
   let code: string;
 
   // Checks to see if the join page has the code query paramter
-  onMount(async () => {
+  onMount(() => {
     if ("errorMessage" in history.state) {
       const { errorMessage } = history.state;
       error = {
