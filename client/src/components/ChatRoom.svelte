@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
   import { onSnapshot, orderBy, query, QueryDocumentSnapshot, Timestamp } from "firebase/firestore";
-  import { type ChatMessage, type ChatRoom, type Lobby, type Player } from "$lib/firebase/firestore-types/lobby";
+  import type { ChatMessage, ChatRoom, Lobby, Player } from "$lib/firebase/firestore-types/lobby";
   import { findChatRoom, addChatMessage } from "$lib/firebase/chat";
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
   import type { User } from "firebase/auth";
@@ -12,7 +12,7 @@
   // variables
   let user = $authStore as User;
   let userInfo: Player;
-  let partnerInfo: Player;
+  let partnerInfo: Player | undefined;
   let chatRoomInfo: QueryDocumentSnapshot<ChatRoom>;
   let chatMessages: ChatMessage[] = [];
   let timer: ReturnType<typeof setInterval>;
@@ -35,10 +35,12 @@
     // Get userInfo
     userInfo = lobbyData.players[lobbyData.uids.indexOf(user.uid)];
     // Get partnerInfo
-    const [partner] = chatRoomInfo.data().pair.filter((u) => {
+    const partner = chatRoomInfo.data().pair.find((u) => {
       return user.uid !== u;
     });
-    partnerInfo = lobbyData.players[lobbyData.uids.indexOf(partner)];
+    if (partner !== undefined) {
+      partnerInfo = lobbyData.players[lobbyData.uids.indexOf(partner)];
+    }
     // create timer
     timer = setInterval(() => {
       const diff = Math.floor((lobbyData.expiration.toMillis() - Date.now()) / 1000);
