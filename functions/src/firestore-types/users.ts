@@ -30,3 +30,24 @@ export function displayNameValidator(displayName: string): { valid: true } | { v
 
   return { valid: true };
 }
+/**
+ * the type of documents `/users/{uid}/stats/{statsId}`
+ */
+export type Stats = {
+  /**
+   * amount of times won as cat
+   */
+  catWins: number;
+  /**
+   * amount of times won as catfish
+   */
+  catfishWins: number;
+  /**
+   * amount of times you played as cat
+   */
+  playedAsCat: number;
+  /**
+   * amount of times you played as catfish
+   */
+  playedAsCatfish: number;
+};
