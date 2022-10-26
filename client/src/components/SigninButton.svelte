@@ -1,8 +1,11 @@
 <script lang="ts">
   import Button, { Label } from "@smui/button";
+  import Menu from "@smui/menu";
+  import List, { Item, Separator, Text } from "@smui/list";
   import Dialog, { Header, Title, Content } from "@smui/dialog";
   import { Svg, Icon } from "@smui/common";
   import { authStore as user } from "$stores/auth";
+  import { logOut } from "$lib/firebase/auth";
 
   const googleSvgPaths: { color: string; path: string }[] = [
     {
@@ -24,6 +27,7 @@
   ];
 
   let showSignInDialog = false;
+  let menu: Menu;
 </script>
 
 <!-- Sign In Modal -->
@@ -60,14 +64,15 @@
     <Button on:click={() => (showSignInDialog = true)}><Label>Sign in</Label></Button>
     <!-- If you show account and dropdown -->
   {:else}
-    <Button><Label>Account</Label></Button>
-    <!-- Hover doesn't work on mobile -->
-    <div class="account-content">
-      <!-- TODO: Account Hover Links -->
-      <a href="/settings">Account Settings</a>
-      <a href="/stats">Stats</a>
-      <button>Logout</button>
-    </div>
+    <Button on:click={() => menu.setOpen(true)}><Label>Account</Label></Button>
+    <Menu bind:this={menu}>
+      <List>
+        <Item tag="a" href="/settings"><Text>Account Settings</Text></Item>
+        <Item tag="a" href="/stats"><Text>Stats</Text></Item>
+        <Separator />
+        <Item on:SMUI:action={logOut}><Text>Logout</Text></Item>
+      </List>
+    </Menu>
   {/if}
 </div>
 
@@ -75,20 +80,6 @@
   .account-container {
     position: relative;
     display: inline-block;
-  }
-
-  .account-content {
-    display: none;
-    position: absolute;
-    right: 5px;
-    background-color: #151515;
-    min-width: 160px;
-    /* box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2); */
-    z-index: 1;
-  }
-
-  .account-container:hover .account-content {
-    display: block;
   }
 
   .buttons {
