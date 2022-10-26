@@ -45,7 +45,7 @@
     </div>
     <SelectAvatar {lobby} {lobbyCode} />
     <div class="start">
-      <Button id="start-game" on:click={() => startGame({ code: lobbyCode })}><Label>Start Game</Label></Button>
+      <Button on:click={() => startGame({ code: lobbyCode })}><Label>Start Game</Label></Button>
     </div>
     <div class="buttons">
       <h3 class="invite-link">Invite Link: {url}</h3>
@@ -58,11 +58,6 @@
 <style>
   main {
     justify-content: center;
-  }
-
-  #start-game {
-    width: 100px;
-    height: 35px;
   }
 
   .start {
