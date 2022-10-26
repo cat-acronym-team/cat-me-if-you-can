@@ -34,6 +34,10 @@ service cloud.firestore {
       // allows anyone to read that information
       allow read;
       allow create, update: if request.auth.uid == userId && validateAttrs();
+
+      match /stats/{statsId}{
+        allow get, write: if request.auth.uid == statsId;
+      }
     }
   }
 }
