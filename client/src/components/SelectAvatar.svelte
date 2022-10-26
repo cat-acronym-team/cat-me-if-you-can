@@ -5,13 +5,29 @@
   export let lobbyCode: string;
   export let lobby: Lobby;
 
+  const avatarAltText = [
+    "Default cat",
+    "Astronaut cat",
+    "Bee Cat",
+    "Burger cat",
+    "City cat",
+    "Computer cat",
+    "Cowboy cat",
+    "Emo demon cat",
+    "Fantasy cat",
+    "Fish cat",
+    "Ghost cat",
+    "Magic cat",
+    "Torsten cat",
+  ] as const;
+
   $: avatarChoices = updateAvatarChoices(lobby);
 
   function updateAvatarChoices(lobby: Lobby) {
-    const newAvatarChoices: { avatar: Avatar; displayName?: string }[] = [];
+    const newAvatarChoices: { avatar: Avatar; altText: string; displayName?: string }[] = [];
 
     for (let i = 1; i <= 12; i++) {
-      newAvatarChoices.push({ avatar: i as Avatar });
+      newAvatarChoices.push({ avatar: i as Avatar, altText: avatarAltText[i] });
     }
 
     for (const player of lobby.players) {
@@ -31,9 +47,9 @@
 </script>
 
 <div class="grid">
-  {#each avatarChoices as { avatar, displayName }}
+  {#each avatarChoices as { avatar, altText, displayName }}
     <button class="avatar" on:click={() => selectAvatar(avatar)}>
-      <img src="/avatars/{avatar}.webp" alt="cat picture {avatar}" />
+      <img src="/avatars/{avatar}.webp" alt={altText} />
       <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
     </button>
   {/each}
