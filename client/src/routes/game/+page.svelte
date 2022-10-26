@@ -82,7 +82,7 @@
 <!-- I do this check because the html was rendering the Lobby component before the onmount happened due to lobby having default values -->
 <!-- So the code was displaying undefined in the Lobby Component -->
 <!-- We could have a loading animation until the lobby is not undefined -->
-<div>
+<main>
   {#if $user == null || lobby == undefined || lobbyCode == null}
     Loading... <!-- TODO: make a Nice Loading spinner -->
   {:else if lobby.state === "WAIT"}
@@ -94,4 +94,11 @@
   {:else}
     unknown lobby state: {lobby.state}
   {/if}
-</div>
+</main>
+
+<style>
+  main {
+    height: 100%;
+    overflow: auto;
+  }
+</style>
