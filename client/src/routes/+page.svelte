@@ -1,5 +1,7 @@
 <script lang="ts">
   import SigninButton from "$components/SigninButton.svelte";
+  import Button, { Label } from "@smui/button";
+  import Textfield from "@smui/textfield";
   import { getUser, saveOrCreate } from "$lib/firebase/splash";
   import { createLobby } from "$lib/firebase/create-lobby";
   import type { UserData } from "$lib/firebase/firestore-types/users";
@@ -70,9 +72,9 @@
       <img src="https://picsum.photos/500/300" alt="our logo" />
     </div>
     <div class="cat-main-buttons">
-      <input type="text" placeholder="Enter in your display name" bind:value={name} />
-      <button on:click={createLobbyHandler}>Create Lobby</button>
-      <button on:click={joinLobbyHandler}>Join Lobby</button>
+      <Textfield type="text" label="Display name" bind:value={name} />
+      <Button on:click={createLobbyHandler}><Label>Create Lobby</Label></Button>
+      <Button on:click={joinLobbyHandler}><Label>Join Lobby</Label></Button>
     </div>
   </div>
 </main>
@@ -119,52 +121,20 @@
     width: 70%;
     margin: auto;
   }
-  .cat-main-buttons input {
-    width: 100%;
-    height: 25px;
-    text-align: center;
-  }
-  .cat-main-buttons button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    margin-top: 20px;
-    background-color: #151515;
-    color: red;
-    width: 100%;
-    height: 45px;
-  }
+
   /* Tablet Styles */
   @media only screen and (min-width: 700px) {
-    .account-container {
-      margin-right: 10px;
-    }
     .logo-container {
       width: 40%;
-    }
-    .cat-main-buttons input {
-      height: 35px;
-      font-size: 1.4em;
-    }
-    .cat-main-buttons a {
-      height: 50px;
-      font-size: 1.4em;
     }
   }
   /* Desktop Styles */
   @media only screen and (min-width: 1000px) {
-    .question-container {
-      width: 3%;
-    }
     .logo-container {
       width: 20%;
     }
     .cat-main-buttons {
       width: 35%;
-    }
-    .cat-main-buttons a {
-      height: 60px;
     }
   }
 </style>

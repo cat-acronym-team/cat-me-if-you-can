@@ -34,7 +34,6 @@ export async function loginAnonymous() {
   return await signInAnonymously(auth);
 }
 
-// Sign out
-export async function onSignOut() {
-  return await signOut(auth);
+export function logOut() {
+  return signOut(auth);
 }
