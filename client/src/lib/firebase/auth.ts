@@ -1,5 +1,12 @@
 import { auth } from "$lib/firebase/app";
-import { GoogleAuthProvider, OAuthProvider, signInWithPopup, signInAnonymously, deleteUser } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  OAuthProvider,
+  signInWithPopup,
+  signInAnonymously,
+  deleteUser,
+  signOut,
+} from "firebase/auth";
 
 // Google login/signup
 export async function loginWithGoogle() {
@@ -44,4 +51,8 @@ export async function deleteAccount() {
   }
 
   return user;
+}
+
+export function logOut() {
+  return signOut(auth);
 }

@@ -1,5 +1,7 @@
 <script lang="ts">
   import SigninButton from "$components/SigninButton.svelte";
+  import Button, { Label } from "@smui/button";
+  import Textfield from "@smui/textfield";
   import { authStore as user } from "$stores/auth";
   import { findAndJoinLobby } from "$lib/firebase/join-lobby";
   import { saveOrCreate } from "$lib/firebase/splash";
@@ -16,10 +18,10 @@
     status: false,
     message: "",
   };
-  let code: string;
+  let code: string = "";
 
   // Checks to see if the join page has the code query paramter
-  onMount(async () => {
+  onMount(() => {
     if ("errorMessage" in history.state) {
       const { errorMessage } = history.state;
       error = {
@@ -84,14 +86,14 @@
   <SigninButton />
 </nav>
 <div class="cat-join-container">
-  <h2>Join Lobby!</h2>
+  <h2 class="mdc-typography--headline2">Join Lobby!</h2>
   {#if error.status}
     <p style="color:red;">{error.message}</p>
   {/if}
   <form on:submit|preventDefault={joinLobby}>
-    <input type="text" placeholder="Enter in your display name" bind:value={name} />
-    <input bind:value={code} />
-    <button type="submit" placeholder="Enter the lobby code">Join</button>
+    <Textfield type="text" label="Display name" bind:value={name} />
+    <Textfield type="text" label="Lobby code" bind:value={code} />
+    <Button><Label>Join</Label></Button>
   </form>
 </div>
 
@@ -105,17 +107,11 @@
     margin: auto;
     text-align: center;
   }
-  .cat-join-container input {
-    margin-top: 5px;
-    width: 100%;
-    height: 35px;
-    text-align: center;
-  }
-  .cat-join-container button {
-    margin-top: 10px;
-    border: 0;
-    width: 50%;
-    height: 25px;
+
+  form {
+    display: grid;
+    place-items: center;
+    gap: 12px;
   }
 
   @media only screen and (min-width: 1000px) {
