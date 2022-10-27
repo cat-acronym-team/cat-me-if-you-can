@@ -1,5 +1,6 @@
 <script lang="ts">
   import Button, { Label } from "@smui/button";
+  import Textfield from "@smui/textfield";
   import Menu from "@smui/menu";
   import List, { Item, Separator, Text } from "@smui/list";
   import Dialog, { Header, Title, Content } from "@smui/dialog";
@@ -156,17 +157,9 @@
         <Label>Sign in with email</Label>
       </Button>
       {#if signInButton}
-        <form class="formContainer" on:submit|preventDefault={submitLogin}>
-          <div class="groupContainer">
-            <div class="formGroup">
-              <label for="email"><b>Email</b></label>
-              <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
-            </div>
-            <div class="formGroup">
-              <label for="password"><b>Password</b></label>
-              <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
-            </div>
-          </div>
+        <form on:submit|preventDefault={submitLogin}>
+          <Textfield label="Email" type="email" bind:value={email} required />
+          <Textfield label="Password" type="password" bind:value={password} required />
           {#if errorMessage !== ""}
             <p class="error">{errorMessage}</p>
           {/if}
@@ -180,27 +173,10 @@
         <Label>Sign up with email</Label>
       </Button>
       {#if createAccountButton}
-        <form class="formContainer" on:submit|preventDefault={createAccount}>
-          <div class="groupContainer">
-            <div class="formGroup">
-              <label for="email"><b>Email</b></label>
-              <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
-            </div>
-            <div class="formGroup">
-              <label for="password"><b>Password</b></label>
-              <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
-            </div>
-            <div class="formGroup">
-              <label for="confirmPass"><b>Confirm Password</b></label>
-              <input
-                type="password"
-                bind:value={confirmPass}
-                placeholder="Confirm Password"
-                name="confirmPass"
-                required
-              />
-            </div>
-          </div>
+        <form on:submit|preventDefault={createAccount}>
+          <Textfield label="Email" type="email" bind:value={email} required />
+          <Textfield label="Password" type="password" bind:value={password} required />
+          <Textfield label="Confirm Password" type="password" bind:value={confirmPass} required />
           {#if errorMessage !== ""}
             <p class="error">{errorMessage}</p>
           {/if}
@@ -264,31 +240,12 @@
     }
   }
 
+  form {
+    display: grid;
+    gap: 12px;
+  }
+
   .error {
     color: salmon;
-  }
-
-  .groupContainer {
-    display: flex;
-    width: 100%;
-  }
-
-  .formGroup {
-    display: flex;
-    flex-direction: column;
-    width: 40%;
-    margin: auto;
-  }
-  .formGroup label {
-    text-align: left;
-  }
-
-  .formGroup input {
-    width: 100%;
-    height: 25px;
-  }
-  .formContainer button {
-    margin: auto;
-    margin-top: 10px;
   }
 </style>
