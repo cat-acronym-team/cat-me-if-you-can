@@ -88,6 +88,10 @@ export const joinLobby = functions.https.onCall((data: unknown, context) => {
   });
 });
 
+export const leaveLobby = functions.https.onCall(() => {
+  // TODO: All the leave lobby stuff
+});
+
 // TODO: replace with the correct trigger
 export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate(async (change, context) => {
   const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;

@@ -4,5 +4,6 @@ import type { LobbyRequest, ErrorResponse } from "./firestore-functions-types";
 import type { ChangeAvatarData } from "./functions-types/avatar";
 
 export const startGame = httpsCallable<LobbyRequest, ErrorResponse>(functions, "startGame");
+export const leaveLobby = httpsCallable<LobbyRequest, ErrorResponse>(functions, "leaveLobby");
 export const joinLobby = httpsCallable<LobbyRequest, ErrorResponse>(functions, "joinLobby");
 export const changeAvatar = httpsCallable<ChangeAvatarData, void>(functions, "changeAvatar");

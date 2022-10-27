@@ -5,7 +5,7 @@
   import { page } from "$app/stores";
   import type { Lobby } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { startGame } from "$lib/firebase/firestore-functions";
+  import { startGame, leaveLobby } from "$lib/firebase/firestore-functions";
 
   // Props
   export let lobbyCode: string;
@@ -47,6 +47,9 @@
     <div class="start">
       <Button on:click={() => startGame({ code: lobbyCode })}><Label>Start Game</Label></Button>
     </div>
+    <div class="leave">
+      <Button on:click={() => leaveLobby({ code: lobbyCode })}><Label>Leave Lobby</Label></Button>
+    </div>
     <div class="buttons">
       <h3 class="invite-link">Invite Link: {url}</h3>
       <IconButton class="material-icons" on:click={copyLink}>content_copy</IconButton>
@@ -60,7 +63,8 @@
     justify-content: center;
   }
 
-  .start {
+  .start,
+  .leave {
     display: grid;
     place-items: center;
   }
