@@ -34,9 +34,9 @@
   async function createLobbyHandler() {
     try {
       // Create User
-      await saveOrCreate(user, userData, name);
+      await saveOrCreate(user, userData, name.trim());
       // Create Lobby
-      const code = await createLobby(name);
+      const code = await createLobby(name.trim());
       // go to game page
       goto("/game?code=" + code);
     } catch (err) {
