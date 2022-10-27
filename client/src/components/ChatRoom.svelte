@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
-  import { onSnapshot, orderBy, query, QueryDocumentSnapshot, Timestamp } from "firebase/firestore";
+  import { onSnapshot, orderBy, query, QueryDocumentSnapshot } from "firebase/firestore";
   import type { ChatMessage, ChatRoom, Lobby, Player } from "$lib/firebase/firestore-types/lobby";
   import { findChatRoom, addChatMessage } from "$lib/firebase/chat";
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
@@ -26,17 +26,16 @@
     // subscribe the chat messages
     onSnapshot(
       query(getChatRoomMessagesCollection(lobbyData.id, chatRoomInfo.id), orderBy("timestamp", "asc")),
-      async (collection) => {
+      (collection) => {
         chatMessages = collection.docs.map((message) => message.data());
       }
     );
-    // set countdown
-    countdown = Math.floor((lobbyData.expiration.toMillis() - Date.now()) / 1000);
+    
     // Get userInfo
     userInfo = lobbyData.players[lobbyData.uids.indexOf(user.uid)];
     // Get partnerInfo
-    const partner = chatRoomInfo.data().pair.find((u) => {
-      return user.uid !== u;
+    const partner = chatRoomInfo.data().pair.find((uid) => {
+      return user.uid !== uid;
     });
     if (partner !== undefined) {
       partnerInfo = lobbyData.players[lobbyData.uids.indexOf(partner)];
@@ -61,9 +60,7 @@
       // clear the input
       message = "";
       // if there's an error message then clear it
-      if (errorMessage !== "") {
-        errorMessage = "";
-      }
+      errorMessage = "";
     } catch (err) {
       // catch and display erro
       errorMessage = err instanceof Error ? err.message : String(err);
@@ -76,11 +73,11 @@
   // Reactive Calls
   $: if (countdown === 0 && lobbyData.uids[0] === user.uid) {
     clearInterval(timer);
-    verifyExpiration({ time: Timestamp.now(), code: lobbyData.id });
+    verifyExpiration({ code: lobbyData.id });
   }
-  $: if (countdown < 0) {
+  $: if (countdown < -5) {
     clearInterval(timer);
-    verifyExpiration({ time: Timestamp.now(), code: lobbyData.id });
+    verifyExpiration({ code: lobbyData.id });
   }
 </script>
 
