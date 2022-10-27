@@ -16,6 +16,9 @@ export type UserData = {
 };
 
 export function displayNameValidator(displayName: string): { valid: true } | { valid: false; reason: string } {
+  if (displayName === "") {
+    return { valid: false, reason: "Display name must not be empty" };
+  }
   if (displayName.length < 3) {
     return { valid: false, reason: "Display name must be at least 3 characters long" };
   }
@@ -26,6 +29,10 @@ export function displayNameValidator(displayName: string): { valid: true } | { v
 
   if (displayName !== displayName.trim()) {
     return { valid: false, reason: "Display name must not contain leading or trailing whitespace" };
+  }
+
+  if (displayName.search(/[^A-Za-z0-9-_ ]+/) >= 0) {
+    return { valid: false, reason: "Display name must not have special characters" };
   }
 
   return { valid: true };
