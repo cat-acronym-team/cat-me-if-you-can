@@ -11,7 +11,9 @@
   import { authStore as user } from "$stores/auth";
   import { goto } from "$app/navigation";
   import type { Unsubscribe } from "firebase/auth";
+  import type { DocumentReference } from "firebase/firestore";
 
+  let lobbyDocRef: DocumentReference<Lobby>;
   let lobbyCode: string | null = null;
 
   let lobby: Lobby | undefined = undefined;
@@ -29,7 +31,7 @@
       return;
     }
 
-    const lobbyDocRef = doc(lobbyCollection, lobbyCode);
+    lobbyDocRef = doc(lobbyCollection, lobbyCode);
 
     // We want to get the document immediately because if we wait there's a short delay in getting
     // the new doc from subscribing below. This makes the redirect slow since we want to check if the user isn't in this lobby
@@ -93,7 +95,7 @@
   {:else if lobby.state === "PROMPT"}
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
   {:else if lobby.state === "END"}
-    <WinLoss {lobbyCode} {lobby} {privatePlayer} />
+    <WinLoss {lobbyCode} {lobby} {lobbyDocRef} />
   {:else}
     unknown lobby state: {lobby.state}
   {/if}

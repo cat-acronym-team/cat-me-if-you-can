@@ -24,6 +24,11 @@ export type Player = {
    * the number of players that have voted for this player
    */
   votes?: number;
+
+  /**
+   * the role that the player played; used at the end of the game
+   */
+  role: Role;
 };
 
 export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
@@ -48,6 +53,11 @@ export type Lobby = {
    * the current state of the game
    */
   state: GameState;
+
+  /**
+   * the role that won at the end of the game
+   */
+  winner: Role;
 };
 
 /**

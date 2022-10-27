@@ -2,62 +2,44 @@
   import { authStore as user } from "$stores/auth";
   import type { PrivatePlayer, Lobby } from "../../../functions/src/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { lobbyReturn, getLobbyRole } from "$lib/firebase/firestore-functions";
-  import type { ErrorResponse, LobbyRoleResponse } from "$lib/firebase/firestore-functions-types";
+  import { lobbyReturn } from "$lib/firebase/firestore-functions";
+  import { getPrivatePlayerCollection } from "$lib/firebase/firestore-collections";
+  import { doc, getDoc } from "firebase/firestore";
+  import type { DocumentReference } from "firebase/firestore";
 
+  export let lobbyDocRef: DocumentReference<Lobby>;
   export let lobbyCode: string;
-  export let privatePlayer: PrivatePlayer;
   export let lobby: Lobby;
 
   let end: "Cat Win" | "Cat Lose" | "Catfish Lose" | "Catfish Win" | null = null;
   let catfishList: string = "";
-  let catfishDisplayname: string[] = [];
-  let isHost: boolean = false;
+  let catfishes: string[];
+  onMount(async () => {
+    // format a string list to have commas and "and" when needed
+    const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
+    // get the list of catfishes from lobby.ts and put them into a variable
+    catfishes = lobby.players
+      .filter((p) => {
+        return p.role == "CATFISH";
+      })
+      .map((c) => c.displayName);
+    catfishList = formatter.format(catfishes);
 
-  // check if the player is host aka the first uid in the uids array
-  if ($user !== null)
-    if (lobby.uids.indexOf($user.uid) == 0) {
-      isHost = true;
-    }
-
-  function findResult(privatePlayer: PrivatePlayer, catCount: number, catfishCount: number) {
-    const { role } = privatePlayer;
-    if (role == "CAT") {
-      if (catfishCount == 0) {
-        return "Cat Win";
-      }
-      if (catCount <= catfishCount) {
-        return "Cat Lose";
+    // grab the current user's role
+    const myRole = (await getDoc(doc(getPrivatePlayerCollection(lobbyDocRef), $user?.uid))).data() as PrivatePlayer;
+    // update end variable depending on the winner type and the current player's role
+    if (myRole.role == "CAT") {
+      if (lobby.winner == "CAT") {
+        end = "Cat Win";
+      } else if (lobby.winner == "CATFISH") {
+        end = "Cat Lose";
       }
     } else {
-      if (catfishCount >= catCount) {
-        return "Catfish Win";
+      if (lobby.winner == "CAT") {
+        end = "Catfish Lose";
+      } else if (lobby.winner == "CATFISH") {
+        end = "Catfish Win";
       }
-      if (catfishCount == 0) {
-        return "Catfish Lose";
-      }
-    }
-    return null;
-  }
-
-  onMount(async () => {
-    // function to count the number of players currently alive
-    let gameInfo = await getLobbyRole({ code: lobbyCode }); // grabs return statement from function as an object
-    if ("error" in (gameInfo.data as ErrorResponse)) {
-      console.log("Error occurred!");
-    }
-    const response = gameInfo.data as LobbyRoleResponse;
-    let aliveCatCount = response.aliveCatCount; // number of cats that are currently alive
-    let catfishDisplayname = response.catfishDisplayname; // catfish's dislplay name used in the html lobbyCode
-
-    let aliveCatFishCount = catfishDisplayname.length;
-    const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
-    catfishList = formatter.format(catfishDisplayname);
-    // any other player who is alive and not a cat is a catfish
-    if ($user !== null) {
-      // set conditions for the game to be declared a win or loss
-      end = findResult(privatePlayer, aliveCatCount, aliveCatFishCount);
-      console.log(end);
     }
   });
 </script>
@@ -71,24 +53,24 @@
     </div>
 
     <div class="image">
-      <img src="https://picsum.photos/200" alt="clown fish" />
+      <img src="https://www.azpetvet.com/wp-content/uploads/Happy-cat-1024x711.jpg" alt="clown fish" />
     </div>
 
     <div class="displayname">
-      {#if catfishDisplayname.length > 1}
+      {#if catfishes.length > 1}
         <h2>{catfishList} were sentenced to 9 lives in purrison!</h2>
       {:else}
         <h2>{catfishList} was sentenced to 9 lives in purrison!</h2>
       {/if}
-      {#if isHost}
-        <button
-          on:click={() => {
-            lobbyReturn({ code: lobbyCode });
-          }}>Return to Lobby</button
-        >
-      {:else}
+      <!-- {#if isHost} -->
+      <button
+        on:click={() => {
+          lobbyReturn({ code: lobbyCode });
+        }}>Return to Lobby</button
+      >
+      <!-- {:else}
         <span class="button">Waiting for Host to Return to Lobby...</span>
-      {/if}
+      {/if} -->
     </div>
   {:else if end == "Cat Lose"}
     <div class="banner">
@@ -97,21 +79,23 @@
     </div>
 
     <div class="image">
-      <img src="https://picsum.photos/200" alt="cat fish" />
+      <img src="https://pbs.twimg.com/media/EAmr-PAWsAEoiWR.jpg" alt="cat fish" />
     </div>
     <div class="displayname">
-      <h2>{catfishList} has taken over the litter!</h2>
-      <!-- If the player is the host, show the return button -->
-      {#if isHost}
-        <button
-          on:click={() => {
-            lobbyReturn({ code: lobbyCode });
-          }}>Return to Lobby</button
-        >
-        <!-- Otherwise show a message -->
+      <!-- Check the number of catfish for grammar purposes -->
+      {#if catfishes.length > 1}
+        <h2>{catfishList} have taken over the litter!</h2>
       {:else}
-        <span class="button">Waiting for Host to Return to Lobby...</span>
+        <h2>{catfishList} has taken over the litter!</h2>
       {/if}
+      <!-- If the player is the host, show the return button -->
+      <button
+        on:click={() => {
+          lobbyReturn({ code: lobbyCode });
+        }}>Return to Lobby</button
+      >
+      <!-- Otherwise show a message
+        <span class="button">Waiting for Host to Return to Lobby...</span> -->
     </div>
   {:else if end == "Catfish Win"}
     <div class="banner">
@@ -120,20 +104,18 @@
     </div>
 
     <div class="image">
-      <img src="https://picsum.photos/200" alt="cat fish" />
+      <img src="https://media.fisheries.noaa.gov/2020-10/blue%20catfish%20face.jpg?VersionId=null" alt="cat fish" />
     </div>
 
     <div class="displayname">
       <h2>You have successfully taken over the litter!</h2>
-      {#if isHost}
-        <button
-          on:click={() => {
-            lobbyReturn({ code: lobbyCode });
-          }}>Return to Lobby</button
-        >
-      {:else}
-        <span class="button">Waiting for Host to Return to Lobby...</span>
-      {/if}
+      <!-- {#if isHost} -->
+      <button
+        on:click={() => {
+          lobbyReturn({ code: lobbyCode });
+        }}>Return to Lobby</button
+      >
+      <!-- <span class="button">Waiting for Host to Return to Lobby...</span> -->
     </div>
   {:else if end == "Catfish Lose"}
     <div class="banner">
@@ -142,20 +124,20 @@
     </div>
 
     <div class="image">
-      <img src="https://picsum.photos/200" alt="clown fish" />
+      <img src="https://cdn.drawception.com/drawings/577991/0C653P5Wka.png" alt="clown fish" />
     </div>
 
     <div class="displayname">
       <h2>You should go back to your sea ani-anim-aneme... home</h2>
-      {#if isHost}
-        <button
-          on:click={() => {
-            lobbyReturn({ code: lobbyCode });
-          }}>Return to Lobby</button
-        >
-      {:else}
+      <!-- {#if isHost} -->
+      <button
+        on:click={() => {
+          lobbyReturn({ code: lobbyCode });
+        }}>Return to Lobby</button
+      >
+      <!-- {:else}
         <span class="button">Waiting for Host to Return to Lobby...</span>
-      {/if}
+      {/if} -->
     </div>
   {/if}
 </div>
@@ -163,7 +145,7 @@
 <style>
   .container {
     position: relative;
-    height: 100vh;
+    height: 90vh;
   }
 
   .banner {
