@@ -50,7 +50,7 @@ service cloud.firestore {
               && request.resource.data.timestamp is timestamp && request.resource.data.timestamp == request.time;
           }
           allow read: if canRead();
-          allow write: if inPair() && validateChatMessage();
+          allow create: if inPair() && validateChatMessage();
         }
       }
     }
