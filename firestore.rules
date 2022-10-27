@@ -43,11 +43,11 @@ service cloud.firestore {
         match /chatMessages/{messageId}{
 
           function validateChatMessage() {
-            return request.resource.data.keys().hasOnly(['sender','text', 'timestamp'])
-            && request.resource.data.sender == request.auth.uid && request.resource.data.text is string 
-            && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 100
-            && request.resource.data.text.trim() == request.resource.data.text
-            && request.resource.data.timestamp is timestamp && request.resource.data.timestamp == request.time;
+            return request.resource.data.keys().hasOnly(['sender', 'text', 'timestamp'])
+              && request.resource.data.sender == request.auth.uid && request.resource.data.text is string 
+              && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 100
+              && request.resource.data.text.trim() == request.resource.data.text
+              && request.resource.data.timestamp is timestamp && request.resource.data.timestamp == request.time;
           }
           allow read: if canRead();
           allow write: if inPair() && validateChatMessage();
