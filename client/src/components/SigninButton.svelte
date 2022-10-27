@@ -151,59 +151,65 @@
         </Icon>
         <Label>Sign in with Microsoft</Label>
       </Button>
+      <Button id="sign-in-with-email" variant="raised" on:click={signInDropDown} on:click={clearFields}>
+        <Icon class="material-icons">email</Icon>
+        <Label>Sign in with email</Label>
+      </Button>
+      {#if signInButton}
+        <form class="formContainer" on:submit|preventDefault={submitLogin}>
+          <div class="groupContainer">
+            <div class="formGroup">
+              <label for="email"><b>Email</b></label>
+              <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
+            </div>
+            <div class="formGroup">
+              <label for="password"><b>Password</b></label>
+              <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
+            </div>
+          </div>
+          {#if errorMessage !== ""}
+            <p class="error">{errorMessage}</p>
+          {/if}
+          <Button type="submit">
+            <Label>Sign In</Label>
+          </Button>
+        </form>
+      {/if}
+      <Button id="sign-up-with-email" variant="raised" on:click={createAccountDropDown} on:click={clearFields}>
+        <Icon class="material-icons">email</Icon>
+        <Label>Sign up with email</Label>
+      </Button>
+      {#if createAccountButton}
+        <form class="formContainer" on:submit|preventDefault={createAccount}>
+          <div class="groupContainer">
+            <div class="formGroup">
+              <label for="email"><b>Email</b></label>
+              <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
+            </div>
+            <div class="formGroup">
+              <label for="password"><b>Password</b></label>
+              <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
+            </div>
+            <div class="formGroup">
+              <label for="confirmPass"><b>Confirm Password</b></label>
+              <input
+                type="password"
+                bind:value={confirmPass}
+                placeholder="Confirm Password"
+                name="confirmPass"
+                required
+              />
+            </div>
+          </div>
+          {#if errorMessage !== ""}
+            <p class="error">{errorMessage}</p>
+          {/if}
+          <Button type="submit">
+            <Label>Sign Up</Label>
+          </Button>
+        </form>
+      {/if}
     </div>
-    <button on:click={signInDropDown} on:click={clearFields}>Sign In</button>
-    {#if signInButton}
-      <form class="formContainer" on:submit|preventDefault={submitLogin}>
-        <div class="groupContainer">
-          <div class="formGroup">
-            <label for="email"><b>Email</b></label>
-            <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
-          </div>
-          <div class="formGroup">
-            <label for="password"><b>Password</b></label>
-            <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
-          </div>
-        </div>
-        {#if errorMessage !== ""}
-          <p class="error">{errorMessage}</p>
-        {/if}
-        <div class="formButton">
-          <button type="submit">Login</button>
-        </div>
-      </form>
-    {/if}
-    <button on:click={createAccountDropDown} on:click={clearFields}>Create Account</button>
-    {#if createAccountButton}
-      <form class="formContainer" on:submit|preventDefault={createAccount}>
-        <div class="groupContainer">
-          <div class="formGroup">
-            <label for="email"><b>Email</b></label>
-            <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
-          </div>
-          <div class="formGroup">
-            <label for="password"><b>Password</b></label>
-            <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
-          </div>
-          <div class="formGroup">
-            <label for="confirmPass"><b>Confirm Password</b></label>
-            <input
-              type="password"
-              bind:value={confirmPass}
-              placeholder="Confirm Password"
-              name="confirmPass"
-              required
-            />
-          </div>
-        </div>
-        {#if errorMessage !== ""}
-          <p class="error">{errorMessage}</p>
-        {/if}
-        <div class="formButton">
-          <button type="submit">Register Account</button>
-        </div>
-      </form>
-    {/if}
   </Content>
 </Dialog>
 <div class="account-container">
@@ -237,12 +243,18 @@
   }
 
   :global(#sign-in-with-google),
-  :global(#sign-in-with-microsoft) {
-    --mdc-theme-primary: #ffffff;
-    --mdc-theme-on-primary: #3c4043;
+  :global(#sign-in-with-microsoft),
+  :global(#sign-in-with-email),
+  :global(#sign-up-with-email) {
     --mdc-typography-button-text-transform: none;
     justify-content: start;
     gap: 4px;
+  }
+
+  :global(#sign-in-with-google),
+  :global(#sign-in-with-microsoft) {
+    --mdc-theme-primary: #ffffff;
+    --mdc-theme-on-primary: #3c4043;
   }
 
   @media (prefers-color-scheme: dark) {
