@@ -110,7 +110,7 @@ describe("displayNameValidator", () => {
       valid: false,
       reason: "Display name must not have special characters",
     };
-    
+
     const actualValidationResult = displayNameValidator(name);
 
     expect(actualValidationResult).to.deep.equal(expectedValidationResult);

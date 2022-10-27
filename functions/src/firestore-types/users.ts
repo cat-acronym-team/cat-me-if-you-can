@@ -34,6 +34,6 @@ export function displayNameValidator(displayName: string): { valid: true } | { v
   if (displayName.search(/[^A-Za-z0-9-_ ]+/) >= 0) {
     return { valid: false, reason: "Display name must not have special characters" };
   }
-  
+
   return { valid: true };
 }

@@ -25,7 +25,7 @@
         if (userData.displayName !== "") {
           name = userData.displayName;
         }
-      } 
+      }
       // if they dont have a user doc and used sign in with google/microsoft
       else {
         if (user.displayName !== null) {
@@ -54,7 +54,7 @@
   async function joinLobbyHandler() {
     try {
       // Create User
-      await saveOrCreate(user, userData, name);
+      await saveOrCreate(user, userData, name.trim());
       // go to join page
       goto("/join");
     } catch (err) {
