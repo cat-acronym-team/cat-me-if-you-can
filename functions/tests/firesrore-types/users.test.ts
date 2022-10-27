@@ -103,11 +103,25 @@ describe("displayNameValidator", () => {
     expect(actualValidationResult).to.deep.equal(expectedValidationResult);
   });
 
-  it("should allow names with emoji", () => {
+  it("Should not allow special characters", () => {
+    const name = "Cat$#";
+
+    const expectedValidationResult = {
+      valid: false,
+      reason: "Display name must not have special characters",
+    };
+    
+    const actualValidationResult = displayNameValidator(name);
+
+    expect(actualValidationResult).to.deep.equal(expectedValidationResult);
+  });
+
+  it("should not allow names with emoji", () => {
     const name = "Cat Emoji 😸";
 
     const expectedValidationResult = {
-      valid: true,
+      valid: false,
+      reason: "Display name must not have special characters",
     };
 
     const actualValidationResult = displayNameValidator(name);
