@@ -13,27 +13,6 @@ export type UserData = {
    * 1 - 12: cat picture 1 - 12
    */
   avatar: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
-};
-
-export function displayNameValidator(displayName: string): { valid: true } | { valid: false; reason: string } {
-  if (displayName.length < 3) {
-    return { valid: false, reason: "Display name must be at least 3 characters long" };
-  }
-
-  if (displayName.length > 12) {
-    return { valid: false, reason: "Display name must be at most 12 characters long" };
-  }
-
-  if (displayName !== displayName.trim()) {
-    return { valid: false, reason: "Display name must not contain leading or trailing whitespace" };
-  }
-
-  return { valid: true };
-}
-/**
- * the type of documents `/users/{uid}/stats/{statsId}`
- */
-export type Stats = {
   /**
    * amount of times won as cat
    */
@@ -51,3 +30,19 @@ export type Stats = {
    */
   playedAsCatfish: number;
 };
+
+export function displayNameValidator(displayName: string): { valid: true } | { valid: false; reason: string } {
+  if (displayName.length < 3) {
+    return { valid: false, reason: "Display name must be at least 3 characters long" };
+  }
+
+  if (displayName.length > 12) {
+    return { valid: false, reason: "Display name must be at most 12 characters long" };
+  }
+
+  if (displayName !== displayName.trim()) {
+    return { valid: false, reason: "Display name must not contain leading or trailing whitespace" };
+  }
+
+  return { valid: true };
+}
