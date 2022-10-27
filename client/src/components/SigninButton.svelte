@@ -14,6 +14,7 @@
   function clearFields() {
     email = "";
     password = "";
+    confirmPass = "";
   }
   function outputErrorMessage() {
     switch (errorMessage) {
