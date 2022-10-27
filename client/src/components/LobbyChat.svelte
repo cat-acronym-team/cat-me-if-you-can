@@ -48,7 +48,7 @@
 <main>
   <Modal open={openSignInModal}>
     <button class="close" on:click={() => (openSignInModal = false)}>X</button>
-    {#each lobbyChatMessage as message}
+    {#each chatMessage as message}
       {#if isUser(message.sender)}
         <p class="user-msg">{message.text}</p>
       {:else}
