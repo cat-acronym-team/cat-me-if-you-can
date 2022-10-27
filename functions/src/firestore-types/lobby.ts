@@ -1,5 +1,9 @@
 import type { Timestamp } from "firebase-admin/firestore";
 
+export const avatars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
+
+export type Avatar = typeof avatars[number];
+
 export type Player = {
   /**
    * true if the player has not bean voted out yet
@@ -9,7 +13,7 @@ export type Player = {
   /**
    * the cat profile picture that the user has selected
    */
-  avatar: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+  avatar: Avatar;
 
   /**
    * the name of the user that should be displayed
@@ -63,8 +67,34 @@ export type PrivatePlayer = {
   /**
    * the prompt that the user will be shown (this varies on the role)
    */
-  prompt: string;
+  prompt?: string;
 };
+
+/**
+ * the type of documents `/lobbies/{code}/promptAnswers/{uid}`
+ */
+export type PromptAnswer = {
+  /**
+   * the answer that the user has submitted
+   */
+  answer: string;
+};
+
+export function promptAnswerValidator(displayName: string): { valid: true } | { valid: false; reason: string } {
+  if (displayName.length == 0) {
+    return { valid: false, reason: "Prompt answer may not be empty" };
+  }
+
+  if (displayName.length > 50) {
+    return { valid: false, reason: "Prompt answer must be at most 50 characters long" };
+  }
+
+  if (displayName !== displayName.trim()) {
+    return { valid: false, reason: "Prompt answer must not contain leading or trailing whitespace" };
+  }
+
+  return { valid: true };
+}
 
 /**
  * the type of documents `/lobbies/{code}/votes/{uid}`
