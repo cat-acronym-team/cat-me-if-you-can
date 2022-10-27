@@ -1,4 +1,7 @@
 <script lang="ts">
+  import Button, { Label } from "@smui/button";
+  import Textfield from "@smui/textfield";
+  import HelperText from "@smui/textfield/helper-text";
   import { getPromptAnswerCollection } from "$lib/firebase/firestore-collections";
   import { doc, setDoc } from "firebase/firestore";
 
@@ -9,6 +12,7 @@
   export let lobbyCode: string;
 
   let answer = "";
+  let dirty = false;
 
   $: answerDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
 
@@ -36,12 +40,13 @@
 </script>
 
 <form class="wraper" on:submit|preventDefault={submitAnswer}>
-  <label class="question" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
+  <label class="mdc-typography--headline5" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
 
   <div class="input">
-    <input id="prompt-answer" type="text" bind:value={answer} />
-    <label class="error" for="prompt-answer">{error ?? ""}</label>
-    <button type="submit" disabled={error != undefined}>Done</button>
+    <Textfield input$id="prompt-answer" bind:value={answer} bind:dirty invalid={dirty && error != undefined}>
+      <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
+    </Textfield>
+    <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
   </div>
 </form>
 
@@ -51,36 +56,5 @@
     display: grid;
     grid-template-rows: 1fr 1fr 1fr;
     place-items: center;
-  }
-
-  .question {
-    font-size: 2rem;
-    font-weight: bold;
-  }
-
-  .input {
-    display: grid;
-    grid-template:
-      "input done" auto
-      "error none" auto
-      / auto auto;
-    gap: 0 8px;
-  }
-
-  #prompt-answer {
-    grid-area: input;
-    font-size: 2rem;
-    font-weight: bold;
-  }
-
-  .error {
-    grid-area: error;
-    display: block;
-    height: 16px;
-    color: red;
-  }
-
-  button {
-    grid-area: done;
   }
 </style>
