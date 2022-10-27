@@ -1,4 +1,4 @@
-import { userCollection, getUserStatsCollection } from "./firestore-collections";
+import { userCollection } from "./firestore-collections";
 import { doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
 import type { User } from "firebase/auth";
 import type { UserData } from "./firestore-types/users";
@@ -18,14 +18,12 @@ export async function saveOrCreate(user: User | null, userData: UserData | undef
   // create anon user and user doc with display name
   if (user === null && userData === undefined) {
     const anon = (await loginAnonymous()).user;
-    await createUser(anon.uid, name);
-    await createStats(anon.uid);
+    createUser(anon.uid, name);
   }
   // this is a user without user doc
   // create user doc with display name
   if (user !== null && userData === undefined) {
-    await createUser(user.uid, name);
-    await createStats(user.uid);
+    createUser(user.uid, name);
   }
   // this is user with a user doc
   // just update their current display name
@@ -54,14 +52,9 @@ export const createUser = async (uid: string, name: string) => {
   await setDoc(doc(userCollection, uid), {
     displayName: name,
     avatar: 0,
-  });
-};
-
-export function createStats(uid: string) {
-  return setDoc(doc(getUserStatsCollection(uid), uid), {
     catfishWins: 0,
     catWins: 0,
     playedAsCat: 0,
     playedAsCatfish: 0,
   });
-}
+};

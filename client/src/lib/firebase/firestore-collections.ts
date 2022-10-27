@@ -1,5 +1,5 @@
 import type { Lobby, PrivatePlayer, PromptAnswer } from "./firestore-types/lobby";
-import type { UserData, Stats } from "./firestore-types/users";
+import type { UserData } from "./firestore-types/users";
 import { collection, type CollectionReference, type DocumentReference } from "firebase/firestore";
 import { db } from "$lib/firebase/app";
 
@@ -13,8 +13,4 @@ export function getPrivatePlayerCollection(lobbyDoc: DocumentReference<Lobby>): 
 
 export function getPromptAnswerCollection(lobbyCode: string): CollectionReference<PromptAnswer> {
   return collection(lobbyCollection, lobbyCode, "promptAnswers") as CollectionReference<PromptAnswer>;
-}
-
-export function getUserStatsCollection(uid: string): CollectionReference<Stats> {
-  return collection(userCollection, uid, "stats") as CollectionReference<Stats>;
 }
