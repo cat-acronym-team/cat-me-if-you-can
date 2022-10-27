@@ -8,7 +8,7 @@ import {
   lobbyCollection,
   userCollection,
 } from "./firestore-collections";
-import { isExpirationRequest, isLobbyRequest } from "./firestore-functions-types";
+import { isLobbyRequest } from "./firestore-functions-types";
 import { avatars, Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
@@ -201,11 +201,13 @@ export const collectPromptAnswers = functions.firestore
           sender: one,
           text: oneAnswer,
           timestamp: firestore.Timestamp.now(),
+          isPromptAnswer: true,
         });
         await getChatRoomMessagesCollection(room).add({
           sender: two,
           text: twoAnswer,
           timestamp: firestore.Timestamp.now(),
+          isPromptAnswer: true,
         });
       });
     });
@@ -217,7 +219,7 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
     throw new functions.https.HttpsError("permission-denied", "User is not Authenticated");
   }
   // check the data request
-  if (!isExpirationRequest(data)) {
+  if (!isLobbyRequest(data)) {
     throw new functions.https.HttpsError("invalid-argument", "Data is not of ExpirationRequest type.");
   }
   // get lobby doc
@@ -231,7 +233,7 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
       throw new functions.https.HttpsError("not-found", "Lobby does not exist.");
     }
     // if the time sent is less than expiration
-    if (data.time.seconds < lobby.expiration.seconds) {
+    if (Date.now() < lobby.expiration.toMillis()) {
       throw new functions.https.HttpsError("invalid-argument", "Too early to make request.");
     }
     // if the timer sent is equal or greater than
@@ -240,7 +242,7 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
     // TODO: potential if checks for other states that require a timer
     // if the state is chat then delete chatrooms
     if (lobby.state === "CHAT") {
-      deleteChatRooms(lobbyDoc.ref);
+      deleteChatRooms(lobbyDocRef);
       return transaction.update(lobbyDocRef, { state: "VOTE" });
     }
 
