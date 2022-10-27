@@ -5,7 +5,106 @@
   import Dialog, { Header, Title, Content } from "@smui/dialog";
   import { Svg, Icon } from "@smui/common";
   import { authStore as user } from "$stores/auth";
-  import { logOut } from "$lib/firebase/auth";
+  import { loginWithGoogle, loginWithMicrosoft, loginWithEmail, logOut, createUser } from "$lib/firebase/auth";
+
+  let showSignInDialog = false;
+  let menu: Menu;
+  let email = "";
+  let password = "";
+  let confirmPass = "";
+  let signInButton = false;
+  let createAccountButton = false;
+  let errorMessage: string = "";
+
+  function clearFields() {
+    email = "";
+    password = "";
+    confirmPass = "";
+  }
+  function outputErrorMessage() {
+    switch (errorMessage) {
+      case "Firebase: Error (auth/user-not-found).":
+        errorMessage = "The email you entered is not registered, please create an account.";
+        return;
+      case "Firebase: Error (auth/popup-closed-by-user).":
+        errorMessage = "";
+        return;
+      case "Firebase: Error (auth/wrong-password).":
+        errorMessage = "Incorrect Password.";
+        return;
+      default:
+        return;
+    }
+  }
+
+  async function createAccount() {
+    if (password != confirmPass) {
+      password = "";
+      confirmPass = "";
+      errorMessage = "Passwords do not match";
+      return;
+    }
+    try {
+      await createUser(email, password);
+      errorMessage = "";
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+      outputErrorMessage();
+      return;
+    }
+    createAccountButton = false;
+    showSignInDialog = false;
+    email = "";
+    password = "";
+    confirmPass = "";
+  }
+  async function submitLogin() {
+    try {
+      await loginWithEmail(email, password);
+      errorMessage = "";
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+      outputErrorMessage();
+      return;
+    }
+    signInButton = false;
+    showSignInDialog = false;
+    password = "";
+    email = "";
+  }
+  function signInDropDown() {
+    errorMessage = "";
+    signInButton = !signInButton;
+    createAccountButton = false;
+  }
+  function createAccountDropDown() {
+    errorMessage = "";
+    createAccountButton = !createAccountButton;
+    signInButton = false;
+  }
+  async function googleLogin() {
+    try {
+      await loginWithGoogle();
+      errorMessage = "";
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+      outputErrorMessage();
+      return;
+    }
+    showSignInDialog = false;
+  }
+
+  async function microsoftLogin() {
+    try {
+      await loginWithMicrosoft();
+      errorMessage = "";
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+      outputErrorMessage();
+      return;
+    }
+    showSignInDialog = false;
+  }
 
   const googleSvgPaths: { color: string; path: string }[] = [
     {
@@ -25,9 +124,6 @@
       path: "M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z",
     },
   ];
-
-  let showSignInDialog = false;
-  let menu: Menu;
 </script>
 
 <!-- Sign In Modal -->
@@ -38,7 +134,7 @@
   <Content id="signin-dialog-content">
     <!-- TODO: Sign In Modal Content Here -->
     <div class="buttons">
-      <Button id="sign-in-with-google" variant="raised">
+      <Button id="sign-in-with-google" variant="raised" on:click={googleLogin}>
         <Icon component={Svg} viewBox="0 0 48 48">
           {#each googleSvgPaths as path}
             <path fill={path.color} d={path.path} />
@@ -46,7 +142,7 @@
         </Icon>
         <Label>Sign in with Google</Label>
       </Button>
-      <Button id="sign-in-with-microsoft" variant="raised">
+      <Button id="sign-in-with-microsoft" variant="raised" on:click={microsoftLogin}>
         <Icon component={Svg} viewBox="0 0 21 21">
           <rect x="1" y="1" width="9" height="9" fill="#f25022" />
           <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
@@ -56,6 +152,58 @@
         <Label>Sign in with Microsoft</Label>
       </Button>
     </div>
+    <button on:click={signInDropDown} on:click={clearFields}>Sign In</button>
+    {#if signInButton}
+      <form class="formContainer" on:submit|preventDefault={submitLogin}>
+        <div class="groupContainer">
+          <div class="formGroup">
+            <label for="email"><b>Email</b></label>
+            <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
+          </div>
+          <div class="formGroup">
+            <label for="password"><b>Password</b></label>
+            <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
+          </div>
+        </div>
+        {#if errorMessage !== ""}
+          <p class="error">{errorMessage}</p>
+        {/if}
+        <div class="formButton">
+          <button type="submit">Login</button>
+        </div>
+      </form>
+    {/if}
+    <button on:click={createAccountDropDown} on:click={clearFields}>Create Account</button>
+    {#if createAccountButton}
+      <form class="formContainer" on:submit|preventDefault={createAccount}>
+        <div class="groupContainer">
+          <div class="formGroup">
+            <label for="email"><b>Email</b></label>
+            <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
+          </div>
+          <div class="formGroup">
+            <label for="password"><b>Password</b></label>
+            <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
+          </div>
+          <div class="formGroup">
+            <label for="confirmPass"><b>Confirm Password</b></label>
+            <input
+              type="password"
+              bind:value={confirmPass}
+              placeholder="Confirm Password"
+              name="confirmPass"
+              required
+            />
+          </div>
+        </div>
+        {#if errorMessage !== ""}
+          <p class="error">{errorMessage}</p>
+        {/if}
+        <div class="formButton">
+          <button type="submit">Register Account</button>
+        </div>
+      </form>
+    {/if}
   </Content>
 </Dialog>
 <div class="account-container">
@@ -102,5 +250,33 @@
       --mdc-theme-primary: #2f2f2f;
       --mdc-theme-on-primary: #ffffff;
     }
+  }
+
+  .error {
+    color: salmon;
+  }
+
+  .groupContainer {
+    display: flex;
+    width: 100%;
+  }
+
+  .formGroup {
+    display: flex;
+    flex-direction: column;
+    width: 40%;
+    margin: auto;
+  }
+  .formGroup label {
+    text-align: left;
+  }
+
+  .formGroup input {
+    width: 100%;
+    height: 25px;
+  }
+  .formContainer button {
+    margin: auto;
+    margin-top: 10px;
   }
 </style>
