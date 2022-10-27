@@ -2,6 +2,8 @@
   import { changeAvatar } from "$lib/firebase/firestore-functions";
   import type { Lobby, Avatar } from "$lib/firebase/firestore-types/lobby";
 
+  import { authStore as user } from "$stores/auth";
+
   export let lobbyCode: string;
   export let lobby: Lobby;
 
@@ -23,15 +25,29 @@
 
   $: avatarChoices = updateAvatarChoices(lobby);
 
+  type AvatarChoice = {
+    avatar: Avatar;
+    altText: string;
+    displayName?: string;
+    avalible: boolean;
+    selected: boolean;
+  };
+
   function updateAvatarChoices(lobby: Lobby) {
-    const newAvatarChoices: { avatar: Avatar; altText: string; displayName?: string }[] = [];
+    const newAvatarChoices: AvatarChoice[] = [];
 
     for (let i = 1; i <= 12; i++) {
-      newAvatarChoices.push({ avatar: i as Avatar, altText: avatarAltText[i] });
+      newAvatarChoices.push({ avatar: i as Avatar, altText: avatarAltText[i], avalible: true, selected: false });
     }
 
     for (const player of lobby.players) {
       newAvatarChoices[player.avatar - 1].displayName = player.displayName;
+      newAvatarChoices[player.avatar - 1].avalible = false;
+    }
+
+    if ($user !== null) {
+      const userIndex = lobby.uids.indexOf($user.uid);
+      newAvatarChoices[lobby.players[userIndex].avatar - 1].selected = true;
     }
 
     return newAvatarChoices;
@@ -47,8 +63,8 @@
 </script>
 
 <div class="grid">
-  {#each avatarChoices as { avatar, altText, displayName }}
-    <button class="avatar" on:click={() => selectAvatar(avatar)}>
+  {#each avatarChoices as { avatar, altText, displayName, avalible, selected }}
+    <button class="avatar" on:click={() => selectAvatar(avatar)} disabled={!avalible} aria-selected={selected}>
       <img src="/avatars/{avatar}.webp" alt={altText} />
       <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
     </button>
@@ -95,6 +111,19 @@
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
-    border: 1px currentColor solid;
+    outline: 1px currentColor solid;
+    border-radius: 8px;
+  }
+
+  .avatar:focus {
+    outline: none;
+  }
+
+  .avatar:focus-visible img {
+    outline: 2px currentColor solid;
+  }
+
+  .avatar[aria-selected="true"] img {
+    outline: 2px var(--primary-theme-color) solid;
   }
 </style>

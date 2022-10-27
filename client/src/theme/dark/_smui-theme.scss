@@ -13,6 +13,7 @@
 
 :root {
   color-scheme: dark;
+  --primary-theme-color: #{theme.$primary};
 }
 
 html,
