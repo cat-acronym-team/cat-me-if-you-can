@@ -4,6 +4,9 @@ import type { UserData } from "./firestore-types/users";
 import { joinLobby } from "./firestore-functions";
 
 export async function findAndJoinLobby(id: string, allUserInfo: UserData & { uid: string }) {
+  if (id === "") {
+    throw new Error("Code can't be empty");
+  }
   // lobby doc
   const lobby = doc(lobbyCollection, id);
   // check if this lobby exists
