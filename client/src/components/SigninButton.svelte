@@ -236,8 +236,4 @@
     display: grid;
     gap: 12px;
   }
-
-  .error {
-    color: salmon;
-  }
 </style>
