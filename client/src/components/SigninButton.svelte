@@ -1,5 +1,6 @@
 <script lang="ts">
   import Button, { Label } from "@smui/button";
+  import IconButton from "@smui/icon-button";
   import Textfield from "@smui/textfield";
   import Menu from "@smui/menu";
   import List, { Item, Separator, Text } from "@smui/list";
@@ -12,15 +13,10 @@
   let menu: Menu;
   let email = "";
   let password = "";
-  let confirmPass = "";
   let selectedForm: "SIGN_IN" | "SIGN_UP" | "NONE" = "NONE";
+  let showPassword = false;
   let errorMessage: string = "";
 
-  function clearFields() {
-    email = "";
-    password = "";
-    confirmPass = "";
-  }
   function outputErrorMessage() {
     switch (errorMessage) {
       case "Firebase: Error (auth/user-not-found).":
@@ -38,12 +34,6 @@
   }
 
   async function createAccount() {
-    if (password != confirmPass) {
-      password = "";
-      confirmPass = "";
-      errorMessage = "Passwords do not match";
-      return;
-    }
     try {
       await createUser(email, password);
       errorMessage = "";
@@ -56,7 +46,6 @@
     showSignInDialog = false;
     email = "";
     password = "";
-    confirmPass = "";
   }
   async function submitLogin() {
     try {
@@ -74,11 +63,11 @@
   }
   function signInDropDown() {
     errorMessage = "";
-    selectedForm = selectedForm == "SIGN_IN" ? "NONE" : "SIGN_IN";
+    selectedForm = "SIGN_IN";
   }
   function createAccountDropDown() {
     errorMessage = "";
-    selectedForm = selectedForm == "SIGN_UP" ? "NONE" : "SIGN_UP";
+    selectedForm = "SIGN_UP";
   }
   async function googleLogin() {
     try {
@@ -89,6 +78,7 @@
       outputErrorMessage();
       return;
     }
+    selectedForm = "NONE";
     showSignInDialog = false;
   }
 
@@ -101,6 +91,7 @@
       outputErrorMessage();
       return;
     }
+    selectedForm = "NONE";
     showSignInDialog = false;
   }
 
@@ -149,11 +140,11 @@
         </Icon>
         <Label>Sign in with Microsoft</Label>
       </Button>
-      <Button id="sign-in-with-email" variant="raised" on:click={signInDropDown} on:click={clearFields}>
+      <Button id="sign-in-with-email" variant="raised" on:click={signInDropDown}>
         <Icon class="material-icons">email</Icon>
         <Label>Sign in with email</Label>
       </Button>
-      <Button id="sign-up-with-email" variant="raised" on:click={createAccountDropDown} on:click={clearFields}>
+      <Button id="sign-up-with-email" variant="raised" on:click={createAccountDropDown}>
         <Icon class="material-icons">email</Icon>
         <Label>Sign up with email</Label>
       </Button>
@@ -162,20 +153,22 @@
           <Textfield label="Email" type="email" bind:value={email} required input$autocomplete="username" />
           <Textfield
             label="Password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             bind:value={password}
             required
             input$autocomplete={selectedForm == "SIGN_IN" ? "current-password" : "new-password"}
-          />
-          {#if selectedForm == "SIGN_UP"}
-            <Textfield
-              label="Confirm Password"
-              type="password"
-              bind:value={confirmPass}
-              required
-              input$autocomplete="new-password"
-            />
-          {/if}
+          >
+            <IconButton
+              type="button"
+              on:click={(event) => event.preventDefault()}
+              slot="trailingIcon"
+              toggle
+              bind:pressed={showPassword}
+            >
+              <Icon class="material-icons" on>visibility</Icon>
+              <Icon class="material-icons">visibility_off</Icon>
+            </IconButton>
+          </Textfield>
           {#if errorMessage !== ""}
             <p class="error">{errorMessage}</p>
           {/if}
