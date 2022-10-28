@@ -13,8 +13,7 @@
   let email = "";
   let password = "";
   let confirmPass = "";
-  let signInButton = false;
-  let createAccountButton = false;
+  let selectedForm: "SIGN_IN" | "SIGN_UP" | "NONE" = "NONE";
   let errorMessage: string = "";
 
   function clearFields() {
@@ -53,7 +52,7 @@
       outputErrorMessage();
       return;
     }
-    createAccountButton = false;
+    selectedForm = "NONE";
     showSignInDialog = false;
     email = "";
     password = "";
@@ -68,20 +67,18 @@
       outputErrorMessage();
       return;
     }
-    signInButton = false;
+    selectedForm = "NONE";
     showSignInDialog = false;
     password = "";
     email = "";
   }
   function signInDropDown() {
     errorMessage = "";
-    signInButton = !signInButton;
-    createAccountButton = false;
+    selectedForm = selectedForm == "SIGN_IN" ? "NONE" : "SIGN_IN";
   }
   function createAccountDropDown() {
     errorMessage = "";
-    createAccountButton = !createAccountButton;
-    signInButton = false;
+    selectedForm = selectedForm == "SIGN_UP" ? "NONE" : "SIGN_UP";
   }
   async function googleLogin() {
     try {
@@ -156,32 +153,34 @@
         <Icon class="material-icons">email</Icon>
         <Label>Sign in with email</Label>
       </Button>
-      {#if signInButton}
-        <form on:submit|preventDefault={submitLogin}>
-          <Textfield label="Email" type="email" bind:value={email} required />
-          <Textfield label="Password" type="password" bind:value={password} required />
-          {#if errorMessage !== ""}
-            <p class="error">{errorMessage}</p>
-          {/if}
-          <Button type="submit">
-            <Label>Sign In</Label>
-          </Button>
-        </form>
-      {/if}
       <Button id="sign-up-with-email" variant="raised" on:click={createAccountDropDown} on:click={clearFields}>
         <Icon class="material-icons">email</Icon>
         <Label>Sign up with email</Label>
       </Button>
-      {#if createAccountButton}
-        <form on:submit|preventDefault={createAccount}>
-          <Textfield label="Email" type="email" bind:value={email} required />
-          <Textfield label="Password" type="password" bind:value={password} required />
-          <Textfield label="Confirm Password" type="password" bind:value={confirmPass} required />
+      {#if selectedForm != "NONE"}
+        <form on:submit|preventDefault={selectedForm == "SIGN_IN" ? submitLogin : createAccount}>
+          <Textfield label="Email" type="email" bind:value={email} required input$autocomplete="username" />
+          <Textfield
+            label="Password"
+            type="password"
+            bind:value={password}
+            required
+            input$autocomplete={selectedForm == "SIGN_IN" ? "current-password" : "new-password"}
+          />
+          {#if selectedForm == "SIGN_UP"}
+            <Textfield
+              label="Confirm Password"
+              type="password"
+              bind:value={confirmPass}
+              required
+              input$autocomplete="new-password"
+            />
+          {/if}
           {#if errorMessage !== ""}
             <p class="error">{errorMessage}</p>
           {/if}
           <Button type="submit">
-            <Label>Sign Up</Label>
+            <Label>{selectedForm == "SIGN_IN" ? "Sign In" : "Sign Up"}</Label>
           </Button>
         </form>
       {/if}
