@@ -65,7 +65,7 @@
 
 <header class="cat-main-header">
   <div class="header-first-level">
-    <SigninButton />
+    <SigninButton {userData} />
   </div>
 </header>
 
