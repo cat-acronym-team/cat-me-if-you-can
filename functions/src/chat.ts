@@ -3,7 +3,7 @@ import { db } from "./app";
 import { getChatRoomCollection, getChatRoomMessagesCollection } from "./firestore-collections";
 import { Lobby } from "./firestore-types/lobby";
 
-export async function deleteChatRooms(lobbyDoc: DocumentReference<Lobby>) {
+export function deleteChatRooms(lobbyDoc: DocumentReference<Lobby>) {
   return db.runTransaction(async (transaction) => {
     const lobbyDocSnapshot = await transaction.get(lobbyDoc);
     const chatRoomsSnapshot = await transaction.get(getChatRoomCollection(lobbyDoc));
