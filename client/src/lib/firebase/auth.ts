@@ -4,9 +4,10 @@ import {
   OAuthProvider,
   signInWithPopup,
   createUserWithEmailAndPassword,
-  signInAnonymously,
-  signOut,
   signInWithEmailAndPassword,
+  signInAnonymously,
+  deleteUser,
+  signOut,
 } from "firebase/auth";
 
 // Google login/signup
@@ -32,6 +33,18 @@ export async function createUser(email: string, password: string) {
 
 export async function loginAnonymous() {
   return await signInAnonymously(auth);
+}
+
+export async function deleteAccount() {
+  const user = auth.currentUser;
+
+  // Prompt user saying they need to log back in and
+  // log them out and redirect to splash page
+  if (user !== null) {
+    return await deleteUser(user);
+  }
+
+  return user;
 }
 
 export function logOut() {
