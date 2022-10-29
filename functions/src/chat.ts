@@ -4,14 +4,15 @@ import { getChatRoomCollection, getChatRoomMessagesCollection } from "./firestor
 import { Lobby } from "./firestore-types/lobby";
 
 export async function deleteChatRooms(lobbyDoc: DocumentReference<Lobby>) {
-  const lobbyDocSnapshot = await lobbyDoc.get();
-  return db.runTransaction(async () => {
-    const chatRooms = await getChatRoomCollection(lobbyDoc).listDocuments();
+  return db.runTransaction(async (transaction) => {
+    const lobbyDocSnapshot = await transaction.get(lobbyDoc);
+    const chatRoomsSnapshot = await transaction.get(getChatRoomCollection(lobbyDoc));
+    const chatRooms = chatRoomsSnapshot.docs.map((room) => room.ref);
 
-    Promise.all(
+    await Promise.all(
       chatRooms.map(async (room) => {
         // get the messages from the chatroom
-        const messages = await getChatRoomMessagesCollection(room).get();
+        const messages = await transaction.get(getChatRoomMessagesCollection(room));
         // get the prompt answers from the messages
         const answers = new Map<string, string>();
         messages.forEach((messageDoc) => {
@@ -37,7 +38,7 @@ export async function deleteChatRooms(lobbyDoc: DocumentReference<Lobby>) {
         }
 
         // updating the players with the new players array with their answers
-        lobbyDoc.update({ players });
+        transaction.update(lobbyDoc, { players });
 
         // then delete room
         room.delete();
