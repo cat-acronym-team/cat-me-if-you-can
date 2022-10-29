@@ -2,6 +2,7 @@ import { PUBLIC_USE_EMULATORS, PUBLIC_FIREBASE_CONFIG } from "$env/static/public
 import { initializeApp, type FirebaseOptions } from "firebase/app";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 import { authStore } from "$stores/auth";
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -37,6 +38,7 @@ const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+export const functions = getFunctions(app);
 
 auth.onAuthStateChanged((user) => {
   authStore.set(user);
@@ -44,5 +46,6 @@ auth.onAuthStateChanged((user) => {
 
 if (PUBLIC_USE_EMULATORS === "true") {
   connectFirestoreEmulator(db, "localhost", 8080);
-  connectAuthEmulator(auth, "http://localhost:9099");
+  connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
+  connectFunctionsEmulator(functions, "localhost", 5001);
 }

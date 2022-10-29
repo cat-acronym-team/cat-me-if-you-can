@@ -1,16 +1,20 @@
 <script lang="ts">
+  import Button, { Label } from "@smui/button";
+  import Textfield from "@smui/textfield";
+  import HelperText from "@smui/textfield/helper-text";
   import { getPromptAnswerCollection } from "$lib/firebase/firestore-collections";
   import { doc, setDoc } from "firebase/firestore";
 
-  export let prompt: string;
+  export let prompt: string | undefined;
 
   export let uid: string;
 
   export let lobbyCode: string;
 
   let answer = "";
+  let dirty = false;
 
-  $: anserDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
+  $: answerDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
 
   $: error = getErrorMessage(answer);
 
@@ -19,10 +23,6 @@
 
     if (trimmed.length === 0) {
       return "Please enter an answer";
-    }
-
-    if (trimmed.length < 3) {
-      return "Your answer must be at least 3 characters";
     }
 
     if (trimmed.length > 50) {
@@ -35,17 +35,18 @@
       return;
     }
 
-    setDoc(anserDoc, { answer });
+    setDoc(answerDoc, { answer });
   }
 </script>
 
 <form class="wraper" on:submit|preventDefault={submitAnswer}>
-  <label class="question" for="prompt-answer">{prompt}</label>
+  <label class="mdc-typography--headline5" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
 
   <div class="input">
-    <input id="prompt-answer" type="text" bind:value={answer} />
-    <label class="error" for="prompt-answer">{error ?? ""}</label>
-    <button type="submit" disabled={error != undefined}>Done</button>
+    <Textfield input$id="prompt-answer" bind:value={answer} bind:dirty invalid={dirty && error != undefined}>
+      <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
+    </Textfield>
+    <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
   </div>
 </form>
 
@@ -55,36 +56,5 @@
     display: grid;
     grid-template-rows: 1fr 1fr 1fr;
     place-items: center;
-  }
-
-  .question {
-    font-size: 2rem;
-    font-weight: bold;
-  }
-
-  .input {
-    display: grid;
-    grid-template:
-      "input done" auto
-      "error none" auto
-      / auto auto;
-    gap: 0 8px;
-  }
-
-  #prompt-answer {
-    grid-area: input;
-    font-size: 2rem;
-    font-weight: bold;
-  }
-
-  .error {
-    grid-area: error;
-    display: block;
-    height: 16px;
-    color: red;
-  }
-
-  button {
-    grid-area: done;
   }
 </style>

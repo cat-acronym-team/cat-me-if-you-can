@@ -1,18 +1,25 @@
 <script lang="ts">
+  import SelectAvatar from "./SelectAvatar.svelte";
+  import Button, { Label } from "@smui/button";
+  import IconButton from "@smui/icon-button";
   import { page } from "$app/stores";
-  import { onMount } from "svelte";
   import type { Lobby } from "$lib/firebase/firestore-types/lobby";
+  import { onMount } from "svelte";
+  import { startGame } from "$lib/firebase/firestore-functions";
 
+  // Props
   export let lobbyCode: string;
   export let lobby: Lobby;
 
-  let url = $page.url.href;
+  // better link to share since it's redirecting to this page anyways
+  // Josh's suggestion that I agreed on
+  let url = `${$page.url.origin}/join?code=${lobbyCode}`;
   let canShare = false;
   // Allows for shareable data with text description
   const shareableData = {
     title: "Cat Me if you Can!",
     text: "Join us in a game of Cat Me if you Can!",
-    url: $page.url.href,
+    url,
   };
 
   // Shares link with other players through click event
@@ -28,33 +35,22 @@
   function copyLink() {
     navigator.clipboard.writeText(url);
   }
-
-  function startgame() {
-    return; // TODO: Placeholder return statement
-  }
 </script>
 
-<link href="http://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css" />
 <main>
   <div class="container">
     <div class="lobby-info">
       <h3>Code: {lobbyCode}</h3>
-      <h3>Players:</h3>
+      <h3>Players: {lobby.players.length}</h3>
     </div>
-    <div class="lobby" />
+    <SelectAvatar {lobby} {lobbyCode} />
     <div class="start">
-      <button id="start-game" on:click={startgame}>Start Game</button>
+      <Button on:click={() => startGame({ code: lobbyCode })}><Label>Start Game</Label></Button>
     </div>
-    <div class="invite-link">
-      <h3>Invite Link: {url}</h3>
-    </div>
-    <div class="copy-button">
-      <button id="copy" on:click={copyLink}>Copy Link</button>
-    </div>
-    <div class="share-button">
-      {#if canShare}
-        <button id="share" on:click={share}>Share Link</button>
-      {/if}
+    <div class="buttons">
+      <h3 class="invite-link">Invite Link: {url}</h3>
+      <IconButton class="material-icons" on:click={copyLink}>content_copy</IconButton>
+      {#if canShare}<IconButton class="material-icons" on:click={share}>share</IconButton>{/if}
     </div>
   </div>
 </main>
@@ -64,56 +60,17 @@
     justify-content: center;
   }
 
-  .container {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-    gap: 0px 0px;
-    grid-template-areas:
-      ". . . . . . ."
-      ". lobby-info lobby-info lobby-info lobby-info lobby-info ."
-      ". lobby lobby lobby lobby lobby ."
-      ". lobby lobby lobby lobby lobby ."
-      ". lobby lobby lobby lobby lobby ."
-      ". . . start . . ."
-      ". . . invite-link copy-button share-button .";
-  }
-  .lobby {
-    grid-area: lobby;
-    border: 2px solid black;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 500px;
-  }
-
-  #start-game {
-    width: 100px;
-    height: 35px;
-  }
-
   .start {
-    grid-area: start;
-    position: relative;
-    left: 50%;
+    display: grid;
+    place-items: center;
   }
 
-  .lobby-info {
-    grid-area: lobby-info;
+  .buttons {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
   }
 
   .invite-link {
-    grid-area: invite-link;
-    width: 750px;
-    height: 100px;
-  }
-
-  .copy-button {
-    grid-area: copy-button;
-  }
-
-  .share-button {
-    grid-area: share-button;
+    margin: 0;
   }
 </style>

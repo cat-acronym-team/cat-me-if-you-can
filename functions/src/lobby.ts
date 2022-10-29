@@ -1,9 +1,92 @@
 import { firestore } from "firebase-admin";
 import * as functions from "firebase-functions";
 import { db } from "./app";
-import { getPrivatePlayerCollection, getPromptAnswerCollection, lobbyCollection } from "./firestore-collections";
-import { Lobby } from "./firestore-types/lobby";
+import {
+  getPrivatePlayerCollection,
+  getPromptAnswerCollection,
+  lobbyCollection,
+  userCollection,
+} from "./firestore-collections";
+import { avatars, Lobby } from "./firestore-types/lobby";
+import { UserData } from "./firestore-types/users";
+import { isLobbyRequest } from "./firestore-functions-types";
 import { getRandomPromptPair } from "./prompts";
+
+export const startGame = functions.https.onCall(async (data: unknown, context) => {
+  // no auth then you shouldn't be here
+  if (context.auth === undefined) {
+    return { error: "Not Signed In" };
+  }
+  // validate code
+  if (!isLobbyRequest(data)) {
+    return { error: "Invalid lobby code!" };
+  }
+  // get lobby doc
+  const lobby = await lobbyCollection.doc(data.code).get();
+  if (lobby.exists === false) {
+    return { error: "Lobby doesn't exist!" };
+  }
+  // check if the request is coming from the host of the game
+  const { uids } = lobby.data() as Lobby;
+  if (context.auth.uid !== uids[0]) {
+    return { error: "Not allowed to start game!" };
+  }
+
+  const privatePlayerCollection = getPrivatePlayerCollection(lobby.ref);
+  for (const uid of uids) {
+    privatePlayerCollection.doc(uid).create({ role: "CAT" });
+  }
+
+  return lobbyCollection.doc(data.code).update({ state: "PROMPT" });
+});
+
+export const joinLobby = functions.https.onCall((data: unknown, context) => {
+  const auth = context.auth;
+  // no auth then you shouldn't be here
+  if (auth === undefined) {
+    return { error: "Not Signed In" };
+  }
+  // validate code
+  if (!isLobbyRequest(data)) {
+    return { error: "Invalid lobby code!" };
+  }
+
+  return db.runTransaction(async (transaction) => {
+    // lobby doc
+    const lobby = lobbyCollection.doc(data.code);
+    const lobbyInfo = await transaction.get(lobby);
+    // extra validation to make sure it exist
+    if (lobbyInfo.exists === false) {
+      return { error: "Lobby doesn't exist!" };
+    }
+    // user doc
+    const user = await transaction.get(userCollection.doc(auth.uid));
+    // make sure this user has a doc with a displayName and avatar
+    if (user.exists === false) {
+      return { error: "You need to have a displayName and avatar!" };
+    }
+    // user data
+    const userInfo = user.data() as UserData;
+
+    // get lobby data
+    const { players, uids } = lobbyInfo.data() as Lobby;
+    if (uids.includes(auth.uid)) {
+      return { error: "You are already in the lobby!" };
+    }
+
+    // change avatar randomly if it is already taken
+    const takenAvatars = players.map((player) => player.avatar);
+    while (userInfo.avatar == 0 || takenAvatars.includes(userInfo.avatar)) {
+      userInfo.avatar = avatars[Math.floor(Math.random() * avatars.length)];
+    }
+
+    // add player
+    return transaction.update(lobby, {
+      players: firestore.FieldValue.arrayUnion({ ...userInfo, alive: true }),
+      uids: firestore.FieldValue.arrayUnion(auth.uid),
+    });
+  });
+});
 
 // TODO: replace with the correct trigger
 export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate(async (change, context) => {
@@ -85,11 +168,14 @@ export const collectPromptAnswers = functions.firestore
         return;
       }
 
+      const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
+
       const promptAnswers = new Map<string, string>();
 
       for (const promptAnswerDoc of promptAnswerDocs.docs) {
         promptAnswers.set(promptAnswerDoc.id, promptAnswerDoc.data().answer);
         transaction.delete(promptAnswerDoc.ref);
+        transaction.update(privatePlayerCollection.doc(promptAnswerDoc.id), { prompt: firestore.FieldValue.delete() });
       }
 
       transaction.update(lobbyDocRef, { state: "CHAT" });

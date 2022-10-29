@@ -1,16 +1,17 @@
 <script lang="ts">
-  import Modal from "$components/Modal.svelte";
-  import { saveDisplayName, getUser, createUser } from "$lib/firebase/splash";
+  import SigninButton from "$components/SigninButton.svelte";
+  import Button, { Label } from "@smui/button";
+  import Textfield from "@smui/textfield";
+  import { getUser, saveOrCreate } from "$lib/firebase/splash";
   import { createLobby } from "$lib/firebase/create-lobby";
-  import { loginAnonymous } from "$lib/firebase/auth";
   import type { UserData } from "$lib/firebase/firestore-types/users";
   import { goto } from "$app/navigation";
   import { authStore } from "$stores/auth";
 
   let userData: UserData | undefined;
   // check if the user is logged in with getAuth
-  let openSignInModal = false;
   let name: string = "";
+  let errorMessage: string = "";
 
   // update user once auth store changes
   $: user = $authStore;
@@ -18,11 +19,17 @@
   async function findUser() {
     if (user !== null) {
       userData = await getUser(user.uid);
-      // fixed error because it would try to look for the display name of a user that doesn't exist
+      // if they have a user doc
       if (userData !== undefined) {
         // assign name from database to name variable
         if (userData.displayName !== "") {
           name = userData.displayName;
+        }
+      }
+      // if they dont have a user doc and used sign in with google/microsoft
+      else {
+        if (user.displayName !== null) {
+          name = user.displayName;
         }
       }
     }
@@ -31,85 +38,34 @@
   $: if (user !== null) {
     findUser();
   }
-  /* 
-  Is called once user unfocuses the display name input field. It was 
-  created to avoid excessive writes to the database with the onchange event.
-  
 
-  removes user logic from buttons
-  when the user enters their display name
-
-  there are three type of situations that could happen
-  1. A Anon User without User Doc 
-    - create anon user and create user doc with display name
-  2. A User without User Doc
-    - create user doc with display name
-  3. A User with User Doc
-    - just update their display name
-  */
-  const saveOrCreate = async () => {
-    // this is an anon user
-    // create anon user and user doc with display name
-    if (user === null && userData === undefined) {
-      const anon = (await loginAnonymous()).user;
-      createUser(anon.uid, name);
+  async function createLobbyHandler() {
+    try {
+      // Create User
+      await saveOrCreate(user, userData, name.trim());
+      // Create Lobby
+      const code = await createLobby(name.trim());
+      // go to game page
+      goto("/game?code=" + code);
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
     }
-    // this is a user without user doc
-    // create user doc with display name
-    if (user !== null && userData === undefined) {
-      createUser(user.uid, name);
+  }
+  async function joinLobbyHandler() {
+    try {
+      // Create User
+      await saveOrCreate(user, userData, name.trim());
+      // go to join page
+      goto("/join");
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
     }
-    // this is user with a user doc
-    // just update their current display name
-    if (user !== null && userData !== undefined) {
-      saveDisplayName(user.uid, name);
-    }
-  };
-  const createLobbyHandler = async () => {
-    if (name === "") {
-      return;
-    }
-    // Create User
-    await saveOrCreate();
-    // Create Lobby
-    const code = await createLobby();
-    // Go to game page
-    goto("/game/" + code);
-  };
+  }
 </script>
 
-<!-- Sign In Modal -->
-<Modal
-  open={openSignInModal}
-  onClosed={() => {
-    openSignInModal = false;
-  }}
->
-  <!-- TODO: Sign In Modal Content Here -->
-</Modal>
 <header class="cat-main-header">
   <div class="header-first-level">
-    <div class="account-container">
-      <!-- If you are not signed in show this  -->
-      {#if user == null}
-        <button
-          on:click={() => {
-            openSignInModal = true;
-          }}
-          class="account-signin">Sign in</button
-        >
-        <!-- If you show account and dropdown -->
-      {:else}
-        <button class="account-account">Account</button>
-        <!-- Hover doesn't work on mobile -->
-        <div class="account-content">
-          <!-- TODO: Account Hover Links -->
-          <!-- <a href="/settings">Account Settings</a>
-        <a href="/stats">Stats</a>
-        <a href="/logout">Logout</a> -->
-        </div>
-      {/if}
-    </div>
+    <SigninButton />
   </div>
 </header>
 
@@ -119,14 +75,17 @@
       <img src="https://picsum.photos/500/300" alt="our logo" />
     </div>
     <div class="cat-main-buttons">
-      <input type="text" placeholder="Enter in your display name" bind:value={name} />
-      <button on:click={createLobbyHandler}>Create Lobby</button>
-      <button>Join Lobby</button>
+      <Textfield type="text" label="Display name" bind:value={name} />
+      <Button on:click={createLobbyHandler}><Label>Create Lobby</Label></Button>
+      <Button on:click={joinLobbyHandler}><Label>Join Lobby</Label></Button>
     </div>
   </div>
 </main>
 
 <style>
+  .error {
+    color: salmon;
+  }
   /* Phone Styles */
   .cat-main-header {
     width: 100%;
@@ -136,51 +95,6 @@
     display: flex;
     justify-content: right;
     align-items: center;
-  }
-  .account-signin {
-    text-decoration: none;
-    margin-right: 5px;
-    color: red;
-    background-color: #151515;
-    padding: 5px;
-  }
-  .account-container {
-    position: relative;
-    display: inline-block;
-  }
-  .account-account {
-    text-decoration: none;
-    margin-right: 5px;
-    color: red;
-    background-color: #151515;
-    padding: 5px;
-  }
-  .account-container button {
-    background-color: #151515;
-    color: red;
-    padding: 16px;
-    font-size: 16px;
-    border: none;
-  }
-
-  .account-content {
-    display: none;
-    position: absolute;
-    right: 5px;
-    background-color: #151515;
-    min-width: 160px;
-    /* box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2); */
-    z-index: 1;
-  }
-
-  .account-content a {
-    color: red;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-  }
-  .account-container:hover .account-content {
-    display: block;
   }
 
   .logo-container {
@@ -213,52 +127,20 @@
     width: 70%;
     margin: auto;
   }
-  .cat-main-buttons input {
-    width: 100%;
-    height: 25px;
-    text-align: center;
-  }
-  .cat-main-buttons button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    margin-top: 20px;
-    background-color: #151515;
-    color: red;
-    width: 100%;
-    height: 45px;
-  }
+
   /* Tablet Styles */
   @media only screen and (min-width: 700px) {
-    .account-container {
-      margin-right: 10px;
-    }
     .logo-container {
       width: 40%;
-    }
-    .cat-main-buttons input {
-      height: 35px;
-      font-size: 1.4em;
-    }
-    .cat-main-buttons a {
-      height: 50px;
-      font-size: 1.4em;
     }
   }
   /* Desktop Styles */
   @media only screen and (min-width: 1000px) {
-    .question-container {
-      width: 3%;
-    }
     .logo-container {
       width: 20%;
     }
     .cat-main-buttons {
       width: 35%;
-    }
-    .cat-main-buttons a {
-      height: 60px;
     }
   }
 </style>
