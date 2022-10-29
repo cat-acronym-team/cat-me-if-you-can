@@ -5,7 +5,7 @@
   import type { ChatMessage, ChatRoom, Lobby, Player } from "$lib/firebase/firestore-types/lobby";
   import { findChatRoom, addChatMessage } from "$lib/firebase/chat";
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
-  import type { User } from "firebase/auth";
+  import type { Unsubscribe, User } from "firebase/auth";
   import { verifyExpiration } from "$lib/firebase/firestore-functions";
   // props
   export let lobbyData: Lobby & { id: string };
@@ -19,18 +19,19 @@
   let countdown: number;
   let message: string = "";
   let errorMessage: string = "";
+  let unsubscribeChatMessages: Unsubscribe | undefined = undefined;
 
   onMount(async () => {
     // Query for their chatroom
     chatRoomInfo = await findChatRoom(lobbyData.id, user.uid);
     // subscribe the chat messages
-    onSnapshot(
+    unsubscribeChatMessages = onSnapshot(
       query(getChatRoomMessagesCollection(lobbyData.id, chatRoomInfo.id), orderBy("timestamp", "asc")),
       (collection) => {
         chatMessages = collection.docs.map((message) => message.data());
       }
     );
-    
+
     // Get userInfo
     userInfo = lobbyData.players[lobbyData.uids.indexOf(user.uid)];
     // Get partnerInfo
@@ -48,6 +49,7 @@
   });
   onDestroy(() => {
     clearInterval(timer);
+    unsubscribeChatMessages?.();
   });
   // Function will create document with new message
   async function submitMessage() {
@@ -68,7 +70,7 @@
   }
   // Checks if the sender is the current user
   function isUser(uid: string) {
-    return (user as User).uid === uid;
+    return user.uid === uid;
   }
   // Reactive Calls
   $: if (countdown === 0 && lobbyData.uids[0] === user.uid) {
