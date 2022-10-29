@@ -86,8 +86,8 @@ export const joinLobby = functions.https.onCall((data: unknown, context) => {
 
     // add player
     return transaction.update(lobby, {
-      players: [...players, { ...userInfo, alive: true }],
-      uids: [...uids, auth.uid],
+      players: firestore.FieldValue.arrayUnion({ ...userInfo, alive: true }),
+      uids: firestore.FieldValue.arrayUnion(auth.uid),
     });
   });
 });
