@@ -20,17 +20,10 @@ export function generatePairs(lobbyData: Lobby): GeneratedPairs {
   // pairs up on the alive players
   while (aliveUids.length > 1) {
     // get random pair
-    const one = aliveUids[Math.floor(Math.random() * aliveUids.length)];
-    let two: string;
-    // generate a random player if the current pairs are equal
-    do {
-      two = aliveUids[Math.floor(Math.random() * aliveUids.length)];
-    } while (one === two);
+    const [one] = aliveUids.splice(Math.floor(Math.random() * aliveUids.length), 1);
+    const [two] = aliveUids.splice(Math.floor(Math.random() * aliveUids.length), 1);
     // organize the pairs
     pairs.push({ one, two });
-    // delete them from array
-    aliveUids.splice(aliveUids.indexOf(one), 1);
-    aliveUids.splice(aliveUids.indexOf(two), 1);
   }
 
   // Make this guy a stalker somehow
