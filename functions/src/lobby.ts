@@ -9,10 +9,10 @@ import {
 } from "./firestore-collections";
 import { avatars, Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
-import { isLobbyRequest } from "./firestore-functions-types";
+import { ErrorResponse, isLobbyRequest } from "./firestore-functions-types";
 import { getRandomPromptPair } from "./prompts";
 
-export const startGame = functions.https.onCall(async (data: unknown, context) => {
+export const startGame = functions.https.onCall(async (data: unknown, context): Promise<ErrorResponse> => {
   // no auth then you shouldn't be here
   if (context.auth === undefined) {
     return { error: "Not Signed In" };
@@ -37,10 +37,12 @@ export const startGame = functions.https.onCall(async (data: unknown, context) =
     privatePlayerCollection.doc(uid).create({ role: "CAT" });
   }
 
-  return lobbyCollection.doc(data.code).update({ state: "PROMPT" });
+  await lobbyCollection.doc(data.code).update({ state: "PROMPT" });
+
+  return {};
 });
 
-export const joinLobby = functions.https.onCall((data: unknown, context) => {
+export const joinLobby = functions.https.onCall((data: unknown, context): Promise<ErrorResponse> | ErrorResponse => {
   const auth = context.auth;
   // no auth then you shouldn't be here
   if (auth === undefined) {
@@ -81,10 +83,12 @@ export const joinLobby = functions.https.onCall((data: unknown, context) => {
     }
 
     // add player
-    return transaction.update(lobby, {
+    await transaction.update(lobby, {
       players: firestore.FieldValue.arrayUnion({ ...userInfo, alive: true }),
       uids: firestore.FieldValue.arrayUnion(auth.uid),
     });
+
+    return {};
   });
 });
 
