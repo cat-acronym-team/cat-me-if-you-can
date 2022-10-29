@@ -11,6 +11,7 @@ import { avatars, Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { isLobbyRequest } from "./firestore-functions-types";
 import { getRandomPromptPair } from "./prompts";
+import { applyStats } from "./stats";
 
 export const startGame = functions.https.onCall(async (data: unknown, context) => {
   // no auth then you shouldn't be here
@@ -82,7 +83,11 @@ export const joinLobby = functions.https.onCall((data: unknown, context) => {
 
     // add player
     return transaction.update(lobby, {
-      players: firestore.FieldValue.arrayUnion({ ...userInfo, alive: true }),
+      players: firestore.FieldValue.arrayUnion({
+        displayName: userInfo.displayName,
+        avatar: userInfo.avatar,
+        alive: true,
+      }),
       uids: firestore.FieldValue.arrayUnion(auth.uid),
     });
   });
@@ -96,6 +101,9 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
 
   if (lobby.state == "PROMPT" && oldLobby.state != "PROMPT") {
     await startPrompt(lobbyDocRef);
+  }
+  if (lobby.state == "END" && oldLobby.state != "END") {
+    applyStats(lobbyDocRef);
   }
 });
 
