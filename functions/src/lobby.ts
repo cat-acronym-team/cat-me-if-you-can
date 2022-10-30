@@ -1,16 +1,20 @@
 import { firestore } from "firebase-admin";
 import * as functions from "firebase-functions";
-import { db } from "./app";
 import {
+  getChatRoomCollection,
+  getChatRoomMessagesCollection,
   getPrivatePlayerCollection,
   getPromptAnswerCollection,
   lobbyCollection,
   userCollection,
 } from "./firestore-collections";
+import { isLobbyRequest } from "./firestore-functions-types";
 import { avatars, Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
-import { isLobbyRequest } from "./firestore-functions-types";
+import { generatePairs } from "./util";
+import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
+import { deleteChatRooms } from "./chat";
 import { applyStats } from "./stats";
 
 export const startGame = functions.https.onCall(async (data: unknown, context) => {
@@ -105,6 +109,10 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   if (lobby.state == "END" && oldLobby.state != "END") {
     applyStats(lobbyDocRef);
   }
+  if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {
+    const expiration = firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 30000);
+    lobbyDocRef.set({ expiration }, { merge: true });
+  }
 });
 
 function startPrompt(lobbyDocRef: firestore.DocumentReference<Lobby>) {
@@ -188,8 +196,63 @@ export const collectPromptAnswers = functions.firestore
 
       transaction.update(lobbyDocRef, { state: "CHAT" });
 
-      functions.logger.log(promptAnswers);
-
-      // TODO #32 create a one on one chat and store the promptAnswers in it
+      // TODO: check if we have a stalker
+      const { pairs } = generatePairs(lobbyData);
+      // create a chatroom for each pair
+      pairs.forEach(async ({ one, two }) => {
+        const room = await getChatRoomCollection(lobbyDocRef).add({ pair: [one, two], viewers: [] });
+        // get answers of the pair
+        const oneAnswer = promptAnswers.get(one) as string;
+        const twoAnswer = promptAnswers.get(two) as string;
+        // place answers in chatMessages inside their room
+        await getChatRoomMessagesCollection(room).add({
+          sender: one,
+          text: oneAnswer,
+          timestamp: firestore.Timestamp.now(),
+          isPromptAnswer: true,
+        });
+        await getChatRoomMessagesCollection(room).add({
+          sender: two,
+          text: twoAnswer,
+          timestamp: firestore.Timestamp.now(),
+          isPromptAnswer: true,
+        });
+      });
     });
   });
+
+export const verifyExpiration = functions.https.onCall(async (data, context) => {
+  // check auth
+  if (context.auth == undefined) {
+    throw new functions.https.HttpsError("permission-denied", "User is not Authenticated");
+  }
+  // check the data request
+  if (!isLobbyRequest(data)) {
+    throw new functions.https.HttpsError("invalid-argument", "Data is not of ExpirationRequest type.");
+  }
+  // get lobby doc
+  const lobbyDocRef = lobbyCollection.doc(data.code);
+
+  // start transaction
+  return db.runTransaction(async (transaction) => {
+    const lobbyDoc = await transaction.get(lobbyDocRef);
+    const lobby = lobbyDoc.data();
+    if (lobby === undefined) {
+      throw new functions.https.HttpsError("not-found", "Lobby does not exist.");
+    }
+    // if the time sent is less than expiration
+    if (Date.now() < lobby.expiration.toMillis()) {
+      throw new functions.https.HttpsError("invalid-argument", "Too early to make request.");
+    }
+    // if the timer sent is equal or greater than
+    // change to the next phase
+
+    // TODO: potential if checks for other states that require a timer
+    // if the state is chat then delete chatrooms
+    if (lobby.state === "CHAT") {
+      await deleteChatRooms(lobby, lobbyDocRef, transaction);
+    }
+
+    return;
+  });
+});
