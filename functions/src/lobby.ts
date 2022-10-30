@@ -243,7 +243,6 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
     // if the state is chat then delete chatrooms
     if (lobby.state === "CHAT") {
       await deleteChatRooms(lobby, lobbyDocRef, transaction);
-      return transaction.update(lobbyDocRef, { state: "VOTE" });
     }
 
     return;

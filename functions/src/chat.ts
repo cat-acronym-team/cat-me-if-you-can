@@ -6,7 +6,7 @@ export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentRefere
   const chatRoomsSnapshot = await transaction.get(getChatRoomCollection(lobbyDoc));
   const chatRooms = chatRoomsSnapshot.docs.map((room) => room.ref);
 
-  return Promise.all(
+  await Promise.all(
     chatRooms.map(async (room) => {
       // get the messages from the chatroom
       const messages = await transaction.get(getChatRoomMessagesCollection(room));
@@ -20,7 +20,7 @@ export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentRefere
           answers.set(message.sender, message.text);
         }
         // delete all messages
-        messageDoc.ref.delete();
+        transaction.delete(messageDoc.ref);
       });
 
       // add the prompt answers to their player object
@@ -28,17 +28,16 @@ export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentRefere
       for (const [key, value] of answers) {
         // get index and add their prompt answer to their player object
         const playerIndex = uids.indexOf(key);
-        const player = players[playerIndex];
-        player.promptAnswer = value;
-        // add back to the original array
-        players[playerIndex] = player;
+        players[playerIndex].promptAnswer = value;
       }
 
       // updating the players with the new players array with their answers
       transaction.update(lobbyDoc, { players });
 
       // then delete room
-      room.delete();
+      transaction.delete(room);
     })
   );
+
+  transaction.update(lobbyDoc, { state: "VOTE" });
 }
