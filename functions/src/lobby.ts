@@ -95,6 +95,8 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   const oldLobby = change.before.data() as Lobby;
 
   if (lobby.state == "PROMPT" && oldLobby.state != "PROMPT") {
+    const expiration = firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 30000);
+    lobbyDocRef.set({ expiration }, { merge: true });
     await startPrompt(lobbyDocRef);
   }
 });
@@ -185,3 +187,40 @@ export const collectPromptAnswers = functions.firestore
       // TODO #32 create a one on one chat and store the promptAnswers in it
     });
   });
+
+export const verifyExpiration = functions.https.onCall(async (data, context) => {
+  // check auth
+  if (context.auth == undefined) {
+    throw new functions.https.HttpsError("permission-denied", "User is not Authenticated");
+  }
+  // check the data request
+  if (!isLobbyRequest(data)) {
+    throw new functions.https.HttpsError("invalid-argument", "Data is not of LobbyRequest type.");
+  }
+  // get lobby doc
+  const lobbyDocRef = lobbyCollection.doc(data.code);
+
+  // start transaction
+  return db.runTransaction(async (transaction) => {
+    const lobbyDoc = await transaction.get(lobbyDocRef);
+    const lobby = lobbyDoc.data();
+    if (lobby === undefined) {
+      throw new functions.https.HttpsError("not-found", "Lobby does not exist.");
+    }
+    // if the time sent is less than expiration
+    if (Date.now() < lobby.expiration.toMillis()) {
+      throw new functions.https.HttpsError("invalid-argument", "Too early to make request.");
+    }
+    // if the timer sent is equal or greater than
+    // change to the next phase
+
+    // TODO: potential if checks for other states that require a timer
+    // if the state is chat then delete chatrooms
+    // if (lobby.state === "CHAT") {
+    //   await deleteChatRooms(lobby, lobbyDocRef, transaction);
+    //   return transaction.update(lobbyDocRef, { state: "VOTE" });
+    // }
+
+    return;
+  });
+});

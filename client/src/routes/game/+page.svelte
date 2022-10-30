@@ -90,7 +90,7 @@
   {:else if privatePlayer == undefined}
     Loading... <!-- TODO: make a Nice Loading spinner -->
   {:else if lobby.state === "PROMPT"}
-    <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
+    <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} lobbyData={lobby} />
   {:else}
     unknown lobby state: {lobby.state}
   {/if}
