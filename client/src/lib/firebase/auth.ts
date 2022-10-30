@@ -8,7 +8,12 @@ import {
   signInAnonymously,
   signOut,
   signInWithEmailAndPassword,
+  EmailAuthProvider,
+  linkWithCredential,
 } from "firebase/auth";
+
+const googleProvider = new GoogleAuthProvider();
+const microsoftProvider = new OAuthProvider("microsoft.com");
 
 // Google login/signup
 export async function loginWithGoogle() {
@@ -35,16 +40,24 @@ export async function loginAnonymous() {
   return await signInAnonymously(auth);
 }
 
-export async function deleteAccount() {
+export function deleteAccount() {
   const user = auth.currentUser;
 
+  if (user !== null) {
+    deleteUser(user);
+  }
   // Prompt user saying they need to log back in and
   // log them out and redirect to splash page
-  if (user !== null) {
-    return await deleteUser(user);
-  }
+  // checkSignInProvider();
+}
 
-  return user;
+export function linkUserCredentials(email: string, password: string) {
+  const user = auth.currentUser;
+  // If user is signed in
+  if (user !== null) {
+    const credential = EmailAuthProvider.credential(email, password);
+    linkWithCredential(user, credential);
+  }
 }
 
 export function logOut() {
