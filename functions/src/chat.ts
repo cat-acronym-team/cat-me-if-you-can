@@ -3,6 +3,7 @@ import { getChatRoomCollection, getChatRoomMessagesCollection } from "./firestor
 import { Lobby } from "./firestore-types/lobby";
 
 export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
+  const { players, uids } = lobbyData;
   const chatRoomsSnapshot = await transaction.get(getChatRoomCollection(lobbyDoc));
   const chatRooms = chatRoomsSnapshot.docs.map((room) => room.ref);
 
@@ -24,20 +25,16 @@ export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentRefere
       });
 
       // add the prompt answers to their player object
-      const { players, uids } = lobbyData;
       for (const [key, value] of answers) {
         // get index and add their prompt answer to their player object
         const playerIndex = uids.indexOf(key);
         players[playerIndex].promptAnswer = value;
       }
 
-      // updating the players with the new players array with their answers
-      transaction.update(lobbyDoc, { players });
-
       // then delete room
       transaction.delete(room);
     })
   );
 
-  transaction.update(lobbyDoc, { state: "VOTE" });
+  transaction.update(lobbyDoc, { state: "VOTE", players });
 }
