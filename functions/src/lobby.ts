@@ -106,7 +106,9 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   if (lobby.state == "PROMPT" && oldLobby.state != "PROMPT") {
     await startPrompt(lobbyDocRef);
   }
+  // TODO: remove this later because apply stats will be in the verify expiration function
   if (lobby.state == "END" && oldLobby.state != "END") {
+    // TODO: once removed then replace this with the expiration time and set it 
     applyStats(lobbyDocRef);
   }
   if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {

@@ -4,10 +4,13 @@ import type { DocumentReference } from "firebase-admin/firestore";
 import { userCollection } from "./firestore-collections";
 import type { UserData } from "./firestore-types/users";
 
+// TODO: When ready add trasaction, lobbyData, and LobbyDoc parameter
 export function applyStats(lobbyDoc: DocumentReference<Lobby>) {
+  // TODO: When transaction parameter is added remove this transaction
   return db.runTransaction(async (transaction) => {
-    // get the lobby infomation
+    // TODO: When lobbyData parameter is added remove this varaible
     const lobbySnapshot = await transaction.get(lobbyDoc);
+    // TODO: When lobbyData parameter is replace this
     const { players, uids, winner } = lobbySnapshot.data() as Lobby;
     // update each players doc
     await Promise.all(
@@ -33,5 +36,6 @@ export function applyStats(lobbyDoc: DocumentReference<Lobby>) {
         transaction.update(userDocRef, { ...user });
       })
     );
+    // TODO: change the lobby state back to wait
   });
 }
