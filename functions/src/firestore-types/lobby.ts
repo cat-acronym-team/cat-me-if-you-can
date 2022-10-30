@@ -24,6 +24,10 @@ export type Player = {
    * the number of players that have voted for this player
    */
   votes?: number;
+  /**
+   * the answer for their prompt
+   */
+  promptAnswer: string;
 };
 
 export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
@@ -143,6 +147,10 @@ export type ChatMessage = {
    * the time when the message was sent (used for sorting)
    */
   timestamp: Timestamp;
+  /**
+   * checks if this is the prompt answer
+   */
+  isPromptAnswer?: true;
 };
 
 /**
@@ -155,16 +163,16 @@ export type LobbyChatMessage = ChatMessage & {
   alive: boolean;
 };
 
-export function chatMessageValidator(displayName: string): { valid: true } | { valid: false; reason: string } {
-  if (displayName.length == 0) {
+export function chatMessageValidator(message: string): { valid: true } | { valid: false; reason: string } {
+  if (message.length == 0) {
     return { valid: false, reason: "Chat message may not be empty" };
   }
 
-  if (displayName.length > 100) {
+  if (message.length > 100) {
     return { valid: false, reason: "Chat message must be at most 100 characters long" };
   }
 
-  if (displayName !== displayName.trim()) {
+  if (message !== message.trim()) {
     return { valid: false, reason: "Chat message must not contain leading or trailing whitespace" };
   }
 

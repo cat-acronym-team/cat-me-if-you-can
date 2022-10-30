@@ -6,3 +6,4 @@ import type { ChangeAvatarData } from "./functions-types/avatar";
 export const startGame = httpsCallable<LobbyRequest, ErrorResponse>(functions, "startGame");
 export const joinLobby = httpsCallable<LobbyRequest, ErrorResponse>(functions, "joinLobby");
 export const changeAvatar = httpsCallable<ChangeAvatarData, void>(functions, "changeAvatar");
+export const verifyExpiration = httpsCallable<LobbyRequest, void>(functions, "verifyExpiration");

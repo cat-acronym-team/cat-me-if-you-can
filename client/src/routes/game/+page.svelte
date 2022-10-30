@@ -1,7 +1,7 @@
 <script lang="ts">
   import Prompt from "$components/Prompt.svelte";
   import LobbyComponent from "$components/Lobby.svelte";
-
+  import ChatRoom from "$components/ChatRoom.svelte";
   import { onSnapshot, doc, getDoc } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
   import { getPrivatePlayerCollection, lobbyCollection } from "$lib/firebase/firestore-collections";
@@ -91,6 +91,8 @@
     Loading... <!-- TODO: make a Nice Loading spinner -->
   {:else if lobby.state === "PROMPT"}
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} lobbyData={lobby} />
+  {:else if lobby.state === "CHAT"}
+    <ChatRoom lobbyData={{ ...lobby, id: lobbyCode }} />
   {:else}
     unknown lobby state: {lobby.state}
   {/if}
