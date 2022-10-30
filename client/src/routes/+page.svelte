@@ -11,6 +11,7 @@
   let userData: UserData | undefined;
   // check if the user is logged in with getAuth
   let name: string = "";
+  let errorMessage: string = "";
 
   // update user once auth store changes
   $: user = $authStore;
@@ -24,7 +25,7 @@
         if (userData.displayName !== "") {
           name = userData.displayName;
         }
-      } 
+      }
       // if they dont have a user doc and used sign in with google/microsoft
       else {
         if (user.displayName !== null) {
@@ -38,26 +39,28 @@
     findUser();
   }
 
-  const createLobbyHandler = async () => {
-    if (name === "") {
-      return;
+  async function createLobbyHandler() {
+    try {
+      // Create User
+      await saveOrCreate(user, userData, name.trim());
+      // Create Lobby
+      const code = await createLobby(name.trim());
+      // go to game page
+      goto("/game?code=" + code);
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
     }
-    // Create User
-    await saveOrCreate(user, userData, name);
-    // Create Lobby
-    const code = await createLobby(name);
-    // Go to game page
-    goto("/game?code=" + code);
-  };
-  const joinLobbyHandler = async () => {
-    if (name === "") {
-      return;
+  }
+  async function joinLobbyHandler() {
+    try {
+      // Create User
+      await saveOrCreate(user, userData, name.trim());
+      // go to join page
+      goto("/join");
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
     }
-    // Create User
-    await saveOrCreate(user, userData, name);
-    // go to join page
-    goto("/join");
-  };
+  }
 </script>
 
 <header class="cat-main-header">
@@ -80,6 +83,9 @@
 </main>
 
 <style>
+  .error {
+    color: salmon;
+  }
   /* Phone Styles */
   .cat-main-header {
     width: 100%;
