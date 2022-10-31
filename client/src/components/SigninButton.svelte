@@ -1,11 +1,99 @@
 <script lang="ts">
   import Button, { Label } from "@smui/button";
+  import IconButton from "@smui/icon-button";
+  import Textfield from "@smui/textfield";
   import Menu from "@smui/menu";
   import List, { Item, Separator, Text } from "@smui/list";
   import Dialog, { Header, Title, Content } from "@smui/dialog";
   import { Svg, Icon } from "@smui/common";
   import { authStore as user } from "$stores/auth";
-  import { logOut } from "$lib/firebase/auth";
+  import { loginWithGoogle, loginWithMicrosoft, loginWithEmail, logOut, createUser } from "$lib/firebase/auth";
+
+  let showSignInDialog = false;
+  let menu: Menu;
+  let email = "";
+  let password = "";
+  let selectedForm: "SIGN_IN" | "SIGN_UP" | "NONE" = "NONE";
+  let showPassword = false;
+  let errorMessage: string = "";
+
+  function outputErrorMessage() {
+    switch (errorMessage) {
+      case "Firebase: Error (auth/user-not-found).":
+        errorMessage = "The email you entered is not registered, please create an account.";
+        return;
+      case "Firebase: Error (auth/popup-closed-by-user).":
+        errorMessage = "";
+        return;
+      case "Firebase: Error (auth/wrong-password).":
+        errorMessage = "Incorrect Password.";
+        return;
+      default:
+        return;
+    }
+  }
+
+  async function createAccount() {
+    try {
+      await createUser(email, password);
+      errorMessage = "";
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+      outputErrorMessage();
+      return;
+    }
+    selectedForm = "NONE";
+    showSignInDialog = false;
+    email = "";
+    password = "";
+  }
+  async function submitLogin() {
+    try {
+      await loginWithEmail(email, password);
+      errorMessage = "";
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+      outputErrorMessage();
+      return;
+    }
+    selectedForm = "NONE";
+    showSignInDialog = false;
+    password = "";
+    email = "";
+  }
+  function signInDropDown() {
+    errorMessage = "";
+    selectedForm = "SIGN_IN";
+  }
+  function createAccountDropDown() {
+    errorMessage = "";
+    selectedForm = "SIGN_UP";
+  }
+  async function googleLogin() {
+    try {
+      await loginWithGoogle();
+      errorMessage = "";
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+      outputErrorMessage();
+      return;
+    }
+    selectedForm = "NONE";
+    showSignInDialog = false;
+  }
+
+  async function microsoftLogin() {
+    try {
+      await loginWithMicrosoft();
+      errorMessage = "";
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+      outputErrorMessage();
+      return;
+    }
+    selectedForm = "NONE";
+    showSignInDialog = false;
+  }
 
   const googleSvgPaths: { color: string; path: string }[] = [
     {
@@ -25,9 +113,6 @@
       path: "M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z",
     },
   ];
-
-  let showSignInDialog = false;
-  let menu: Menu;
 </script>
 
 <!-- Sign In Modal -->
@@ -38,7 +123,7 @@
   <Content id="signin-dialog-content">
     <!-- TODO: Sign In Modal Content Here -->
     <div class="buttons">
-      <Button id="sign-in-with-google" variant="raised">
+      <Button id="sign-in-with-google" variant="raised" on:click={googleLogin}>
         <Icon component={Svg} viewBox="0 0 48 48">
           {#each googleSvgPaths as path}
             <path fill={path.color} d={path.path} />
@@ -46,7 +131,7 @@
         </Icon>
         <Label>Sign in with Google</Label>
       </Button>
-      <Button id="sign-in-with-microsoft" variant="raised">
+      <Button id="sign-in-with-microsoft" variant="raised" on:click={microsoftLogin}>
         <Icon component={Svg} viewBox="0 0 21 21">
           <rect x="1" y="1" width="9" height="9" fill="#f25022" />
           <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
@@ -55,6 +140,43 @@
         </Icon>
         <Label>Sign in with Microsoft</Label>
       </Button>
+      <Button id="sign-in-with-email" variant="raised" on:click={signInDropDown}>
+        <Icon class="material-icons">email</Icon>
+        <Label>Sign in with email</Label>
+      </Button>
+      <Button id="sign-up-with-email" variant="raised" on:click={createAccountDropDown}>
+        <Icon class="material-icons">email</Icon>
+        <Label>Sign up with email</Label>
+      </Button>
+      {#if selectedForm != "NONE"}
+        <form on:submit|preventDefault={selectedForm == "SIGN_IN" ? submitLogin : createAccount}>
+          <Textfield label="Email" type="email" bind:value={email} required input$autocomplete="username" />
+          <Textfield
+            label="Password"
+            type={showPassword ? "text" : "password"}
+            bind:value={password}
+            required
+            input$autocomplete={selectedForm == "SIGN_IN" ? "current-password" : "new-password"}
+          >
+            <IconButton
+              type="button"
+              on:click={(event) => event.preventDefault()}
+              slot="trailingIcon"
+              toggle
+              bind:pressed={showPassword}
+            >
+              <Icon class="material-icons" on>visibility</Icon>
+              <Icon class="material-icons">visibility_off</Icon>
+            </IconButton>
+          </Textfield>
+          {#if errorMessage !== ""}
+            <p class="error">{errorMessage}</p>
+          {/if}
+          <Button type="submit">
+            <Label>{selectedForm == "SIGN_IN" ? "Sign In" : "Sign Up"}</Label>
+          </Button>
+        </form>
+      {/if}
     </div>
   </Content>
 </Dialog>
@@ -89,12 +211,18 @@
   }
 
   :global(#sign-in-with-google),
-  :global(#sign-in-with-microsoft) {
-    --mdc-theme-primary: #ffffff;
-    --mdc-theme-on-primary: #3c4043;
+  :global(#sign-in-with-microsoft),
+  :global(#sign-in-with-email),
+  :global(#sign-up-with-email) {
     --mdc-typography-button-text-transform: none;
     justify-content: start;
     gap: 4px;
+  }
+
+  :global(#sign-in-with-google),
+  :global(#sign-in-with-microsoft) {
+    --mdc-theme-primary: #ffffff;
+    --mdc-theme-on-primary: #3c4043;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -102,5 +230,10 @@
       --mdc-theme-primary: #2f2f2f;
       --mdc-theme-on-primary: #ffffff;
     }
+  }
+
+  form {
+    display: grid;
+    gap: 12px;
   }
 </style>
