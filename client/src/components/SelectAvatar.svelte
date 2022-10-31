@@ -1,11 +1,13 @@
 <script lang="ts">
-  import { changeAvatar } from "$lib/firebase/firestore-functions";
   import type { Lobby, Avatar } from "$lib/firebase/firestore-types/lobby";
 
+  import { createEventDispatcher } from "svelte";
   import { authStore as user } from "$stores/auth";
 
-  export let lobbyCode: string;
-  export let lobby: Lobby;
+  export let selectedAvatar: 0 | Avatar = 0;
+  export let lobby: Lobby | undefined = undefined;
+
+  type $$Props = { selectedAvatar: 0 | Avatar } | { lobby: Lobby };
 
   const avatarAltText = [
     "Default cat",
@@ -23,7 +25,7 @@
     "Torsten cat",
   ] as const;
 
-  $: avatarChoices = updateAvatarChoices(lobby);
+  $: avatarChoices = updateAvatarChoices(lobby, selectedAvatar);
 
   type AvatarChoice = {
     avatar: Avatar;
@@ -33,32 +35,39 @@
     selected: boolean;
   };
 
-  function updateAvatarChoices(lobby: Lobby) {
+  function updateAvatarChoices(lobby: Lobby | undefined, selectedAvatar: 0 | Avatar): AvatarChoice[] {
     const newAvatarChoices: AvatarChoice[] = [];
 
     for (let i = 1; i <= 12; i++) {
       newAvatarChoices.push({ avatar: i as Avatar, altText: avatarAltText[i], avalible: true, selected: false });
     }
 
-    for (const player of lobby.players) {
-      newAvatarChoices[player.avatar - 1].displayName = player.displayName;
-      newAvatarChoices[player.avatar - 1].avalible = false;
-    }
+    if (lobby != undefined) {
+      for (const player of lobby.players) {
+        newAvatarChoices[player.avatar - 1].displayName = player.displayName;
+        newAvatarChoices[player.avatar - 1].avalible = false;
+      }
 
-    if ($user !== null) {
-      const userIndex = lobby.uids.indexOf($user.uid);
-      newAvatarChoices[lobby.players[userIndex].avatar - 1].selected = true;
+      if ($user !== null) {
+        const userIndex = lobby.uids.indexOf($user.uid);
+        newAvatarChoices[lobby.players[userIndex].avatar - 1].selected = true;
+      }
+    } else {
+      for (const avatarChoice of newAvatarChoices) {
+        avatarChoice.selected = avatarChoice.avatar === selectedAvatar;
+        avatarChoice.avalible = !avatarChoice.selected;
+      }
     }
 
     return newAvatarChoices;
   }
 
+  const dispatch = createEventDispatcher<{ change: { value: Avatar } }>();
+
   function selectAvatar(avatar: Avatar) {
-    try {
-      changeAvatar({ lobbyCode, avatar });
-    } catch (err) {
-      console.error(err);
-    }
+    dispatch("change", {
+      value: avatar,
+    });
   }
 </script>
 

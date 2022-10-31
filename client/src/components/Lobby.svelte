@@ -3,9 +3,10 @@
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
   import { page } from "$app/stores";
-  import type { Lobby } from "$lib/firebase/firestore-types/lobby";
+  import type { Avatar, Lobby } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
   import { startGame } from "$lib/firebase/firestore-functions";
+  import { changeAvatar } from "$lib/firebase/firestore-functions";
 
   // Props
   export let lobbyCode: string;
@@ -35,6 +36,14 @@
   function copyLink() {
     navigator.clipboard.writeText(url);
   }
+
+  function onAvatarSelect(avatar: Avatar) {
+    try {
+      changeAvatar({ lobbyCode, avatar });
+    } catch (err) {
+      console.error(err);
+    }
+  }
 </script>
 
 <main>
@@ -43,7 +52,7 @@
       <h3>Code: {lobbyCode}</h3>
       <h3>Players: {lobby.players.length}</h3>
     </div>
-    <SelectAvatar {lobby} {lobbyCode} />
+    <SelectAvatar {lobby} on:change={(event) => onAvatarSelect(event.detail.value)} />
     <div class="start">
       <Button on:click={() => startGame({ code: lobbyCode })}><Label>Start Game</Label></Button>
     </div>
