@@ -88,6 +88,7 @@
         bind:value={name}
         bind:dirty={nameDirty}
         invalid={nameDirty && !nameValidation.valid}
+        required
       >
         <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
       </Textfield>

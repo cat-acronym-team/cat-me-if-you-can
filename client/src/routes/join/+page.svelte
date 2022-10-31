@@ -119,6 +119,7 @@
         bind:value={name}
         bind:dirty={nameDirty}
         invalid={nameDirty && !nameValidation.valid}
+        required
       >
         <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
       </Textfield>
@@ -132,6 +133,7 @@
         invalid={codeDirty && !codeValidation.valid}
         input$autocapitalize="none"
         on:input={() => (code = code.toLowerCase())}
+        required
       >
         <HelperText validationMsg slot="helper">{codeValidation.valid ? "" : codeValidation.reason}</HelperText>
       </Textfield>
