@@ -51,12 +51,16 @@ export function deleteAccount() {
   // checkSignInProvider();
 }
 
-export function linkUserCredentials(email: string, password: string) {
+export async function linkUserCredentials(password: string) {
   const user = auth.currentUser;
+
   // If user is signed in
-  if (user !== null) {
-    const credential = EmailAuthProvider.credential(email, password);
-    linkWithCredential(user, credential);
+  if (user !== null && user !== undefined) {
+    const email = user.email;
+    if (email !== null) {
+      const credential = EmailAuthProvider.credential(email, password);
+      return await linkWithCredential(user, credential);
+    }
   }
 }
 

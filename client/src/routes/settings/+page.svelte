@@ -1,10 +1,56 @@
 <script lang="ts">
-  import { deleteAccount, logOut } from "$lib/firebase/auth";
+  import { deleteAccount, linkUserCredentials, logOut } from "$lib/firebase/auth";
   import { goto } from "$app/navigation";
   import Dialog, { Title, Header, Content, Actions } from "@smui/dialog";
   import Button, { Label } from "@smui/button";
 
   let showDeletionPrompt = false;
+  let password: string = "";
+  let confirmPass = "";
+  let errorMsg = "";
+  let success = false;
+  let linkPassButton = false;
+
+  function outPutErrorMsg() {
+    switch (errorMsg) {
+      case "auth/account-exists-with-different-credential":
+        errorMsg = "Account currently exists with different credentials";
+        return;
+      default:
+        return;
+    }
+  }
+
+  function clearFields() {
+    password = "";
+    confirmPass = "";
+  }
+
+  function linkPassPrompt() {
+    errorMsg = "";
+    linkPassButton = true;
+  }
+
+  async function linkCredentials() {
+    console.log(password + "\n" + confirmPass);
+    if (password != confirmPass) {
+      password = "";
+      confirmPass = "";
+      errorMsg = "Password do not match";
+      return;
+    }
+
+    try {
+      await linkUserCredentials(password);
+      errorMsg = "";
+      success = true;
+      linkPassButton = false;
+    } catch (err) {
+      errorMsg = err instanceof Error ? err.message : String(err);
+      outPutErrorMsg();
+      return;
+    }
+  }
 </script>
 
 <html lang="en">
@@ -36,11 +82,49 @@
           </Button>
         </Actions>
       </Dialog>
-
-      <div class="item-del-account">
-        <Button on:click={() => (showDeletionPrompt = true)}>
-          <Label>Delete Account</Label>
+      <div class="item-link-pass">
+        <h3>Link Password</h3>
+        <Button on:click={linkPassPrompt} on:click={clearFields}>
+          <Label>Link Credentials</Label>
         </Button>
+        <!--If button is clicked, show block-->
+        {#if linkPassButton}
+          <form class="formContainer" on:submit|preventDefault={linkCredentials}>
+            <Label for="password">Password</Label>
+            <div class="passForm">
+              <input
+                id="password"
+                bind:value={password}
+                type="password"
+                placeholder="Enter Password"
+                name="password"
+                required
+              />
+            </div>
+            <div class="passForm">
+              <Label for="confpass">Confirm Password</Label>
+              <input
+                id="confirmpass"
+                bind:value={confirmPass}
+                type="password"
+                placeholder="Confirm Password"
+                name="confpass"
+                required
+              />
+            </div>
+            {#if errorMsg !== ""}
+              <p class="error">{errorMsg}</p>
+            {/if}
+            <div class="formButton">
+              <Button type="submit">
+                <Label>Link Password</Label>
+              </Button>
+            </div>
+          </form>
+        {/if}
+        {#if success == true}
+          <p>Password Linked Successfully</p>
+        {/if}
       </div>
       <div class="item-change-pass">
         <Button>
@@ -48,17 +132,23 @@
         </Button>
       </div>
       <!--EOF Delete Account Button and Prompt-->
-
       <!--Signout button-->
       <div class="item-signout">
         <Button
           on:click={() => {
             logOut();
             goto("/");
-          }}>Sign Out</Button
+          }}
         >
+          <Label>Sign Out</Label>
+        </Button>
       </div>
       <!--End Signout button-->
+      <div class="item-del-account">
+        <Button on:click={() => (showDeletionPrompt = true)}>
+          <Label>Delete Account</Label>
+        </Button>
+      </div>
     </div>
   </main>
 </html>
@@ -69,24 +159,38 @@
     display: inline-grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(5, 1fr);
-    gap: 25px 25px;
+    row-gap: 15px;
   }
 
-  .item-del-account {
+  .item-link-pass {
     grid-column: 1;
-    grid-row: 1;
-    border: 2px solid rgb(32, 218, 171);
   }
-
   .item-change-pass {
     grid-column: 1;
     grid-row: 2;
-    border: 2px solid rgb(32, 218, 171);
+    height: auto;
+    width: 100%;
   }
 
   .item-signout {
     grid-column: 1;
     grid-row: 3;
-    border: 2px solid rgb(32, 218, 171);
+    height: auto;
+    width: 100%;
+  }
+
+  .item-del-account {
+    grid-column: 1;
+    grid-row: 4;
+    height: auto;
+    width: 100%;
+  }
+
+  .passForm {
+    margin-bottom: 5px;
+  }
+
+  .error {
+    color: red;
   }
 </style>
