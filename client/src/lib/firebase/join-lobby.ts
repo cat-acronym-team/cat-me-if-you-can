@@ -20,8 +20,5 @@ export async function findAndJoinLobby(id: string, allUserInfo: UserData & { uid
     throw new Error("You are already in the lobby!");
   }
   // make request to server
-  const { data } = await joinLobby({ code: lobby.id });
-  if (data.error !== undefined) {
-    throw new Error(data.error);
-  }
+  await joinLobby({ code: lobby.id });
 }

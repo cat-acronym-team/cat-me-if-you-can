@@ -16,24 +16,24 @@ import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 import { deleteChatRooms } from "./chat";
 
-export const startGame = functions.https.onCall(async (data: unknown, context) => {
+export const startGame = functions.https.onCall(async (data: unknown, context): Promise<void> => {
   // no auth then you shouldn't be here
   if (context.auth === undefined) {
-    return { error: "Not Signed In" };
+    throw new functions.https.HttpsError("permission-denied", "Not Signed In");
   }
   // validate code
   if (!isLobbyRequest(data)) {
-    return { error: "Invalid lobby code!" };
+    throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
   }
   // get lobby doc
   const lobby = await lobbyCollection.doc(data.code).get();
   if (lobby.exists === false) {
-    return { error: "Lobby doesn't exist!" };
+    throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
   }
   // check if the request is coming from the host of the game
   const { uids } = lobby.data() as Lobby;
   if (context.auth.uid !== uids[0]) {
-    return { error: "Not allowed to start game!" };
+    throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
   }
 
   const privatePlayerCollection = getPrivatePlayerCollection(lobby.ref);
@@ -41,18 +41,18 @@ export const startGame = functions.https.onCall(async (data: unknown, context) =
     privatePlayerCollection.doc(uid).create({ role: "CAT" });
   }
 
-  return lobbyCollection.doc(data.code).update({ state: "PROMPT" });
+  await lobbyCollection.doc(data.code).update({ state: "PROMPT" });
 });
 
-export const joinLobby = functions.https.onCall((data: unknown, context) => {
+export const joinLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
   const auth = context.auth;
   // no auth then you shouldn't be here
   if (auth === undefined) {
-    return { error: "Not Signed In" };
+    throw new functions.https.HttpsError("permission-denied", "Not Signed In");
   }
   // validate code
   if (!isLobbyRequest(data)) {
-    return { error: "Invalid lobby code!" };
+    throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
   }
 
   return db.runTransaction(async (transaction) => {
@@ -61,13 +61,13 @@ export const joinLobby = functions.https.onCall((data: unknown, context) => {
     const lobbyInfo = await transaction.get(lobby);
     // extra validation to make sure it exist
     if (lobbyInfo.exists === false) {
-      return { error: "Lobby doesn't exist!" };
+      throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
     // user doc
     const user = await transaction.get(userCollection.doc(auth.uid));
     // make sure this user has a doc with a displayName and avatar
     if (user.exists === false) {
-      return { error: "You need to have a displayName and avatar!" };
+      throw new functions.https.HttpsError("not-found", "You need to have a displayName and avatar!");
     }
     // user data
     const userInfo = user.data() as UserData;
@@ -75,7 +75,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context) => {
     // get lobby data
     const { players, uids } = lobbyInfo.data() as Lobby;
     if (uids.includes(auth.uid)) {
-      return { error: "You are already in the lobby!" };
+      throw new functions.https.HttpsError("already-exists", "You are already in the lobby!");
     }
 
     // change avatar randomly if it is already taken
@@ -85,7 +85,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context) => {
     }
 
     // add player
-    return transaction.update(lobby, {
+    await transaction.update(lobby, {
       players: firestore.FieldValue.arrayUnion({ ...userInfo, alive: true }),
       uids: firestore.FieldValue.arrayUnion(auth.uid),
     });
