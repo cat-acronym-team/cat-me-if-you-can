@@ -1,5 +1,7 @@
 <script lang="ts">
   import Button, { Label } from "@smui/button";
+  import IconButton from "@smui/icon-button";
+  import Textfield from "@smui/textfield";
   import Menu from "@smui/menu";
   import List, { Item, Separator, Text } from "@smui/list";
   import Dialog, { Header, Title, Content } from "@smui/dialog";
@@ -11,16 +13,10 @@
   let menu: Menu;
   let email = "";
   let password = "";
-  let confirmPass = "";
-  let signInButton = false;
-  let createAccountButton = false;
+  let selectedForm: "SIGN_IN" | "SIGN_UP" | "NONE" = "NONE";
+  let showPassword = false;
   let errorMessage: string = "";
 
-  function clearFields() {
-    email = "";
-    password = "";
-    confirmPass = "";
-  }
   function outputErrorMessage() {
     switch (errorMessage) {
       case "Firebase: Error (auth/user-not-found).":
@@ -38,12 +34,6 @@
   }
 
   async function createAccount() {
-    if (password != confirmPass) {
-      password = "";
-      confirmPass = "";
-      errorMessage = "Passwords do not match";
-      return;
-    }
     try {
       await createUser(email, password);
       errorMessage = "";
@@ -52,11 +42,10 @@
       outputErrorMessage();
       return;
     }
-    createAccountButton = false;
+    selectedForm = "NONE";
     showSignInDialog = false;
     email = "";
     password = "";
-    confirmPass = "";
   }
   async function submitLogin() {
     try {
@@ -67,20 +56,18 @@
       outputErrorMessage();
       return;
     }
-    signInButton = false;
+    selectedForm = "NONE";
     showSignInDialog = false;
     password = "";
     email = "";
   }
   function signInDropDown() {
     errorMessage = "";
-    signInButton = !signInButton;
-    createAccountButton = false;
+    selectedForm = "SIGN_IN";
   }
   function createAccountDropDown() {
     errorMessage = "";
-    createAccountButton = !createAccountButton;
-    signInButton = false;
+    selectedForm = "SIGN_UP";
   }
   async function googleLogin() {
     try {
@@ -91,6 +78,7 @@
       outputErrorMessage();
       return;
     }
+    selectedForm = "NONE";
     showSignInDialog = false;
   }
 
@@ -103,6 +91,7 @@
       outputErrorMessage();
       return;
     }
+    selectedForm = "NONE";
     showSignInDialog = false;
   }
 
@@ -151,59 +140,44 @@
         </Icon>
         <Label>Sign in with Microsoft</Label>
       </Button>
+      <Button id="sign-in-with-email" variant="raised" on:click={signInDropDown}>
+        <Icon class="material-icons">email</Icon>
+        <Label>Sign in with email</Label>
+      </Button>
+      <Button id="sign-up-with-email" variant="raised" on:click={createAccountDropDown}>
+        <Icon class="material-icons">email</Icon>
+        <Label>Sign up with email</Label>
+      </Button>
+      {#if selectedForm != "NONE"}
+        <form on:submit|preventDefault={selectedForm == "SIGN_IN" ? submitLogin : createAccount}>
+          <Textfield label="Email" type="email" bind:value={email} required input$autocomplete="username" />
+          <Textfield
+            label="Password"
+            type={showPassword ? "text" : "password"}
+            bind:value={password}
+            required
+            input$autocomplete={selectedForm == "SIGN_IN" ? "current-password" : "new-password"}
+          >
+            <IconButton
+              type="button"
+              on:click={(event) => event.preventDefault()}
+              slot="trailingIcon"
+              toggle
+              bind:pressed={showPassword}
+            >
+              <Icon class="material-icons" on>visibility</Icon>
+              <Icon class="material-icons">visibility_off</Icon>
+            </IconButton>
+          </Textfield>
+          {#if errorMessage !== ""}
+            <p class="error">{errorMessage}</p>
+          {/if}
+          <Button type="submit">
+            <Label>{selectedForm == "SIGN_IN" ? "Sign In" : "Sign Up"}</Label>
+          </Button>
+        </form>
+      {/if}
     </div>
-    <button on:click={signInDropDown} on:click={clearFields}>Sign In</button>
-    {#if signInButton}
-      <form class="formContainer" on:submit|preventDefault={submitLogin}>
-        <div class="groupContainer">
-          <div class="formGroup">
-            <label for="email"><b>Email</b></label>
-            <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
-          </div>
-          <div class="formGroup">
-            <label for="password"><b>Password</b></label>
-            <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
-          </div>
-        </div>
-        {#if errorMessage !== ""}
-          <p class="error">{errorMessage}</p>
-        {/if}
-        <div class="formButton">
-          <button type="submit">Login</button>
-        </div>
-      </form>
-    {/if}
-    <button on:click={createAccountDropDown} on:click={clearFields}>Create Account</button>
-    {#if createAccountButton}
-      <form class="formContainer" on:submit|preventDefault={createAccount}>
-        <div class="groupContainer">
-          <div class="formGroup">
-            <label for="email"><b>Email</b></label>
-            <input type="email" bind:value={email} placeholder="Enter Username" name="email" required />
-          </div>
-          <div class="formGroup">
-            <label for="password"><b>Password</b></label>
-            <input type="password" bind:value={password} placeholder="Enter Password" name="password" required />
-          </div>
-          <div class="formGroup">
-            <label for="confirmPass"><b>Confirm Password</b></label>
-            <input
-              type="password"
-              bind:value={confirmPass}
-              placeholder="Confirm Password"
-              name="confirmPass"
-              required
-            />
-          </div>
-        </div>
-        {#if errorMessage !== ""}
-          <p class="error">{errorMessage}</p>
-        {/if}
-        <div class="formButton">
-          <button type="submit">Register Account</button>
-        </div>
-      </form>
-    {/if}
   </Content>
 </Dialog>
 <div class="account-container">
@@ -237,12 +211,18 @@
   }
 
   :global(#sign-in-with-google),
-  :global(#sign-in-with-microsoft) {
-    --mdc-theme-primary: #ffffff;
-    --mdc-theme-on-primary: #3c4043;
+  :global(#sign-in-with-microsoft),
+  :global(#sign-in-with-email),
+  :global(#sign-up-with-email) {
     --mdc-typography-button-text-transform: none;
     justify-content: start;
     gap: 4px;
+  }
+
+  :global(#sign-in-with-google),
+  :global(#sign-in-with-microsoft) {
+    --mdc-theme-primary: #ffffff;
+    --mdc-theme-on-primary: #3c4043;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -252,31 +232,8 @@
     }
   }
 
-  .error {
-    color: salmon;
-  }
-
-  .groupContainer {
-    display: flex;
-    width: 100%;
-  }
-
-  .formGroup {
-    display: flex;
-    flex-direction: column;
-    width: 40%;
-    margin: auto;
-  }
-  .formGroup label {
-    text-align: left;
-  }
-
-  .formGroup input {
-    width: 100%;
-    height: 25px;
-  }
-  .formContainer button {
-    margin: auto;
-    margin-top: 10px;
+  form {
+    display: grid;
+    gap: 12px;
   }
 </style>
