@@ -1,0 +1,15 @@
+export const avatarAltText = [
+  "Default cat",
+  "Astronaut cat",
+  "Bee Cat",
+  "Burger cat",
+  "City cat",
+  "Computer cat",
+  "Cowboy cat",
+  "Emo demon cat",
+  "Fantasy cat",
+  "Fish cat",
+  "Ghost cat",
+  "Magic cat",
+  "Torsten cat",
+] as const;

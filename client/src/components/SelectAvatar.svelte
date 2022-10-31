@@ -3,27 +3,12 @@
 
   import { createEventDispatcher } from "svelte";
   import { authStore as user } from "$stores/auth";
+  import { avatarAltText } from "$lib/avatar";
 
   export let selectedAvatar: 0 | Avatar = 0;
   export let lobby: Lobby | undefined = undefined;
 
   type $$Props = { selectedAvatar: 0 | Avatar } | { lobby: Lobby };
-
-  const avatarAltText = [
-    "Default cat",
-    "Astronaut cat",
-    "Bee Cat",
-    "Burger cat",
-    "City cat",
-    "Computer cat",
-    "Cowboy cat",
-    "Emo demon cat",
-    "Fantasy cat",
-    "Fish cat",
-    "Ghost cat",
-    "Magic cat",
-    "Torsten cat",
-  ] as const;
 
   $: avatarChoices = updateAvatarChoices(lobby, selectedAvatar);
 
@@ -71,11 +56,13 @@
   }
 </script>
 
-<div class="grid">
+<div class="grid {lobby != undefined ? 'lobby' : ''}">
   {#each avatarChoices as { avatar, altText, displayName, avalible, selected }}
     <button class="avatar" on:click={() => selectAvatar(avatar)} disabled={!avalible} aria-selected={selected}>
       <img src="/avatars/{avatar}.webp" alt={altText} />
-      <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
+      {#if lobby != undefined}
+        <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
+      {/if}
     </button>
   {/each}
 </div>
@@ -90,8 +77,12 @@
     grid-template-columns: repeat(4, auto);
     grid-template-rows: repeat(3, auto);
     place-content: center;
-    gap: 12px 24px;
+    gap: 24px 24px;
     height: 100%;
+  }
+
+  .grid.lobby {
+    gap: 12px 24px;
   }
 
   @media (max-width: 600px) {
@@ -108,19 +99,21 @@
     background: none;
 
     display: grid;
-    grid-template-rows: auto 16px;
+    grid-template-rows: auto;
     gap: 12px;
     place-items: center;
     color: unset;
   }
 
+  .lobby .avatar {
+    grid-template-rows: auto 16px;
+  }
+
   .avatar img {
     height: 18vmin;
     width: 18vmin;
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
     outline: 1px currentColor solid;
+    outline-offset: -1px;
     border-radius: 8px;
   }
 
@@ -129,10 +122,12 @@
   }
 
   .avatar:focus-visible img {
+    outline-offset: -2px;
     outline: 2px currentColor solid;
   }
 
   .avatar[aria-selected="true"] img {
+    outline-offset: -2px;
     outline: 2px var(--primary-theme-color) solid;
   }
 </style>
