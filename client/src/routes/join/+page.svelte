@@ -30,7 +30,7 @@
       return { valid: false, reason: "Please enter a lobby code" };
     }
     if (!/^[a-zA-Z]+$/.test(code)) {
-      return { valid: false, reason: "Lobby can only contain letters" };
+      return { valid: false, reason: "Lobby code can only contain letters" };
     }
     if (code.length !== 6) {
       return { valid: false, reason: "Lobby code must be 6 letters" };
