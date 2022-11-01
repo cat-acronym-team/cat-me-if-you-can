@@ -34,6 +34,7 @@
       else {
         if (user.displayName !== null) {
           name = user.displayName;
+          nameDirty = true;
         }
       }
     }
