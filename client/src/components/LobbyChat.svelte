@@ -2,10 +2,11 @@
   import Modal from "./Modal.svelte";
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
-  import { onSnapshot, orderBy, query, QueryDocumentSnapshot } from "firebase/firestore";
-  import { type ChatMessage, type ChatRoom, type Lobby, type Player } from "$lib/firebase/firestore-types/lobby";
-  import type { User } from "firebase/auth";
+  import { onSnapshot, orderBy, query } from "firebase/firestore";
+  import type { ChatMessage, Lobby, Player } from "$lib/firebase/firestore-types/lobby";
+  import type { Unsubscribe, User } from "firebase/auth";
   import { getLobbyChatCollection } from "$lib/firebase/firestore-collections";
+  import { addLobbyChatMessage } from "$lib/firebase/lobby-chat";
 
   export let lobbyData: Lobby & { id: string };
 
@@ -14,30 +15,37 @@
   let openSignInModal = false;
   let message: string = "";
   let errorMessage: string = "";
+  let chatMessages: ChatMessage[] = [];
+  let unsubscribeChatMessages: Unsubscribe | undefined = undefined;
 
   onMount(async () => {
-    onSnapshot(
+    unsubscribeChatMessages = onSnapshot(
       query(getLobbyChatCollection(lobbyData.id), orderBy("timestamp", "asc")),
-      async((collection) => {
-        lobbyChatMessages = collection.docs.map((messages) => message.data());
-      })
+      (collection) => {
+        chatMessages = collection.docs.map((message) => message.data());
+      }
     );
   });
 
+  userInfo = lobbyData.players[lobbyData.uids.indexOf(user.uid)];
+
+  onDestroy(() => {
+    unsubscribeChatMessages?.();
+  });
   async function submitMessage() {
     if (message === "") {
       return;
     }
     try {
       // add Message
-      //await addChatMessage(lobbyData.id, chatRoomInfo.id, user.uid, message);
-      //clear the input
+      await addLobbyChatMessage(lobbyData.id, user.uid, message);
+      // clear the input
       message = "";
-      if (errorMessage !== "") {
-        errorMessage = "";
-      }
+      // if there's an error message then clear it
+      errorMessage = "";
     } catch (err) {
-      //errorMessage = err instanceOf Error ? err.message : String(err);
+      // catch and display erro
+      errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
   function isUser(uid: string) {
@@ -47,19 +55,26 @@
 
 <main>
   <Modal open={openSignInModal}>
-    <button class="close" on:click={() => (openSignInModal = false)}>X</button>
-    {#each chatMessage as message}
-      {#if isUser(message.sender)}
-        <p class="user-msg">{message.text}</p>
-      {:else}
-        <p class="lobby-msg">{message.txt}</p>
-      {/if}
-    {/each}
-    <div class="chatRoom">
-      <form on:submit|preventDefault={submitMessage}>
-        <input type="text" bind:value={message} />
-        <button type="submit" disabled={message === ""}>Send</button>
-      </form>
+    <div class="chatroom">
+      <button class="close" on:click={() => (openSignInModal = false)}>X</button>
+      <div class="messages">
+        {#each chatMessages as message}
+          {#if isUser(message.sender)}
+            <p class="user-msg">{message.text}</p>
+          {:else}
+            <p class="lobby-msg">{message.sender}: {message.text}</p>
+          {/if}
+        {/each}
+      </div>
+      <div class="chatRoom">
+        <form on:submit|preventDefault={submitMessage}>
+          <input type="text" bind:value={message} />
+          <button type="submit" disabled={message === ""}>Send</button>
+          {#if errorMessage !== ""}
+            <p class="error">{errorMessage}</p>
+          {/if}
+        </form>
+      </div>
     </div>
   </Modal>
   <button
@@ -71,9 +86,10 @@
 </main>
 
 <style>
-  .formGroup {
-    position: absolute;
-    bottom: 0px;
+  .messages {
+    width: 100%;
+    height: 60%;
+    overflow-y: scroll;
   }
   .user-msg {
     text-align: right;
@@ -83,14 +99,14 @@
     padding: 5px;
     border-radius: 15px;
   }
-  .partner-msg {
+  .lobby-msg {
     text-align: left;
     background-color: red;
     width: fit-content;
     padding: 5px;
     border-radius: 15px;
   }
-  /* .chatRoom {
+  .chatroom {
     position: fixed;
     top: 0;
     left: 0;
@@ -103,5 +119,5 @@
     height: 100%;
     margin: auto;
     text-align: center;
-  } */
+  }
 </style>

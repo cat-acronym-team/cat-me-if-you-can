@@ -2,6 +2,14 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /lobbies/{code} {
+      
+      function lobbyData(){
+        return get(/databases/$(database)/documents/lobbies/$(code)).data;
+      }
+      function inLobby(){
+        return request.auth.uid in lobbyData().uids;
+      }
+      
       // to combat the delete room issue where the host is potentially stalker
       // allow the second player in the lobby to be co-host 
       // since in the future the second player in the lobby might become host if the host leaves
@@ -41,7 +49,6 @@ service cloud.firestore {
         // I think its because the info is in the resource object
         allow read: if request.auth.uid in resource.data.pair || request.auth.uid in resource.data.viewers ;
         match /chatMessages/{messageId}{
-
           function validateChatMessage() {
             return request.resource.data.keys().hasOnly(['sender', 'text', 'timestamp'])
               && request.resource.data.sender == request.auth.uid && request.resource.data.text is string 
@@ -52,6 +59,18 @@ service cloud.firestore {
           allow read: if canRead();
           allow create: if inPair() && validateChatMessage();
         }
+      }
+
+      match /chatMessages/{messageId}{
+        function validateLobbyChatMessage() {
+            return request.resource.data.keys().hasOnly(['sender', 'text', 'timestamp'])
+              && request.resource.data.sender == request.auth.uid && request.resource.data.text is string 
+              && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 100
+              && request.resource.data.text.trim() == request.resource.data.text
+              && request.resource.data.timestamp is timestamp && request.resource.data.timestamp == request.time;
+          }
+          allow read: if inLobby();
+          allow create: if validateLobbyChatMessage();
       }
     }
 

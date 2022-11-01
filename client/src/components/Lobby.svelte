@@ -45,7 +45,7 @@
       <h3>Players: {lobby.players.length}</h3>
     </div>
     <div class="lobbyChat-level">
-      <LobbyChat />
+      <LobbyChat lobbyData={{ ...lobby, id: lobbyCode }} />
     </div>
     <SelectAvatar {lobby} {lobbyCode} />
     <div class="start">
