@@ -1,35 +1,39 @@
 import { firestore } from "firebase-admin";
 import * as functions from "firebase-functions";
-import { db } from "./app";
 import {
+  getChatRoomCollection,
+  getChatRoomMessagesCollection,
   getPrivatePlayerCollection,
   getPromptAnswerCollection,
   lobbyCollection,
   userCollection,
 } from "./firestore-collections";
 import { avatars, Lobby, PrivatePlayer, Role } from "./firestore-types/lobby";
-import { UserData } from "./firestore-types/users";
 import { isLobbyRequest } from "./firestore-functions-types";
+import { UserData } from "./firestore-types/users";
+import { generatePairs } from "./util";
+import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
+import { deleteChatRooms } from "./chat";
 
-export const startGame = functions.https.onCall(async (data: unknown, context) => {
+export const startGame = functions.https.onCall(async (data: unknown, context): Promise<void> => {
   // no auth then you shouldn't be here
   if (context.auth === undefined) {
-    return { error: "Not Signed In" };
+    throw new functions.https.HttpsError("permission-denied", "Not Signed In");
   }
   // validate code
   if (!isLobbyRequest(data)) {
-    return { error: "Invalid lobby code!" };
+    throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
   }
   // get lobby doc
   const lobby = await lobbyCollection.doc(data.code).get();
   if (lobby.exists === false) {
-    return { error: "Lobby doesn't exist!" };
+    throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
   }
   // check if the request is coming from the host of the game
   const { uids } = lobby.data() as Lobby;
   if (context.auth.uid !== uids[0]) {
-    return { error: "Not allowed to start game!" };
+    throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
   }
 
   const privatePlayerCollection = getPrivatePlayerCollection(lobby.ref);
@@ -37,18 +41,18 @@ export const startGame = functions.https.onCall(async (data: unknown, context) =
     privatePlayerCollection.doc(uid).create({ role: "CAT" });
   }
 
-  return lobbyCollection.doc(data.code).update({ state: "PROMPT" });
+  await lobbyCollection.doc(data.code).update({ state: "PROMPT" });
 });
 
-export const joinLobby = functions.https.onCall((data: unknown, context) => {
+export const joinLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
   const auth = context.auth;
   // no auth then you shouldn't be here
   if (auth === undefined) {
-    return { error: "Not Signed In" };
+    throw new functions.https.HttpsError("permission-denied", "Not Signed In");
   }
   // validate code
   if (!isLobbyRequest(data)) {
-    return { error: "Invalid lobby code!" };
+    throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
   }
 
   return db.runTransaction(async (transaction) => {
@@ -57,13 +61,13 @@ export const joinLobby = functions.https.onCall((data: unknown, context) => {
     const lobbyInfo = await transaction.get(lobby);
     // extra validation to make sure it exist
     if (lobbyInfo.exists === false) {
-      return { error: "Lobby doesn't exist!" };
+      throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
     // user doc
     const user = await transaction.get(userCollection.doc(auth.uid));
     // make sure this user has a doc with a displayName and avatar
     if (user.exists === false) {
-      return { error: "You need to have a displayName and avatar!" };
+      throw new functions.https.HttpsError("not-found", "You need to have a displayName and avatar!");
     }
     // user data
     const userInfo = user.data() as UserData;
@@ -71,7 +75,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context) => {
     // get lobby data
     const { players, uids } = lobbyInfo.data() as Lobby;
     if (uids.includes(auth.uid)) {
-      return { error: "You are already in the lobby!" };
+      throw new functions.https.HttpsError("already-exists", "You are already in the lobby!");
     }
 
     // change avatar randomly if it is already taken
@@ -81,7 +85,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context) => {
     }
 
     // add player
-    return transaction.update(lobby, {
+    await transaction.update(lobby, {
       players: firestore.FieldValue.arrayUnion({ ...userInfo, alive: true }),
       uids: firestore.FieldValue.arrayUnion(auth.uid),
     });
@@ -96,6 +100,11 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
 
   if (lobby.state == "PROMPT" && oldLobby.state != "PROMPT") {
     await startPrompt(lobbyDocRef);
+  }
+
+  if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {
+    const expiration = firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 30000);
+    lobbyDocRef.set({ expiration }, { merge: true });
   }
 
   if (lobby.state == "END" && oldLobby.state != "END") {
@@ -189,9 +198,28 @@ export const collectPromptAnswers = functions.firestore
 
       transaction.update(lobbyDocRef, { state: "CHAT" });
 
-      functions.logger.log(promptAnswers);
-
-      // TODO #32 create a one on one chat and store the promptAnswers in it
+      // TODO: check if we have a stalker
+      const { pairs } = generatePairs(lobbyData);
+      // create a chatroom for each pair
+      pairs.forEach(async ({ one, two }) => {
+        const room = await getChatRoomCollection(lobbyDocRef).add({ pair: [one, two], viewers: [] });
+        // get answers of the pair
+        const oneAnswer = promptAnswers.get(one) as string;
+        const twoAnswer = promptAnswers.get(two) as string;
+        // place answers in chatMessages inside their room
+        await getChatRoomMessagesCollection(room).add({
+          sender: one,
+          text: oneAnswer,
+          timestamp: firestore.Timestamp.now(),
+          isPromptAnswer: true,
+        });
+        await getChatRoomMessagesCollection(room).add({
+          sender: two,
+          text: twoAnswer,
+          timestamp: firestore.Timestamp.now(),
+          isPromptAnswer: true,
+        });
+      });
     });
   });
 
@@ -245,6 +273,7 @@ export async function makeAlive(lobbyDocRef: firestore.DocumentReference<Lobby>)
     return { error: "Lobby doesn't exist!" };
   }
 
+  // loop through each player and set their alive status to true
   const { players } = lobby.data() as Lobby;
   for (let i = 0; i < players.length; i++) {
     players[i].alive = true;
@@ -264,6 +293,7 @@ export async function deletePrivatePlayers(
     return { error: "Lobby does not exist!" };
   }
 
+  // loop through each doc in the private player collection via uid and delete them one-by-one
   const { uids } = lobby.data() as Lobby;
   for (let i = 0; i <= docCount; i++) {
     const playerDoc = privatePlayerCollectionRef.doc(uids[i]);
@@ -276,3 +306,38 @@ export async function deletePrivatePlayers(
   }
   return;
 }
+export const verifyExpiration = functions.https.onCall(async (data, context) => {
+  // check auth
+  if (context.auth == undefined) {
+    throw new functions.https.HttpsError("permission-denied", "User is not Authenticated");
+  }
+  // check the data request
+  if (!isLobbyRequest(data)) {
+    throw new functions.https.HttpsError("invalid-argument", "Data is not of ExpirationRequest type.");
+  }
+  // get lobby doc
+  const lobbyDocRef = lobbyCollection.doc(data.code);
+
+  // start transaction
+  return db.runTransaction(async (transaction) => {
+    const lobbyDoc = await transaction.get(lobbyDocRef);
+    const lobby = lobbyDoc.data();
+    if (lobby === undefined) {
+      throw new functions.https.HttpsError("not-found", "Lobby does not exist.");
+    }
+    // if the time sent is less than expiration
+    if (Date.now() < lobby.expiration.toMillis()) {
+      throw new functions.https.HttpsError("invalid-argument", "Too early to make request.");
+    }
+    // if the timer sent is equal or greater than
+    // change to the next phase
+
+    // TODO: potential if checks for other states that require a timer
+    // if the state is chat then delete chatrooms
+    if (lobby.state === "CHAT") {
+      await deleteChatRooms(lobby, lobbyDocRef, transaction);
+    }
+
+    return;
+  });
+});

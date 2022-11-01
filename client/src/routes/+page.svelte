@@ -83,9 +83,6 @@
 </main>
 
 <style>
-  .error {
-    color: salmon;
-  }
   /* Phone Styles */
   .cat-main-header {
     width: 100%;
