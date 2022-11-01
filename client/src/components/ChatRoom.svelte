@@ -22,7 +22,7 @@
   let chatRoomInfo: QueryDocumentSnapshot<ChatRoom>;
   let chatMessages: ChatMessage[] = [];
   let timer: ReturnType<typeof setInterval>;
-  let countdown: number;
+  let countdown = GAME_STATE_DURATIONS.CHAT;
   let message: string = "";
   let errorMessage: string = "";
   let unsubscribeChatMessages: Unsubscribe | undefined = undefined;
@@ -49,9 +49,7 @@
     }
     // create timer
     timer = setInterval(() => {
-      if (lobbyData.expiration == undefined) {
-        countdown = GAME_STATE_DURATIONS.CHAT;
-      } else {
+      if (lobbyData.expiration != undefined) {
         const diff = Math.floor((lobbyData.expiration.toMillis() - Date.now()) / 1000);
         countdown = diff;
       }
@@ -94,9 +92,7 @@
 </script>
 
 <div class="chatroom">
-  {#if countdown !== undefined}
-    <p class="countdown">{countdown}</p>
-  {/if}
+  <p class="countdown">{countdown}</p>
   {#if partnerInfo !== undefined}
     <div>MATCHED WITH {partnerInfo.displayName.toUpperCase()}</div>
   {/if}
