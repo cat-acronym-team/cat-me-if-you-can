@@ -92,8 +92,35 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
   });
 });
 
-export const leaveLobby = functions.https.onCall(() => {
-  // TODO: All the leave lobby stuff
+export const leaveLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
+  const auth = context.auth;
+
+  // no auth then you shouldn't be here
+  if (auth === undefined) {
+    throw new functions.https.HttpsError("permission-denied", "Not Signed In");
+  }
+
+  // validate code
+  if (!isLobbyRequest(data)) {
+    throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
+  }
+
+  return db.runTransaction(async (transaction) => {
+    // lobby doc
+    const lobby = lobbyCollection.doc(data.code);
+    const lobbyInfo = await transaction.get(lobby);
+
+    // extra validation to make sure it exist
+    if (lobbyInfo.exists === false) {
+      throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
+    }
+
+    // Remove player from the lobby
+    await transaction.update(lobby, {
+      players: firestore.FieldValue.arrayRemove(0),
+      uids: firestore.FieldValue.arrayRemove(auth.uid),
+    });
+  });
 });
 
 // TODO: replace with the correct trigger
