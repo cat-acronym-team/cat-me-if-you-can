@@ -156,7 +156,4 @@
   button {
     height: 50px;
   }
-  .error {
-    color: salmon;
-  }
 </style>
