@@ -29,6 +29,8 @@ export async function applyStats(lobbyData: Lobby, lobbyDoc: DocumentReference<L
       transaction.update(userDocRef, { ...user });
     })
   );
+  // TODO: Might want to reset lobby information below 
 
+  // Back to the waiting to start new game
   transaction.update(lobbyDoc, { state: "WAIT" });
 }

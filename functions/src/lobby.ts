@@ -258,6 +258,7 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
     if (lobby.state === "CHAT") {
       await deleteChatRooms(lobby, lobbyDocRef, transaction);
     }
+    // Applies the stats once the timer on the end screen ends
     if (lobby.state === "END") {
       await applyStats(lobby, lobbyDocRef, transaction);
     }
