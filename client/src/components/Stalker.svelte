@@ -23,16 +23,17 @@
       chatroomsIds = chatSnapshot.docs.map((room) => room.id);
       chatrooms = chatSnapshot.docs.map((room) => room.data());
 
-      const [room] = chatSnapshot.docs.filter((chatDoc) => {
+      const room = chatSnapshot.docs.find((chatDoc) => {
         return chatDoc.data().viewers.includes($user!.uid);
       });
-      console.log(room);
-      onSnapshot(
-        query(getChatRoomMessagesCollection(lobbyCode, room.id), orderBy("timestamp", "asc")),
-        (collection) => {
-          chatMessages = collection.docs.map((d) => d.data());
-        }
-      );
+      if (room !== undefined) {
+        onSnapshot(
+          query(getChatRoomMessagesCollection(lobbyCode, room.id), orderBy("timestamp", "asc")),
+          (collection) => {
+            chatMessages = collection.docs.map((d) => d.data());
+          }
+        );
+      }
     });
   });
 
@@ -72,7 +73,7 @@
     {/each}
   </div>
 {:else}
-  <ChatRoom lobbyData={{ ...lobby, id: lobbyCode }} />
+  <ChatRoom lobbyData={{ ...lobby, id: lobbyCode }} isStalker={true} />
 {/if}
 
 <style>
