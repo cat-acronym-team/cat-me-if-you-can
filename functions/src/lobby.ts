@@ -115,9 +115,15 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
       throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
 
+    // get lobby data
+    const { players, uids } = lobbyInfo.data() as Lobby;
+
+    // Get position of the Player
+    const playerPos = uids.indexOf(auth.uid);
+
     // Remove player from the lobby
     await transaction.update(lobby, {
-      players: firestore.FieldValue.arrayRemove(0),
+      players: firestore.FieldValue.arrayRemove(players[playerPos]),
       uids: firestore.FieldValue.arrayRemove(auth.uid),
     });
   });
