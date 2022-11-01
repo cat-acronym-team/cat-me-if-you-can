@@ -96,7 +96,7 @@
   {:else if lobby.state === "CHAT" && privatePlayer.stalker === true}
     <Stalker {lobby} {lobbyCode} />
   {:else if lobby.state === "CHAT"}
-    <ChatRoom lobbyData={{ ...lobby, id: lobbyCode }} />
+    <ChatRoom lobbyData={{ ...lobby, id: lobbyCode }} isStalker={false} />
   {:else}
     unknown lobby state: {lobby.state}
   {/if}
