@@ -1,20 +1,16 @@
 <script lang="ts">
-  import { authStore as user } from "$stores/auth";
   import type { PrivatePlayer, Lobby } from "../../../functions/src/firestore-types/lobby";
   import { onMount } from "svelte";
   import { lobbyReturn } from "$lib/firebase/firestore-functions";
-  import { getPrivatePlayerCollection } from "$lib/firebase/firestore-collections";
-  import { doc, getDoc } from "firebase/firestore";
-  import type { DocumentReference } from "firebase/firestore";
 
-  export let lobbyDocRef: DocumentReference<Lobby>;
   export let lobbyCode: string;
   export let lobby: Lobby;
+  export let privatePlayer: PrivatePlayer;
 
   let end: "Cat Win" | "Cat Lose" | "Catfish Lose" | "Catfish Win" | null = null;
   let catfishList: string = "";
   let catfishes: string[];
-  onMount(async () => {
+  onMount(() => {
     // format a string list to have commas and "and" when needed
     const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
     // get the list of catfishes from lobby.ts and put them into a variable
@@ -26,9 +22,9 @@
     catfishList = formatter.format(catfishes);
 
     // grab the current user's role
-    const myRole = (await getDoc(doc(getPrivatePlayerCollection(lobbyDocRef), $user?.uid))).data() as PrivatePlayer;
+    const myRole = privatePlayer.role;
     // update end variable depending on the winner type and the current player's role
-    if (myRole.role == "CAT") {
+    if (myRole == "CAT") {
       if (lobby.winner == "CAT") {
         end = "Cat Win";
       } else if (lobby.winner == "CATFISH") {

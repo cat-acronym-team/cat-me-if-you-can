@@ -57,7 +57,7 @@ export type Lobby = {
   /**
    * the role that won at the end of the game
    */
-  winner: Role;
+  winner?: Role;
 };
 
 /**

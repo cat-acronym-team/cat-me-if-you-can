@@ -7,7 +7,7 @@ import {
   lobbyCollection,
   userCollection,
 } from "./firestore-collections";
-import { avatars, Lobby, Role } from "./firestore-types/lobby";
+import { avatars, Lobby, PrivatePlayer, Role } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { isLobbyRequest } from "./firestore-functions-types";
 import { getRandomPromptPair } from "./prompts";
@@ -104,6 +104,7 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
 
   if (lobby.state == "WAIT" && oldLobby.state == "END") {
     makeAlive(lobbyDocRef);
+    deletePrivatePlayers(lobbyDocRef, getPrivatePlayerCollection(lobbyDocRef), lobby.players.length + 1);
   }
 });
 
@@ -214,37 +215,23 @@ export async function addRole(lobbyDocRef: firestore.DocumentReference<Lobby>) {
     // replace the role of the player
     player.role = privateInfo.role;
   }
-  let catCount = 0;
   let catfishCount = 0;
-  const catfishDisplayname: string[] = [];
+
   for (let i = 0; i < uids.length; i++) {
     // check the alive players
     if (players[i].alive == true) {
-      if (players[i].role == "CAT") {
-        catCount++;
-        // within the alive players, count the number that are cats
-      } else {
-        let temp = "";
-        temp = players[i].displayName;
+      if (players[i].role == "CATFISH") {
         catfishCount++;
-        catfishDisplayname.push(temp);
       }
     }
     // check any catfish who are not alive and add their display name to the list
-    else {
-      if (players[i].role == "CATFISH") {
-        let temp = "";
-        temp = players[i].displayName;
-        catfishDisplayname.push(temp);
-      }
-    }
   }
 
-  let winner: Role | undefined;
+  let winner: Role;
   if (catfishCount == 0) {
     winner = "CAT";
-  }
-  if (catCount <= catfishCount) {
+  } else {
+    // if (catCount <= catfishCount) {
     winner = "CATFISH";
   }
 
@@ -263,4 +250,29 @@ export async function makeAlive(lobbyDocRef: firestore.DocumentReference<Lobby>)
     players[i].alive = true;
   }
   return lobbyDocRef.update({ players });
+}
+
+export async function deletePrivatePlayers(
+  lobbyDocRef: firestore.DocumentReference<Lobby>,
+  privatePlayerCollectionRef: firestore.CollectionReference<PrivatePlayer>,
+  docCount: number
+) {
+  let deleted = 0;
+
+  const lobby = await lobbyDocRef.get();
+  if (lobby.exists === false) {
+    return { error: "Lobby does not exist!" };
+  }
+
+  const { uids } = lobby.data() as Lobby;
+  for (let i = 0; i <= docCount; i++) {
+    const playerDoc = privatePlayerCollectionRef.doc(uids[i]);
+    await playerDoc.delete();
+    deleted++;
+  }
+
+  if (deleted >= docCount) {
+    return;
+  }
+  return;
 }

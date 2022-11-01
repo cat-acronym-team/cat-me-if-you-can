@@ -3,6 +3,7 @@ import { lobbyCollection } from "./firestore-collections";
 import { isLobbyRequest } from "./firestore-functions-types";
 import { Lobby } from "./firestore-types/lobby";
 
+// this function will likely be obsolete once timers are introduced
 export const lobbyReturn = functions.https.onCall(async (data: unknown, context) => {
   if (context.auth === undefined) {
     return { error: "Not Signed In" };
