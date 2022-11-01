@@ -3,7 +3,7 @@
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
   import { getUser, saveOrCreate } from "$lib/firebase/splash";
-  import { createLobby } from "$lib/firebase/create-lobby";
+  import { createLobby } from "$lib/firebase/firebase-functions";
   import type { UserData } from "$lib/firebase/firestore-types/users";
   import { goto } from "$app/navigation";
   import { authStore } from "$stores/auth";
@@ -44,9 +44,9 @@
       // Create User
       await saveOrCreate(user, userData, name.trim());
       // Create Lobby
-      const code = await createLobby(name.trim());
+      const responce = await createLobby();
       // go to game page
-      goto("/game?code=" + code);
+      goto("/game?code=" + responce.data.code);
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : String(err);
     }
