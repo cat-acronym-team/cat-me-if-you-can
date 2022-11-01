@@ -259,7 +259,7 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
       await deleteChatRooms(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "END") {
-      await applyStats(transaction, lobby, lobbyDocRef);
+      await applyStats(lobby, lobbyDocRef, transaction);
     }
 
     return;

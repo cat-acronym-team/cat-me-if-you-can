@@ -3,7 +3,7 @@ import type { DocumentReference, Transaction } from "firebase-admin/firestore";
 import { userCollection } from "./firestore-collections";
 import type { UserData } from "./firestore-types/users";
 
-export async function applyStats(transaction: Transaction, lobbyData: Lobby, lobbyDoc: DocumentReference<Lobby>) {
+export async function applyStats(lobbyData: Lobby, lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
   const { players, uids, winner } = lobbyData;
   // update each players doc
   await Promise.all(
