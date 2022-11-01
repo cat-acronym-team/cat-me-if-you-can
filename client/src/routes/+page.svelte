@@ -1,14 +1,21 @@
 <script lang="ts">
   import SigninButton from "$components/SigninButton.svelte";
+  import Button, { Label } from "@smui/button";
+  import Textfield from "@smui/textfield";
+  import HelperText from "@smui/textfield/helper-text";
   import { getUser, saveOrCreate } from "$lib/firebase/splash";
   import { createLobby } from "$lib/firebase/create-lobby";
-  import type { UserData } from "$lib/firebase/firestore-types/users";
+  import { displayNameValidator, type UserData } from "$lib/firebase/firestore-types/users";
   import { goto } from "$app/navigation";
   import { authStore } from "$stores/auth";
 
   let userData: UserData | undefined;
-  // check if the user is logged in with getAuth
+
   let name: string = "";
+  let nameDirty: boolean = false;
+  $: nameValidation = displayNameValidator(name);
+
+  let errorMessage: string = "";
 
   // update user once auth store changes
   $: user = $authStore;
@@ -16,11 +23,17 @@
   async function findUser() {
     if (user !== null) {
       userData = await getUser(user.uid);
-      // fixed error because it would try to look for the display name of a user that doesn't exist
+      // if they have a user doc
       if (userData !== undefined) {
         // assign name from database to name variable
         if (userData.displayName !== "") {
           name = userData.displayName;
+        }
+      }
+      // if they dont have a user doc and used sign in with google/microsoft
+      else {
+        if (user.displayName !== null) {
+          name = user.displayName;
         }
       }
     }
@@ -30,26 +43,28 @@
     findUser();
   }
 
-  const createLobbyHandler = async () => {
-    if (name === "") {
-      return;
+  async function createLobbyHandler() {
+    try {
+      // Create User
+      await saveOrCreate(user, userData, name.trim());
+      // Create Lobby
+      const code = await createLobby(name.trim());
+      // go to game page
+      goto("/game?code=" + code);
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
     }
-    // Create User
-    await saveOrCreate(user, userData, name);
-    // Create Lobby
-    const code = await createLobby(name);
-    // Go to game page
-    goto("/game?code=" + code);
-  };
-  const joinLobbyHandler = async () => {
-    if (name === "") {
-      return;
+  }
+  async function joinLobbyHandler() {
+    try {
+      // Create User
+      await saveOrCreate(user, userData, name.trim());
+      // go to join page
+      goto("/join");
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
     }
-    // Create User
-    await saveOrCreate(user, userData, name);
-    // go to join page
-    goto("/join");
-  };
+  }
 </script>
 
 <header class="cat-main-header">
@@ -64,9 +79,21 @@
       <img src="https://picsum.photos/500/300" alt="our logo" />
     </div>
     <div class="cat-main-buttons">
-      <input type="text" placeholder="Enter in your display name" bind:value={name} />
-      <button on:click={createLobbyHandler}>Create Lobby</button>
-      <button on:click={joinLobbyHandler}>Join Lobby</button>
+      {#if errorMessage !== ""}
+        <p class="error">{errorMessage}</p>
+      {/if}
+      <Textfield
+        type="text"
+        label="Display name"
+        bind:value={name}
+        bind:dirty={nameDirty}
+        invalid={nameDirty && !nameValidation.valid}
+        required
+      >
+        <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
+      </Textfield>
+      <Button on:click={createLobbyHandler} disabled={!nameValidation.valid}><Label>Create Lobby</Label></Button>
+      <Button on:click={joinLobbyHandler} disabled={!nameValidation.valid}><Label>Join Lobby</Label></Button>
     </div>
   </div>
 </main>
@@ -113,52 +140,20 @@
     width: 70%;
     margin: auto;
   }
-  .cat-main-buttons input {
-    width: 100%;
-    height: 25px;
-    text-align: center;
-  }
-  .cat-main-buttons button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    margin-top: 20px;
-    background-color: #151515;
-    color: red;
-    width: 100%;
-    height: 45px;
-  }
+
   /* Tablet Styles */
   @media only screen and (min-width: 700px) {
-    .account-container {
-      margin-right: 10px;
-    }
     .logo-container {
       width: 40%;
-    }
-    .cat-main-buttons input {
-      height: 35px;
-      font-size: 1.4em;
-    }
-    .cat-main-buttons a {
-      height: 50px;
-      font-size: 1.4em;
     }
   }
   /* Desktop Styles */
   @media only screen and (min-width: 1000px) {
-    .question-container {
-      width: 3%;
-    }
     .logo-container {
       width: 20%;
     }
     .cat-main-buttons {
       width: 35%;
-    }
-    .cat-main-buttons a {
-      height: 60px;
     }
   }
 </style>
