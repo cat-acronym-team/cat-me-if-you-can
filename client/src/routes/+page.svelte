@@ -44,9 +44,9 @@
       // Create User
       await saveOrCreate(user, userData, name.trim());
       // Create Lobby
-      const responce = await createLobby();
+      const response = await createLobby();
       // go to game page
-      goto("/game?code=" + responce.data.code);
+      goto("/game?code=" + response.data.code);
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : String(err);
     }
