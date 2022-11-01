@@ -9,15 +9,20 @@
     type Lobby,
     type Player,
   } from "$lib/firebase/firestore-types/lobby";
-  import { findChatRoom } from "$lib/firebase/chat";
+  import { findChatRoom, findViewerChatRoom } from "$lib/firebase/chat";
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
   import type { User } from "firebase/auth";
   import { addChatMessage, deleteChatRooms } from "$lib/firebase/firestore-functions";
   // props
   export let lobbyData: Lobby & { id: string };
+  export let isStalker: boolean;
   // variables
   let user = $authStore as User;
+  let firstPair: string = "";
+  let secondPair: string = "";
   let userInfo: Player;
+  let firstPairInfo: Player;
+  let secondPairInfo: Player;
   let partnerInfo: Player;
   let chatRoomInfo: QueryDocumentSnapshot<ChatRoom>;
   let chatMessages: ChatMessage[] = [];
@@ -32,7 +37,11 @@
 
   onMount(async () => {
     // Query for their chatroom
-    chatRoomInfo = await findChatRoom(lobbyData.id, user.uid);
+    if (isStalker) {
+      chatRoomInfo = await findViewerChatRoom(lobbyData.id, user.uid);
+    } else {
+      chatRoomInfo = await findChatRoom(lobbyData.id, user.uid);
+    }
     // subscribe the chat messages
     onSnapshot(
       query(getChatRoomMessagesCollection(lobbyData.id, chatRoomInfo.id), orderBy("timestamp", "asc")),
@@ -47,6 +56,12 @@
       return user.uid !== u;
     });
     partnerInfo = lobbyData.players[lobbyData.uids.indexOf(partner)];
+
+    // first/second pair uid in string and player type
+    firstPair = chatRoomInfo.data().pair[0];
+    secondPair = chatRoomInfo.data().pair[1];
+    firstPairInfo = lobbyData.players[lobbyData.uids.indexOf(firstPair)];
+    secondPairInfo = lobbyData.players[lobbyData.uids.indexOf(secondPair)];
     // create timer
     timer = setInterval(() => {
       const diff = Math.floor((end - Date.now()) / 1000);
@@ -79,6 +94,10 @@
   function isUser(uid: string) {
     return (user as User).uid === uid;
   }
+
+  function isFirstPair(uid: string) {
+    return firstPair === uid;
+  }
   // Reactive Calls
   $: if (countdown === 0) {
     clearInterval(timer);
@@ -88,26 +107,46 @@
 </script>
 
 <div class="chatroom">
-  <p class="countdown">{countdown}</p>
-  {#if partnerInfo !== undefined}
-    <div>MATCHED WITH {partnerInfo.displayName.toUpperCase()}</div>
-  {/if}
-  <div class="messages">
-    {#each chatMessages as message}
-      {#if isUser(message.sender)}
-        <p class="user-msg">{message.text}</p>
-      {:else}
-        <p class="partner-msg">{message.text}</p>
-      {/if}
-    {/each}
-  </div>
-  <form on:submit|preventDefault={submitMessage}>
-    <input type="text" bind:value={message} />
-    <button type="submit" disabled={message === ""}>Send</button>
-    {#if error.status}
-      <p class="error">{error.message}</p>
+  {#if isStalker}
+    <p class="countdown">{countdown}</p>
+    {#if chatRoomInfo !== undefined}
+      <div>{firstPairInfo.displayName} MATCHED WITH {secondPairInfo.displayName}</div>
     {/if}
-  </form>
+    <div class="messages">
+      {#each chatMessages as message}
+        {#if isFirstPair(message.sender)}
+          <p class="partner-name">{firstPairInfo.displayName}</p>
+          <p class="partner-msg">{message.text}</p>
+        {:else}
+          <p class="partner-name">{secondPairInfo.displayName}</p>
+          <p class="partner2-msg">{message.text}</p>
+        {/if}
+      {/each}
+    </div>
+  {:else}
+    <p class="countdown">{countdown}</p>
+    {#if partnerInfo !== undefined}
+      <div>MATCHED WITH {partnerInfo.displayName}</div>
+    {/if}
+    <div class="messages">
+      {#each chatMessages as message}
+        {#if isUser(message.sender)}
+          <p class="user-name">{userInfo.displayName}</p>
+          <p class="user-msg">{message.text}</p>
+        {:else}
+          <p class="partner-name">{partnerInfo.displayName}</p>
+          <p class="partner-msg">{message.text}</p>
+        {/if}
+      {/each}
+    </div>
+    <form on:submit|preventDefault={submitMessage}>
+      <input type="text" bind:value={message} />
+      <button type="submit" disabled={message === ""}>Send</button>
+      {#if error.status}
+        <p class="error">{error.message}</p>
+      {/if}
+    </form>
+  {/if}
 </div>
 
 <style>
@@ -142,9 +181,28 @@
     padding: 5px;
     border-radius: 15px;
   }
+
+  .user-name {
+    text-align: right;
+    width: fit-content;
+    margin-left: auto;
+    padding: 1px;
+  }
+  .partner-name {
+    text-align: left;
+    width: fit-content;
+    padding: 1px;
+  }
   .partner-msg {
     text-align: left;
     background-color: red;
+    width: fit-content;
+    padding: 5px;
+    border-radius: 15px;
+  }
+  .partner2-msg {
+    text-align: left;
+    background-color: skyblue;
     width: fit-content;
     padding: 5px;
     border-radius: 15px;
