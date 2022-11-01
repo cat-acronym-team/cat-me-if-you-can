@@ -9,7 +9,7 @@ import {
   userCollection,
 } from "./firestore-collections";
 import { isLobbyRequest, LobbyCreationResponse } from "./firebase-functions-types";
-import { avatars, GAME_STATE_DURATIONS, Lobby } from "./firestore-types/lobby";
+import { AVATARS, GAME_STATE_DURATIONS, Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
@@ -42,7 +42,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
     players: [
       {
         alive: true,
-        avatar: userData.avatar || avatars[Math.floor(Math.random() * avatars.length)],
+        avatar: userData.avatar || AVATARS[Math.floor(Math.random() * AVATARS.length)],
         displayName: userData.displayName,
       },
     ],
@@ -129,7 +129,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     // change avatar randomly if it is already taken
     const takenAvatars = players.map((player) => player.avatar);
     while (userInfo.avatar == 0 || takenAvatars.includes(userInfo.avatar)) {
-      userInfo.avatar = avatars[Math.floor(Math.random() * avatars.length)];
+      userInfo.avatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
     }
 
     // add player
