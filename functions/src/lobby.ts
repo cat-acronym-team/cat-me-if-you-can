@@ -8,13 +8,61 @@ import {
   lobbyCollection,
   userCollection,
 } from "./firestore-collections";
-import { isLobbyRequest } from "./firestore-functions-types";
+import { isLobbyRequest, LobbyCreationResponse } from "./firestore-functions-types";
 import { avatars, Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 import { deleteChatRooms } from "./chat";
+
+function generateLobbyCode() {
+  const chars = new Array(6);
+  for (let i = 0; i < 6; i++) {
+    // random character between 'a' and 'z'
+    chars[i] = String.fromCharCode(97 + Math.floor(Math.random() * 26));
+  }
+  return chars.join("");
+}
+
+export const createLobby = functions.https.onCall(async (data: unknown, context): Promise<LobbyCreationResponse> => {
+  if (context.auth === undefined) {
+    throw new functions.https.HttpsError("permission-denied", "Not Signed In");
+  }
+
+  const userDoc = await userCollection.doc(context.auth.uid).get();
+  const userData = userDoc.data();
+
+  if (userData == undefined) {
+    throw new functions.https.HttpsError("not-found", "User not found");
+  }
+
+  const lobbyData: Lobby = {
+    uids: [context.auth.uid],
+    players: [
+      {
+        alive: true,
+        avatar: userData.avatar || avatars[Math.floor(Math.random() * avatars.length)],
+        displayName: userData.displayName,
+      },
+    ],
+    state: "WAIT",
+  };
+
+  // try making lobby 5 times before giving up
+  for (let i = 0; i < 5; i++) {
+    const code = generateLobbyCode();
+
+    try {
+      await lobbyCollection.doc(code).create(lobbyData);
+      return { code };
+    } catch (error) {
+      continue;
+    }
+  }
+
+  throw new functions.https.HttpsError("internal", "Cannot create document. Maximum number of tries exceeded");
+});
 
 export const startGame = functions.https.onCall(async (data: unknown, context): Promise<void> => {
   // no auth then you shouldn't be here
@@ -232,6 +280,11 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
     if (lobby === undefined) {
       throw new functions.https.HttpsError("not-found", "Lobby does not exist.");
     }
+
+    if (lobby.expiration == undefined) {
+      throw new functions.https.HttpsError("failed-precondition", "Lobby has no expiration.");
+    }
+
     // if the time sent is less than expiration
     if (Date.now() < lobby.expiration.toMillis()) {
       throw new functions.https.HttpsError("invalid-argument", "Too early to make request.");
