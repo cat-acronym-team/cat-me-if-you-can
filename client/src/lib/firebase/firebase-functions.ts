@@ -1,6 +1,6 @@
 import { functions } from "$lib/firebase/app";
 import { httpsCallable } from "firebase/functions";
-import type { LobbyRequest } from "./firestore-functions-types";
+import type { LobbyRequest } from "./firebase-functions-types";
 import type { ChangeAvatarData } from "./functions-types/avatar";
 
 export const startGame = httpsCallable<LobbyRequest, void>(functions, "startGame");

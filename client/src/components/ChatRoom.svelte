@@ -6,7 +6,7 @@
   import { findChatRoom, addChatMessage } from "$lib/firebase/chat";
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
   import type { Unsubscribe, User } from "firebase/auth";
-  import { verifyExpiration } from "$lib/firebase/firestore-functions";
+  import { verifyExpiration } from "$lib/firebase/firebase-functions";
   // props
   export let lobbyData: Lobby & { id: string };
   // variables

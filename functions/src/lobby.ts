@@ -8,7 +8,7 @@ import {
   lobbyCollection,
   userCollection,
 } from "./firestore-collections";
-import { isLobbyRequest, LobbyCreationResponse } from "./firestore-functions-types";
+import { isLobbyRequest, LobbyCreationResponse } from "./firebase-functions-types";
 import { avatars, Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
