@@ -2,15 +2,19 @@
   import SigninButton from "$components/SigninButton.svelte";
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
+  import HelperText from "@smui/textfield/helper-text";
   import { getUser, saveOrCreate } from "$lib/firebase/splash";
   import { createLobby } from "$lib/firebase/create-lobby";
-  import type { UserData } from "$lib/firebase/firestore-types/users";
+  import { displayNameValidator, type UserData } from "$lib/firebase/firestore-types/users";
   import { goto } from "$app/navigation";
   import { authStore } from "$stores/auth";
 
   let userData: UserData | undefined;
-  // check if the user is logged in with getAuth
+
   let name: string = "";
+  let nameDirty: boolean = false;
+  $: nameValidation = displayNameValidator(name);
+
   let errorMessage: string = "";
 
   // update user once auth store changes
@@ -75,9 +79,21 @@
       <img src="https://picsum.photos/500/300" alt="our logo" />
     </div>
     <div class="cat-main-buttons">
-      <Textfield type="text" label="Display name" bind:value={name} />
-      <Button on:click={createLobbyHandler}><Label>Create Lobby</Label></Button>
-      <Button on:click={joinLobbyHandler}><Label>Join Lobby</Label></Button>
+      {#if errorMessage !== ""}
+        <p class="error">{errorMessage}</p>
+      {/if}
+      <Textfield
+        type="text"
+        label="Display name"
+        bind:value={name}
+        bind:dirty={nameDirty}
+        invalid={nameDirty && !nameValidation.valid}
+        required
+      >
+        <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
+      </Textfield>
+      <Button on:click={createLobbyHandler} disabled={!nameValidation.valid}><Label>Create Lobby</Label></Button>
+      <Button on:click={joinLobbyHandler} disabled={!nameValidation.valid}><Label>Join Lobby</Label></Button>
     </div>
   </div>
 </main>
