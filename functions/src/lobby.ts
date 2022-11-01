@@ -9,7 +9,7 @@ import {
   userCollection,
 } from "./firestore-collections";
 import { isLobbyRequest, LobbyCreationResponse } from "./firebase-functions-types";
-import { avatars, Lobby } from "./firestore-types/lobby";
+import { avatars, GAME_STATE_DURATIONS, Lobby } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
@@ -150,7 +150,9 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
     await startPrompt(lobbyDocRef);
   }
   if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {
-    const expiration = firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 30000);
+    const expiration = firestore.Timestamp.fromMillis(
+      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.CHAT * 1000
+    );
     lobbyDocRef.set({ expiration }, { merge: true });
   }
 });

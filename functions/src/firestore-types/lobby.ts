@@ -34,6 +34,17 @@ export type Player = {
 export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
 
 /**
+ * the duration in seconds for each game state
+ */
+export const GAME_STATE_DURATIONS: { [state in GameState]: number } = {
+  WAIT: 2 * 60 * 60,
+  PROMPT: 60,
+  CHAT: 2 * 60,
+  VOTE: 3 * 60,
+  END: 10,
+};
+
+/**
  * the type of documents `/lobbies/{code}`
  */
 export type Lobby = {
