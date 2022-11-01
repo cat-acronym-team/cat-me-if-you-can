@@ -40,12 +40,11 @@ export async function loginAnonymous() {
 export function deleteAccount() {
   const user = auth.currentUser;
 
-  if (user !== null) {
-    deleteUser(user);
+  if (user == null) {
+    throw new Error("User is not defined.");
   }
-  // Prompt user saying they need to log back in and
-  // log them out and redirect to splash page
-  // checkSignInProvider();
+
+  deleteUser(user);
 }
 
 export async function linkUserCredentials(password: string) {
