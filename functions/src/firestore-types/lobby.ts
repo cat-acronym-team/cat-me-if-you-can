@@ -60,11 +60,11 @@ export type Lobby = {
   /**
    * expiration time of the current phase with a timer
    */
-  expiration: Timestamp;
+  expiration?: Timestamp;
   /**
    * what role won this lobby
    */
-  winner: Role;
+  winner?: Role;
 };
 
 /**

@@ -109,7 +109,6 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   // TODO: remove this later because apply stats will be in the verify expiration function
   if (lobby.state == "END" && oldLobby.state != "END") {
     // TODO: once removed then replace this with the expiration time and set it
-    applyStats(lobbyDocRef);
   }
   if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {
     const expiration = firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 30000);
@@ -242,6 +241,11 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
     if (lobby === undefined) {
       throw new functions.https.HttpsError("not-found", "Lobby does not exist.");
     }
+
+    if (lobby.expiration == undefined) {
+      throw new functions.https.HttpsError("failed-precondition", "Lobby has no expiration.");
+    }
+
     // if the time sent is less than expiration
     if (Date.now() < lobby.expiration.toMillis()) {
       throw new functions.https.HttpsError("invalid-argument", "Too early to make request.");
@@ -253,6 +257,9 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
     // if the state is chat then delete chatrooms
     if (lobby.state === "CHAT") {
       await deleteChatRooms(lobby, lobbyDocRef, transaction);
+    }
+    if (lobby.state === "END") {
+      await applyStats(transaction, lobby, lobbyDocRef);
     }
 
     return;
