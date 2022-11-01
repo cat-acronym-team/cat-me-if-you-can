@@ -199,7 +199,8 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/development'
-    needs: [prettier, lint-functions, test-functions, build-functions, lint-client, build-client, playwright]
+    needs:
+      [prettier, lint-functions, test-functions, build-functions, lint-client, svelte-check, build-client, playwright]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -236,7 +237,8 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/production'
-    needs: [prettier, lint-functions, test-functions, build-functions, lint-client, build-client, playwright]
+    needs:
+      [prettier, lint-functions, test-functions, build-functions, lint-client, svelte-check, build-client, playwright]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
