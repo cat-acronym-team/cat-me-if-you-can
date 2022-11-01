@@ -3,7 +3,6 @@ import {
   getChatRoomCollection,
   getChatRoomMessagesCollection,
   getPrivatePlayerCollection,
-  lobbyCollection,
 } from "./firestore-collections";
 import { Lobby } from "./firestore-types/lobby";
 
