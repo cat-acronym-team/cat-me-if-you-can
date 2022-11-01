@@ -1,29 +1,36 @@
 <script lang="ts">
-  import QuestionMark from "$components/QuestionMark.svelte";
-  import Modal from "$components/Modal.svelte";
+  import "@material/typography/mdc-typography.scss";
+  import IconButton from "@smui/icon-button";
+  import Dialog, { Header, Title, Content } from "@smui/dialog";
 
-  let openModal = false;
+  let showRulesDialog = false;
 </script>
 
-<Modal
-  open={openModal}
-  onClosed={() => {
-    openModal = false;
-  }}
+<Dialog
+  bind:open={showRulesDialog}
+  fullscreen
+  aria-labelledby="rules-dialog-title"
+  aria-describedby="rules-dialog-content"
 >
-  <div class="rules-heading">
-    <h1>Rules!</h1>
-  </div>
-  <div class="rules-body">
-    <!-- Rules Content Here -->
-  </div>
-</Modal>
+  <Header>
+    <Title id="rules-dialog-title">Rules!</Title>
+    <IconButton action="close" class="material-icons">close</IconButton>
+  </Header>
+  <Content id="rules-dialog-content">
+    <!-- TODO: Rules Content Here -->
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+    irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+    cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+  </Content>
+</Dialog>
 
-<QuestionMark
-  on:clicked={() => {
-    openModal = true;
-  }}
-/>
+<IconButton
+  class="material-icons"
+  on:click={() => {
+    showRulesDialog = true;
+  }}>help</IconButton
+>
 
 <slot />
 

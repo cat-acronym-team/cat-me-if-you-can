@@ -3,7 +3,7 @@ import { isChangeAvatarData } from "./functions-types/avatar";
 import { lobbyCollection } from "./firestore-collections";
 import { db } from "./app";
 
-export const changeAvatar = functions.https.onCall((data: unknown, context) => {
+export const changeAvatar = functions.https.onCall((data: unknown, context): Promise<void> => {
   const auth = context.auth;
 
   if (auth === undefined) {
@@ -35,6 +35,6 @@ export const changeAvatar = functions.https.onCall((data: unknown, context) => {
 
     lobbyData.players[playerIndex].avatar = data.avatar;
 
-    return transaction.update(lobbyDocRef, lobbyData);
+    await transaction.update(lobbyDocRef, lobbyData);
   });
 });

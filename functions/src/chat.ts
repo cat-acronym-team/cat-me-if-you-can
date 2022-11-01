@@ -1,77 +1,49 @@
-import { firestore } from "firebase-admin";
-import * as functions from "firebase-functions";
+import type { DocumentReference, Transaction } from "firebase-admin/firestore";
 import {
   getChatRoomCollection,
   getChatRoomMessagesCollection,
   getPrivatePlayerCollection,
   lobbyCollection,
 } from "./firestore-collections";
-import { isChatRequest, isLobbyRequest } from "./firestore-functions-types";
-import { chatMessageValidator, ChatRoom, Lobby } from "./firestore-types/lobby";
+import { Lobby } from "./firestore-types/lobby";
 
-export const addChatMessage = functions.https.onCall(async (data: unknown, context) => {
-  if (!context.auth) {
-    return { error: "Not Signed In" };
-  }
-  if (!isChatRequest(data)) {
-    return { error: "Invalid Chat Request!" };
-  }
+export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
+  const { players, uids } = lobbyData;
+  const chatRoomsSnapshot = await transaction.get(getChatRoomCollection(lobbyDoc));
+  const chatRooms = chatRoomsSnapshot.docs.map((room) => room.ref);
 
-  // get room doc
-  const lobbyDoc = lobbyCollection.doc(data.code);
-  const roomDoc = getChatRoomCollection(lobbyDoc).doc(data.roomId);
-  const room = await roomDoc.get();
-  // check if the room exist
-  if (!room.exists) {
-    return { error: "Chatroom doesn't exist!" };
-  }
-  // check if the sender is allowed to add messages
-  const { pair } = room.data() as ChatRoom;
-  if (!pair.includes(context.auth.uid)) {
-    return { error: "You can't add a message" };
-  }
-  // validate the messgae
-  const isValid = chatMessageValidator(data.message);
-  if (!isValid.valid) {
-    return { error: isValid.reason };
-  }
-  // create message doc
-  return getChatRoomMessagesCollection(roomDoc).add({
-    sender: context.auth.uid,
-    text: data.message,
-    timestamp: firestore.Timestamp.now(),
-  });
-});
+  await Promise.all(
+    chatRooms.map(async (room) => {
+      // get the messages from the chatroom
+      const messages = await transaction.get(getChatRoomMessagesCollection(room));
+      // get the prompt answers from the messages
+      const answers = new Map<string, string>();
+      messages.forEach((messageDoc) => {
+        // get message info
+        const message = messageDoc.data();
+        // if the message is the prompt answer then add to map
+        if (message.isPromptAnswer) {
+          answers.set(message.sender, message.text);
+        }
+        // delete all messages
+        transaction.delete(messageDoc.ref);
+      });
 
-export const deleteChatRooms = functions.https.onCall(async (data: unknown, context) => {
-  if (!context.auth) {
-    return { error: "Not Signed In" };
-  }
-  if (!isLobbyRequest(data)) {
-    return { error: "Invalid lobby code!" };
-  }
+      // add the prompt answers to their player object
+      for (const [key, value] of answers) {
+        // get index and add their prompt answer to their player object
+        const playerIndex = uids.indexOf(key);
+        players[playerIndex].promptAnswer = value;
+      }
 
-  // get lobby doc, and check if the lobby exist
-  const lobby = lobbyCollection.doc(data.code);
-  const lobbyData = await lobby.get();
-  if (!lobbyData.exists) {
-    return { error: "Lobby doesn't exist!" };
-  }
-  // only allow the request coming from host to delete the chatrooms
-  const { uids } = lobbyData.data() as Lobby;
-  if (context.auth.uid !== uids[0]) {
-    return { error: "Not allowed to delete chatrooms" };
-  }
-  // delete all chatrooms
-  const chatRooms = await getChatRoomCollection(lobby).listDocuments();
-  for (const room of chatRooms) {
-    await room.delete();
-  }
-  // delete stalker
-  const stalkers = await getPrivatePlayerCollection(lobby).where("stalker", "==", true).get();
-  for (const stalker of stalkers.docs) {
-    await stalker.ref.update({ stalker: false });
-  }
-  // change game state
-  return lobby.set({ state: "VOTE" }, { merge: true });
-});
+      // delete stalker
+      const stalkers = await getPrivatePlayerCollection(lobbyDoc).where("stalker", "==", true).get();
+      for (const stalker of stalkers.docs) {
+        await stalker.ref.update({ stalker: false });
+      }
+      // then delete room
+      transaction.delete(room);
+    })
+  );
+  transaction.update(lobbyDoc, { state: "VOTE", players });
+}

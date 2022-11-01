@@ -24,6 +24,10 @@ export type Player = {
    * the number of players that have voted for this player
    */
   votes?: number;
+  /**
+   * the answer for their prompt
+   */
+  promptAnswer: string;
 };
 
 export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
@@ -48,6 +52,10 @@ export type Lobby = {
    * the current state of the game
    */
   state: GameState;
+  /**
+   * expiration time of the current phase with a timer
+   */
+  expiration: Timestamp;
 };
 
 /**
@@ -144,6 +152,10 @@ export type ChatMessage = {
    * the time when the message was sent (used for sorting)
    */
   timestamp: Timestamp;
+  /**
+   * checks if this is the prompt answer
+   */
+  isPromptAnswer?: true;
 };
 
 /**

@@ -22,5 +22,6 @@ module.exports = {
     "spaced-comment": "warn",
     "no-warning-comments": "warn",
     "no-throw-literal": "warn",
+    "require-await": "warn",
   },
 };
