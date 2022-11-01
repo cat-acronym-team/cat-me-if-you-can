@@ -24,10 +24,11 @@ export type Player = {
    * the number of players that have voted for this player
    */
   votes?: number;
+
   /**
    * the answer for their prompt
    */
-  promptAnswer: string;
+  promptAnswer?: string;
 };
 
 export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
@@ -52,10 +53,11 @@ export type Lobby = {
    * the current state of the game
    */
   state: GameState;
+
   /**
    * expiration time of the current phase with a timer
    */
-  expiration: Timestamp;
+  expiration?: Timestamp;
 };
 
 /**
