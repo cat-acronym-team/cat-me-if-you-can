@@ -6,6 +6,7 @@
   import type { Lobby } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
   import { startGame, leaveLobby } from "$lib/firebase/firestore-functions";
+  import { goto } from "$app/navigation";
 
   // Props
   export let lobbyCode: string;
@@ -48,7 +49,12 @@
       <Button on:click={() => startGame({ code: lobbyCode })}><Label>Start Game</Label></Button>
     </div>
     <div class="leave">
-      <Button on:click={() => leaveLobby({ code: lobbyCode })}><Label>Leave Lobby</Label></Button>
+      <Button
+        on:click={() => {
+          leaveLobby({ code: lobbyCode });
+          goto("/");
+        }}><Label>Leave Lobby</Label></Button
+      >
     </div>
     <div class="buttons">
       <h3 class="invite-link">Invite Link: {url}</h3>
