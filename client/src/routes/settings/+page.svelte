@@ -1,7 +1,7 @@
 <script lang="ts">
   import { deleteAccount, linkUserCredentials, logOut } from "$lib/firebase/auth";
   import { goto } from "$app/navigation";
-  import Dialog, { Title, Header, Content, Actions } from "@smui/dialog";
+  import Dialog, { Title, Header, Content, Actions, InitialFocus } from "@smui/dialog";
   import Button, { Label } from "@smui/button";
 
   let showDeletionPrompt = false;
@@ -10,6 +10,7 @@
   let errorMsg = "";
   let success = false;
   let linkPassButton = false;
+  let errPrompt = false;
 
   function outPutErrorMsg() {
     switch (errorMsg) {
@@ -31,8 +32,20 @@
     linkPassButton = true;
   }
 
+  function verifyDelete() {
+    try {
+      deleteAccount();
+      // If no error
+      errorMsg = "";
+      goto("/");
+      return;
+    } catch (err) {
+      errPrompt = true;
+      errorMsg = err instanceof Error ? err.message : String(err);
+    }
+  }
+
   async function linkCredentials() {
-    console.log(password + "\n" + confirmPass);
     if (password != confirmPass) {
       password = "";
       confirmPass = "";
@@ -74,14 +87,34 @@
           <Button
             id="confirm-delete-account"
             on:click={() => {
-              deleteAccount();
-              goto("/");
+              verifyDelete();
             }}
           >
             <Label>Yes</Label>
           </Button>
         </Actions>
       </Dialog>
+      <!--If user signed in too long ago, redirect them to sign in-->
+      {#if errorMsg !== ""}
+        <Dialog bind:open={errPrompt} aria-labelledby="reauth-title" aria-describedby="err-msg-content">
+          <Title id="reauth-title">NOTICE!</Title>
+          <Content id="err-msg-content"
+            >Last sign in too long ago.
+            <br />Click ok to be redirected back to sign in</Content
+          >
+          <Actions>
+            <Button
+              defaultAction
+              use={[InitialFocus]}
+              on:click={() => {
+                logOut();
+                goto("/");
+              }}
+              ><Label>Ok</Label>
+            </Button>
+          </Actions>
+        </Dialog>
+      {/if}
       <div class="item-link-pass">
         <h3>Link Password</h3>
         <Button on:click={linkPassPrompt} on:click={clearFields}>

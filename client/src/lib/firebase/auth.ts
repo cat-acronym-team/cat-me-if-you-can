@@ -12,9 +12,6 @@ import {
   linkWithCredential,
 } from "firebase/auth";
 
-const googleProvider = new GoogleAuthProvider();
-const microsoftProvider = new OAuthProvider("microsoft.com");
-
 // Google login/signup
 export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
