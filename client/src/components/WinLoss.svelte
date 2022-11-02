@@ -2,6 +2,7 @@
   import type { PrivatePlayer, Lobby } from "../../../functions/src/firestore-types/lobby";
   import { onMount } from "svelte";
   import { lobbyReturn } from "$lib/firebase/firestore-functions";
+  import { authStore as user } from "$stores/auth";
 
   export let lobbyCode: string;
   export let lobby: Lobby;
@@ -10,7 +11,16 @@
   let end: "Cat Win" | "Cat Lose" | "Catfish Lose" | "Catfish Win" | null = null;
   let catfishList: string = "";
   let catfishes: string[];
+  let isHost: boolean;
   onMount(() => {
+    // check if the user is the host
+    if ($user !== null) {
+      if (lobby.uids.indexOf($user.uid) == 0) {
+        isHost = true;
+      } else {
+        isHost = false;
+      }
+    }
     // format a string list to have commas and "and" when needed
     const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
     // get the list of catfishes from lobby.ts and put them into a variable
@@ -40,6 +50,8 @@
   });
 </script>
 
+<!-- TODO: Get different images for each screen -->
+<!-- Scenario 1 -->
 <div class="container">
   <!-- Check the user's role and display the correct win or loss page accordingly -->
   {#if end == "Cat Win"}
@@ -47,35 +59,40 @@
       <h2>Hooray!</h2>
       <h2>You have sniffed out the cat fish!</h2>
     </div>
-
     <div class="image">
-      <img src="https://www.azpetvet.com/wp-content/uploads/Happy-cat-1024x711.jpg" alt="clown fish" />
+      <img src="/images/winloss/HappyCat.png" alt="happy cat" />
     </div>
-
     <div class="displayname">
+      <!-- Check the number of catfish for grammar purposes -->
       {#if catfishes.length > 1}
         <h2>{catfishList} were sentenced to 9 lives in purrison!</h2>
       {:else}
         <h2>{catfishList} was sentenced to 9 lives in purrison!</h2>
       {/if}
-      <!-- {#if isHost} -->
-      <button
-        on:click={() => {
-          lobbyReturn({ code: lobbyCode });
-        }}>Return to Lobby</button
-      >
-      <!-- {:else}
-        <span class="button">Waiting for Host to Return to Lobby...</span>
-      {/if} -->
+      <!-- If the player is the host, show the return button -->
+      {#if isHost}
+        <button
+          on:click={() => {
+            lobbyReturn({ code: lobbyCode });
+          }}>Return to Lobby</button
+        >
+      {:else}
+        <!-- Otherwise show a message -->
+        <span class="button">Waiting for host to return to lobby...</span>
+      {/if}
     </div>
+    <!-- Scenario 2 -->
   {:else if end == "Cat Lose"}
     <div class="banner">
       <h2>You have cat to be kitten me!</h2>
-      <h2>The impawster was not caught!</h2>
+      {#if catfishes.length > 1}
+        <h2>The impawster, {catfishList} was not caught!</h2>
+      {:else}
+        <h2>The impawsters, {catfishList} were not caught!</h2>
+      {/if}
     </div>
-
     <div class="image">
-      <img src="https://pbs.twimg.com/media/EAmr-PAWsAEoiWR.jpg" alt="cat fish" />
+      <img src="/images/winloss/SadCat.png" alt="sad cat" />
     </div>
     <div class="displayname">
       <!-- Check the number of catfish for grammar purposes -->
@@ -84,15 +101,17 @@
       {:else}
         <h2>{catfishList} has taken over the litter!</h2>
       {/if}
-      <!-- If the player is the host, show the return button -->
-      <button
-        on:click={() => {
-          lobbyReturn({ code: lobbyCode });
-        }}>Return to Lobby</button
-      >
-      <!-- Otherwise show a message
-        <span class="button">Waiting for Host to Return to Lobby...</span> -->
+      {#if isHost}
+        <button
+          on:click={() => {
+            lobbyReturn({ code: lobbyCode });
+          }}>Return to Lobby</button
+        >
+      {:else}
+        <span class="button">Waiting for host to return to lobby...</span>
+      {/if}
     </div>
+    <!-- Scenario 3 -->
   {:else if end == "Catfish Win"}
     <div class="banner">
       <h2>O-fish-ally the greatest!</h2>
@@ -100,40 +119,41 @@
     </div>
 
     <div class="image">
-      <img src="https://media.fisheries.noaa.gov/2020-10/blue%20catfish%20face.jpg?VersionId=null" alt="cat fish" />
+      <img src="/images/winloss/Catfish.png" alt="cat fish" />
     </div>
 
     <div class="displayname">
       <h2>You have successfully taken over the litter!</h2>
-      <!-- {#if isHost} -->
-      <button
-        on:click={() => {
-          lobbyReturn({ code: lobbyCode });
-        }}>Return to Lobby</button
-      >
-      <!-- <span class="button">Waiting for Host to Return to Lobby...</span> -->
+      {#if isHost}
+        <button
+          on:click={() => {
+            lobbyReturn({ code: lobbyCode });
+          }}>Return to Lobby</button
+        >
+      {:else}
+        <span class="button">Waiting for host to return to lobby...</span>
+      {/if}
     </div>
+    <!-- Scenario 4 -->
   {:else if end == "Catfish Lose"}
     <div class="banner">
-      <h2>You have been caught (and released)!</h2>
+      <h2>You have been caught (and released) !</h2>
       <h2>Might as well have been a <b>clown</b> fish...</h2>
     </div>
-
     <div class="image">
-      <img src="https://cdn.drawception.com/drawings/577991/0C653P5Wka.png" alt="clown fish" />
+      <img src="/images/winloss/Clownfish.png" alt="clown fish" />
     </div>
-
     <div class="displayname">
       <h2>You should go back to your sea ani-anim-aneme... home</h2>
-      <!-- {#if isHost} -->
-      <button
-        on:click={() => {
-          lobbyReturn({ code: lobbyCode });
-        }}>Return to Lobby</button
-      >
-      <!-- {:else}
-        <span class="button">Waiting for Host to Return to Lobby...</span>
-      {/if} -->
+      {#if isHost}
+        <button
+          on:click={() => {
+            lobbyReturn({ code: lobbyCode });
+          }}>Return to Lobby</button
+        >
+      {:else}
+        <span class="button">Waiting for host to return to lobby...</span>
+      {/if}
     </div>
   {/if}
 </div>

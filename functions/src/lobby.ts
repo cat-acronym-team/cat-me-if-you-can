@@ -8,13 +8,14 @@ import {
   lobbyCollection,
   userCollection,
 } from "./firestore-collections";
-import { avatars, Lobby, PrivatePlayer, Role } from "./firestore-types/lobby";
+import { avatars, Lobby } from "./firestore-types/lobby";
 import { isLobbyRequest } from "./firestore-functions-types";
 import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 import { deleteChatRooms } from "./chat";
+import { findWinner } from "./winloss";
 
 export const startGame = functions.https.onCall(async (data: unknown, context): Promise<void> => {
   // no auth then you shouldn't be here
@@ -108,12 +109,7 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   }
 
   if (lobby.state == "END" && oldLobby.state != "END") {
-    addRole(lobbyDocRef);
-  }
-
-  if (lobby.state == "WAIT" && oldLobby.state == "END") {
-    makeAlive(lobbyDocRef);
-    deletePrivatePlayers(lobbyDocRef, getPrivatePlayerCollection(lobbyDocRef), lobby.players.length + 1);
+    findWinner(lobbyDocRef);
   }
 });
 
@@ -223,89 +219,6 @@ export const collectPromptAnswers = functions.firestore
     });
   });
 
-export async function addRole(lobbyDocRef: firestore.DocumentReference<Lobby>) {
-  const lobby = await lobbyDocRef.get();
-  if (lobby.exists === false) {
-    return { error: "Lobby doesn't exist!" };
-  }
-  const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
-  const privatePlayers = (await privatePlayerCollection.get()).docs;
-
-  const { players, uids } = lobby.data() as Lobby;
-
-  for (let i = 0; i < players.length; i++) {
-    //  private player id = user uid
-    const privateId = privatePlayers[i].id;
-    // private player info
-    const privateInfo = privatePlayers[i].data();
-    // get player
-    const player = players[uids.indexOf(privateId)];
-    // replace the role of the player
-    player.role = privateInfo.role;
-  }
-  let catfishCount = 0;
-
-  for (let i = 0; i < uids.length; i++) {
-    // check the alive players
-    if (players[i].alive == true) {
-      if (players[i].role == "CATFISH") {
-        catfishCount++;
-      }
-    }
-    // check any catfish who are not alive and add their display name to the list
-  }
-
-  let winner: Role;
-  if (catfishCount == 0) {
-    winner = "CAT";
-  } else {
-    // if (catCount <= catfishCount) {
-    winner = "CATFISH";
-  }
-
-  return lobbyDocRef.update({ players, winner });
-}
-
-// when returning to the lobby, make every player alive again
-export async function makeAlive(lobbyDocRef: firestore.DocumentReference<Lobby>) {
-  const lobby = await lobbyDocRef.get();
-  if (lobby.exists === false) {
-    return { error: "Lobby doesn't exist!" };
-  }
-
-  // loop through each player and set their alive status to true
-  const { players } = lobby.data() as Lobby;
-  for (let i = 0; i < players.length; i++) {
-    players[i].alive = true;
-  }
-  return lobbyDocRef.update({ players });
-}
-
-export async function deletePrivatePlayers(
-  lobbyDocRef: firestore.DocumentReference<Lobby>,
-  privatePlayerCollectionRef: firestore.CollectionReference<PrivatePlayer>,
-  docCount: number
-) {
-  let deleted = 0;
-
-  const lobby = await lobbyDocRef.get();
-  if (lobby.exists === false) {
-    return { error: "Lobby does not exist!" };
-  }
-
-  // loop through each doc in the private player collection via uid and delete them one-by-one
-  const { uids } = lobby.data() as Lobby;
-  for (let i = 0; i <= docCount; i++) {
-    const playerDoc = privatePlayerCollectionRef.doc(uids[i]);
-    await playerDoc.delete();
-    deleted++;
-  }
-
-  if (deleted >= docCount) {
-    return;
-  }
-  return;
-}
 export const verifyExpiration = functions.https.onCall(async (data, context) => {
   // check auth
   if (context.auth == undefined) {
