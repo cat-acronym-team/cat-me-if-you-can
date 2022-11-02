@@ -112,6 +112,10 @@
     padding-top: 64px;
   }
 
+  main:has(.spinner-wraper) {
+    padding: 0;
+  }
+
   .spinner-wraper {
     height: 100%;
     display: grid;
