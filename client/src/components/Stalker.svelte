@@ -2,10 +2,9 @@
   import type { ChatRoom as ChatRoomType, ChatMessage, Lobby } from "$lib/firebase/firestore-types/lobby";
   import { stalkChatroom } from "$lib/firebase/firestore-functions";
   import { getChatRoomCollection, getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
-  import { onSnapshot, query, orderBy, collection } from "firebase/firestore";
+  import { onSnapshot, query, orderBy } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
   import type { Unsubscribe } from "firebase/auth";
-  // import { auth } from "$lib/firebase/app";
   import { authStore as user } from "$stores/auth";
   import ChatRoom from "./ChatRoom.svelte";
 
