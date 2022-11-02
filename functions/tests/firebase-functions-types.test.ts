@@ -1,4 +1,4 @@
-import { isLobbyRequest } from "../src/firestore-functions-types";
+import { isLobbyRequest } from "../src/firebase-functions-types";
 
 import { expect } from "chai";
 

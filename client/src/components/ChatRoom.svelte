@@ -2,11 +2,17 @@
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
   import { onSnapshot, orderBy, query, QueryDocumentSnapshot } from "firebase/firestore";
-  import type { ChatMessage, ChatRoom, Lobby, Player } from "$lib/firebase/firestore-types/lobby";
+  import {
+    GAME_STATE_DURATIONS,
+    type ChatMessage,
+    type ChatRoom,
+    type Lobby,
+    type Player,
+  } from "$lib/firebase/firestore-types/lobby";
   import { findChatRoom, addChatMessage } from "$lib/firebase/chat";
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
   import type { Unsubscribe, User } from "firebase/auth";
-  import { verifyExpiration } from "$lib/firebase/firestore-functions";
+  import { verifyExpiration } from "$lib/firebase/firebase-functions";
   // props
   export let lobbyData: Lobby & { id: string };
   // variables
@@ -16,7 +22,7 @@
   let chatRoomInfo: QueryDocumentSnapshot<ChatRoom>;
   let chatMessages: ChatMessage[] = [];
   let timer: ReturnType<typeof setInterval>;
-  let countdown: number;
+  let countdown = GAME_STATE_DURATIONS.CHAT;
   let message: string = "";
   let errorMessage: string = "";
   let unsubscribeChatMessages: Unsubscribe | undefined = undefined;
@@ -43,8 +49,10 @@
     }
     // create timer
     timer = setInterval(() => {
-      const diff = Math.floor((lobbyData.expiration.toMillis() - Date.now()) / 1000);
-      countdown = diff;
+      if (lobbyData.expiration != undefined) {
+        const diff = Math.floor((lobbyData.expiration.toMillis() - Date.now()) / 1000);
+        countdown = diff;
+      }
     }, 500);
   });
   onDestroy(() => {
@@ -84,9 +92,7 @@
 </script>
 
 <div class="chatroom">
-  {#if countdown !== undefined}
-    <p class="countdown">{countdown}</p>
-  {/if}
+  <p class="countdown">{countdown}</p>
   {#if partnerInfo !== undefined}
     <div>MATCHED WITH {partnerInfo.displayName.toUpperCase()}</div>
   {/if}
