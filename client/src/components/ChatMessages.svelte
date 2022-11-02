@@ -93,10 +93,12 @@
     height: 100%;
     display: grid;
     grid-template-rows: 1fr auto;
+    max-width: 1080px;
+    margin: 0 auto;
   }
 
   .messages {
-    margin: 12px;
+    padding: 12px;
     display: grid;
     grid-template-columns: 1fr;
     gap: 12px;
