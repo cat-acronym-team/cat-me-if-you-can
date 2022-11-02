@@ -106,8 +106,10 @@
 
 <style>
   main {
+    box-sizing: border-box;
     height: 100%;
     overflow: auto;
+    padding-top: 64px;
   }
 
   .spinner-wraper {
