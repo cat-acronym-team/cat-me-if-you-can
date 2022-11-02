@@ -1,4 +1,4 @@
-import { query, where, getDocs, addDoc, serverTimestamp, getDoc, doc } from "firebase/firestore";
+import { query, where, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
 import { getChatRoomCollection, getChatRoomMessagesCollection } from "./firestore-collections";
 import { chatMessageValidator } from "./firestore-types/lobby";
 

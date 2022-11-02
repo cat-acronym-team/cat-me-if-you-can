@@ -1,7 +1,7 @@
 import { lobbyCollection } from "./firestore-collections";
 import { doc, getDoc } from "firebase/firestore";
 import type { UserData } from "./firestore-types/users";
-import { joinLobby } from "./firestore-functions";
+import { joinLobby } from "./firebase-functions";
 
 export async function findAndJoinLobby(id: string, allUserInfo: UserData & { uid: string }) {
   if (id === "") {
