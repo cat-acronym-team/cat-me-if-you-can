@@ -17,11 +17,7 @@
   export let lobby: Lobby;
   export let messages: (ChatMessage | LobbyChatMessage)[];
 
-  type Events = {
-    send: { text: string };
-  };
-
-  const dispatch = createEventDispatcher<Events>();
+  const dispatch = createEventDispatcher<{ send: { text: string } }>();
 
   $: playersMap = generatePlayersMap(lobby);
 
