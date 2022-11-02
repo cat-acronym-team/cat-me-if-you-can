@@ -16,6 +16,7 @@
 
   export let lobby: Lobby;
   export let messages: (ChatMessage | LobbyChatMessage)[];
+  export let readOnly = false;
 
   const dispatch = createEventDispatcher<{ send: { text: string } }>();
 
@@ -52,7 +53,7 @@
   }
 </script>
 
-<div class="root">
+<div class="root {readOnly ? 'read-only' : ''}">
   <div class="messages" bind:this={messagesElement}>
     {#each displayMessages as message}
       <div class="message {message.sender == $user?.uid ? 'current-user' : ''}">
@@ -67,21 +68,23 @@
     {/each}
   </div>
 
-  <form on:submit|preventDefault={sendMessage}>
-    <Textfield
-      type="text"
-      variant="outlined"
-      label="Chat message"
-      bind:value={message}
-      invalid={messageInvalid}
-      input$autofocus
-    >
-      <IconButton type="submit" disabled={message == "" || messageInvalid} slot="trailingIcon" class="material-icons">
-        send
-      </IconButton>
-      <HelperText validationMsg slot="helper">{messageValidation.valid ? "" : messageValidation.reason}</HelperText>
-    </Textfield>
-  </form>
+  {#if !readOnly}
+    <form on:submit|preventDefault={sendMessage}>
+      <Textfield
+        type="text"
+        variant="outlined"
+        label="Chat message"
+        bind:value={message}
+        invalid={messageInvalid}
+        input$autofocus
+      >
+        <IconButton type="submit" disabled={message == "" || messageInvalid} slot="trailingIcon" class="material-icons">
+          send
+        </IconButton>
+        <HelperText validationMsg slot="helper">{messageValidation.valid ? "" : messageValidation.reason}</HelperText>
+      </Textfield>
+    </form>
+  {/if}
 </div>
 
 <style>
@@ -91,6 +94,10 @@
     grid-template-rows: 1fr auto;
     max-width: 1080px;
     margin: 0 auto;
+  }
+
+  .root.read-only {
+    grid-template-rows: 1fr;
   }
 
   .messages {
