@@ -104,10 +104,10 @@
 </script>
 
 <div class="chatroom">
+  {#if countdown !== undefined}
+    <p class="countdown">{countdown}</p>
+  {/if}
   {#if isStalker}
-    {#if countdown !== undefined}
-      <p class="countdown">{countdown}</p>
-    {/if}
     {#if chatRoomInfo !== undefined}
       <div>{firstPairInfo.displayName} MATCHED WITH {secondPairInfo.displayName}</div>
     {/if}
@@ -123,7 +123,6 @@
       {/each}
     </div>
   {:else}
-    <p class="countdown">{countdown}</p>
     {#if partnerInfo !== undefined}
       <div>MATCHED WITH {partnerInfo.displayName}</div>
     {/if}
