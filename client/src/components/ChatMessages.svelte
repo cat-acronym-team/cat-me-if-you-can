@@ -1,10 +1,27 @@
 <script lang="ts">
-  import type { ChatMessage, Lobby, LobbyChatMessage, Player } from "$lib/firebase/firestore-types/lobby";
+  import Textfield from "@smui/textfield";
+  import HelperText from "@smui/textfield/helper-text";
+  import IconButton from "@smui/icon-button";
+  import { Icon } from "@smui/common";
+  import {
+    chatMessageValidator,
+    type ChatMessage,
+    type Lobby,
+    type LobbyChatMessage,
+    type Player,
+  } from "$lib/firebase/firestore-types/lobby";
   import { avatarAltText, avatarColors } from "$lib/avatar";
   import { authStore as user } from "$stores/auth";
+  import { createEventDispatcher, tick } from "svelte";
 
   export let lobby: Lobby;
   export let messages: (ChatMessage | LobbyChatMessage)[];
+
+  type Events = {
+    send: { text: string };
+  };
+
+  const dispatch = createEventDispatcher<Events>();
 
   $: playersMap = generatePlayersMap(lobby);
 
@@ -20,28 +37,70 @@
     const { avatar, displayName } = playersMap.get(message.sender) ?? { avatar: 0, displayName: "Unknown Player" };
     return { ...message, avatar, displayName };
   });
+
+  let messagesElement: HTMLElement;
+  function scrollToBottom() {
+    messagesElement?.scroll({ top: messagesElement.scrollHeight, behavior: "smooth" });
+  }
+
+  // when the messages change, scroll to the bottom after svelte is done updating the DOM
+  $: displayMessages, tick().then(scrollToBottom);
+
+  let message = "";
+  $: messageValidation = chatMessageValidator(message.trim());
+  $: messageInvalid = message != "" && messageValidation?.valid === false;
+
+  function sendMessage() {
+    dispatch("send", { text: message.trim() });
+    message = "";
+  }
 </script>
 
-<div class="messages">
-  {#each displayMessages as message}
-    <div class="message {message.sender == $user?.uid ? 'current-user' : ''}">
-      <div class="avatar">
-        <img src="/avatars/{message.avatar}.webp" alt={avatarAltText[message.avatar]} />
+<div class="root">
+  <div class="messages" bind:this={messagesElement}>
+    {#each displayMessages as message}
+      <div class="message {message.sender == $user?.uid ? 'current-user' : ''}">
+        <div class="avatar">
+          <img src="/avatars/{message.avatar}.webp" alt={avatarAltText[message.avatar]} />
+        </div>
+        <div class="display-name mdc-typography--body2">{message.displayName}</div>
+        <div class="text mdc-typography--body1" style="background-color: {avatarColors[message.avatar]}">
+          {message.text}
+        </div>
       </div>
-      <div class="display-name mdc-typography--body2">{message.displayName}</div>
-      <div class="text mdc-typography--body1" style="background-color: {avatarColors[message.avatar]}">
-        {message.text}
-      </div>
-    </div>
-  {/each}
+    {/each}
+  </div>
+
+  <form on:submit|preventDefault={sendMessage}>
+    <Textfield
+      type="text"
+      variant="outlined"
+      label="Chat message"
+      bind:value={message}
+      invalid={messageInvalid}
+      input$autofocus
+    >
+      <IconButton type="submit" disabled={message == "" || messageInvalid} slot="trailingIcon" class="material-icons">
+        send
+      </IconButton>
+      <HelperText validationMsg slot="helper">{messageValidation.valid ? "" : messageValidation.reason}</HelperText>
+    </Textfield>
+  </form>
 </div>
 
 <style>
+  .root {
+    height: 100%;
+    display: grid;
+    grid-template-rows: 1fr auto;
+  }
+
   .messages {
     margin: 12px;
     display: grid;
     grid-template-columns: 1fr;
     gap: 12px;
+    overflow-y: auto;
   }
 
   .message {
@@ -94,5 +153,20 @@
 
   .current-user .text {
     border-radius: 24px 24px 0 24px;
+  }
+
+  form {
+    --mdc-shape-small: 28px;
+    --mdc-theme-text-disabled-on-light: #888888;
+    display: grid;
+    margin: 12px;
+  }
+
+  form :global(.mdc-text-field .mdc-icon-button) {
+    align-self: center;
+  }
+
+  form :global(.mdc-text-field-helper-line) {
+    padding-inline-start: var(--mdc-shape-small);
   }
 </style>
