@@ -1,6 +1,7 @@
 <script lang="ts">
   import Prompt from "$components/Prompt.svelte";
   import LobbyComponent from "$components/Lobby.svelte";
+  import ChatRoom from "$components/ChatRoom.svelte";
   import CircularProgress from "@smui/circular-progress";
 
   import { onSnapshot, doc, getDoc } from "firebase/firestore";
@@ -96,6 +97,8 @@
     </div>
   {:else if lobby.state === "PROMPT"}
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
+  {:else if lobby.state === "CHAT"}
+    <ChatRoom lobbyData={{ ...lobby, id: lobbyCode }} />
   {:else}
     unknown lobby state: {lobby.state}
   {/if}
