@@ -1,47 +1,66 @@
 <script lang="ts">
   import SigninButton from "$components/SigninButton.svelte";
+  import Button, { Label } from "@smui/button";
+  import Textfield from "@smui/textfield";
+  import HelperText from "@smui/textfield/helper-text";
   import { authStore as user } from "$stores/auth";
   import { findAndJoinLobby } from "$lib/firebase/join-lobby";
   import { saveOrCreate } from "$lib/firebase/splash";
   import { getUser } from "$lib/firebase/splash";
-  import type { UserData } from "$lib/firebase/firestore-types/users";
+  import { displayNameValidator, type UserData } from "$lib/firebase/firestore-types/users";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import { page } from "$app/stores";
   import type { User } from "firebase/auth";
 
-  let name: string = "";
   let userData: UserData | undefined;
-  let error = {
-    status: false,
-    message: "",
-  };
-  let code: string;
+  let errorMessage: string = "";
+  let queryCode: string | null;
+
+  let name: string = "";
+  let nameDirty: boolean = false;
+  $: nameValidation = displayNameValidator(name);
+
+  let code: string = "";
+  let codeDirty: boolean = false;
+  $: codeValidation = lobbyCodeValidator(code);
+
+  function lobbyCodeValidator(code: string): { valid: true } | { valid: false; reason: string } {
+    if (code.length === 0) {
+      return { valid: false, reason: "Please enter a lobby code" };
+    }
+    if (!/^[a-zA-Z]+$/.test(code)) {
+      return { valid: false, reason: "Lobby code can only contain letters" };
+    }
+    if (code.length !== 6) {
+      return { valid: false, reason: "Lobby code must be 6 letters" };
+    }
+    return { valid: true };
+  }
 
   // Checks to see if the join page has the code query paramter
   onMount(() => {
     if ("errorMessage" in history.state) {
-      const { errorMessage } = history.state;
-      error = {
-        status: true,
-        message: errorMessage,
-      };
+      const { errorMessage: stateError } = history.state;
+      errorMessage = stateError;
       // do this to remove the errorMessage property in state
       goto("/join", { replaceState: true });
     }
     // gets code from url search
-    const queryCode = $page.url.searchParams.get("code");
+    queryCode = $page.url.searchParams.get("code");
 
     // sets it the code var for two way binding
     if (queryCode !== null) {
+      codeDirty = true;
       code = queryCode;
     }
   });
-  const joinLobby = async () => {
-    await saveOrCreate($user, userData, name);
-    // get the current user info
-    const { displayName, avatar } = (await getUser(($user as User).uid)) as UserData;
+  async function joinLobby() {
+    code = code.toLowerCase();
     try {
+      await saveOrCreate($user, userData, name.trim());
+      // get the current user info
+      const { displayName, avatar } = (await getUser(($user as User).uid)) as UserData;
       // enter lobby with the user's info
       await findAndJoinLobby(code, {
         displayName,
@@ -52,13 +71,17 @@
       goto(`/game?code=${code}`);
     } catch (err) {
       // if the lobby doesn't exist then error is thrown
-      error = {
-        status: true,
-        message: err instanceof Error ? err.message : String(err),
-      };
-      code = "";
+      errorMessage = err instanceof Error ? err.message : String(err);
+      if (errorMessage == "You are already in the lobby!") {
+        goto(`/game?code=${code}`);
+      }
+      // this checks if the query code is set
+      // fixes the issue of the code going empty after an error
+      if (queryCode === undefined) {
+        code = "";
+      }
     }
-  };
+  }
 
   // this function will find user if the auth isnt null
   async function findUser() {
@@ -84,14 +107,38 @@
   <SigninButton />
 </nav>
 <div class="cat-join-container">
-  <h2>Join Lobby!</h2>
-  {#if error.status}
-    <p style="color:red;">{error.message}</p>
+  <h2 class="mdc-typography--headline2">Join Lobby!</h2>
+  {#if errorMessage !== ""}
+    <p class="error">{errorMessage}</p>
   {/if}
   <form on:submit|preventDefault={joinLobby}>
-    <input type="text" placeholder="Enter in your display name" bind:value={name} />
-    <input bind:value={code} />
-    <button type="submit" placeholder="Enter the lobby code">Join</button>
+    <div>
+      <Textfield
+        type="text"
+        label="Display name"
+        bind:value={name}
+        bind:dirty={nameDirty}
+        invalid={nameDirty && !nameValidation.valid}
+        required
+      >
+        <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
+      </Textfield>
+    </div>
+    <div>
+      <Textfield
+        type="text"
+        label="Lobby code"
+        bind:value={code}
+        bind:dirty={codeDirty}
+        invalid={codeDirty && !codeValidation.valid}
+        input$autocapitalize="none"
+        on:input={() => (code = code.toLowerCase())}
+        required
+      >
+        <HelperText validationMsg slot="helper">{codeValidation.valid ? "" : codeValidation.reason}</HelperText>
+      </Textfield>
+    </div>
+    <Button disabled={!nameValidation.valid || !codeValidation.valid}><Label>Join</Label></Button>
   </form>
 </div>
 
@@ -105,17 +152,11 @@
     margin: auto;
     text-align: center;
   }
-  .cat-join-container input {
-    margin-top: 5px;
-    width: 100%;
-    height: 35px;
-    text-align: center;
-  }
-  .cat-join-container button {
-    margin-top: 10px;
-    border: 0;
-    width: 50%;
-    height: 25px;
+
+  form {
+    display: grid;
+    place-items: center;
+    gap: 12px;
   }
 
   @media only screen and (min-width: 1000px) {

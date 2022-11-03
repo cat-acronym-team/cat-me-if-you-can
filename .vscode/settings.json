@@ -1,5 +1,16 @@
 {
-  "cSpell.words": ["Abdulaziz", "Asai", "Averbach", "Clusky", "Giantte", "Jumaah", "Muaad", "Salkeld", "Shunsuke"],
+  "cSpell.words": [
+    "Abdulaziz",
+    "Asai",
+    "Averbach",
+    "Clusky",
+    "Giantte",
+    "Jumaah",
+    "Muaad",
+    "Salkeld",
+    "Shunsuke",
+    "smui"
+  ],
   "conventionalCommits.scopes": ["client", "functions", "firestore"],
   "conventionalCommits.emojiFormat": "emoji",
   "eslint.workingDirectories": ["/client", "/functions"],

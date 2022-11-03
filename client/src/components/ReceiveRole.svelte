@@ -1,19 +1,18 @@
 <script lang="ts">
   import type { PrivatePlayer } from "$lib/firebase/firestore-types/lobby";
   import { getPrivatePlayerCollection } from "$lib/firebase/firestore-collections";
-  import { doc, setDoc, getDoc } from "firebase/firestore";
+  import { doc, getDoc } from "firebase/firestore";
   import { lobbyCollection } from "$lib/firebase/firestore-collections";
   import { onMount } from "svelte";
-  import { assignRole } from "$lib/firebase/role";
+  // import { assignRole } from "$lib/firebase/role";
   import { authStore as user } from "$stores/auth";
 
-  export let code: string;
+  export let lobbyCode: string;
   let getRole: PrivatePlayer;
 
   // Runs the assignRole function using the lobby to assign every user a role. Then pulls the current user's uid and their data.
   onMount(async () => {
-    const lobby = doc(lobbyCollection, code);
-    await assignRole(lobby);
+    const lobby = doc(lobbyCollection, lobbyCode);
     if ($user !== null) {
       const getRoleDoc = await getDoc(doc(getPrivatePlayerCollection(lobby), $user.uid));
       getRole = getRoleDoc.data() as PrivatePlayer;

@@ -1,8 +1,8 @@
 import type { Timestamp } from "firebase-admin/firestore";
 
-export const avatars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
+export const AVATARS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
 
-export type Avatar = typeof avatars[number];
+export type Avatar = typeof AVATARS[number];
 
 export type Player = {
   /**
@@ -24,9 +24,26 @@ export type Player = {
    * the number of players that have voted for this player
    */
   votes?: number;
+
+  /**
+   * the answer for their prompt
+   */
+  promptAnswer?: string;
 };
 
-export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
+export type GameState = "WAIT" | "ROLE" | "PROMPT" | "CHAT" | "VOTE" | "END";
+
+/**
+ * the duration in seconds for each game state
+ */
+export const GAME_STATE_DURATIONS: { [state in GameState]: number } = {
+  WAIT: 2 * 60 * 60,
+  ROLE: 20,
+  PROMPT: 60,
+  CHAT: 2 * 60,
+  VOTE: 3 * 60,
+  END: 10,
+};
 
 /**
  * the type of documents `/lobbies/{code}`
@@ -48,6 +65,11 @@ export type Lobby = {
    * the current state of the game
    */
   state: GameState;
+
+  /**
+   * expiration time of the current phase with a timer
+   */
+  expiration?: Timestamp;
 };
 
 /**
@@ -139,6 +161,10 @@ export type ChatMessage = {
    * the time when the message was sent (used for sorting)
    */
   timestamp: Timestamp;
+  /**
+   * checks if this is the prompt answer
+   */
+  isPromptAnswer?: true;
 };
 
 /**
@@ -151,16 +177,16 @@ export type LobbyChatMessage = ChatMessage & {
   alive: boolean;
 };
 
-export function chatMessageValidator(displayName: string): { valid: true } | { valid: false; reason: string } {
-  if (displayName.length == 0) {
+export function chatMessageValidator(message: string): { valid: true } | { valid: false; reason: string } {
+  if (message.length == 0) {
     return { valid: false, reason: "Chat message may not be empty" };
   }
 
-  if (displayName.length > 100) {
+  if (message.length > 100) {
     return { valid: false, reason: "Chat message must be at most 100 characters long" };
   }
 
-  if (displayName !== displayName.trim()) {
+  if (message !== message.trim()) {
     return { valid: false, reason: "Chat message must not contain leading or trailing whitespace" };
   }
 

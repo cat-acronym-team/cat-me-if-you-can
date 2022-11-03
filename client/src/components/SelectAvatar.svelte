@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { changeAvatar } from "$lib/firebase/firestore-functions";
+  import { changeAvatar } from "$lib/firebase/firebase-functions";
   import type { Lobby, Avatar } from "$lib/firebase/firestore-types/lobby";
 
   export let lobbyCode: string;
@@ -34,7 +34,7 @@
   {#each avatarChoices as { avatar, displayName }}
     <button class="avatar" on:click={() => selectAvatar(avatar)}>
       <img src="/avatars/{avatar}.webp" alt="cat picture {avatar}" />
-      <span class="name">{displayName ?? ""}</span>
+      <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
     </button>
   {/each}
 </div>
@@ -70,6 +70,7 @@
     grid-template-rows: auto 16px;
     gap: 12px;
     place-items: center;
+    color: unset;
   }
 
   .avatar img {
@@ -78,10 +79,6 @@
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
-    border: 1px black solid;
-  }
-
-  .avatar .name {
-    font-size: 2vmin;
+    border: 1px currentColor solid;
   }
 </style>
