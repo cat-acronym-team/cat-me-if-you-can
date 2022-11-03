@@ -13,18 +13,22 @@ export type UserData = {
    * 1 - 12: cat picture 1 - 12
    */
   avatar: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+  
   /**
    * amount of times won as cat
    */
   catWins: number;
+
   /**
    * amount of times won as catfish
    */
   catfishWins: number;
+
   /**
    * amount of times you played as cat
    */
   playedAsCat: number;
+
   /**
    * amount of times you played as catfish
    */
