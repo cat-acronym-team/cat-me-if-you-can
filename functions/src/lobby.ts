@@ -97,7 +97,12 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
   const lobby = change.after.data() as Lobby;
   const oldLobby = change.before.data() as Lobby;
-
+  const alivePlayers = [];
+  for (let i = 0; i < lobby.uids.length; i++) {
+    if (lobby.players[i].alive) {
+      alivePlayers.push(lobby.uids[i]);
+    }
+  }
   if (lobby.state == "PROMPT" && oldLobby.state != "PROMPT") {
     await startPrompt(lobbyDocRef);
   }
