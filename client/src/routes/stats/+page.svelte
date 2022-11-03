@@ -1,6 +1,6 @@
 <script lang="ts">
   import CircularProgress from "@smui/circular-progress";
-  
+
   import { authStore as user } from "$stores/auth";
   import type { UserData } from "$lib/firebase/firestore-types/users";
   import { doc, onSnapshot } from "firebase/firestore";

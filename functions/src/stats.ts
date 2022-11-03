@@ -35,7 +35,7 @@ export async function applyStats(lobbyData: Lobby, lobbyDoc: DocumentReference<L
       } else {
         newStats.playedAsCatfish = FieldValue.increment(1);
       }
-      
+
       // increment wins
       if (winner == "CAT" && player.role == "CAT") {
         newStats.catWins = FieldValue.increment(1);
@@ -43,7 +43,7 @@ export async function applyStats(lobbyData: Lobby, lobbyDoc: DocumentReference<L
       if (winner == "CATFISH" && player.role == "CATFISH") {
         newStats.catfishWins = FieldValue.increment(1);
       }
-      
+
       // update their user doc
       transaction.update(userDocRef, newStats);
     })
