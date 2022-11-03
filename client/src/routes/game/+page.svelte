@@ -3,6 +3,8 @@
   import LobbyComponent from "$components/Lobby.svelte";
   import WinLoss from "$components/WinLoss.svelte";
   import ChatRoom from "$components/ChatRoom.svelte";
+  import CircularProgress from "@smui/circular-progress";
+
   import { onSnapshot, doc, getDoc } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
   import { getPrivatePlayerCollection, lobbyCollection } from "$lib/firebase/firestore-collections";
@@ -83,13 +85,17 @@
 <!-- I do this check because the html was rendering the Lobby component before the onmount happened due to lobby having default values -->
 <!-- So the code was displaying undefined in the Lobby Component -->
 <!-- We could have a loading animation until the lobby is not undefined -->
-<div>
+<main>
   {#if $user == null || lobby == undefined || lobbyCode == null}
-    Loading... <!-- TODO: make a Nice Loading spinner -->
+    <div class="spinner-wraper">
+      <CircularProgress indeterminate />
+    </div>
   {:else if lobby.state === "WAIT"}
     <LobbyComponent {lobbyCode} {lobby} />
   {:else if privatePlayer == undefined}
-    Loading... <!-- TODO: make a Nice Loading spinner -->
+    <div class="spinner-wraper">
+      <CircularProgress indeterminate />
+    </div>
   {:else if lobby.state === "PROMPT"}
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
   {:else if lobby.state === "CHAT"}
@@ -99,4 +105,26 @@
   {:else}
     unknown lobby state: {lobby.state}
   {/if}
-</div>
+</main>
+
+<style>
+  main {
+    box-sizing: border-box;
+    height: 100%;
+    overflow: auto;
+    padding-top: 64px;
+  }
+
+  main:has(.spinner-wraper) {
+    padding: 0;
+  }
+
+  .spinner-wraper {
+    height: 100%;
+    display: grid;
+    place-content: center;
+    grid-template-columns: 128px;
+    grid-template-rows: 128px;
+    place-items: stretch;
+  }
+</style>

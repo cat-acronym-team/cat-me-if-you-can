@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { changeAvatar } from "$lib/firebase/firestore-functions";
+  import { changeAvatar } from "$lib/firebase/firebase-functions";
   import type { Lobby, Avatar } from "$lib/firebase/firestore-types/lobby";
 
   export let lobbyCode: string;

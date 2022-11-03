@@ -1,8 +1,8 @@
 import type { Timestamp } from "firebase-admin/firestore";
 
-export const avatars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
+export const AVATARS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
 
-export type Avatar = typeof avatars[number];
+export type Avatar = typeof AVATARS[number];
 
 export type Player = {
   /**
@@ -33,10 +33,21 @@ export type Player = {
   /**
    * the answer for their prompt
    */
-  promptAnswer: string;
+  promptAnswer?: string;
 };
 
 export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
+
+/**
+ * the duration in seconds for each game state
+ */
+export const GAME_STATE_DURATIONS: { [state in GameState]: number } = {
+  WAIT: 2 * 60 * 60,
+  PROMPT: 60,
+  CHAT: 2 * 60,
+  VOTE: 3 * 60,
+  END: 10,
+};
 
 /**
  * the type of documents `/lobbies/{code}`
@@ -67,7 +78,7 @@ export type Lobby = {
   /**
    * expiration time of the current phase with a timer
    */
-  expiration: Timestamp;
+  expiration?: Timestamp;
 };
 
 /**
