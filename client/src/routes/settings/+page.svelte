@@ -26,7 +26,7 @@
 <html lang="en">
   <h2>Account Settings</h2>
   <main>
-    <div class="wrapper">
+    <div>
       <!--Delete Account Button and Prompt-->
       <Dialog
         bind:open={showDeletionPrompt}
@@ -81,17 +81,4 @@
 </html>
 
 <style>
-  .wrapper {
-    display: grid;
-    display: inline-grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-    row-gap: 15px;
-  }
-  .item-del-account {
-    grid-column: 1;
-    grid-row: 1;
-    height: auto;
-    width: 100%;
-  }
 </style>
