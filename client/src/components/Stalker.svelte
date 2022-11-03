@@ -1,44 +1,23 @@
 <script lang="ts">
-  import type { ChatRoom as ChatRoomType, ChatMessage, Lobby } from "$lib/firebase/firestore-types/lobby";
+  import type { ChatRoom as ChatRoomType, Lobby } from "$lib/firebase/firestore-types/lobby";
   import { stalkChatroom } from "$lib/firebase/firestore-functions";
-  import { getChatRoomCollection, getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
-  import { onSnapshot, query, orderBy } from "firebase/firestore";
-  import { onMount, onDestroy } from "svelte";
-  import type { Unsubscribe } from "firebase/auth";
-  import { authStore as user } from "$stores/auth";
+  import { getChatRoomCollection } from "$lib/firebase/firestore-collections";
+  import { getDocs } from "firebase/firestore";
+  import { onMount } from "svelte";
   import ChatRoom from "./ChatRoom.svelte";
 
   export let lobby: Lobby;
   export let lobbyCode: string;
 
-  let unsubscribeChatrooms: Unsubscribe | undefined = undefined;
   let chatrooms: ChatRoomType[] = [];
   let chatroomsIds: string[] = [];
-  let chatMessages: ChatMessage[] = [];
+  let chatroomClick: boolean = false;
 
   onMount(async () => {
     const chatCollection = getChatRoomCollection(lobbyCode);
-    unsubscribeChatrooms = onSnapshot(chatCollection, (chatSnapshot) => {
-      chatroomsIds = chatSnapshot.docs.map((room) => room.id);
-      chatrooms = chatSnapshot.docs.map((room) => room.data());
-
-      const room = chatSnapshot.docs.find((chatDoc) => {
-        return chatDoc.data().viewers.includes($user!.uid);
-      });
-      if (room !== undefined) {
-        onSnapshot(
-          query(getChatRoomMessagesCollection(lobbyCode, room.id), orderBy("timestamp", "asc")),
-          (collection) => {
-            chatMessages = collection.docs.map((d) => d.data());
-          }
-        );
-      }
-    });
-  });
-
-  onDestroy(() => {
-    // unsub from chatroom
-    unsubscribeChatrooms?.();
+    const chatSnapshot = await getDocs(chatCollection);
+    chatroomsIds = chatSnapshot.docs.map((room) => room.id);
+    chatrooms = chatSnapshot.docs.map((room) => room.data());
   });
 
   /**
@@ -57,13 +36,14 @@
   // onsnapshot subscribe to list of all chatrooms where you a viewer, if not empty switch to show chatroom
 </script>
 
-{#if chatMessages.length == 0}
+{#if chatroomClick == false}
   <div class="container">
     <h1>Stalk a chat:</h1>
     {#each chatrooms as chatroom, i}
       <button
-        on:click={() => {
-          onClickChat(chatroomsIds[i]);
+        on:click={async () => {
+          await onClickChat(chatroomsIds[i]);
+          chatroomClick = true;
         }}
         class="chatRoom"
       >
