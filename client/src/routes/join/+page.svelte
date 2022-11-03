@@ -59,8 +59,6 @@
     code = code.toLowerCase();
     try {
       await saveOrCreate($user, userData, name.trim());
-      // get the current user info
-      const { displayName, avatar } = (await getUser(($user as User).uid)) as UserData;
       // enter lobby with the user's info
       await findAndJoinLobby(code);
       // go to game page
