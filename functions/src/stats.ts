@@ -1,5 +1,6 @@
 import { Lobby } from "./firestore-types/lobby";
-import { DocumentReference, FieldValue, Transaction } from "firebase-admin/firestore";
+import type { DocumentReference, Transaction } from "firebase-admin/firestore";
+import { firestore } from "firebase-admin";
 import { userCollection } from "./firestore-collections";
 import * as functions from "firebase-functions";
 
@@ -23,25 +24,25 @@ export async function applyStats(lobbyData: Lobby, lobbyDoc: DocumentReference<L
       }
 
       const newStats: {
-        playedAsCat?: FieldValue;
-        playedAsCatfish?: FieldValue;
-        catWins?: FieldValue;
-        catfishWins?: FieldValue;
+        playedAsCat?: firestore.FieldValue;
+        playedAsCatfish?: firestore.FieldValue;
+        catWins?: firestore.FieldValue;
+        catfishWins?: firestore.FieldValue;
       } = {};
 
       // increment played as role
       if (player.role == "CAT") {
-        newStats.playedAsCat = FieldValue.increment(1);
+        newStats.playedAsCat = firestore.FieldValue.increment(1);
       } else {
-        newStats.playedAsCatfish = FieldValue.increment(1);
+        newStats.playedAsCatfish = firestore.FieldValue.increment(1);
       }
 
       // increment wins
       if (winner == "CAT" && player.role == "CAT") {
-        newStats.catWins = FieldValue.increment(1);
+        newStats.catWins = firestore.FieldValue.increment(1);
       }
       if (winner == "CATFISH" && player.role == "CATFISH") {
-        newStats.catfishWins = FieldValue.increment(1);
+        newStats.catfishWins = firestore.FieldValue.increment(1);
       }
 
       // update their user doc
