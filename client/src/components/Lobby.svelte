@@ -7,6 +7,7 @@
   import { onMount } from "svelte";
   import { startGame, leaveLobby } from "$lib/firebase/firestore-functions";
   import { goto } from "$app/navigation";
+  import { auth } from "$lib/firebase/app";
 
   // Props
   export let lobbyCode: string;
@@ -45,9 +46,9 @@
       <h3>Players: {lobby.players.length}</h3>
     </div>
     <SelectAvatar {lobby} {lobbyCode} />
-    <div class="start">
-      <Button on:click={() => startGame({ code: lobbyCode })}><Label>Start Game</Label></Button>
-    </div>
+    {#if auth.currentUser?.uid === lobby.uids[0]}<div class="start">
+        <Button on:click={() => startGame({ code: lobbyCode })}><Label>Start Game</Label></Button>
+      </div>{/if}
     <div class="leave">
       <Button
         on:click={() => {
