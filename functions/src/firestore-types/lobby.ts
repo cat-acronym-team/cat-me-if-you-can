@@ -38,6 +38,7 @@ export type GameState = "WAIT" | "ROLE" | "PROMPT" | "CHAT" | "VOTE" | "END";
  */
 export const GAME_STATE_DURATIONS: { [state in GameState]: number } = {
   WAIT: 2 * 60 * 60,
+  ROLE: 30,
   PROMPT: 60,
   CHAT: 2 * 60,
   VOTE: 3 * 60,
