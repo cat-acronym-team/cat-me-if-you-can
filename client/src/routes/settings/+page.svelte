@@ -26,50 +26,48 @@
 <html lang="en">
   <h2>Account Settings</h2>
   <main>
-    <div>
-      <!--Delete Account Button and Prompt-->
-      <Dialog
-        bind:open={showDeletionPrompt}
-        aria-labelledby="confirm-account-deletion-title"
-        aria-describedby="deletion-confirmation-content"
-      >
-        <Title id="confirm-account-deletion-title">Delete Account</Title>
-        <Content id="deletion-confirmation-content">Are you sure?</Content>
+    <!--Delete Account Button and Prompt-->
+    <Dialog
+      bind:open={showDeletionPrompt}
+      aria-labelledby="confirm-account-deletion-title"
+      aria-describedby="deletion-confirmation-content"
+    >
+      <Title id="confirm-account-deletion-title">Delete Account</Title>
+      <Content id="deletion-confirmation-content">Are you sure?</Content>
+      <Actions>
+        <Button id="cancel">
+          <Label>Cancel</Label>
+        </Button>
+        <Button on:click={verifyDelete}>
+          <Label>Delete Account</Label>
+        </Button>
+      </Actions>
+    </Dialog>
+    <!--If user signed in too long ago, redirect them to sign in-->
+    {#if errorMsg !== ""}
+      <Dialog bind:open={errPrompt} aria-labelledby="reauth-title" aria-describedby="err-msg-content">
+        <Title id="reauth-title">NOTICE!</Title>
+        <Content id="err-msg-content"
+          >Last sign in too long ago.
+          <br />Click ok to be redirected back to sign in</Content
+        >
         <Actions>
-          <Button id="cancel">
-            <Label>Cancel</Label>
-          </Button>
-          <Button on:click={verifyDelete}>
-            <Label>Delete Account</Label>
+          <Button
+            defaultAction
+            use={[InitialFocus]}
+            on:click={() => {
+              logOut();
+              goto("/");
+            }}
+            ><Label>Ok</Label>
           </Button>
         </Actions>
       </Dialog>
-      <!--If user signed in too long ago, redirect them to sign in-->
-      {#if errorMsg !== ""}
-        <Dialog bind:open={errPrompt} aria-labelledby="reauth-title" aria-describedby="err-msg-content">
-          <Title id="reauth-title">NOTICE!</Title>
-          <Content id="err-msg-content"
-            >Last sign in too long ago.
-            <br />Click ok to be redirected back to sign in</Content
-          >
-          <Actions>
-            <Button
-              defaultAction
-              use={[InitialFocus]}
-              on:click={() => {
-                logOut();
-                goto("/");
-              }}
-              ><Label>Ok</Label>
-            </Button>
-          </Actions>
-        </Dialog>
-      {/if}
+    {/if}
 
-      <Button on:click={() => (showDeletionPrompt = true)}>
-        <Label>Delete Account</Label>
-      </Button>
-    </div>
+    <Button on:click={() => (showDeletionPrompt = true)}>
+      <Label>Delete Account</Label>
+    </Button>
   </main>
 </html>
 
