@@ -74,7 +74,7 @@ export type Lobby = {
    * expiration time of the current phase with a timer
    */
   expiration?: Timestamp;
-  
+
   /**
    * the role that won the game
    */
