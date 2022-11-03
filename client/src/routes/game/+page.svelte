@@ -6,7 +6,7 @@
   import { onMount, onDestroy } from "svelte";
   import { getPrivatePlayerCollection, lobbyCollection } from "$lib/firebase/firestore-collections";
   import type { Lobby, PrivatePlayer } from "$lib/firebase/firestore-types/lobby";
-  import { leaveLobby } from "$lib/firebase/firestore-functions";
+  import { findAndLeaveLobby } from "$lib/firebase/leave-lobby";
   import { page } from "$app/stores";
   import { authStore as user } from "$stores/auth";
   import { goto } from "$app/navigation";
@@ -67,7 +67,7 @@
     addEventListener("beforeunload", (event) => {
       event.returnValue = "\\o/";
       if (lobby?.state === "WAIT" && lobbyCode !== null) {
-        leaveLobby({ code: lobbyCode });
+        findAndLeaveLobby(lobbyCode);
       }
     });
   });

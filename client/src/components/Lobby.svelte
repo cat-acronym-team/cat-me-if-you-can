@@ -5,13 +5,15 @@
   import { page } from "$app/stores";
   import type { Lobby } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { startGame, leaveLobby } from "$lib/firebase/firestore-functions";
+  import { findAndLeaveLobby } from "$lib/firebase/leave-lobby";
+  import { findAndStartLobby } from "$lib/firebase/start-lobby";
   import { goto } from "$app/navigation";
   import { auth } from "$lib/firebase/app";
 
   // Props
   export let lobbyCode: string;
   export let lobby: Lobby;
+  let errorMessage: string = "";
 
   // better link to share since it's redirecting to this page anyways
   // Josh's suggestion that I agreed on
@@ -37,6 +39,23 @@
   function copyLink() {
     navigator.clipboard.writeText(url);
   }
+
+  async function startGame() {
+    try {
+      await findAndStartLobby(lobbyCode);
+    } catch (err) {
+      console.log("HELLLO" + err);
+      errorMessage = err instanceof Error ? err.message : String(err);
+    }
+  }
+
+  async function leaveLobby() {
+    try {
+      await findAndLeaveLobby(lobbyCode);
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+    }
+  }
 </script>
 
 <main>
@@ -46,16 +65,21 @@
       <h3>Players: {lobby.players.length}</h3>
     </div>
     <SelectAvatar {lobby} {lobbyCode} />
-    {#if auth.currentUser?.uid === lobby.uids[0]}<div class="start">
-        <Button on:click={() => startGame({ code: lobbyCode })}><Label>Start Game</Label></Button>
+    {#if auth.currentUser?.uid === lobby.uids[1]}<div class="start">
+        <Button on:click={() => startGame()}><Label>Start Game</Label></Button>
       </div>{/if}
     <div class="leave">
       <Button
         on:click={() => {
-          leaveLobby({ code: lobbyCode });
+          leaveLobby();
           goto("/");
         }}><Label>Leave Lobby</Label></Button
       >
+    </div>
+    <div class="error">
+      {#if errorMessage !== ""}
+        <p class="error">{errorMessage}</p>
+      {/if}
     </div>
     <div class="buttons">
       <h3 class="invite-link">Invite Link: {url}</h3>
@@ -71,7 +95,8 @@
   }
 
   .start,
-  .leave {
+  .leave,
+  .error {
     display: grid;
     place-items: center;
   }
