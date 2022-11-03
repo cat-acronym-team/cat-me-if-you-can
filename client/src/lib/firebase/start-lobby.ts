@@ -1,4 +1,4 @@
-import { startGame } from "./firestore-functions";
+import { startGame } from "./firebase-functions";
 
 export async function findAndStartLobby(id: string) {
   // Check if code is valid

@@ -1,4 +1,4 @@
-import { leaveLobby } from "./firestore-functions";
+import { leaveLobby } from "./firebase-functions";
 
 export async function findAndLeaveLobby(id: string) {
   // Check if code is valid
