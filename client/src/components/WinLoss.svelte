@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PrivatePlayer, Lobby } from "../../../functions/src/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { lobbyReturn } from "$lib/firebase/firestore-functions";
+  import { lobbyReturn } from "$lib/firebase/firebase-functions";
   import { authStore as user } from "$stores/auth";
 
   export let lobbyCode: string;

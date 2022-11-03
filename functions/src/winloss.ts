@@ -2,7 +2,7 @@ import { firestore } from "firebase-admin";
 import * as functions from "firebase-functions";
 import { db } from "./app";
 import { getPrivatePlayerCollection, lobbyCollection } from "./firestore-collections";
-import { isLobbyRequest } from "./firestore-functions-types";
+import { isLobbyRequest } from "./firebase-functions-types";
 import { Lobby, PrivatePlayer } from "./firestore-types/lobby";
 
 // this function will likely be obsolete once timers are introduced
