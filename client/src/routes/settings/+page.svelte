@@ -39,15 +39,10 @@
         <Content id="deletion-confirmation-content">Are you sure?</Content>
         <Actions>
           <Button id="dont-delete-account">
-            <Label>No</Label>
+            <Label>Cancel</Label>
           </Button>
-          <Button
-            id="confirm-delete-account"
-            on:click={() => {
-              verifyDelete();
-            }}
-          >
-            <Label>Yes</Label>
+          <Button id="confirm-delete-account" on:click={verifyDelete}>
+            <Label>Delete Account</Label>
           </Button>
         </Actions>
       </Dialog>
