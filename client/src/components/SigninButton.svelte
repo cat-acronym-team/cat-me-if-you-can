@@ -10,7 +10,7 @@
   import { loginWithGoogle, loginWithMicrosoft, loginWithEmail, logOut, createUser } from "$lib/firebase/auth";
   import type { UserData } from "$lib/firebase/firestore-types/users";
 
-  export let userData: UserData | undefined = undefined;
+  export let userData: UserData | undefined;
   let showSignInDialog = false;
   let menu: Menu;
   let email = "";

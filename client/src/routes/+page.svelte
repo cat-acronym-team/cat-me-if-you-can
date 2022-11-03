@@ -69,7 +69,7 @@
 </script>
 
 <header>
-  <SigninButton />
+  <SigninButton {userData} />
 </header>
 
 <main class="cat-main-container">
