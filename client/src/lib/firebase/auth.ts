@@ -35,5 +35,6 @@ export async function loginAnonymous() {
 }
 
 export function logOut() {
+  location.reload();
   return signOut(auth);
 }
