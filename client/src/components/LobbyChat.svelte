@@ -44,7 +44,7 @@
       // if there's an error message then clear it
       errorMessage = "";
     } catch (err) {
-      // catch and display erro
+      // catch and display error
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
@@ -60,7 +60,7 @@
       <div class="messages">
         {#each chatMessages as message}
           {#if isUser(message.sender)}
-            <p class="user-msg">{message.text}</p>
+            <p class="user-msg">You: {message.text}</p>
           {:else}
             <p class="lobby-msg">{message.sender}: {message.text}</p>
           {/if}
