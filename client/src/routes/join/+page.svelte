@@ -62,11 +62,7 @@
       // get the current user info
       const { displayName, avatar } = (await getUser(($user as User).uid)) as UserData;
       // enter lobby with the user's info
-      await findAndJoinLobby(code, {
-        displayName,
-        avatar,
-        uid: ($user as User).uid,
-      });
+      await findAndJoinLobby(code);
       // go to game page
       goto(`/game?code=${code}`);
     } catch (err) {
