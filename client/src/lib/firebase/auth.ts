@@ -8,8 +8,6 @@ import {
   signInAnonymously,
   signOut,
   signInWithEmailAndPassword,
-  EmailAuthProvider,
-  linkWithCredential,
 } from "firebase/auth";
 
 // Google login/signup
@@ -40,25 +38,11 @@ export async function loginAnonymous() {
 export function deleteAccount() {
   const user = auth.currentUser;
 
-  if (user !== null) {
-    deleteUser(user);
+  if (user == null) {
+    throw new Error("User is not defined.");
   }
-  // Prompt user saying they need to log back in and
-  // log them out and redirect to splash page
-  // checkSignInProvider();
-}
 
-export async function linkUserCredentials(password: string) {
-  const user = auth.currentUser;
-
-  // If user is signed in
-  if (user !== null && user !== undefined) {
-    const email = user.email;
-    if (email !== null) {
-      const credential = EmailAuthProvider.credential(email, password);
-      return await linkWithCredential(user, credential);
-    }
-  }
+  deleteUser(user);
 }
 
 export function logOut() {
