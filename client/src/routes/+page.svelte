@@ -68,10 +68,8 @@
   }
 </script>
 
-<header class="cat-main-header">
-  <div class="header-first-level">
-    <SigninButton />
-  </div>
+<header>
+  <SigninButton />
 </header>
 
 <main class="cat-main-container">
@@ -101,14 +99,12 @@
 
 <style>
   /* Phone Styles */
-  .cat-main-header {
-    width: 100%;
-  }
-  .header-first-level {
-    width: 100%;
+  header {
+    height: 64px;
     display: flex;
     justify-content: right;
     align-items: center;
+    padding-right: 16px;
   }
 
   .logo-container {

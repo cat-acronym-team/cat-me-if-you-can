@@ -25,17 +25,22 @@
   </Content>
 </Dialog>
 
-<IconButton
-  class="material-icons"
-  on:click={() => {
-    showRulesDialog = true;
-  }}>help</IconButton
->
+<div class="top-left">
+  <IconButton class="material-icons" on:click={() => (showRulesDialog = true)}>help</IconButton>
+</div>
 
 <slot />
 
 <style>
   :global(body) {
     margin: 0;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .top-left {
+    position: absolute;
+    top: 8px;
+    left: 8px;
   }
 </style>
