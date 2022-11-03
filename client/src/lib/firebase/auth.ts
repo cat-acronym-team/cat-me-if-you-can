@@ -8,8 +8,6 @@ import {
   signInAnonymously,
   signOut,
   signInWithEmailAndPassword,
-  EmailAuthProvider,
-  linkWithCredential,
 } from "firebase/auth";
 
 // Google login/signup
@@ -45,19 +43,6 @@ export function deleteAccount() {
   }
 
   deleteUser(user);
-}
-
-export async function linkUserCredentials(password: string) {
-  const user = auth.currentUser;
-
-  // If user is signed in
-  if (user !== null && user !== undefined) {
-    const email = user.email;
-    if (email !== null) {
-      const credential = EmailAuthProvider.credential(email, password);
-      return await linkWithCredential(user, credential);
-    }
-  }
 }
 
 export function logOut() {
