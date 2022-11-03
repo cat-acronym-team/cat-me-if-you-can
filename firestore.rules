@@ -61,7 +61,9 @@ service cloud.firestore {
           && request.resource.data.displayName == request.resource.data.displayName.trim()
           && request.resource.data.displayName.matches('[A-Za-z0-9-_ ]+')
           && request.resource.data.avatar is number && int(request.resource.data.avatar) == request.resource.data.avatar 
-          && request.resource.data.avatar >= 0 && request.resource.data.avatar <=12;
+          && request.resource.data.avatar >= 0 && request.resource.data.avatar <=12
+          && request.resource.data.catWins == 0 && request.resource.data.catfishWins == 0
+          && request.resource.data.playedAsCat == 0 && request.resource.data.playedAsCatfish == 0;
       }
       function validateOnUpdate(){
         return request.resource.data.keys().hasOnly(['displayName', 'avatar', 'catWins', 'catfishWins', 'playedAsCat', 'playedAsCatfish'])
