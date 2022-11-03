@@ -121,11 +121,16 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
     // Get position of the Player
     const playerPos = uids.indexOf(auth.uid);
 
-    // Remove player from the lobby
-    await transaction.update(lobby, {
-      players: firestore.FieldValue.arrayRemove(players[playerPos]),
-      uids: firestore.FieldValue.arrayRemove(auth.uid),
-    });
+    // If the last player is leaving delete the document instead
+    if (uids.length === 1) {
+      await transaction.delete(lobby);
+    } else {
+      // Remove player from the lobby
+      await transaction.update(lobby, {
+        players: firestore.FieldValue.arrayRemove(players[playerPos]),
+        uids: firestore.FieldValue.arrayRemove(auth.uid),
+      });
+    }
   });
 });
 
