@@ -102,10 +102,10 @@
   }
 </script>
 
-<!-- If not then show regular page -->
-<nav class="temp-nav">
+<header>
   <SigninButton />
-</nav>
+</header>
+
 <div class="cat-join-container">
   <h2 class="mdc-typography--headline2">Join Lobby!</h2>
   {#if errorMessage !== ""}
@@ -143,10 +143,14 @@
 </div>
 
 <style>
-  .temp-nav {
+  header {
+    height: 64px;
     display: flex;
     justify-content: right;
+    align-items: center;
+    padding-right: 16px;
   }
+
   .cat-join-container {
     width: 60%;
     margin: auto;

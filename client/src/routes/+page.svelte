@@ -4,7 +4,7 @@
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
   import { getUser, saveOrCreate } from "$lib/firebase/splash";
-  import { createLobby } from "$lib/firebase/create-lobby";
+  import { createLobby } from "$lib/firebase/firebase-functions";
   import { displayNameValidator, type UserData } from "$lib/firebase/firestore-types/users";
   import { goto } from "$app/navigation";
   import { authStore } from "$stores/auth";
@@ -49,9 +49,9 @@
       // Create User
       await saveOrCreate(user, userData, name.trim());
       // Create Lobby
-      const code = await createLobby(name.trim());
+      const response = await createLobby();
       // go to game page
-      goto("/game?code=" + code);
+      goto("/game?code=" + response.data.code);
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : String(err);
     }
@@ -68,10 +68,8 @@
   }
 </script>
 
-<header class="cat-main-header">
-  <div class="header-first-level">
-    <SigninButton {userData} />
-  </div>
+<header>
+  <SigninButton />
 </header>
 
 <main class="cat-main-container">
@@ -101,14 +99,12 @@
 
 <style>
   /* Phone Styles */
-  .cat-main-header {
-    width: 100%;
-  }
-  .header-first-level {
-    width: 100%;
+  header {
+    height: 64px;
     display: flex;
     justify-content: right;
     align-items: center;
+    padding-right: 16px;
   }
 
   .logo-container {
