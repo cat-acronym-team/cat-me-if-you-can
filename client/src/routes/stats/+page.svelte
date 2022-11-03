@@ -1,70 +1,101 @@
 <script lang="ts">
-  import { authStore } from "$stores/auth";
+  import CircularProgress from "@smui/circular-progress";
+  
+  import { authStore as user } from "$stores/auth";
   import type { UserData } from "$lib/firebase/firestore-types/users";
-  import { getUser } from "$lib/firebase/splash";
+  import { doc, onSnapshot } from "firebase/firestore";
+  import { userCollection } from "$lib/firebase/firestore-collections";
+  import type { Unsubscribe } from "firebase/auth";
+  import { onDestroy } from "svelte";
 
   // variables
-  let user = $authStore;
   let userInfo: UserData | undefined;
+  let unsubscribeUser: Unsubscribe | undefined;
   let totalPlayed: number;
   let catLosses: number;
   let catfishLosses: number;
+  let catRatio: number;
+  let catfishRatio: number;
 
   // reactive calls
-  $: if (user !== null) {
-    getInfo();
+  $: if ($user !== null) {
+    unsubscribeUser = onSnapshot(doc(userCollection, $user.uid), (userDoc) => {
+      userInfo = userDoc.data();
+    });
   }
   $: if (userInfo !== undefined) {
     totalPlayed = userInfo.playedAsCat + userInfo.playedAsCatfish;
     catLosses = userInfo.playedAsCat - userInfo.catWins;
     catfishLosses = userInfo.playedAsCatfish - userInfo.catfishWins;
+    catRatio = userInfo.catWins / catLosses;
+    catfishRatio = userInfo.catfishWins / catfishLosses;
   }
-
-  // function
-  async function getInfo() {
-    if (user !== null) {
-      userInfo = (await getUser(user.uid)) as UserData;
-    }
-  }
+  // lifecyle methods
+  onDestroy(() => {
+    unsubscribeUser?.();
+  });
 </script>
 
-{#if userInfo !== undefined}
-  <h1>{userInfo.displayName} Stats</h1>
-  <div class="userInfo-container">
-    <div class="stat total">
-      <h3>Total Games Played</h3>
-      <output>{totalPlayed}</output>
+<main>
+  {#if user == null || userInfo == undefined}
+    <div class="spinner-wraper">
+      <CircularProgress indeterminate />
     </div>
-    <div class="stat">
-      <h3>Cat Wins</h3>
-      <output>{userInfo.catWins}</output>
+  {:else}
+    <h1>{userInfo?.displayName} Stats</h1>
+    <div class="userInfo-container">
+      <div class="stat total">
+        <h3>Total Games Played</h3>
+        <output>{totalPlayed}</output>
+      </div>
+      <div class="stat">
+        <h3>Cat Wins</h3>
+        <output>{userInfo.catWins}</output>
+      </div>
+      <div class="stat">
+        <h3>Cat Losses</h3>
+        <output>{catLosses}</output>
+      </div>
+      <div class="stat">
+        <h3>Catfish Wins</h3>
+        <output>{userInfo.catfishWins}</output>
+      </div>
+      <div class="stat">
+        <h3>Catfish Losses</h3>
+        <output>{catfishLosses}</output>
+      </div>
+      <div class="stat">
+        <h3>Win/Loss Ratio as Cat</h3>
+        <output>{isNaN(catRatio) || !isFinite(catRatio) ? "N/A" : catRatio.toFixed(2)}</output>
+      </div>
+      <div class="stat">
+        <h3>Win/Loss Ratio as Catfish</h3>
+        <output>{isNaN(catfishRatio) || !isFinite(catRatio) ? "N/A" : catfishRatio.toFixed(2)}</output>
+      </div>
     </div>
-    <div class="stat">
-      <h3>Cat Losses</h3>
-      <output>{catLosses}</output>
-    </div>
-    <div class="stat">
-      <h3>Catfish Wins</h3>
-      <output>{userInfo.catfishWins}</output>
-    </div>
-    <div class="stat">
-      <h3>Catfish Losses</h3>
-      <output>{catfishLosses}</output>
-    </div>
-    <div class="stat">
-      <h3>Win/Loss Ratio as Cat</h3>
-      <output>{(userInfo.catWins / catLosses).toFixed(2)}</output>
-    </div>
-    <div class="stat">
-      <h3>Win/Loss Ratio as Catfish</h3>
-      <output>{(userInfo.catfishWins / catfishLosses).toFixed(2)}</output>
-    </div>
-  </div>
-{:else}
-  <h1>Sad Kitty...No Stats Here :(</h1>
-{/if}
+  {/if}
+</main>
 
 <style>
+  main {
+    box-sizing: border-box;
+    height: 100%;
+    overflow: auto;
+    padding-top: 64px;
+  }
+
+  main:has(.spinner-wraper) {
+    padding: 0;
+  }
+
+  .spinner-wraper {
+    height: 100%;
+    display: grid;
+    place-content: center;
+    grid-template-columns: 128px;
+    grid-template-rows: 128px;
+    place-items: stretch;
+  }
   h1 {
     text-align: center;
     text-decoration: underline;
