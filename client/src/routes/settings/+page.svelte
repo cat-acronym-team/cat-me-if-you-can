@@ -1,7 +1,7 @@
 <script lang="ts">
   import { deleteAccount, logOut } from "$lib/firebase/auth";
   import { goto } from "$app/navigation";
-  import Dialog, { Title, Header, Content, Actions, InitialFocus } from "@smui/dialog";
+  import Dialog, { Title, Content, Actions, InitialFocus } from "@smui/dialog";
   import Button, { Label } from "@smui/button";
 
   let showDeletionPrompt = false;
@@ -33,15 +33,13 @@
         aria-labelledby="confirm-account-deletion-title"
         aria-describedby="deletion-confirmation-content"
       >
-        <Header>
-          <Title id="confirm-account-deletion-title">Delete Account</Title>
-        </Header>
+        <Title id="confirm-account-deletion-title">Delete Account</Title>
         <Content id="deletion-confirmation-content">Are you sure?</Content>
         <Actions>
-          <Button id="dont-delete-account">
+          <Button id="cancel">
             <Label>Cancel</Label>
           </Button>
-          <Button id="confirm-delete-account" on:click={verifyDelete}>
+          <Button on:click={verifyDelete}>
             <Label>Delete Account</Label>
           </Button>
         </Actions>
@@ -68,7 +66,7 @@
         </Dialog>
       {/if}
 
-      <Button class="item-del-account" on:click={() => (showDeletionPrompt = true)}>
+      <Button on:click={() => (showDeletionPrompt = true)}>
         <Label>Delete Account</Label>
       </Button>
     </div>
