@@ -21,7 +21,7 @@ module.exports = {
   ],
   plugins: ["@typescript-eslint", "import"],
   rules: {
-    "spaced-comment": "warn",
+    "spaced-comment": ["warn", "always", { markers: ["/"] }],
     "no-warning-comments": "warn",
     "no-throw-literal": "warn",
     "require-await": "warn",
