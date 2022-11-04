@@ -62,7 +62,24 @@ export function linkWithGoogle() {
     linkWithPopup(user, google);
     return;
   } else {
-    console.log(user);
+    return user;
+  }
+}
+
+export function linkWithMicrosoft() {
+  const user = auth.currentUser;
+  if (user != null) {
+    const signInMethods = user.providerData;
+
+    signInMethods.forEach((provider) => {
+      if (provider.providerId == "microsoft.com") {
+        throw new Error("a-microsoft-account-already-exists-for-this-user");
+      }
+    });
+
+    linkWithPopup(user, microsoft);
+    return;
+  } else {
     return user;
   }
 }

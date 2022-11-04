@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { deleteAccount, linkWithGoogle, logOut } from "$lib/firebase/auth";
+  import { deleteAccount, linkWithGoogle, linkWithMicrosoft, logOut } from "$lib/firebase/auth";
   import { goto } from "$app/navigation";
   import Dialog, { Title, Content, Actions } from "@smui/dialog";
   import Button, { Label } from "@smui/button";
@@ -14,6 +14,9 @@
     switch (errorMsg) {
       case "a-google-account-already-exists-for-this-user":
         errorMsg = "A Google Account is Already Linked to this Account";
+        return;
+      case "a-microsoft-account-already-exists-for-this-user":
+        errorMsg = "A Microsft Account is Already Linked to this Account";
         return;
       default:
         errorMsg = "An unexpected error has occured";
@@ -37,6 +40,17 @@
   function linkGoogleAccount() {
     try {
       linkWithGoogle();
+      return;
+    } catch (err) {
+      errorMsg = err instanceof Error ? err.message : String(err);
+      outputErrMsg();
+      return;
+    }
+  }
+
+  function linkMicrosoftAccount() {
+    try {
+      linkWithMicrosoft();
       return;
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : String(err);
@@ -85,10 +99,7 @@
             </Icon>
             <Label>Sign in with Google</Label>
           </Button>
-          {#if errorMsg !== ""}
-            <p class="error">{errorMsg}</p>
-          {/if}
-          <Button id="sign-in-with-microsoft" variant="raised">
+          <Button id="sign-in-with-microsoft" variant="raised" on:click={linkMicrosoftAccount}>
             <Icon component={Svg} viewBox="0 0 21 21">
               <rect x="1" y="1" width="9" height="9" fill="#f25022" />
               <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
@@ -97,6 +108,9 @@
             </Icon>
             <Label>Sign in with Microsoft</Label>
           </Button>
+          {#if errorMsg !== ""}
+            <p class="error">{errorMsg}</p>
+          {/if}
         </div>
       </Content>
     </Dialog>
