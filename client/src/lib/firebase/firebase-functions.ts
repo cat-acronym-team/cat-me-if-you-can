@@ -1,8 +1,14 @@
 import { functions } from "$lib/firebase/app";
 import { httpsCallable } from "firebase/functions";
-import type { LobbyRequest, ChatRequest, StalkChatroomRequest } from "./firestore-functions-types";
+import type {
+  LobbyCreationResponse,
+  LobbyRequest,
+  ChatRequest,
+  StalkChatroomRequest,
+} from "./firebase-functions-types";
 import type { ChangeAvatarData } from "./functions-types/avatar";
 
+export const createLobby = httpsCallable<void, LobbyCreationResponse>(functions, "createLobby");
 export const startGame = httpsCallable<LobbyRequest, void>(functions, "startGame");
 export const joinLobby = httpsCallable<LobbyRequest, void>(functions, "joinLobby");
 export const stalkChatroom = httpsCallable<StalkChatroomRequest, void>(functions, "stalkChatroom");

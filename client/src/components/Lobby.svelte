@@ -5,7 +5,7 @@
   import { page } from "$app/stores";
   import type { Lobby } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { startGame } from "$lib/firebase/firestore-functions";
+  import { startGame } from "$lib/firebase/firebase-functions";
 
   // Props
   export let lobbyCode: string;
