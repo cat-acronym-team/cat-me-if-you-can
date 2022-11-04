@@ -36,9 +36,9 @@ export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentRefere
       }
 
       // delete stalker
-      const stalkers = await getPrivatePlayerCollection(lobbyDoc).where("stalker", "==", true).get();
+      const stalkers = await transaction.get(getPrivatePlayerCollection(lobbyDoc).where("stalker", "==", true));
       for (const stalker of stalkers.docs) {
-        await stalker.ref.update({ stalker: false });
+        transaction.update(stalker.ref, { stalker: false });
       }
       // then delete room
       transaction.delete(room);
