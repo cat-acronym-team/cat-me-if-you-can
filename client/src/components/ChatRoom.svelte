@@ -14,6 +14,7 @@
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
   import type { Unsubscribe, User } from "firebase/auth";
   import { verifyExpiration } from "$lib/firebase/firebase-functions";
+  import { formatTimer } from "$lib/time";
   // props
   export let lobbyData: Lobby & { id: string };
   // variables
@@ -53,7 +54,7 @@
         const diff = Math.floor((lobbyData.expiration.toMillis() - Date.now()) / 1000);
         countdown = diff;
       }
-    }, 500);
+    }, 100);
   });
   onDestroy(() => {
     clearInterval(timer);
@@ -74,7 +75,7 @@
   }
 
   // Reactive Calls
-  $: if (countdown === 0 && lobbyData.uids[0] === user.uid) {
+  $: if (countdown <= 0 && lobbyData.uids[0] === user.uid) {
     clearInterval(timer);
     verifyExpiration({ code: lobbyData.id });
   }
@@ -85,11 +86,13 @@
 </script>
 
 <div class="chatroom">
-  <p class="countdown">{countdown}</p>
+  <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
+    {formatTimer(Math.max(countdown, 0))}
+  </p>
   <ChatMessages lobby={lobbyData} messages={chatMessages} on:send={(event) => submitMessage(event.detail.text)}>
-    <div slot="before-messages" class="matched-with">
+    <div slot="before-messages" class="matched-with mdc-typography--headline5">
       {#if partnerInfo !== undefined}
-        MATCHED WITH {partnerInfo.displayName.toUpperCase()}
+        You matched with {partnerInfo.displayName}
       {/if}
     </div>
   </ChatMessages>
@@ -108,8 +111,6 @@
   }
 
   .countdown {
-    font-size: 3em;
-    font-weight: bold;
     margin: 0;
   }
 
