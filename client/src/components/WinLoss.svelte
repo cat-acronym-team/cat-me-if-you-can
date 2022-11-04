@@ -12,6 +12,7 @@
   let catfishList: string = "";
   let catfishes: string[];
   let isHost: boolean;
+
   onMount(() => {
     // check if the user is the host
     if ($user !== null) {
@@ -34,23 +35,24 @@
     // grab the current user's role
     const myRole = privatePlayer.role;
     // update end variable depending on the winner type and the current player's role
-    if (myRole == "CAT") {
-      if (lobby.winner == "CAT") {
-        end = "Cat Win";
-      } else if (lobby.winner == "CATFISH") {
-        end = "Cat Lose";
-      }
-    } else {
-      if (lobby.winner == "CAT") {
-        end = "Catfish Lose";
-      } else if (lobby.winner == "CATFISH") {
-        end = "Catfish Win";
+    if (lobby.winner !== undefined) {
+      if (myRole == "CAT") {
+        if (lobby.winner == "CAT") {
+          end = "Cat Win";
+        } else {
+          end = "Cat Lose";
+        }
+      } else {
+        if (lobby.winner == "CAT") {
+          end = "Catfish Lose";
+        } else {
+          end = "Catfish Win";
+        }
       }
     }
   });
 </script>
 
-<!-- TODO: Get different images for each screen -->
 <!-- Scenario 1 -->
 <div class="container">
   <!-- Check the user's role and display the correct win or loss page accordingly -->
@@ -69,26 +71,15 @@
       {:else}
         <h2>{catfishList} was sentenced to 9 lives in purrison!</h2>
       {/if}
-      <!-- If the player is the host, show the return button -->
-      {#if isHost}
-        <button
-          on:click={() => {
-            lobbyReturn({ code: lobbyCode });
-          }}>Return to Lobby</button
-        >
-      {:else}
-        <!-- Otherwise show a message -->
-        <span class="button">Waiting for host to return to lobby...</span>
-      {/if}
     </div>
     <!-- Scenario 2 -->
   {:else if end == "Cat Lose"}
     <div class="banner">
       <h2>You have cat to be kitten me!</h2>
       {#if catfishes.length > 1}
-        <h2>The impawster, {catfishList} was not caught!</h2>
-      {:else}
         <h2>The impawsters, {catfishList} were not caught!</h2>
+      {:else}
+        <h2>The impawster, {catfishList} was not caught!</h2>
       {/if}
     </div>
     <div class="image">
@@ -100,15 +91,6 @@
         <h2>{catfishList} have taken over the litter!</h2>
       {:else}
         <h2>{catfishList} has taken over the litter!</h2>
-      {/if}
-      {#if isHost}
-        <button
-          on:click={() => {
-            lobbyReturn({ code: lobbyCode });
-          }}>Return to Lobby</button
-        >
-      {:else}
-        <span class="button">Waiting for host to return to lobby...</span>
       {/if}
     </div>
     <!-- Scenario 3 -->
@@ -124,15 +106,6 @@
 
     <div class="displayname">
       <h2>You have successfully taken over the litter!</h2>
-      {#if isHost}
-        <button
-          on:click={() => {
-            lobbyReturn({ code: lobbyCode });
-          }}>Return to Lobby</button
-        >
-      {:else}
-        <span class="button">Waiting for host to return to lobby...</span>
-      {/if}
     </div>
     <!-- Scenario 4 -->
   {:else if end == "Catfish Lose"}
@@ -145,17 +118,22 @@
     </div>
     <div class="displayname">
       <h2>You should go back to your sea ani-anim-aneme... home</h2>
-      {#if isHost}
-        <button
-          on:click={() => {
-            lobbyReturn({ code: lobbyCode });
-          }}>Return to Lobby</button
-        >
-      {:else}
-        <span class="button">Waiting for host to return to lobby...</span>
-      {/if}
     </div>
   {/if}
+  <!-- If the player is the host, show the return button -->
+  <div class="buttonContainer">
+    {#if isHost}
+      <button
+        id="return"
+        on:click={() => {
+          lobbyReturn({ code: lobbyCode });
+        }}>Return to Lobby</button
+      >
+    {:else}
+      <!-- Otherwise show a message -->
+      <span class="button">Waiting for host to return to lobby...</span>
+    {/if}
+  </div>
 </div>
 
 <style>
@@ -193,6 +171,14 @@
     top: 67.5%;
     left: 10%;
     font-size: 2.1em;
+    text-align: center;
+  }
+
+  .buttonContainer {
+    position: absolute;
+    width: 40%;
+    top: 85%;
+    left: 30%;
     text-align: center;
   }
 
