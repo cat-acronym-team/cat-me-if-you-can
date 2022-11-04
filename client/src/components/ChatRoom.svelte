@@ -86,12 +86,13 @@
 
 <div class="chatroom">
   <p class="countdown">{countdown}</p>
-  <div class="matched-with">
-    {#if partnerInfo !== undefined}
-      MATCHED WITH {partnerInfo.displayName.toUpperCase()}
-    {/if}
-  </div>
-  <ChatMessages lobby={lobbyData} messages={chatMessages} on:send={(event) => submitMessage(event.detail.text)} />
+  <ChatMessages lobby={lobbyData} messages={chatMessages} on:send={(event) => submitMessage(event.detail.text)}>
+    <div slot="before-messages" class="matched-with">
+      {#if partnerInfo !== undefined}
+        MATCHED WITH {partnerInfo.displayName.toUpperCase()}
+      {/if}
+    </div>
+  </ChatMessages>
   {#if errorMessage !== ""}
     <p class="error">{errorMessage}</p>
   {/if}
@@ -101,13 +102,18 @@
   .chatroom {
     height: 100%;
     display: grid;
-    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
     gap: 12px;
     justify-items: center;
   }
+
   .countdown {
     font-size: 3em;
     font-weight: bold;
     margin: 0;
+  }
+
+  .matched-with {
+    justify-self: center;
   }
 </style>

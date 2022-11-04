@@ -58,6 +58,7 @@
 
 <div class="root {readOnly ? 'read-only' : ''}">
   <div class="messages" bind:this={messagesElement}>
+    <slot name="before-messages" />
     {#each displayMessages as message}
       <div class="message {message.sender == $user?.uid ? 'current-user' : ''}">
         <div class="avatar">
