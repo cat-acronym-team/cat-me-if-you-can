@@ -5,8 +5,7 @@
   import { page } from "$app/stores";
   import type { Lobby } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { findAndLeaveLobby } from "$lib/firebase/leave-lobby";
-  import { findAndStartLobby } from "$lib/firebase/start-lobby";
+  import { startGame, leaveLobby } from "$lib/firebase/firebase-functions";
   import { goto } from "$app/navigation";
   import { auth } from "$lib/firebase/app";
 
@@ -40,18 +39,17 @@
     navigator.clipboard.writeText(url);
   }
 
-  async function startGame() {
+  async function start() {
     try {
-      await findAndStartLobby(lobbyCode);
+      await startGame({ code: lobbyCode });
     } catch (err) {
-      console.log("HELLLO" + err);
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
 
-  async function leaveLobby() {
+  async function leave() {
     try {
-      await findAndLeaveLobby(lobbyCode);
+      await leaveLobby({ code: lobbyCode });
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : String(err);
     }
@@ -65,20 +63,20 @@
       <h3>Players: {lobby.players.length}</h3>
     </div>
     <SelectAvatar {lobby} {lobbyCode} />
-    {#if auth.currentUser?.uid === lobby.uids[0]}<div class="start">
-        <Button on:click={() => startGame()}><Label>Start Game</Label></Button>
+    {#if auth.currentUser?.uid === lobby.uids[0]}<div class="actions">
+        <Button on:click={() => start()}><Label>Start Game</Label></Button>
       </div>{/if}
-    <div class="leave">
+    <div class="actions">
       <Button
         on:click={() => {
-          leaveLobby();
+          leave();
           goto("/");
         }}><Label>Leave Lobby</Label></Button
       >
     </div>
-    <div class="error">
+    <div class="actions">
       {#if errorMessage !== ""}
-        <p class="error">{errorMessage}</p>
+        <p>{errorMessage}</p>
       {/if}
     </div>
     <div class="buttons">
@@ -94,9 +92,7 @@
     justify-content: center;
   }
 
-  .start,
-  .leave,
-  .error {
+  .actions {
     display: grid;
     place-items: center;
   }
