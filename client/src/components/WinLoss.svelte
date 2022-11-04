@@ -13,42 +13,40 @@
   let isHost: boolean;
   let myRole: Role;
 
-  $: {
-    // check if the user is the host
-    if ($user !== null) {
-      if (lobby.uids.indexOf($user.uid) == 0) {
-        isHost = true;
-      } else {
-        isHost = false;
-      }
+  // check if the user is the host
+  $: if ($user !== null) {
+    if (lobby.uids.indexOf($user.uid) == 0) {
+      isHost = true;
+    } else {
+      isHost = false;
     }
-    // format a string list to have commas and "and" when needed
-    const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
-    // get the list of catfishes from lobby.ts and put them into a variable
-    catfishes = lobby.players
-      .filter((p) => {
-        return p.role == "CATFISH";
-      })
-      .map((c) => c.displayName);
-    catfishList = formatter.format(catfishes);
+  }
+  // format a string list to have commas and "and" when needed
+  const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
+  // get the list of catfishes from lobby.ts and put them into a variable
+  catfishes = lobby.players
+    .filter((p) => {
+      return p.role == "CATFISH";
+    })
+    .map((c) => c.displayName);
+  catfishList = formatter.format(catfishes);
 
-    // grab the current user's role
-    myRole = privatePlayer.role;
-    // update end variable depending on the winner type and the current player's role
+  // grab the current user's role
+  myRole = privatePlayer.role;
+  // update end variable depending on the winner type and the current player's role
 
-    if (lobby.winner !== undefined) {
-      if (myRole == "CAT") {
-        if (lobby.winner == "CAT") {
-          end = "Cat Win";
-        } else {
-          end = "Cat Lose";
-        }
+  $: if (lobby.winner !== undefined) {
+    if (myRole == "CAT") {
+      if (lobby.winner == "CAT") {
+        end = "Cat Win";
       } else {
-        if (lobby.winner == "CAT") {
-          end = "Catfish Lose";
-        } else {
-          end = "Catfish Win";
-        }
+        end = "Cat Lose";
+      }
+    } else {
+      if (lobby.winner == "CAT") {
+        end = "Catfish Lose";
+      } else {
+        end = "Catfish Win";
       }
     }
   }
@@ -193,12 +191,12 @@
   }
 
   .button {
-    width: 150px;
-    height: 200px;
+    width: 300px;
+    height: 100px;
     font-size: 1.2em;
     font-weight: bold;
     background-color: cornflowerblue;
     color: white;
-    padding: 20px;
+    padding: 35px;
   }
 </style>
