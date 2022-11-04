@@ -12,6 +12,7 @@
   let userInfo: UserData | undefined;
   let unsubscribeUser: Unsubscribe | undefined;
   let totalPlayed: number;
+  let totalWinRatio: number;
   let catLosses: number;
   let catfishLosses: number;
   let catRatio: number;
@@ -29,6 +30,7 @@
     catfishLosses = userInfo.playedAsCatfish - userInfo.catfishWins;
     catRatio = userInfo.catWins / catLosses;
     catfishRatio = userInfo.catfishWins / catfishLosses;
+    totalWinRatio = (userInfo.catWins + userInfo.catfishWins) / (catLosses + catfishLosses);
   }
   // lifecyle methods
   onDestroy(() => {
@@ -37,40 +39,48 @@
 </script>
 
 <main>
-  {#if user == null || userInfo == undefined}
+  {#if $user == null}
     <div class="spinner-wraper">
       <CircularProgress indeterminate />
     </div>
+  {:else if userInfo == undefined}
+    <h1>Sad Kitty... No Stats Here</h1>
   {:else}
-    <h1>{userInfo?.displayName} Stats</h1>
+    <h1>{userInfo.displayName} Stats</h1>
     <div class="userInfo-container">
-      <div class="stat total">
-        <h3>Total Games Played</h3>
-        <output>{totalPlayed}</output>
+      <div class="totals">
+        <div>
+          <h3>Total Games Played</h3>
+          <output>{totalPlayed}</output>
+        </div>
+        <div>
+          <h3>Total Win/Loss Ratio</h3>
+          <output>{isNaN(totalWinRatio) || !isFinite(totalWinRatio) ? "N/A" : totalWinRatio.toFixed(2)}</output>
+        </div>
       </div>
-      <div class="stat">
+      <div>
         <h3>Cat Wins</h3>
         <output>{userInfo.catWins}</output>
       </div>
-      <div class="stat">
+      <div>
         <h3>Cat Losses</h3>
         <output>{catLosses}</output>
       </div>
-      <div class="stat">
+      <div>
         <h3>Catfish Wins</h3>
         <output>{userInfo.catfishWins}</output>
       </div>
-      <div class="stat">
+      <div>
         <h3>Catfish Losses</h3>
         <output>{catfishLosses}</output>
       </div>
-      <div class="stat">
+      <div>
         <h3>Win/Loss Ratio as Cat</h3>
         <output>{isNaN(catRatio) || !isFinite(catRatio) ? "N/A" : catRatio.toFixed(2)}</output>
       </div>
-      <div class="stat">
+      <div>
         <h3>Win/Loss Ratio as Catfish</h3>
-        <output>{isNaN(catfishRatio) || !isFinite(catRatio) ? "N/A" : catfishRatio.toFixed(2)}</output>
+        <output>{isNaN(catfishRatio) || !isFinite(catfishRatio) ? "N/A" : catfishRatio.toFixed(2)}</output>
       </div>
     </div>
   {/if}
@@ -112,8 +122,10 @@
     margin: auto;
     text-align: center;
   }
-  .total {
-    grid-column: 1 / -1;
+  .totals {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-column: 1/-1;
     text-align: center;
   }
 
