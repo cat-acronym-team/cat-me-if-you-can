@@ -154,13 +154,17 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   if (lobby.state == "PROMPT" && oldLobby.state != "PROMPT") {
     await startPrompt(lobbyDocRef);
   }
-  // TODO: remove this later because apply stats will be in the verify expiration function
-  if (lobby.state == "END" && oldLobby.state != "END") {
-    // TODO: once removed then replace this with the expiration time and set it
-  }
+
   if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {
     const expiration = firestore.Timestamp.fromMillis(
       firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.CHAT * 1000
+    );
+    lobbyDocRef.set({ expiration }, { merge: true });
+  }
+
+  if (lobby.state == "END" && oldLobby.state != "END") {
+    const expiration = firestore.Timestamp.fromMillis(
+      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.END * 1000
     );
     lobbyDocRef.set({ expiration }, { merge: true });
   }
