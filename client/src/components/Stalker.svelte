@@ -2,22 +2,29 @@
   import type { ChatRoom as ChatRoomType, Lobby } from "$lib/firebase/firestore-types/lobby";
   import { stalkChatroom } from "$lib/firebase/firebase-functions";
   import { getChatRoomCollection } from "$lib/firebase/firestore-collections";
-  import { getDocs } from "firebase/firestore";
+  import { getDocs, onSnapshot, query, where } from "firebase/firestore";
   import { onMount } from "svelte";
   import ChatRoom from "./ChatRoom.svelte";
+  import { authStore as user } from "$stores/auth";
 
   export let lobby: Lobby;
   export let lobbyCode: string;
 
   let chatrooms: ChatRoomType[] = [];
   let chatroomsIds: string[] = [];
-  let chatroomClick: boolean = false;
+  let selectedChat: string | undefined = undefined;
 
   onMount(async () => {
     const chatCollection = getChatRoomCollection(lobbyCode);
     const chatSnapshot = await getDocs(chatCollection);
     chatroomsIds = chatSnapshot.docs.map((room) => room.id);
     chatrooms = chatSnapshot.docs.map((room) => room.data());
+
+    onSnapshot(query(chatCollection, where("viewers", "array-contains", $user!.uid)), (snapshot) => {
+      if (snapshot.docs.length != 0) {
+        selectedChat = snapshot.docs[0].id;
+      }
+    });
   });
 
   /**
@@ -36,14 +43,13 @@
   // onsnapshot subscribe to list of all chatrooms where you a viewer, if not empty switch to show chatroom
 </script>
 
-{#if chatroomClick == false}
+{#if selectedChat == undefined}
   <div class="container">
     <h1>Stalk a chat:</h1>
     {#each chatrooms as chatroom, i}
       <button
         on:click={async () => {
           await onClickChat(chatroomsIds[i]);
-          chatroomClick = true;
         }}
         class="chatRoom"
       >
