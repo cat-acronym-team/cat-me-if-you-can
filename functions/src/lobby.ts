@@ -189,7 +189,6 @@ export const collectPromptAnswers = functions.firestore
       transaction.update(lobbyDocRef, { state: "CHAT" });
 
       const { pairs, stalker } = generatePairs(lobbyData);
-      functions.logger.info(stalker);
 
       if (stalker != undefined) {
         privatePlayerCollection.doc(stalker).update({ stalker: true });
