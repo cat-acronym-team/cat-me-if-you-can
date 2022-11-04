@@ -77,6 +77,7 @@
         bind:value={message}
         invalid={messageInvalid}
         input$autofocus
+        input$enterkeyhint="send"
       >
         <IconButton type="submit" disabled={message == "" || messageInvalid} slot="trailingIcon" class="material-icons">
           send
