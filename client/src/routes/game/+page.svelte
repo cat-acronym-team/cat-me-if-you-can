@@ -12,6 +12,7 @@
   import { authStore as user } from "$stores/auth";
   import { goto } from "$app/navigation";
   import type { Unsubscribe } from "firebase/auth";
+  import WinLoss from "$components/WinLoss.svelte";
 
   let lobbyCode: string | null = null;
 
@@ -90,6 +91,7 @@
       <CircularProgress indeterminate />
     </div>
   {:else if lobby.state === "WAIT"}
+    {console.log($user, lobby, lobbyCode)}
     <LobbyComponent {lobbyCode} {lobby} />
   {:else if privatePlayer == undefined}
     <div class="spinner-wraper">
@@ -99,6 +101,8 @@
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
   {:else if lobby.state === "CHAT"}
     <ChatRoom lobbyData={{ ...lobby, id: lobbyCode }} />
+  {:else if lobby.state === "END"}
+    <WinLoss {lobby} {lobbyCode} />
   {:else}
     unknown lobby state: {lobby.state}
   {/if}
