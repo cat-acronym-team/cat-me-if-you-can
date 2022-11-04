@@ -2,7 +2,6 @@
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
   import IconButton from "@smui/icon-button";
-  import { Icon } from "@smui/common";
   import {
     chatMessageValidator,
     type ChatMessage,
