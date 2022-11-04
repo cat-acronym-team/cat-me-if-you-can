@@ -67,6 +67,14 @@
         <output>{catLosses}</output>
       </div>
       <div>
+        <h3>Games Played As Cat</h3>
+        <output>{userInfo.playedAsCat}</output>
+      </div>
+      <div>
+        <h3>Win/Loss Ratio as Cat</h3>
+        <output>{isNaN(catRatio) || !isFinite(catRatio) ? "N/A" : catRatio.toFixed(2)}</output>
+      </div>
+      <div>
         <h3>Catfish Wins</h3>
         <output>{userInfo.catfishWins}</output>
       </div>
@@ -75,8 +83,8 @@
         <output>{catfishLosses}</output>
       </div>
       <div>
-        <h3>Win/Loss Ratio as Cat</h3>
-        <output>{isNaN(catRatio) || !isFinite(catRatio) ? "N/A" : catRatio.toFixed(2)}</output>
+        <h3>Games Played As Catfish</h3>
+        <output>{userInfo.playedAsCatfish}</output>
       </div>
       <div>
         <h3>Win/Loss Ratio as Catfish</h3>
@@ -113,7 +121,7 @@
   }
   h3,
   output {
-    font-size: 1em;
+    font-size: 1.3em;
   }
   .userInfo-container {
     display: grid;
@@ -138,7 +146,7 @@
       font-size: 2em;
     }
     .userInfo-container {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
     }
   }
 </style>
