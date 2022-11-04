@@ -21,7 +21,7 @@ export const stalkChatroom = functions.https.onCall((data: unknown, context) => 
     if (!chatRoomsSnapshot.empty) {
       throw new functions.https.HttpsError("already-exists", "User already stalking a chat");
     }
-    const chatRoom = await transaction.get(chatRooms.doc(data.chatId));
+    const chatRoom = await transaction.get(chatRoomsRef);
     const chatRoomData = chatRoom.data();
     if (chatRoomData === undefined) {
       throw new functions.https.HttpsError("not-found", "Chatroom not found");
