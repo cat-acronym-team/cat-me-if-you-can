@@ -69,7 +69,7 @@ service cloud.firestore {
               && request.resource.data.text.trim() == request.resource.data.text
               && request.resource.data.timestamp is timestamp && request.resource.data.timestamp == request.time;
           }
-          allow read: if inLobby();
+          allow read: if inLobby() && lobbyData() ;
           allow create: if validateLobbyChatMessage();
       }
     }

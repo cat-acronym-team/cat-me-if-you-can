@@ -103,6 +103,7 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
       alivePlayers.push(lobby.uids[i]);
     }
   }
+  lobbyDocRef.update({ alivePlayers: alivePlayers });
   if (lobby.state == "PROMPT" && oldLobby.state != "PROMPT") {
     await startPrompt(lobbyDocRef);
   }
