@@ -310,7 +310,7 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
     }
     // Applies the stats once the timer on the end screen ends
     if (lobby.state === "END") {
-      await applyStats(lobby, lobbyDocRef, transaction);
+      applyStats(lobby, lobbyDocRef, transaction);
     }
 
     return;
