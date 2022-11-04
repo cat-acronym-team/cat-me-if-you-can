@@ -1,6 +1,5 @@
 <script lang="ts">
-  import type { PrivatePlayer, Lobby } from "../../../functions/src/firestore-types/lobby";
-  import { onMount } from "svelte";
+  import type { PrivatePlayer, Lobby, Role } from "../../../functions/src/firestore-types/lobby";
   import { lobbyReturn } from "$lib/firebase/firebase-functions";
   import { authStore as user } from "$stores/auth";
 
@@ -12,8 +11,9 @@
   let catfishList: string = "";
   let catfishes: string[];
   let isHost: boolean;
+  let myRole: Role;
 
-  onMount(() => {
+  $: {
     // check if the user is the host
     if ($user !== null) {
       if (lobby.uids.indexOf($user.uid) == 0) {
@@ -33,8 +33,9 @@
     catfishList = formatter.format(catfishes);
 
     // grab the current user's role
-    const myRole = privatePlayer.role;
+    myRole = privatePlayer.role;
     // update end variable depending on the winner type and the current player's role
+
     if (lobby.winner !== undefined) {
       if (myRole == "CAT") {
         if (lobby.winner == "CAT") {
@@ -50,7 +51,7 @@
         }
       }
     }
-  });
+  }
 </script>
 
 <!-- Scenario 1 -->
