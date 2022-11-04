@@ -55,6 +55,8 @@
   let textfield: Textfield;
 </script>
 
+<svelte:window on:resize={scrollToBottom} />
+
 <div class="root {readOnly ? 'read-only' : ''}">
   <div class="messages" bind:this={messagesElement}>
     {#each displayMessages as message}
