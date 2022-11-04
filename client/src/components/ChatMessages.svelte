@@ -104,6 +104,7 @@
     height: 100%;
     display: grid;
     grid-template-rows: 1fr auto;
+    width: 100%;
     max-width: 1080px;
     margin: 0 auto;
   }
@@ -118,6 +119,7 @@
     grid-template-columns: 1fr;
     gap: 12px;
     overflow-y: auto;
+    align-content: start;
   }
 
   .message {
