@@ -51,6 +51,8 @@
     dispatch("send", { text: message.trim() });
     message = "";
   }
+
+  let textfield: Textfield;
 </script>
 
 <div class="root {readOnly ? 'read-only' : ''}">
@@ -71,6 +73,7 @@
   {#if !readOnly}
     <form on:submit|preventDefault={sendMessage}>
       <Textfield
+        bind:this={textfield}
         type="text"
         variant="outlined"
         label="Chat message"
@@ -79,7 +82,13 @@
         input$autofocus
         input$enterkeyhint="send"
       >
-        <IconButton type="submit" disabled={message == "" || messageInvalid} slot="trailingIcon" class="material-icons">
+        <IconButton
+          type="submit"
+          disabled={message == "" || messageInvalid}
+          slot="trailingIcon"
+          class="material-icons"
+          on:click={() => textfield.focus()}
+        >
           send
         </IconButton>
         <HelperText validationMsg slot="helper">{messageValidation.valid ? "" : messageValidation.reason}</HelperText>
