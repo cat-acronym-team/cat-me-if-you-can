@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ChatRoom as ChatRoomType, Lobby } from "$lib/firebase/firestore-types/lobby";
-  import { stalkChatroom } from "$lib/firebase/firestore-functions";
+  import { stalkChatroom } from "$lib/firebase/firebase-functions";
   import { getChatRoomCollection } from "$lib/firebase/firestore-collections";
   import { getDocs } from "firebase/firestore";
   import { onMount } from "svelte";

@@ -1,4 +1,4 @@
-import { isLobbyRequest, isStalkChatroomRequest } from "../src/firestore-functions-types";
+import { isLobbyRequest, isStalkChatroomRequest } from "../src/firebase-functions-types";
 
 import { expect } from "chai";
 

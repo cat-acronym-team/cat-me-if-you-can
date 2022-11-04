@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions";
 import { db } from "./app";
-import { isStalkChatroomRequest } from "./firestore-functions-types";
+import { isStalkChatroomRequest } from "./firebase-functions-types";
 import { getChatRoomCollection, lobbyCollection } from "./firestore-collections";
 
 export const stalkChatroom = functions.https.onCall((data: unknown, context) => {
