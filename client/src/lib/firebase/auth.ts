@@ -9,6 +9,7 @@ import {
   signOut,
   signInWithEmailAndPassword,
   linkWithPopup,
+  updatePassword,
 } from "firebase/auth";
 
 const google = new GoogleAuthProvider();
@@ -83,6 +84,20 @@ export function linkWithMicrosoft() {
     return user;
   }
 }
+
+export function linkWithPassword(password: string) {
+  const user = auth.currentUser;
+
+  if (user != null) {
+    const newPassword = password;
+
+    updatePassword(user, newPassword);
+  } else {
+    return user;
+  }
+}
+
 export function logOut() {
   return signOut(auth);
 }
+
