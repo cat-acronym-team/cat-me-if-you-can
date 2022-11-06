@@ -105,7 +105,7 @@
   {#if errorMessage !== ""}
     <p class="error">{errorMessage}</p>
   {/if}
-  <form on:submit|preventDefault|once={joinLobby} on:submit|preventDefault>
+  <form on:submit|once={joinLobby} on:submit|preventDefault>
     <div>
       <Textfield
         type="text"
