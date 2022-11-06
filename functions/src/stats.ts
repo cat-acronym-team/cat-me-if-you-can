@@ -6,7 +6,7 @@ import * as functions from "firebase-functions";
 
 export async function applyStats(lobbyData: Lobby, lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
   const { players, uids, winner } = lobbyData;
-  
+
   // update each players doc
   await Promise.all(
     uids.map(async (uid, index) => {
