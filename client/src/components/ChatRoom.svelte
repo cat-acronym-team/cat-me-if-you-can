@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ChatMessages from "$components/ChatMessages.svelte";
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
   import { onSnapshot, orderBy, query, QueryDocumentSnapshot } from "firebase/firestore";
@@ -13,6 +14,7 @@
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
   import type { Unsubscribe, User } from "firebase/auth";
   import { verifyExpiration } from "$lib/firebase/firebase-functions";
+  import { formatTimer } from "$lib/time";
   // props
   export let lobbyData: Lobby & { id: string };
   // variables
@@ -23,7 +25,6 @@
   let chatMessages: ChatMessage[] = [];
   let timer: ReturnType<typeof setInterval>;
   let countdown = GAME_STATE_DURATIONS.CHAT;
-  let message: string = "";
   let errorMessage: string = "";
   let unsubscribeChatMessages: Unsubscribe | undefined = undefined;
 
@@ -53,22 +54,18 @@
         const diff = Math.floor((lobbyData.expiration.toMillis() - Date.now()) / 1000);
         countdown = diff;
       }
-    }, 500);
+    }, 100);
   });
   onDestroy(() => {
     clearInterval(timer);
     unsubscribeChatMessages?.();
   });
   // Function will create document with new message
-  async function submitMessage() {
-    if (message === "") {
-      return;
-    }
+  async function submitMessage(message: string) {
     try {
       // add Message
       await addChatMessage(lobbyData.id, chatRoomInfo.id, user.uid, message);
-      // clear the input
-      message = "";
+
       // if there's an error message then clear it
       errorMessage = "";
     } catch (err) {
@@ -76,12 +73,9 @@
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
-  // Checks if the sender is the current user
-  function isUser(uid: string) {
-    return user.uid === uid;
-  }
+
   // Reactive Calls
-  $: if (countdown === 0 && lobbyData.uids[0] === user.uid) {
+  $: if (countdown <= 0 && lobbyData.uids[0] === user.uid) {
     clearInterval(timer);
     verifyExpiration({ code: lobbyData.id });
   }
@@ -92,69 +86,35 @@
 </script>
 
 <div class="chatroom">
-  <p class="countdown">{countdown}</p>
-  {#if partnerInfo !== undefined}
-    <div>MATCHED WITH {partnerInfo.displayName.toUpperCase()}</div>
-  {/if}
-  <div class="messages">
-    {#each chatMessages as message}
-      {#if isUser(message.sender)}
-        <p class="user-msg">{message.text}</p>
-      {:else}
-        <p class="partner-msg">{message.text}</p>
+  <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
+    {formatTimer(Math.max(countdown, 0))}
+  </p>
+  <ChatMessages lobby={lobbyData} messages={chatMessages} on:send={(event) => submitMessage(event.detail.text)}>
+    <div slot="before-messages" class="matched-with mdc-typography--headline5">
+      {#if partnerInfo !== undefined}
+        You matched with {partnerInfo.displayName}
       {/if}
-    {/each}
-  </div>
-  <form on:submit|preventDefault={submitMessage}>
-    <input type="text" bind:value={message} />
-    <button type="submit" disabled={message === ""}>Send</button>
-    {#if errorMessage !== ""}
-      <p class="error">{errorMessage}</p>
-    {/if}
-  </form>
+    </div>
+  </ChatMessages>
+  {#if errorMessage !== ""}
+    <p class="error">{errorMessage}</p>
+  {/if}
 </div>
 
 <style>
   .chatroom {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    width: 90%;
     height: 100%;
-    margin: auto;
-    text-align: center;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 12px;
+    justify-items: center;
   }
+
   .countdown {
-    font-size: 3em;
-    font-weight: bold;
+    margin: 0;
   }
-  .messages {
-    width: 100%;
-    height: 60%;
-    overflow-y: scroll;
-  }
-  .user-msg {
-    text-align: right;
-    background-color: skyblue;
-    width: fit-content;
-    margin-left: auto;
-    padding: 5px;
-    border-radius: 15px;
-  }
-  .partner-msg {
-    text-align: left;
-    background-color: red;
-    width: fit-content;
-    padding: 5px;
-    border-radius: 15px;
-  }
-  .chatroom form,
-  input {
-    width: 75%;
-    margin: auto;
-    height: 45px;
-  }
-  button {
-    height: 50px;
+
+  .matched-with {
+    justify-self: center;
   }
 </style>
