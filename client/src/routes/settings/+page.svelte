@@ -1,5 +1,13 @@
 <script lang="ts">
-  import { deleteAccount, linkWithGoogle, linkWithMicrosoft, linkWithPassword, logOut } from "$lib/firebase/auth";
+  import {
+    deleteAccount,
+    getDisplayName,
+    getEmail,
+    linkWithGoogle,
+    linkWithMicrosoft,
+    linkWithPassword,
+    logOut,
+  } from "$lib/firebase/auth";
   import { goto } from "$app/navigation";
   import Dialog, { Title, Content, Actions } from "@smui/dialog";
   import Button, { Label } from "@smui/button";
@@ -15,14 +23,16 @@
   let password = "";
   let confirmPassword = "";
   let linkPass = false;
+  let googleErr = "";
+  let microsoftErr = "";
 
   function outputErrMsg() {
     switch (errorMsg) {
       case "a-google-account-already-exists-for-this-user":
-        errorMsg = "A Google Account is Already Linked to this Account";
+        googleErr = "A Google Account is Already Linked to this Account";
         return;
       case "a-microsoft-account-already-exists-for-this-user":
-        errorMsg = "A Microsft Account is Already Linked to this Account";
+        microsoftErr = "A Microsft Account is Already Linked to this Account";
         return;
       default:
         errorMsg = "An unexpected error has occured";
@@ -76,9 +86,17 @@
     }
   }
 
+  function clearFields() {
+    password = "";
+    confirmPassword = "";
+  }
+
   function passValidator() {
     if (password == confirmPassword) {
       linkPassword();
+      clearFields();
+    } else {
+      return;
     }
   }
 
@@ -105,6 +123,8 @@
 <html lang="en">
   <main class="settings-wrapper">
     <h2>Account Settings</h2>
+    <h3>Email: {getEmail()}</h3>
+    <h3>Display Name: {getDisplayName()}</h3>
     <div>
       <Button on:click={() => (showOptions = true)}>
         <Label>Link Account Options</Label>
@@ -122,6 +142,9 @@
             </Icon>
             <Label>Sign in with Google</Label>
           </Button>
+          {#if googleErr !== ""}
+            <p class="error">{googleErr}</p>
+          {/if}
           <Button id="sign-in-with-microsoft" variant="raised" on:click={linkMicrosoftAccount}>
             <Icon component={Svg} viewBox="0 0 21 21">
               <rect x="1" y="1" width="9" height="9" fill="#f25022" />
@@ -131,12 +154,18 @@
             </Icon>
             <Label>Sign in with Microsoft</Label>
           </Button>
-          {#if errorMsg !== ""}
-            <p class="error">{errorMsg}</p>
+          {#if microsoftErr !== ""}
+            <p class="error">{microsoftErr}</p>
           {/if}
         </div>
         <h3>Set Password</h3>
-        <Textfield label="Password" type={showPassword ? "text" : "password"} bind:value={password} required>
+        <Textfield
+          name="password"
+          label="Password"
+          type={showPassword ? "text" : "password"}
+          bind:value={password}
+          required
+        >
           <IconButton
             type="button"
             on:click={(event) => event.preventDefault()}
@@ -150,20 +179,21 @@
         </Textfield>
         <div>
           <Textfield
+            name="confirmpass"
             label="Confirm Password"
             type={showPassword ? "text" : "password"}
             bind:value={confirmPassword}
             required
           />
         </div>
+        {#if linkPass}
+          <p>Password Sucessfully Set</p>
+        {:else if password != confirmPassword}
+          <p class="error">Passwords do not Match</p>
+        {/if}
         <Button on:click={passValidator}>
           <Label>Set Password</Label>
         </Button>
-        {#if linkPass}
-          <p>Password Sucessfully Set</p>
-        {:else}
-          <p class="error">{errorMsg}</p>
-        {/if}
       </Content>
     </Dialog>
     <div>
@@ -225,7 +255,8 @@
   .settings-wrapper {
     display: grid;
     grid-template-rows: repeat(5, 50px [row-start]);
-    margin-top: 100px;
+    margin-top: 50px;
+    margin-left: 20px;
   }
 
   .signin-buttons {

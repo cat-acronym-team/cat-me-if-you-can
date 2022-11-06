@@ -101,3 +101,22 @@ export function logOut() {
   return signOut(auth);
 }
 
+export function getEmail() {
+  const user = auth.currentUser;
+
+  if (user != null) {
+    return user.email;
+  } else {
+    return user;
+  }
+}
+
+export function getDisplayName() {
+  const user = auth.currentUser;
+
+  if (user != null) {
+    return user.displayName;
+  } else {
+    return user;
+  }
+}
