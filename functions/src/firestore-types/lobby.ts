@@ -79,9 +79,9 @@ export type Lobby = {
    */
   votedOff?: string;
   /**
-   * the player that was voted off for the round
+   * the role that won the game
    */
-  winner?: string;
+  winner?: Role;
 };
 
 /**
