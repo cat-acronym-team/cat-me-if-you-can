@@ -159,7 +159,7 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   }
 
   if (lobby.state == "END" && oldLobby.state != "END") {
-    findWinner(lobbyDocRef);
+    await findWinner(lobbyDocRef);
   }
 });
 

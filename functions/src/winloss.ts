@@ -30,11 +30,11 @@ export const lobbyReturn = functions.https.onCall(async (data: unknown, context)
 
   // check game state
   if (state !== "END") {
-    throw new functions.https.HttpsError("invalid-argument", "Wrong game state!");
+    throw new functions.https.HttpsError("failed-precondition", "Wrong game state!");
   }
 
-  await resetLobby(lobby.ref);
-  await deletePrivatePlayers(lobby.ref, getPrivatePlayerCollection(lobby.ref));
+  await resetLobby(lobby);
+  await deletePrivatePlayers(lobby, getPrivatePlayerCollection(lobby.ref));
 });
 
 export function findWinner(lobbyDocRef: firestore.DocumentReference<Lobby>) {
@@ -80,14 +80,11 @@ export function findWinner(lobbyDocRef: firestore.DocumentReference<Lobby>) {
 }
 
 // when returning to the lobby, make every player alive again and delete the role, winner, and the private player collection
-export function resetLobby(lobbyDocRef: firestore.DocumentReference<Lobby>) {
+export function resetLobby(lobbyDoc: firestore.DocumentSnapshot<Lobby>) {
   return db.runTransaction(async (transaction) => {
+    const lobbyDocRef = lobbyDoc.ref;
     const lobby = await transaction.get(lobbyDocRef);
     const lobbyData = lobby.data();
-
-    if (lobby === undefined) {
-      throw new Error("Lobby does not exist!");
-    }
 
     if (lobbyData === undefined) {
       throw new Error("Lobby does not exist!");
@@ -104,22 +101,20 @@ export function resetLobby(lobbyDocRef: firestore.DocumentReference<Lobby>) {
 }
 
 export async function deletePrivatePlayers(
-  lobbyDocRef: firestore.DocumentReference<Lobby>,
+  lobbyDoc: firestore.DocumentSnapshot<Lobby>,
   privatePlayerCollectionRef: firestore.CollectionReference<PrivatePlayer>
 ) {
-  const lobby = await lobbyDocRef.get();
-  if (lobby.exists === false) {
+  if (lobbyDoc.exists === false) {
     throw new Error("Lobby does not exist!");
   }
   // create a WriteBatch
   const batch = db.batch();
   // loop through each doc in the private player collection via uid and delete them one-by-one
-  const { uids } = lobby.data() as Lobby;
-  for (let i = 0; i <= uids.length; i++) {
+  const { uids } = lobbyDoc.data() as Lobby;
+  for (let i = 0; i < uids.length; i++) {
     const playerDoc = privatePlayerCollectionRef.doc(uids[i]);
     // delete each private player document with the WriteBatch
     batch.delete(playerDoc);
-    batch.commit();
   }
-  return;
+  await batch.commit();
 }
