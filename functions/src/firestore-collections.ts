@@ -1,4 +1,4 @@
-import { ChatMessage, ChatRoom, Lobby, PrivatePlayer, PromptAnswer } from "./firestore-types/lobby";
+import { ChatMessage, ChatRoom, Lobby, PrivatePlayer, PromptAnswer, LobbyChatMessage } from "./firestore-types/lobby";
 import { db } from "./app";
 
 import { UserData } from "./firestore-types/users";
@@ -9,7 +9,7 @@ export const userCollection = db.collection("users") as CollectionReference<User
 export const lobbyCollection = db.collection("lobbies") as CollectionReference<Lobby>;
 
 export function getLobbyChatCollection(lobbyDoc: DocumentReference<Lobby>) {
-  return lobbyDoc.collection("chatMessages") as CollectionReference<ChatMessage>;
+  return lobbyDoc.collection("chatMessages") as CollectionReference<LobbyChatMessage>;
 }
 
 export function getChatRoomCollection(lobbyDoc: DocumentReference<Lobby>) {

@@ -2,8 +2,8 @@
   import Modal from "./Modal.svelte";
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
-  import { onSnapshot, orderBy, query } from "firebase/firestore";
-  import type { ChatMessage, Lobby, Player } from "$lib/firebase/firestore-types/lobby";
+  import { onSnapshot, orderBy, query, where } from "firebase/firestore";
+  import type { LobbyChatMessage, Lobby, Player } from "$lib/firebase/firestore-types/lobby";
   import type { Unsubscribe, User } from "firebase/auth";
   import { getLobbyChatCollection } from "$lib/firebase/firestore-collections";
   import { addLobbyChatMessage } from "$lib/firebase/lobby-chat";
@@ -15,16 +15,24 @@
   let openSignInModal = false;
   let message: string = "";
   let errorMessage: string = "";
-  let chatMessages: ChatMessage[] = [];
+  let chatMessages: LobbyChatMessage[] = [];
   let unsubscribeChatMessages: Unsubscribe | undefined = undefined;
 
   onMount(async () => {
-    unsubscribeChatMessages = onSnapshot(
-      query(getLobbyChatCollection(lobbyData.id), orderBy("timestamp", "asc")),
-      (collection) => {
-        chatMessages = collection.docs.map((message) => message.data());
-      }
-    );
+    let messageQuery;
+    if (userInfo.alive) {
+      messageQuery = query(
+        getLobbyChatCollection(lobbyData.id),
+        where("alive", "==", true),
+        orderBy("timestamp", "asc")
+      );
+    } else {
+      messageQuery = query(getLobbyChatCollection(lobbyData.id), orderBy("timestamp", "asc"));
+    }
+    unsubscribeChatMessages = onSnapshot(messageQuery, (collection) => {
+      chatMessages = collection.docs.map((message) => message.data());
+      console.log(collection.docs);
+    });
   });
 
   userInfo = lobbyData.players[lobbyData.uids.indexOf(user.uid)];
@@ -38,7 +46,7 @@
     }
     try {
       // add Message
-      await addLobbyChatMessage(lobbyData.id, user.uid, message);
+      await addLobbyChatMessage(lobbyData.id, user.uid, message, userInfo.alive);
       // clear the input
       message = "";
       // if there's an error message then clear it

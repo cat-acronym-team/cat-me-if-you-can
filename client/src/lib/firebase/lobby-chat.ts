@@ -2,7 +2,7 @@ import { query, where, getDocs, addDoc, serverTimestamp, getDoc, doc } from "fir
 import { getLobbyChatCollection } from "./firestore-collections";
 import { chatMessageValidator } from "./firestore-types/lobby";
 
-export async function addLobbyChatMessage(lobbyId: string, sender: string, text: string) {
+export async function addLobbyChatMessage(lobbyId: string, sender: string, text: string, alive: boolean) {
   //Validate Chat Message
   const isValid = chatMessageValidator(text);
   if (!isValid.valid) {
@@ -13,5 +13,6 @@ export async function addLobbyChatMessage(lobbyId: string, sender: string, text:
     text,
     sender,
     timestamp: serverTimestamp(),
+    alive,
   });
 }
