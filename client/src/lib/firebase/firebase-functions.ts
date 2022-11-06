@@ -13,6 +13,5 @@ export const startGame = httpsCallable<LobbyRequest, void>(functions, "startGame
 export const joinLobby = httpsCallable<LobbyRequest, void>(functions, "joinLobby");
 export const leaveLobby = httpsCallable<LobbyRequest, void>(functions, "leaveLobby");
 export const stalkChatroom = httpsCallable<StalkChatroomRequest, void>(functions, "stalkChatroom");
-export const addChatMessage = httpsCallable<ChatRequest, void>(functions, "addChatMessage");
 export const changeAvatar = httpsCallable<ChangeAvatarData, void>(functions, "changeAvatar");
 export const verifyExpiration = httpsCallable<LobbyRequest, void>(functions, "verifyExpiration");
