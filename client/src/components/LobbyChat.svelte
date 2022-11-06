@@ -6,7 +6,7 @@
   import type { LobbyChatMessage, Lobby, Player } from "$lib/firebase/firestore-types/lobby";
   import type { Unsubscribe, User } from "firebase/auth";
   import { getLobbyChatCollection } from "$lib/firebase/firestore-collections";
-  import { addLobbyChatMessage } from "$lib/firebase/lobby-chat";
+  import { addLobbyChatMessages } from "$lib/firebase/chat";
 
   export let lobbyData: Lobby & { id: string };
 
@@ -46,7 +46,7 @@
     }
     try {
       // add Message
-      await addLobbyChatMessage(lobbyData.id, user.uid, message, userInfo.alive);
+      await addLobbyChatMessages(lobbyData.id, user.uid, message, userInfo.alive);
       // clear the input
       message = "";
       // if there's an error message then clear it

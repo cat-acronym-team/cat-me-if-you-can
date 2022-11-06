@@ -25,7 +25,7 @@ export async function addChatMessage(lobbyId: string, roomId: string, sender: st
     timestamp: serverTimestamp(),
   });
 }
-export async function addLobbyChatMessages(lobbyId: string, sender: string, text: string) {
+export async function addLobbyChatMessages(lobbyId: string, sender: string, text: string, alive: boolean) {
   // Validate Chat Message
   const isValid = chatMessageValidator(text);
   if (!isValid.valid) {
@@ -36,5 +36,6 @@ export async function addLobbyChatMessages(lobbyId: string, sender: string, text
     text,
     sender,
     timestamp: serverTimestamp(),
+    alive,
   });
 }

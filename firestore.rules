@@ -76,7 +76,8 @@ service cloud.firestore {
         function chatSenderAlive(){
           return resource.data.alive;
         }
-
+          //if in lobby and message sender is alive allow read
+          //if in lobby and player is dead allow read
           allow read: if inLobby() && (chatSenderAlive() || ! isAlive());
           allow create: if validateLobbyChatMessage();
       }
