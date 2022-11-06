@@ -29,9 +29,13 @@ export type Player = {
    * the answer for their prompt
    */
   promptAnswer?: string;
+  /**
+   * the role of the current player
+   */
+  role?: Role;
 };
 
-export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
+export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "RESULT" | "END";
 
 /**
  * the duration in seconds for each game state
@@ -40,7 +44,8 @@ export const GAME_STATE_DURATIONS: { [state in GameState]: number } = {
   WAIT: 2 * 60 * 60,
   PROMPT: 60,
   CHAT: 2 * 60,
-  VOTE: 3 * 60,
+  VOTE: 30, //TODO: replace with correct timer when getting merged
+  RESULT: 15,
   END: 10,
 };
 
@@ -69,6 +74,14 @@ export type Lobby = {
    * expiration time of the current phase with a timer
    */
   expiration?: Timestamp;
+  /**
+   * the player that was voted off for the round
+   */
+  votedOff?: string;
+  /**
+   * the player that was voted off for the round
+   */
+  winner?: string;
 };
 
 /**
