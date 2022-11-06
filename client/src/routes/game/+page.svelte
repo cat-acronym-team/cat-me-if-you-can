@@ -104,10 +104,8 @@
     </div>
   {:else if lobby.state === "PROMPT"}
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
-  {:else if lobby.state === "CHAT" && privatePlayer.stalker === true}
-    <Stalker {lobby} {lobbyCode} />
   {:else if lobby.state === "CHAT"}
-    <ChatRoom lobbyData={{ ...lobby, id: lobbyCode }} isStalker={false} />
+    <ChatRoom {lobby} {lobbyCode} isStalker={privatePlayer.stalker} />
   {:else}
     unknown lobby state: {lobby.state}
   {/if}
