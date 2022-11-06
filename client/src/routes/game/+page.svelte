@@ -97,7 +97,6 @@
       <CircularProgress indeterminate />
     </div>
   {:else if lobby.state === "WAIT"}
-    {console.log($user, lobby, lobbyCode)}
     <LobbyComponent {lobbyCode} {lobby} />
   {:else if privatePlayer == undefined}
     <div class="spinner-wraper">

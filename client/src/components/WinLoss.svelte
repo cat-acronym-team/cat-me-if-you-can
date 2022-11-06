@@ -22,13 +22,13 @@
   });
 
   // apply stats
-  $: if (countdown == 0 && $user?.uid == lobby.uids[0]) {
+  $: if (countdown <= 0 && $user?.uid == lobby.uids[0]) {
     clearInterval(timer);
     verifyExpiration({ code: lobbyCode });
   }
   $: if (countdown <= -5) {
-    verifyExpiration({ code: lobbyCode });
     clearInterval(timer);
+    verifyExpiration({ code: lobbyCode });
   }
 </script>
 
