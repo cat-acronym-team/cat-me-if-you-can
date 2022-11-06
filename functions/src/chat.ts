@@ -1,5 +1,9 @@
 import type { DocumentReference, Transaction } from "firebase-admin/firestore";
-import { getChatRoomCollection, getChatRoomMessagesCollection } from "./firestore-collections";
+import {
+  getChatRoomCollection,
+  getChatRoomMessagesCollection,
+  getPrivatePlayerCollection,
+} from "./firestore-collections";
 import { Lobby } from "./firestore-types/lobby";
 
 export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
@@ -31,10 +35,14 @@ export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentRefere
         players[playerIndex].promptAnswer = value;
       }
 
+      // delete stalker
+      const stalkers = await transaction.get(getPrivatePlayerCollection(lobbyDoc).where("stalker", "==", true));
+      for (const stalker of stalkers.docs) {
+        transaction.update(stalker.ref, { stalker: false });
+      }
       // then delete room
       transaction.delete(room);
     })
   );
-
   transaction.update(lobbyDoc, { state: "VOTE", players });
 }

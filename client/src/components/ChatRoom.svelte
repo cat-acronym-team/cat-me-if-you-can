@@ -10,16 +10,21 @@
     type Lobby,
     type Player,
   } from "$lib/firebase/firestore-types/lobby";
-  import { findChatRoom, addChatMessage } from "$lib/firebase/chat";
+  import { findChatRoom, addChatMessage, findViewerChatRoom } from "$lib/firebase/chat";
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
   import type { Unsubscribe, User } from "firebase/auth";
   import { verifyExpiration } from "$lib/firebase/firebase-functions";
   import { formatTimer } from "$lib/time";
   // props
   export let lobbyData: Lobby & { id: string };
+  export let isStalker: boolean;
   // variables
   let user = $authStore as User;
+  let firstPair: string = "";
+  let secondPair: string = "";
   let userInfo: Player;
+  let firstPairInfo: Player;
+  let secondPairInfo: Player;
   let partnerInfo: Player | undefined;
   let chatRoomInfo: QueryDocumentSnapshot<ChatRoom>;
   let chatMessages: ChatMessage[] = [];
@@ -30,7 +35,11 @@
 
   onMount(async () => {
     // Query for their chatroom
-    chatRoomInfo = await findChatRoom(lobbyData.id, user.uid);
+    if (isStalker) {
+      chatRoomInfo = await findViewerChatRoom(lobbyData.id, user.uid);
+    } else {
+      chatRoomInfo = await findChatRoom(lobbyData.id, user.uid);
+    }
     // subscribe the chat messages
     unsubscribeChatMessages = onSnapshot(
       query(getChatRoomMessagesCollection(lobbyData.id, chatRoomInfo.id), orderBy("timestamp", "asc")),
@@ -45,6 +54,13 @@
     const partner = chatRoomInfo.data().pair.find((uid) => {
       return user.uid !== uid;
     });
+
+    // first/second pair uid in string and player type
+    firstPair = chatRoomInfo.data().pair[0];
+    secondPair = chatRoomInfo.data().pair[1];
+    firstPairInfo = lobbyData.players[lobbyData.uids.indexOf(firstPair)];
+    secondPairInfo = lobbyData.players[lobbyData.uids.indexOf(secondPair)];
+
     if (partner !== undefined) {
       partnerInfo = lobbyData.players[lobbyData.uids.indexOf(partner)];
     }
@@ -73,7 +89,6 @@
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
-
   // Reactive Calls
   $: if (countdown <= 0 && lobbyData.uids[0] === user.uid) {
     clearInterval(timer);
@@ -89,13 +104,23 @@
   <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
     {formatTimer(Math.max(countdown, 0))}
   </p>
-  <ChatMessages lobby={lobbyData} messages={chatMessages} on:send={(event) => submitMessage(event.detail.text)}>
-    <div slot="before-messages" class="matched-with mdc-typography--headline5">
-      {#if partnerInfo !== undefined}
-        You matched with {partnerInfo.displayName}
-      {/if}
-    </div>
-  </ChatMessages>
+  {#if isStalker}
+    <ChatMessages lobby={lobbyData} messages={chatMessages} readOnly>
+      <div slot="before-messages" class="matched-with mdc-typography--headline5">
+        {#if partnerInfo !== undefined}
+          {firstPairInfo.displayName} matched with {secondPairInfo.displayName}
+        {/if}
+      </div>
+    </ChatMessages>
+  {:else}
+    <ChatMessages lobby={lobbyData} messages={chatMessages} on:send={(event) => submitMessage(event.detail.text)}>
+      <div slot="before-messages" class="matched-with mdc-typography--headline5">
+        {#if partnerInfo !== undefined}
+          You matched with {partnerInfo.displayName}
+        {/if}
+      </div>
+    </ChatMessages>
+  {/if}
   {#if errorMessage !== ""}
     <p class="error">{errorMessage}</p>
   {/if}

@@ -86,7 +86,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
 
   const privatePlayerCollection = getPrivatePlayerCollection(lobby.ref);
   for (const uid of uids) {
-    privatePlayerCollection.doc(uid).create({ role: "CAT" });
+    privatePlayerCollection.doc(uid).create({ role: "CAT", stalker: false });
   }
 
   await lobbyCollection.doc(data.code).update({ state: "PROMPT" });
@@ -280,8 +280,11 @@ export const collectPromptAnswers = functions.firestore
 
       transaction.update(lobbyDocRef, { state: "CHAT" });
 
-      // TODO: check if we have a stalker
-      const { pairs } = generatePairs(lobbyData);
+      const { pairs, stalker } = generatePairs(lobbyData);
+
+      if (stalker != undefined) {
+        privatePlayerCollection.doc(stalker).update({ stalker: true });
+      }
       // create a chatroom for each pair
       pairs.forEach(async ({ one, two }) => {
         const room = await getChatRoomCollection(lobbyDocRef).add({ pair: [one, two], viewers: [] });
