@@ -171,10 +171,10 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
 
     // If the last player is leaving delete the document instead
     if (uids.length === 1) {
-      await transaction.delete(lobby);
+      transaction.delete(lobby);
     } else {
       // Remove player from the lobby
-      await transaction.update(lobby, {
+      transaction.update(lobby, {
         players: firestore.FieldValue.arrayRemove(players[playerPos]),
         uids: firestore.FieldValue.arrayRemove(auth.uid),
       });

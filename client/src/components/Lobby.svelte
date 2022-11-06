@@ -63,7 +63,8 @@
       <h3>Players: {lobby.players.length}</h3>
     </div>
     <SelectAvatar {lobby} {lobbyCode} />
-    {#if auth.currentUser?.uid === lobby.uids[0]}<div class="actions">
+    {#if auth.currentUser?.uid === lobby.uids[0]}
+      <div class="actions">
         <Button on:click={() => start()}><Label>Start Game</Label></Button>
       </div>
     {/if}
