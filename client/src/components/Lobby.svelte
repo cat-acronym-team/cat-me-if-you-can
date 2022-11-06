@@ -65,12 +65,12 @@
     <SelectAvatar {lobby} {lobbyCode} />
     {#if auth.currentUser?.uid === lobby.uids[0]}
       <div class="actions">
-        <Button on:click={() => start()}><Label>Start Game</Label></Button>
+        <Button on:click|once={() => start()}><Label>Start Game</Label></Button>
       </div>
     {/if}
     <div class="actions">
       <Button
-        on:click={async () => {
+        on:click|once={async () => {
           await leave();
           goto("/");
         }}><Label>Leave Lobby</Label></Button
