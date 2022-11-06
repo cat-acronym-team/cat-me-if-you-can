@@ -1,7 +1,6 @@
 <script lang="ts">
   import {
     deleteAccount,
-    getDisplayName,
     getEmail,
     linkWithGoogle,
     linkWithMicrosoft,
@@ -19,10 +18,13 @@
   let showOptions = false;
   let showPassword = false;
   let errPrompt = false;
+  let googleLinked = false;
+  let microsoftLinked = false;
+  let linkPass = false;
+
   let errorMsg = "";
   let password = "";
   let confirmPassword = "";
-  let linkPass = false;
   let googleErr = "";
   let microsoftErr = "";
 
@@ -56,6 +58,7 @@
   function linkGoogleAccount() {
     try {
       linkWithGoogle();
+      googleLinked = true;
       return;
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : String(err);
@@ -67,6 +70,7 @@
   function linkMicrosoftAccount() {
     try {
       linkWithMicrosoft();
+      microsoftLinked = true;
       return;
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : String(err);
@@ -123,8 +127,7 @@
 <html lang="en">
   <main class="settings-wrapper">
     <h2>Account Settings</h2>
-    <h3>Email: {getEmail()}</h3>
-    <h3>Display Name: {getDisplayName()}</h3>
+    <p id="email">Email: {getEmail()}</p>
     <div>
       <Button on:click={() => (showOptions = true)}>
         <Label>Link Account Options</Label>
@@ -144,6 +147,8 @@
           </Button>
           {#if googleErr !== ""}
             <p class="error">{googleErr}</p>
+          {:else if googleLinked && googleErr === ""}
+            <p class="success">Successfully Linked Google Account</p>
           {/if}
           <Button id="sign-in-with-microsoft" variant="raised" on:click={linkMicrosoftAccount}>
             <Icon component={Svg} viewBox="0 0 21 21">
@@ -156,6 +161,8 @@
           </Button>
           {#if microsoftErr !== ""}
             <p class="error">{microsoftErr}</p>
+          {:else if microsoftLinked && microsoftErr === ""}
+            <p class="success">Successfully Linked Microsoft Account</p>
           {/if}
         </div>
         <h3>Set Password</h3>
@@ -264,6 +271,10 @@
     justify-content: center;
     gap: 4px;
     max-width: 230px;
+  }
+
+  .success {
+    color: rgb(34, 187, 51);
   }
 
   :global(#sign-in-with-google),
