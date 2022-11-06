@@ -5,8 +5,7 @@
   import { page } from "$app/stores";
   import type { Avatar, Lobby } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { startGame } from "$lib/firebase/firestore-functions";
-  import { changeAvatar } from "$lib/firebase/firestore-functions";
+  import { changeAvatar, startGame } from "$lib/firebase/firebase-functions";
 
   // Props
   export let lobbyCode: string;
@@ -54,7 +53,7 @@
     </div>
     <SelectAvatar {lobby} on:change={(event) => onAvatarSelect(event.detail.value)} />
     <div class="start">
-      <Button on:click={() => startGame({ code: lobbyCode })}><Label>Start Game</Label></Button>
+      <Button on:click|once={() => startGame({ code: lobbyCode })}><Label>Start Game</Label></Button>
     </div>
     <div class="buttons">
       <h3 class="invite-link">Invite Link: {url}</h3>
