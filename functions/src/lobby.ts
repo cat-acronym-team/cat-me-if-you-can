@@ -9,12 +9,14 @@ import {
   userCollection,
 } from "./firestore-collections";
 import { isLobbyRequest, LobbyCreationResponse } from "./firebase-functions-types";
-import { AVATARS, GAME_STATE_DURATIONS, Lobby } from "./firestore-types/lobby";
+import { AVATARS, GAME_STATE_DURATIONS, Lobby, Vote } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 import { deleteChatRooms } from "./chat";
+import { findVoteOff } from "./vote";
+import { determineWinner } from "./result";
 
 function generateLobbyCode() {
   const chars = new Array(6);
@@ -193,7 +195,19 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   }
   if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {
     const expiration = firestore.Timestamp.fromMillis(
-      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.CHAT * 1000
+      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.END * 1000 // TODO: replace with correct timer when doing pull request
+    );
+    lobbyDocRef.set({ expiration }, { merge: true });
+  }
+  if (lobby.state == "VOTE" && oldLobby.state != "VOTE") {
+    const expiration = firestore.Timestamp.fromMillis(
+      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.VOTE * 1000
+    );
+    lobbyDocRef.set({ expiration }, { merge: true });
+  }
+  if (lobby.state == "RESULT" && oldLobby.state != "RESULT") {
+    const expiration = firestore.Timestamp.fromMillis(
+      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.RESULT * 1000
     );
     lobbyDocRef.set({ expiration }, { merge: true });
   }
@@ -304,6 +318,7 @@ export const collectPromptAnswers = functions.firestore
       });
     });
   });
+  
 export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{uid}").onWrite((change, context) => {
   const { code } = context.params;
 
@@ -383,6 +398,12 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
     // if the state is chat then delete chatrooms
     if (lobby.state === "CHAT") {
       await deleteChatRooms(lobby, lobbyDocRef, transaction);
+    }
+    if (lobby.state === "VOTE") {
+      findVoteOff(lobby, lobbyDocRef, transaction);
+    }
+    if (lobby.state === "RESULT") {
+      await determineWinner(lobby, lobbyDocRef, transaction);
     }
 
     return;
