@@ -304,6 +304,49 @@ export const collectPromptAnswers = functions.firestore
       });
     });
   });
+export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{uid}").onWrite((change, context) => {
+  const { code } = context.params;
+
+  // check if the after change exists
+  // we want to do this because onwrite is for oncreation, onupdate, and ondelete
+  if (!change.after.exists) {
+    return {};
+  }
+
+  const lobbyDocRef = lobbyCollection.doc(code);
+
+  const oldVoteDoc = change.before.data() as Vote | undefined;
+  const latestVoteDoc = change.after.data() as Vote;
+
+  return db.runTransaction(async (transaction) => {
+    const lobbyDoc = await transaction.get(lobbyDocRef);
+    const lobbyData = lobbyDoc.data();
+
+    if (lobbyData == undefined || lobbyData.state !== "VOTE") {
+      return;
+    }
+
+    const { players, uids } = lobbyData;
+    const target = players[uids.indexOf(latestVoteDoc.target)];
+
+    // decrement old target
+    if (oldVoteDoc != undefined) {
+      const oldTarget = players[uids.indexOf(oldVoteDoc.target)];
+      if (oldTarget.votes != undefined) {
+        oldTarget.votes -= 1;
+      }
+    }
+
+    // increment new target
+    if (target.votes == undefined) {
+      target.votes = 1;
+    } else {
+      target.votes += 1;
+    }
+
+    transaction.update(lobbyDocRef, { players });
+  });
+});
 
 export const verifyExpiration = functions.https.onCall(async (data, context) => {
   // check auth
