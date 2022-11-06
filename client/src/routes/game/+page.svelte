@@ -2,6 +2,8 @@
   import Prompt from "$components/Prompt.svelte";
   import LobbyComponent from "$components/Lobby.svelte";
   import ChatRoom from "$components/ChatRoom.svelte";
+  import Vote from "$components/Vote.svelte";
+  import Result from "$components/Result.svelte";
   import CircularProgress from "@smui/circular-progress";
 
   import { onSnapshot, doc, getDoc } from "firebase/firestore";
@@ -105,6 +107,10 @@
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
   {:else if lobby.state === "CHAT"}
     <ChatRoom lobbyData={{ ...lobby, id: lobbyCode }} />
+  {:else if lobby.state === "VOTE"}
+    <Vote {lobby} {lobbyCode} />
+  {:else if lobby.state === "RESULT"}
+    <Result {lobby} {lobbyCode} />
   {:else}
     unknown lobby state: {lobby.state}
   {/if}
