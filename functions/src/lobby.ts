@@ -318,7 +318,7 @@ export const collectPromptAnswers = functions.firestore
       });
     });
   });
-  
+
 export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{uid}").onWrite((change, context) => {
   const { code } = context.params;
 
