@@ -1,6 +1,5 @@
 import { ChatMessage, ChatRoom, Lobby, PrivatePlayer, PromptAnswer, LobbyChatMessage } from "./firestore-types/lobby";
 import { db } from "./app";
-
 import { UserData } from "./firestore-types/users";
 import type { CollectionReference, DocumentReference } from "firebase-admin/firestore";
 

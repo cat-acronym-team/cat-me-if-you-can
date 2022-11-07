@@ -3,6 +3,7 @@ import {
   GoogleAuthProvider,
   OAuthProvider,
   signInWithPopup,
+  deleteUser,
   createUserWithEmailAndPassword,
   signInAnonymously,
   signOut,
@@ -32,6 +33,16 @@ export async function createUser(email: string, password: string) {
 
 export async function loginAnonymous() {
   return await signInAnonymously(auth);
+}
+
+export function deleteAccount() {
+  const user = auth.currentUser;
+
+  if (user == null) {
+    throw new Error("User is not defined.");
+  }
+
+  deleteUser(user);
 }
 
 export function logOut() {

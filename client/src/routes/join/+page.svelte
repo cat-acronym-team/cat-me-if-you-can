@@ -59,14 +59,8 @@
     code = code.toLowerCase();
     try {
       await saveOrCreate($user, userData, name.trim());
-      // get the current user info
-      const { displayName, avatar } = (await getUser(($user as User).uid)) as UserData;
       // enter lobby with the user's info
-      await findAndJoinLobby(code, {
-        displayName,
-        avatar,
-        uid: ($user as User).uid,
-      });
+      await findAndJoinLobby(code);
       // go to game page
       goto(`/game?code=${code}`);
     } catch (err) {
@@ -102,16 +96,16 @@
   }
 </script>
 
-<!-- If not then show regular page -->
-<nav class="temp-nav">
+<header>
   <SigninButton />
-</nav>
+</header>
+
 <div class="cat-join-container">
   <h2 class="mdc-typography--headline2">Join Lobby!</h2>
   {#if errorMessage !== ""}
     <p class="error">{errorMessage}</p>
   {/if}
-  <form on:submit|preventDefault={joinLobby}>
+  <form on:submit|once={joinLobby} on:submit|preventDefault>
     <div>
       <Textfield
         type="text"
@@ -143,10 +137,14 @@
 </div>
 
 <style>
-  .temp-nav {
+  header {
+    height: 64px;
     display: flex;
     justify-content: right;
+    align-items: center;
+    padding-right: 16px;
   }
+
   .cat-join-container {
     width: 60%;
     margin: auto;

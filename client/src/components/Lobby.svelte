@@ -6,11 +6,14 @@
   import { page } from "$app/stores";
   import type { Lobby } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { startGame } from "$lib/firebase/firestore-functions";
+  import { startGame, leaveLobby } from "$lib/firebase/firebase-functions";
+  import { goto } from "$app/navigation";
+  import { auth } from "$lib/firebase/app";
 
   // Props
   export let lobbyCode: string;
   export let lobby: Lobby;
+  let errorMessage: string = "";
 
   // better link to share since it's redirecting to this page anyways
   // Josh's suggestion that I agreed on
@@ -36,6 +39,22 @@
   function copyLink() {
     navigator.clipboard.writeText(url);
   }
+
+  async function start() {
+    try {
+      await startGame({ code: lobbyCode });
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+    }
+  }
+
+  async function leave() {
+    try {
+      await leaveLobby({ code: lobbyCode });
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+    }
+  }
 </script>
 
 <main>
@@ -48,8 +67,23 @@
       <LobbyChat lobbyData={{ ...lobby, id: lobbyCode }} />
     </div>
     <SelectAvatar {lobby} {lobbyCode} />
-    <div class="start">
-      <Button on:click={() => startGame({ code: lobbyCode })}><Label>Start Game</Label></Button>
+    {#if auth.currentUser?.uid === lobby.uids[0]}
+      <div class="actions">
+        <Button on:click|once={() => start()}><Label>Start Game</Label></Button>
+      </div>
+    {/if}
+    <div class="actions">
+      <Button
+        on:click|once={async () => {
+          await leave();
+          goto("/");
+        }}><Label>Leave Lobby</Label></Button
+      >
+    </div>
+    <div class="actions">
+      {#if errorMessage !== ""}
+        <p>{errorMessage}</p>
+      {/if}
     </div>
     <div class="buttons">
       <h3 class="invite-link">Invite Link: {url}</h3>
@@ -64,7 +98,7 @@
     justify-content: center;
   }
 
-  .start {
+  .actions {
     display: grid;
     place-items: center;
   }

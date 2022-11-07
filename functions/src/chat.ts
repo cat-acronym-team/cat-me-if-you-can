@@ -17,6 +17,7 @@ export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentRefere
   const { players, uids } = lobbyData;
   const chatRoomsSnapshot = await transaction.get(getChatRoomCollection(lobbyDoc));
   const chatRooms = chatRoomsSnapshot.docs.map((room) => room.ref);
+
   await Promise.all(
     chatRooms.map(async (room) => {
       // get the messages from the chatroom
