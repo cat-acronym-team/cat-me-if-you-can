@@ -17,7 +17,6 @@ import { getRandomPromptPair } from "./prompts";
 import { deleteChatRooms } from "./chat";
 import { findVoteOff } from "./vote";
 import { determineWinner } from "./result";
-import { findWinner } from "./winloss";
 
 function generateLobbyCode() {
   const chars = new Array(6);
@@ -215,9 +214,6 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
     lobbyDocRef.update({ expiration });
   }
 
-  if (lobby.state == "END" && oldLobby.state != "END") {
-    await findWinner(lobbyDocRef);
-  }
 });
 
 function startPrompt(lobbyDocRef: firestore.DocumentReference<Lobby>) {
