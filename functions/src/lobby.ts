@@ -15,6 +15,7 @@ import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 import { deleteChatRooms } from "./chat";
+import { findWinner } from "./winloss";
 
 function generateLobbyCode() {
   const chars = new Array(6);
@@ -191,11 +192,16 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   if (lobby.state == "PROMPT" && oldLobby.state != "PROMPT") {
     await startPrompt(lobbyDocRef);
   }
+
   if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {
     const expiration = firestore.Timestamp.fromMillis(
       firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.CHAT * 1000
     );
     lobbyDocRef.set({ expiration }, { merge: true });
+  }
+
+  if (lobby.state == "END" && oldLobby.state != "END") {
+    await findWinner(lobbyDocRef);
   }
 });
 

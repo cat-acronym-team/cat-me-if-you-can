@@ -26,6 +26,11 @@ export type Player = {
   votes?: number;
 
   /**
+   * the role that the player played; used at the end of the game
+   */
+  role?: Role;
+
+  /**
    * the answer for their prompt
    */
   promptAnswer?: string;
@@ -64,6 +69,11 @@ export type Lobby = {
    * the current state of the game
    */
   state: GameState;
+
+  /**
+   * the role that won at the end of the game
+   */
+  winner?: Role;
 
   /**
    * expiration time of the current phase with a timer
