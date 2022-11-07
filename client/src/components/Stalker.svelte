@@ -66,18 +66,17 @@
     width: 100%;
     max-width: 800px;
     overflow-y: auto;
-    display: grid;
-    grid-template-columns: auto;
     padding: 24px;
-    gap: 24px;
-    align-content: start;
   }
 
   .container > * {
     margin: 0;
   }
 
-  button {
+  .container > button {
+    margin-top: 24px;
+    display: block;
+    width: 100%;
     position: relative;
     appearance: none;
     border: none;
