@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import type {
   Lobby,
   PrivatePlayer,
@@ -7,10 +6,6 @@ import type {
   ChatMessage,
   LobbyChatMessage,
 } from "./firestore-types/lobby";
-
-=======
-import type { Lobby, PrivatePlayer, PromptAnswer, ChatRoom, ChatMessage } from "./firestore-types/lobby";
->>>>>>> 57644ac0ee78587aa95604b21c56f056cef37dda
 import type { UserData } from "./firestore-types/users";
 import { collection, type CollectionReference, type DocumentReference } from "firebase/firestore";
 import { db } from "$lib/firebase/app";

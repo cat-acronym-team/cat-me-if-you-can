@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-<h2>Account Settings</h2>
-=======
 <script lang="ts">
   import { deleteAccount, logOut } from "$lib/firebase/auth";
   import { goto } from "$app/navigation";
@@ -71,4 +68,3 @@
     </Button>
   </main>
 </html>
->>>>>>> 57644ac0ee78587aa95604b21c56f056cef37dda
