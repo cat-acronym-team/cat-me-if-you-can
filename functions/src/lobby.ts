@@ -17,6 +17,7 @@ import { getRandomPromptPair } from "./prompts";
 import { deleteChatRooms } from "./chat";
 import { findVoteOff } from "./vote";
 import { determineWinner } from "./result";
+import { findWinner } from "./winloss";
 
 function generateLobbyCode() {
   const chars = new Array(6);
@@ -194,6 +195,7 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   if (lobby.state == "PROMPT" && oldLobby.state != "PROMPT") {
     await startPrompt(lobbyDocRef);
   }
+
   if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {
     const expiration = firestore.Timestamp.fromMillis(
       firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.END * 1000 // TODO: replace with correct timer when doing pull request
@@ -211,6 +213,10 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
       firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.RESULT * 1000
     );
     lobbyDocRef.update({ expiration });
+  }
+
+  if (lobby.state == "END" && oldLobby.state != "END") {
+    await findWinner(lobbyDocRef);
   }
 });
 
