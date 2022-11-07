@@ -1,76 +1,116 @@
 <script lang="ts">
-  import type { ChatRoom as ChatRoomType, Lobby } from "$lib/firebase/firestore-types/lobby";
+  import type { Player, Lobby } from "$lib/firebase/firestore-types/lobby";
+  import Ripple from "@smui/ripple";
   import { stalkChatroom } from "$lib/firebase/firebase-functions";
   import { getChatRoomCollection } from "$lib/firebase/firestore-collections";
   import { getDocs } from "firebase/firestore";
   import { onMount } from "svelte";
+  import { avatarAltText, avatarColors } from "$lib/avatar";
+  import { generateHclGradient } from "$lib/color";
 
   export let lobby: Lobby;
   export let lobbyCode: string;
 
-  let chatrooms: ChatRoomType[] = [];
-  let chatroomsIds: string[] = [];
+  let chatrooms: { players: [Player, Player]; id: string }[] = [];
+
+  let errorMessage: string | undefined = undefined;
 
   onMount(async () => {
     const chatCollection = getChatRoomCollection(lobbyCode);
     const chatSnapshot = await getDocs(chatCollection);
-    chatroomsIds = chatSnapshot.docs.map((room) => room.id);
-    chatrooms = chatSnapshot.docs.map((room) => room.data());
+    chatrooms = chatSnapshot.docs.map((room) => ({
+      id: room.id,
+      players: room.data().pair.map((uid) => lobby.players[lobby.uids.indexOf(uid)]) as [Player, Player],
+    }));
   });
 
-  /**
-   * takes uid of single user, then uses the index of uid to find and return display name
-   */
-  function findDisplayName(uid: string): string {
-    return lobby.players[lobby.uids.indexOf(uid)].displayName;
-  }
-
   // takes chatid to send a stalk chatroom request
-  function onClickChat(chatId: string) {
-    const stalkChatroomRequest = { code: lobbyCode, chatId };
-    return stalkChatroom(stalkChatroomRequest);
+  async function onClickChat(chatId: string) {
+    try {
+      await stalkChatroom({ code: lobbyCode, chatId });
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+    }
   }
 </script>
 
 <div class="container">
-  <h1>Stalk a chat:</h1>
-  {#each chatrooms as chatroom, i}
+  <h1 class="mdc-typography--headline4">Select a Chat to Stalk</h1>
+  {#if errorMessage != undefined}
+    <p class="error">{errorMessage}</p>
+  {/if}
+  {#each chatrooms as chatroom}
     <button
-      on:click={async () => {
-        await onClickChat(chatroomsIds[i]);
-      }}
-      class="chatRoom"
+      on:click={() => onClickChat(chatroom.id)}
+      use:Ripple={{ surface: true }}
+      style="background: {generateHclGradient(
+        avatarColors[chatroom.players[0].avatar],
+        avatarColors[chatroom.players[1].avatar]
+      )};"
     >
-      <span class="pair">{findDisplayName(chatroom.pair[0]) + " & " + findDisplayName(chatroom.pair[1])}</span>
-    </button><br />
+      <div class="button-content base-theme-colors">
+        <img src="/avatars/{chatroom.players[0].avatar}.webp" alt={avatarAltText[chatroom.players[0].avatar]} />
+        <span class="first-name mdc-typography--headline6">{chatroom.players[0].displayName}</span>
+
+        <span class="second-name mdc-typography--headline6">{chatroom.players[1].displayName}</span>
+        <img src="/avatars/{chatroom.players[1].avatar}.webp" alt={avatarAltText[chatroom.players[1].avatar]} />
+      </div>
+    </button>
   {/each}
 </div>
 
 <style>
   .container {
     text-align: center;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 800px;
+    overflow-y: auto;
     display: grid;
+    grid-template-columns: auto;
+    padding: 24px;
+    gap: 24px;
+    align-content: start;
+  }
+
+  .container > * {
+    margin: 0;
   }
 
   button {
+    position: relative;
+    appearance: none;
     border: none;
-    cursor: pointer;
-    padding-left: 24px;
-    padding-right: 24px;
-    width: 150px;
-    height: 50px;
-    margin: auto;
-    border-radius: 8px;
+    background: none;
+    border: none;
+    border-radius: 32px;
+    padding: 8px;
   }
 
-  button:hover,
-  button:focus-visible {
-    color: rgb(187, 193, 199);
-    background-color: rgb(68, 68, 68);
+  .button-content {
+    display: grid;
+    grid-template-columns: 64px auto auto 64px;
+    grid-template-rows: 64px;
+    padding: 12px;
+    gap: 12px;
+    align-items: center;
+    border-radius: 24px;
   }
 
-  button:active {
-    color: aliceblue;
-    background-color: black;
+  .button-content > img {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+  }
+
+  .button-content > img:first-of-type {
+    transform: scaleX(-1);
+  }
+
+  .first-name {
+    justify-self: start;
+  }
+  .second-name {
+    justify-self: end;
   }
 </style>
