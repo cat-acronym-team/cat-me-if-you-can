@@ -1,12 +1,22 @@
 import type { DocumentReference, Transaction } from "firebase-admin/firestore";
-import { getChatRoomCollection, getChatRoomMessagesCollection } from "./firestore-collections";
-import { Lobby } from "./firestore-types/lobby";
+import { getChatRoomCollection, getChatRoomMessagesCollection, getLobbyChatCollection } from "./firestore-collections";
+import { Lobby, LobbyChatMessage } from "./firestore-types/lobby";
+
+export async function deleteLobbyChatMessages(
+  lobbyData: Lobby,
+  lobbyDoc: DocumentReference<Lobby>,
+  transaction: Transaction
+) {
+  const messages = await transaction.get(getLobbyChatCollection(lobbyDoc));
+  messages.forEach((messageDoc) => {
+    transaction.delete(messageDoc.ref);
+  });
+}
 
 export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
   const { players, uids } = lobbyData;
   const chatRoomsSnapshot = await transaction.get(getChatRoomCollection(lobbyDoc));
   const chatRooms = chatRoomsSnapshot.docs.map((room) => room.ref);
-
   await Promise.all(
     chatRooms.map(async (room) => {
       // get the messages from the chatroom

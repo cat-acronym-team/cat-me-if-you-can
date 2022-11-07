@@ -14,7 +14,7 @@ import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
-import { deleteChatRooms } from "./chat";
+import { deleteChatRooms, deleteLobbyChatMessages } from "./chat";
 
 export const startGame = functions.https.onCall(async (data: unknown, context): Promise<void> => {
   // no auth then you shouldn't be here
@@ -250,7 +250,9 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
     if (lobby.state === "CHAT") {
       await deleteChatRooms(lobby, lobbyDocRef, transaction);
     }
-
+    if (lobby.state === "VOTE") {
+      await deleteLobbyChatMessages(lobby, lobbyDocRef, transaction);
+    }
     return;
   });
 });
