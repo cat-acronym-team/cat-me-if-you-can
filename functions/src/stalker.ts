@@ -3,7 +3,7 @@ import { db } from "./app";
 import { isStalkChatroomRequest } from "./firebase-functions-types";
 import { getChatRoomCollection, lobbyCollection } from "./firestore-collections";
 
-export const stalkChatroom = functions.https.onCall((data: unknown, context) => {
+export const stalkChatroom = functions.https.onCall((data: unknown, context): Promise<void> => {
   const auth = context.auth;
   if (auth === undefined) {
     throw new functions.https.HttpsError("permission-denied", "User is not Authenticated");
