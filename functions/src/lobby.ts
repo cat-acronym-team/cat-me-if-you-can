@@ -213,7 +213,6 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
     );
     lobbyDocRef.update({ expiration });
   }
-
 });
 
 function startPrompt(lobbyDocRef: firestore.DocumentReference<Lobby>) {
