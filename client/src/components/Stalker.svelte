@@ -30,8 +30,6 @@
     const stalkChatroomRequest = { code: lobbyCode, chatId };
     return stalkChatroom(stalkChatroomRequest);
   }
-
-  // onsnapshot subscribe to list of all chatrooms where you a viewer, if not empty switch to show chatroom
 </script>
 
 <div class="container">
