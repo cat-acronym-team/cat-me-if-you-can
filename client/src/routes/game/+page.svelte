@@ -1,7 +1,6 @@
 <script lang="ts">
   import Prompt from "$components/Prompt.svelte";
   import LobbyComponent from "$components/Lobby.svelte";
-  import Stalker from "$components/Stalker.svelte";
   import ChatRoom from "$components/ChatRoom.svelte";
   import CircularProgress from "@smui/circular-progress";
 
