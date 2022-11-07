@@ -5,6 +5,7 @@
   import { authStore as user } from "$stores/auth";
   import { onMount } from "svelte";
   import { verifyExpiration } from "$lib/firebase/firebase-functions";
+  import { avatarAltText } from "$lib/avatar";
 
   export let lobby: Lobby;
   export let lobbyCode: string;
@@ -38,8 +39,12 @@
   <div class="voting-grid">
     {#each lobby.players as { avatar, displayName, votes }, i}
       <div class="vote-container">
-        <button class="avatar" on:click={() => addVote(lobbyCode, $user?.uid ?? "", lobby.uids[i])}>
-          <img src="/avatars/{avatar}.webp" alt="cat picture {avatar}" />
+        <button
+          class="avatar"
+          disabled={$user?.uid == lobby.uids[i]}
+          on:click={() => addVote(lobbyCode, $user?.uid ?? "", lobby.uids[i])}
+        >
+          <img src="/avatars/{avatar}.webp" alt={avatarAltText[avatar]} />
           <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
         </button>
         <span class="mdc-typography--heading6">{votes ?? 0}</span>
