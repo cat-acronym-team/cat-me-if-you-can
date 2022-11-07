@@ -1,11 +1,6 @@
 import { functions } from "$lib/firebase/app";
 import { httpsCallable } from "firebase/functions";
-import type {
-  LobbyCreationResponse,
-  LobbyRequest,
-  ChatRequest,
-  StalkChatroomRequest,
-} from "./firebase-functions-types";
+import type { LobbyCreationResponse, LobbyRequest, StalkChatroomRequest } from "./firebase-functions-types";
 import type { ChangeAvatarData } from "./functions-types/avatar";
 
 export const createLobby = httpsCallable<void, LobbyCreationResponse>(functions, "createLobby");
