@@ -59,14 +59,8 @@
     code = code.toLowerCase();
     try {
       await saveOrCreate($user, userData, name.trim());
-      // get the current user info
-      const { displayName, avatar } = (await getUser(($user as User).uid)) as UserData;
       // enter lobby with the user's info
-      await findAndJoinLobby(code, {
-        displayName,
-        avatar,
-        uid: ($user as User).uid,
-      });
+      await findAndJoinLobby(code);
       // go to game page
       goto(`/game?code=${code}`);
     } catch (err) {
@@ -111,7 +105,7 @@
   {#if errorMessage !== ""}
     <p class="error">{errorMessage}</p>
   {/if}
-  <form on:submit|preventDefault={joinLobby}>
+  <form on:submit|once={joinLobby} on:submit|preventDefault>
     <div>
       <Textfield
         type="text"

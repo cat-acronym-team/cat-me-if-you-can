@@ -80,7 +80,13 @@
       state: { errorMessage: errorMessage },
     });
   }
+
+  function onbeforeunload(event: BeforeUnloadEvent) {
+    event.returnValue = true;
+  }
 </script>
+
+<svelte:window on:beforeunload={onbeforeunload} />
 
 <!-- I do this check because the html was rendering the Lobby component before the onmount happened due to lobby having default values -->
 <!-- So the code was displaying undefined in the Lobby Component -->
