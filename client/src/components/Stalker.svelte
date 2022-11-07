@@ -35,7 +35,7 @@
 </script>
 
 <div class="container">
-  <h1 class="mdc-typography--headline4">Select a Chat to Stalk</h1>
+  <h1 class="mdc-typography--headline4">Select a chat to stalk</h1>
   {#if errorMessage != undefined}
     <p class="error">{errorMessage}</p>
   {/if}
