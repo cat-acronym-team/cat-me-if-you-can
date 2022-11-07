@@ -26,7 +26,7 @@ export type Player = {
   votes?: number;
 
   /**
-   * the role of the player
+   * the role that the player played; used at the end of the game
    */
   role?: Role;
 

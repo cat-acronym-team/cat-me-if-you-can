@@ -16,6 +16,7 @@ import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 import { deleteChatRooms } from "./chat";
 import { applyStats } from "./stats";
+import { findWinner } from "./winloss";
 
 function generateLobbyCode() {
   const chars = new Array(6);
@@ -205,6 +206,7 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   }
 
   if (lobby.state == "END" && oldLobby.state != "END") {
+    await findWinner(lobbyDocRef);
     const expiration = firestore.Timestamp.fromMillis(
       firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.END * 1000
     );
