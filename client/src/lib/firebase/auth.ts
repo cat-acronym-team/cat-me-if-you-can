@@ -59,9 +59,7 @@ export function linkWithGoogle() {
         throw new Error("a-google-account-already-exists-for-this-user");
       }
     });
-
-    linkWithPopup(user, google);
-    return;
+    return linkWithPopup(user, google);
   } else {
     return user;
   }
@@ -78,8 +76,7 @@ export function linkWithMicrosoft() {
       }
     });
 
-    linkWithPopup(user, microsoft);
-    return;
+    return linkWithPopup(user, microsoft);
   } else {
     return user;
   }
@@ -91,7 +88,7 @@ export function linkWithPassword(password: string) {
   if (user != null) {
     const newPassword = password;
 
-    updatePassword(user, newPassword);
+    return updatePassword(user, newPassword);
   } else {
     return user;
   }

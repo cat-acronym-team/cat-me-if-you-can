@@ -55,9 +55,9 @@
     }
   }
 
-  function linkGoogleAccount() {
+  async function linkGoogleAccount() {
     try {
-      linkWithGoogle();
+      await linkWithGoogle();
       googleLinked = true;
       return;
     } catch (err) {
@@ -67,9 +67,9 @@
     }
   }
 
-  function linkMicrosoftAccount() {
+  async function linkMicrosoftAccount() {
     try {
-      linkWithMicrosoft();
+      await linkWithMicrosoft();
       microsoftLinked = true;
       return;
     } catch (err) {
@@ -79,9 +79,9 @@
     }
   }
 
-  function linkPassword() {
+  async function linkPassword() {
     try {
-      linkWithPassword(password);
+      await linkWithPassword(password);
       linkPass = true;
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : String(err);
