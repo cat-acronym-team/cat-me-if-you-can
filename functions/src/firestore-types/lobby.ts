@@ -23,12 +23,13 @@ export type Player = {
   /**
    * the number of players that have voted for this player
    */
-  votes?: number;
+  votes: number;
 
   /**
    * the answer for their prompt
    */
   promptAnswer?: string;
+
   /**
    * the role of the current player
    */
@@ -74,10 +75,12 @@ export type Lobby = {
    * expiration time of the current phase with a timer
    */
   expiration?: Timestamp;
+
   /**
-   * the player that was voted off for the round
+   * the uid of the player that was voted off for the round
    */
-  votedOff?: string;
+  votedOff?: string | "NONE";
+
   /**
    * the role that won the game
    */

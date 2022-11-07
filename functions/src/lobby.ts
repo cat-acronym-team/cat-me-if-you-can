@@ -46,6 +46,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
         alive: true,
         avatar: userData.avatar || AVATARS[Math.floor(Math.random() * AVATARS.length)],
         displayName: userData.displayName,
+        votes: 0,
       },
     ],
     state: "WAIT",
@@ -136,7 +137,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
 
     // add player
     await transaction.update(lobby, {
-      players: firestore.FieldValue.arrayUnion({ ...userInfo, alive: true }),
+      players: firestore.FieldValue.arrayUnion({ ...userInfo, alive: true, votes: 0 }),
       uids: firestore.FieldValue.arrayUnion(auth.uid),
     });
   });
@@ -197,19 +198,19 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
     const expiration = firestore.Timestamp.fromMillis(
       firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.END * 1000 // TODO: replace with correct timer when doing pull request
     );
-    lobbyDocRef.set({ expiration }, { merge: true });
+    lobbyDocRef.update({ expiration });
   }
   if (lobby.state == "VOTE" && oldLobby.state != "VOTE") {
     const expiration = firestore.Timestamp.fromMillis(
       firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.VOTE * 1000
     );
-    lobbyDocRef.set({ expiration }, { merge: true });
+    lobbyDocRef.update({ expiration });
   }
   if (lobby.state == "RESULT" && oldLobby.state != "RESULT") {
     const expiration = firestore.Timestamp.fromMillis(
       firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.RESULT * 1000
     );
-    lobbyDocRef.set({ expiration }, { merge: true });
+    lobbyDocRef.update({ expiration });
   }
 });
 
@@ -325,7 +326,7 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
   // check if the after change exists
   // we want to do this because onwrite is for oncreation, onupdate, and ondelete
   if (!change.after.exists) {
-    return {};
+    return;
   }
 
   const lobbyDocRef = lobbyCollection.doc(code);
@@ -342,22 +343,17 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
     }
 
     const { players, uids } = lobbyData;
-    const target = players[uids.indexOf(latestVoteDoc.target)];
 
     // decrement old target
     if (oldVoteDoc != undefined) {
       const oldTarget = players[uids.indexOf(oldVoteDoc.target)];
-      if (oldTarget.votes != undefined) {
+      if (oldTarget.votes != 0) {
         oldTarget.votes -= 1;
       }
     }
 
     // increment new target
-    if (target.votes == undefined) {
-      target.votes = 1;
-    } else {
-      target.votes += 1;
-    }
+    players[uids.indexOf(latestVoteDoc.target)].votes += 1;
 
     transaction.update(lobbyDocRef, { players });
   });
@@ -400,7 +396,7 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
       await deleteChatRooms(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "VOTE") {
-      findVoteOff(lobby, lobbyDocRef, transaction);
+      await findVoteOff(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "RESULT") {
       await determineWinner(lobby, lobbyDocRef, transaction);
