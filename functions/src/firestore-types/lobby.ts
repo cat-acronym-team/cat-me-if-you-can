@@ -45,8 +45,8 @@ export const GAME_STATE_DURATIONS: { [state in GameState]: number } = {
   WAIT: 2 * 60 * 60,
   PROMPT: 60,
   CHAT: 2 * 60,
-  VOTE: 30, //TODO: replace with correct timer when getting merged
-  RESULT: 15,
+  VOTE: 3 * 60,
+  RESULT: 10,
   END: 10,
 };
 
