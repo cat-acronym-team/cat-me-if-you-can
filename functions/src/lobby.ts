@@ -140,6 +140,48 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
   });
 });
 
+export const leaveLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
+  const auth = context.auth;
+
+  // no auth then you shouldn't be here
+  if (auth === undefined) {
+    throw new functions.https.HttpsError("permission-denied", "Not Signed In");
+  }
+
+  // validate code
+  if (!isLobbyRequest(data)) {
+    throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
+  }
+
+  return db.runTransaction(async (transaction) => {
+    // lobby doc
+    const lobby = lobbyCollection.doc(data.code);
+    const lobbyInfo = await transaction.get(lobby);
+
+    // extra validation to make sure it exist
+    if (lobbyInfo.exists === false) {
+      throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
+    }
+
+    // get lobby data
+    const { players, uids } = lobbyInfo.data() as Lobby;
+
+    // Get position of the Player
+    const playerPos = uids.indexOf(auth.uid);
+
+    // If the last player is leaving delete the document instead
+    if (uids.length === 1) {
+      transaction.delete(lobby);
+    } else {
+      // Remove player from the lobby
+      transaction.update(lobby, {
+        players: firestore.FieldValue.arrayRemove(players[playerPos]),
+        uids: firestore.FieldValue.arrayRemove(auth.uid),
+      });
+    }
+  });
+});
+
 // TODO: replace with the correct trigger
 export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate(async (change, context) => {
   const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
