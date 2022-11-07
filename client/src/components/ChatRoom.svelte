@@ -105,7 +105,7 @@
     <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
       {formatTimer(Math.max(countdown, 0))}
     </p>
-    <ChatMessages lobby={lobbyData} messages={chatMessages}>
+    <ChatMessages lobby={lobbyData} messages={chatMessages} readOnly={true}>
       <div slot="before-messages" class="matched-with mdc-typography--headline5">
         {#if secondPairInfo !== undefined}
           {firstPairInfo.displayName} matched with {secondPairInfo.displayName}
