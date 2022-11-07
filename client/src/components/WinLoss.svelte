@@ -23,12 +23,12 @@
   // format a string list to have commas and "and" when needed
   const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
   // get the list of catfishes from lobby.ts and put them into a variable
-  catfishes = lobby.players
+  $: catfishes = lobby.players
     .filter((p) => {
       return p.role == "CATFISH";
     })
     .map((c) => c.displayName);
-  catfishList = formatter.format(catfishes);
+  $: catfishList = formatter.format(catfishes);
 
   // update end variable depending on the winner type and the current player's role
   $: if (lobby.winner !== undefined) {
@@ -72,9 +72,9 @@
     <div class="banner">
       <h2>You have cat to be kitten me!</h2>
       {#if catfishes.length > 1}
-        <h2>The impawsters, {catfishList} were not caught!</h2>
+        <h2>The impawsters were not caught!</h2>
       {:else}
-        <h2>The impawster, {catfishList} was not caught!</h2>
+        <h2>The impawster was not caught!</h2>
       {/if}
     </div>
     <div class="image">
@@ -139,9 +139,9 @@
 
   .banner {
     position: absolute;
-    width: 60%;
-    top: 10%;
-    left: 20%;
+    width: 80%;
+    top: 5%;
+    left: 10%;
     text-align: center;
     font-size: 2.1em;
   }
