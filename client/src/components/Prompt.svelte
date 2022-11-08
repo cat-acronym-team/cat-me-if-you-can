@@ -7,7 +7,7 @@
   import { GAME_STATE_DURATIONS, type Lobby } from "$lib/firebase/firestore-types/lobby";
   import { authStore as user } from "$stores/auth";
   import { verifyExpiration } from "$lib/firebase/firebase-functions";
-    import { formatTimer } from "$lib/time";
+  import { formatTimer } from "$lib/time";
 
   export let prompt: string | undefined;
 
