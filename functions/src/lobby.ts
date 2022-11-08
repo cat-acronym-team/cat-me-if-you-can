@@ -15,8 +15,7 @@ import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 import { deleteChatRooms } from "./chat";
-import { applyStats } from "./stats";
-import { findWinner } from "./winloss";
+import { endGameProcess, findWinner } from "./winloss";
 
 function generateLobbyCode() {
   const chars = new Array(6);
@@ -358,7 +357,7 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
     }
     // Applies the stats once the timer on the end screen ends
     if (lobby.state === "END") {
-      await applyStats(lobby, lobbyDocRef, transaction);
+      await endGameProcess(lobby, lobbyDocRef, transaction);
     }
 
     return;

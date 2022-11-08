@@ -1,9 +1,9 @@
 import { firestore } from "firebase-admin";
 import * as functions from "firebase-functions";
 import { db } from "./app";
-import { getPrivatePlayerCollection, lobbyCollection } from "./firestore-collections";
+import { getPrivatePlayerCollection, lobbyCollection, userCollection } from "./firestore-collections";
 import { isLobbyRequest } from "./firebase-functions-types";
-import { Lobby, PrivatePlayer } from "./firestore-types/lobby";
+import { Lobby } from "./firestore-types/lobby";
 
 // this function will likely be obsolete once timers are introduced
 export const lobbyReturn = functions.https.onCall(async (data: unknown, context): Promise<void> => {
@@ -17,24 +17,26 @@ export const lobbyReturn = functions.https.onCall(async (data: unknown, context)
   }
 
   // get lobby doc
-  const lobby = await lobbyCollection.doc(data.code).get();
-  if (lobby.exists === false) {
+  const lobbyDocRef = lobbyCollection.doc(data.code);
+  const lobbyDoc = await lobbyDocRef.get();
+  if (lobbyDoc.exists === false) {
     throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
   }
 
-  const { uids, state } = lobby.data() as Lobby;
+  const lobbyData = lobbyDoc.data() as Lobby;
   // check if host
-  if (context.auth.uid !== uids[0]) {
+  if (context.auth.uid !== lobbyData.uids[0]) {
     throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
   }
 
   // check game state
-  if (state !== "END") {
+  if (lobbyData.state !== "END") {
     throw new functions.https.HttpsError("failed-precondition", "Wrong game state!");
   }
 
-  await resetLobby(lobby);
-  await deletePrivatePlayers(lobby, getPrivatePlayerCollection(lobby.ref));
+  await db.runTransaction(async (transaction) => {
+    await endGameProcess(lobbyData, lobbyDocRef, transaction);
+  });
 });
 
 export function findWinner(lobbyDocRef: firestore.DocumentReference<Lobby>) {
@@ -79,42 +81,71 @@ export function findWinner(lobbyDocRef: firestore.DocumentReference<Lobby>) {
   });
 }
 
-// when returning to the lobby, make every player alive again and delete the role, winner, and the private player collection
-export function resetLobby(lobbyDoc: firestore.DocumentSnapshot<Lobby>) {
-  return db.runTransaction(async (transaction) => {
-    const lobbyDocRef = lobbyDoc.ref;
-    const lobby = await transaction.get(lobbyDocRef);
-    const lobbyData = lobby.data();
-
-    if (lobbyData === undefined) {
-      throw new Error("Lobby does not exist!");
-    }
-
-    // loop through each player and set their alive status to true and remove the role property from the player
-    let { players } = lobbyData;
-    players = players.map(({ role, ...rest }) => {
-      return { ...rest, alive: true };
-    });
-
-    transaction.update(lobbyDocRef, { state: "WAIT", players, winner: firestore.FieldValue.delete() });
-  });
-}
-
-export async function deletePrivatePlayers(
-  lobbyDoc: firestore.DocumentSnapshot<Lobby>,
-  privatePlayerCollectionRef: firestore.CollectionReference<PrivatePlayer>
+export async function endGameProcess(
+  lobbyData: Lobby,
+  lobbyDocRef: firestore.DocumentReference<Lobby>,
+  transaction: firestore.Transaction
 ) {
-  if (lobbyDoc.exists === false) {
-    throw new Error("Lobby does not exist!");
-  }
+  // apply the stats
+  let { players } = lobbyData;
+  const { uids, winner } = lobbyData;
+
+  // update each players doc
+  await Promise.all(
+    uids.map(async (uid, index) => {
+      const userDocRef = userCollection.doc(uid);
+      const userDoc = await transaction.get(userDocRef);
+
+      if (players[index].role == undefined) {
+        functions.logger.error("This player's role doesn't exist!");
+        return;
+      }
+
+      const newStats: {
+        playedAsCat?: firestore.FieldValue;
+        playedAsCatfish?: firestore.FieldValue;
+        catWins?: firestore.FieldValue;
+        catfishWins?: firestore.FieldValue;
+      } = {};
+
+      // increment played as role
+      if (players[index].role == "CAT") {
+        newStats.playedAsCat = firestore.FieldValue.increment(1);
+      } else {
+        newStats.playedAsCatfish = firestore.FieldValue.increment(1);
+      }
+
+      // increment wins
+      if (winner == "CAT" && players[index].role == "CAT") {
+        newStats.catWins = firestore.FieldValue.increment(1);
+      }
+      if (winner == "CATFISH" && players[index].role == "CATFISH") {
+        newStats.catfishWins = firestore.FieldValue.increment(1);
+      }
+      // update their user doc
+      if (userDoc.exists) {
+        return transaction.update(userDocRef, newStats);
+      }
+      return;
+    })
+  );
+
+  // reset the lobby
+  players = players.map(({ role, ...rest }) => {
+    return { ...rest, alive: true };
+  });
+
   // create a WriteBatch
   const batch = db.batch();
+  const privatePlayerCollectionRef = getPrivatePlayerCollection(lobbyDocRef);
+  
   // loop through each doc in the private player collection via uid and delete them one-by-one
-  const { uids } = lobbyDoc.data() as Lobby;
   for (let i = 0; i < uids.length; i++) {
     const playerDoc = privatePlayerCollectionRef.doc(uids[i]);
     // delete each private player document with the WriteBatch
     batch.delete(playerDoc);
   }
   await batch.commit();
+
+  transaction.update(lobbyDocRef, { state: "WAIT", players, winner: firestore.FieldValue.delete() });
 }
