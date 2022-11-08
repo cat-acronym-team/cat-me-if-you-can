@@ -16,7 +16,6 @@ import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 import { deleteChatRooms } from "./chat";
 import { findWinner } from "./winloss";
-import { Timestamp } from "firebase-admin/firestore";
 
 function generateLobbyCode() {
   const chars = new Array(6);
@@ -49,7 +48,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
       },
     ],
     state: "WAIT",
-    alivePlayers: [context.auth.uid],
+    alivePlayers: [],
   };
 
   // try making lobby 5 times before giving up
