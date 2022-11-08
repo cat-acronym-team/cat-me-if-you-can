@@ -1,6 +1,7 @@
 <script lang="ts">
   import Prompt from "$components/Prompt.svelte";
   import LobbyComponent from "$components/Lobby.svelte";
+  import WinLoss from "$components/WinLoss.svelte";
   import ChatRoom from "$components/ChatRoom.svelte";
   import CircularProgress from "@smui/circular-progress";
 
@@ -105,6 +106,8 @@
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
   {:else if lobby.state === "CHAT"}
     <ChatRoom lobbyData={{ ...lobby, id: lobbyCode }} />
+  {:else if lobby.state === "END"}
+    <WinLoss {lobbyCode} {lobby} {privatePlayer} />
   {:else}
     unknown lobby state: {lobby.state}
   {/if}
