@@ -86,7 +86,20 @@ service cloud.firestore {
           allow read: if inLobby() && (chatSenderAlive() || ! isAlive());
           allow create: if validateLobbyChatMessage();
       }
-44ac0ee78587aa95604b21c56f056cef37dda
+      match /votes/{uid} {
+        function checkTarget(){
+          return request.resource.data.keys().hasOnly(['target'])
+          && request.resource.data.target is string
+          && request.resource.data.target in lobbyData().uids
+          && request.resource.data.target != request.auth.uid;
+        }
+        function notPastTarget(){
+          return checkTarget() && request.resource.data.target != resource.data.target;
+        }
+
+        allow create: if request.auth.uid == uid && inLobby() && checkTarget();
+        allow update: if request.auth.uid == uid && inLobby() && notPastTarget();
+      }
     }
 
     match /users/{userId} {
