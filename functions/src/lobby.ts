@@ -14,7 +14,7 @@ import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
-import { deleteChatRooms } from "./chat";
+import { deleteChatRooms, deleteLobbyChatMessages } from "./chat";
 import { findVoteOff } from "./vote";
 import { determineWinner } from "./result";
 
@@ -404,8 +404,8 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
       await deleteChatRooms(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "VOTE") {
+      await deleteLobbyChatMessages(lobby, lobbyDocRef, transaction);
       findVoteOff(lobby, lobbyDocRef, transaction);
-      //   await deleteLobbyChatMessages(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "RESULT") {
       await determineWinner(lobby, lobbyDocRef, transaction);

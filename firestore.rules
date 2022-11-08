@@ -24,7 +24,7 @@ service cloud.firestore {
       // since in the future the second player in the lobby might become host if the host leaves
       function isHost(){
         return request.auth.uid == resource.data.uids[0] || request.auth.uid == resource.data.uids[1];
-
+      }
       allow get: if true;
 
       match /privatePlayers/{uid} {
