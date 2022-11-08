@@ -1,6 +1,6 @@
 export type LobbyRequest = { code: string };
 
-export type ErrorResponse = { error?: string };
+export type LobbyCreationResponse = { code: string };
 
 export function isLobbyRequest(data: unknown): data is LobbyRequest {
   // will only return true if the data is an object with a code property and string

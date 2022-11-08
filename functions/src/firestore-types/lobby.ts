@@ -1,8 +1,8 @@
 import type { Timestamp } from "firebase-admin/firestore";
 
-export const avatars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
+export const AVATARS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
 
-export type Avatar = typeof avatars[number];
+export type Avatar = typeof AVATARS[number];
 
 export type Player = {
   /**
@@ -23,14 +23,32 @@ export type Player = {
   /**
    * the number of players that have voted for this player
    */
-  votes?: number;
+  votes: number;
+
+  /**
+   * the role that the player played; used at the end of the game
+   */
+  role?: Role;
+
   /**
    * the answer for their prompt
    */
-  promptAnswer: string;
+  promptAnswer?: string;
 };
 
-export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
+export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "RESULT" | "END";
+
+/**
+ * the duration in seconds for each game state
+ */
+export const GAME_STATE_DURATIONS: { [state in GameState]: number } = {
+  WAIT: 2 * 60 * 60,
+  PROMPT: 60,
+  CHAT: 2 * 60,
+  VOTE: 3 * 60,
+  RESULT: 10,
+  END: 10,
+};
 
 /**
  * the type of documents `/lobbies/{code}`
@@ -52,10 +70,22 @@ export type Lobby = {
    * the current state of the game
    */
   state: GameState;
+
   /**
    * expiration time of the current phase with a timer
    */
-  expiration: Timestamp;
+  expiration?: Timestamp;
+
+  /**
+   * the uid of the player that was voted off for the round
+   * @note this can be a uid, NONE, or undefined
+   */
+  votedOff?: string | "NONE";
+
+  /**
+   * the role that won the game
+   */
+  winner?: Role;
 };
 
 /**

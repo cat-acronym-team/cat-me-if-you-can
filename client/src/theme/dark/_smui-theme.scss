@@ -27,3 +27,7 @@ a {
 a:visited {
   color: color.scale(theme.$primary, $lightness: -35%);
 }
+
+.error {
+  color: theme.$error;
+}

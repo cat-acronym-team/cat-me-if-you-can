@@ -8,32 +8,83 @@ import {
   lobbyCollection,
   userCollection,
 } from "./firestore-collections";
-import { isLobbyRequest } from "./firestore-functions-types";
-import { avatars, Lobby } from "./firestore-types/lobby";
+import { isLobbyRequest, LobbyCreationResponse } from "./firebase-functions-types";
+import { AVATARS, GAME_STATE_DURATIONS, Lobby, Vote } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 import { deleteChatRooms } from "./chat";
+import { findVoteOff } from "./vote";
+import { determineWinner } from "./result";
 
-export const startGame = functions.https.onCall(async (data: unknown, context) => {
+function generateLobbyCode() {
+  const chars = new Array(6);
+  for (let i = 0; i < 6; i++) {
+    // random character between 'a' and 'z'
+    chars[i] = String.fromCharCode(97 + Math.floor(Math.random() * 26));
+  }
+  return chars.join("");
+}
+
+export const createLobby = functions.https.onCall(async (data: unknown, context): Promise<LobbyCreationResponse> => {
+  if (context.auth === undefined) {
+    throw new functions.https.HttpsError("permission-denied", "Not Signed In");
+  }
+
+  const userDoc = await userCollection.doc(context.auth.uid).get();
+  const userData = userDoc.data();
+
+  if (userData == undefined) {
+    throw new functions.https.HttpsError("not-found", "User not found");
+  }
+
+  const lobbyData: Lobby = {
+    uids: [context.auth.uid],
+    players: [
+      {
+        alive: true,
+        avatar: userData.avatar || AVATARS[Math.floor(Math.random() * AVATARS.length)],
+        displayName: userData.displayName,
+        votes: 0,
+      },
+    ],
+    state: "WAIT",
+  };
+
+  // try making lobby 5 times before giving up
+  for (let i = 0; i < 5; i++) {
+    const code = generateLobbyCode();
+
+    try {
+      await lobbyCollection.doc(code).create(lobbyData);
+      return { code };
+    } catch (error) {
+      continue;
+    }
+  }
+
+  throw new functions.https.HttpsError("internal", "Cannot create document. Maximum number of tries exceeded");
+});
+
+export const startGame = functions.https.onCall(async (data: unknown, context): Promise<void> => {
   // no auth then you shouldn't be here
   if (context.auth === undefined) {
-    return { error: "Not Signed In" };
+    throw new functions.https.HttpsError("permission-denied", "Not Signed In");
   }
   // validate code
   if (!isLobbyRequest(data)) {
-    return { error: "Invalid lobby code!" };
+    throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
   }
   // get lobby doc
   const lobby = await lobbyCollection.doc(data.code).get();
   if (lobby.exists === false) {
-    return { error: "Lobby doesn't exist!" };
+    throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
   }
   // check if the request is coming from the host of the game
   const { uids } = lobby.data() as Lobby;
   if (context.auth.uid !== uids[0]) {
-    return { error: "Not allowed to start game!" };
+    throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
   }
 
   const privatePlayerCollection = getPrivatePlayerCollection(lobby.ref);
@@ -41,18 +92,18 @@ export const startGame = functions.https.onCall(async (data: unknown, context) =
     privatePlayerCollection.doc(uid).create({ role: "CAT" });
   }
 
-  return lobbyCollection.doc(data.code).update({ state: "PROMPT" });
+  await lobbyCollection.doc(data.code).update({ state: "PROMPT" });
 });
 
-export const joinLobby = functions.https.onCall((data: unknown, context) => {
+export const joinLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
   const auth = context.auth;
   // no auth then you shouldn't be here
   if (auth === undefined) {
-    return { error: "Not Signed In" };
+    throw new functions.https.HttpsError("permission-denied", "Not Signed In");
   }
   // validate code
   if (!isLobbyRequest(data)) {
-    return { error: "Invalid lobby code!" };
+    throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
   }
 
   return db.runTransaction(async (transaction) => {
@@ -61,13 +112,13 @@ export const joinLobby = functions.https.onCall((data: unknown, context) => {
     const lobbyInfo = await transaction.get(lobby);
     // extra validation to make sure it exist
     if (lobbyInfo.exists === false) {
-      return { error: "Lobby doesn't exist!" };
+      throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
     // user doc
     const user = await transaction.get(userCollection.doc(auth.uid));
     // make sure this user has a doc with a displayName and avatar
     if (user.exists === false) {
-      return { error: "You need to have a displayName and avatar!" };
+      throw new functions.https.HttpsError("not-found", "You need to have a displayName and avatar!");
     }
     // user data
     const userInfo = user.data() as UserData;
@@ -75,20 +126,62 @@ export const joinLobby = functions.https.onCall((data: unknown, context) => {
     // get lobby data
     const { players, uids } = lobbyInfo.data() as Lobby;
     if (uids.includes(auth.uid)) {
-      return { error: "You are already in the lobby!" };
+      throw new functions.https.HttpsError("already-exists", "You are already in the lobby!");
     }
 
     // change avatar randomly if it is already taken
     const takenAvatars = players.map((player) => player.avatar);
     while (userInfo.avatar == 0 || takenAvatars.includes(userInfo.avatar)) {
-      userInfo.avatar = avatars[Math.floor(Math.random() * avatars.length)];
+      userInfo.avatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
     }
 
     // add player
-    return transaction.update(lobby, {
-      players: firestore.FieldValue.arrayUnion({ ...userInfo, alive: true }),
+    await transaction.update(lobby, {
+      players: firestore.FieldValue.arrayUnion({ ...userInfo, alive: true, votes: 0 }),
       uids: firestore.FieldValue.arrayUnion(auth.uid),
     });
+  });
+});
+
+export const leaveLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
+  const auth = context.auth;
+
+  // no auth then you shouldn't be here
+  if (auth === undefined) {
+    throw new functions.https.HttpsError("permission-denied", "Not Signed In");
+  }
+
+  // validate code
+  if (!isLobbyRequest(data)) {
+    throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
+  }
+
+  return db.runTransaction(async (transaction) => {
+    // lobby doc
+    const lobby = lobbyCollection.doc(data.code);
+    const lobbyInfo = await transaction.get(lobby);
+
+    // extra validation to make sure it exist
+    if (lobbyInfo.exists === false) {
+      throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
+    }
+
+    // get lobby data
+    const { players, uids } = lobbyInfo.data() as Lobby;
+
+    // Get position of the Player
+    const playerPos = uids.indexOf(auth.uid);
+
+    // If the last player is leaving delete the document instead
+    if (uids.length === 1) {
+      transaction.delete(lobby);
+    } else {
+      // Remove player from the lobby
+      transaction.update(lobby, {
+        players: firestore.FieldValue.arrayRemove(players[playerPos]),
+        uids: firestore.FieldValue.arrayRemove(auth.uid),
+      });
+    }
   });
 });
 
@@ -103,9 +196,24 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
     lobbyDocRef.set({ expiration }, { merge: true });
     await startPrompt(lobbyDocRef);
   }
+
   if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {
-    const expiration = firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 30000);
-    lobbyDocRef.set({ expiration }, { merge: true });
+    const expiration = firestore.Timestamp.fromMillis(
+      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.CHAT * 1000
+    );
+    lobbyDocRef.update({ expiration });
+  }
+  if (lobby.state == "VOTE" && oldLobby.state != "VOTE") {
+    const expiration = firestore.Timestamp.fromMillis(
+      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.VOTE * 1000
+    );
+    lobbyDocRef.update({ expiration });
+  }
+  if (lobby.state == "RESULT" && oldLobby.state != "RESULT") {
+    const expiration = firestore.Timestamp.fromMillis(
+      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.RESULT * 1000
+    );
+    lobbyDocRef.update({ expiration });
   }
 });
 
@@ -215,7 +323,46 @@ export const collectPromptAnswers = functions.firestore
     });
   });
 
-export const verifyExpiration = functions.https.onCall(async (data, context) => {
+export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{uid}").onWrite((change, context) => {
+  const { code } = context.params;
+
+  // check if the after change exists
+  // we want to do this because onwrite is for oncreation, onupdate, and ondelete
+  if (!change.after.exists) {
+    return;
+  }
+
+  const lobbyDocRef = lobbyCollection.doc(code);
+
+  const oldVoteDoc = change.before.data() as Vote | undefined;
+  const latestVoteDoc = change.after.data() as Vote;
+
+  return db.runTransaction(async (transaction) => {
+    const lobbyDoc = await transaction.get(lobbyDocRef);
+    const lobbyData = lobbyDoc.data();
+
+    if (lobbyData == undefined || lobbyData.state !== "VOTE") {
+      return;
+    }
+
+    const { players, uids } = lobbyData;
+
+    // decrement old target
+    if (oldVoteDoc != undefined) {
+      const oldTarget = players[uids.indexOf(oldVoteDoc.target)];
+      if (oldTarget.votes != 0) {
+        oldTarget.votes -= 1;
+      }
+    }
+
+    // increment new target
+    players[uids.indexOf(latestVoteDoc.target)].votes += 1;
+
+    transaction.update(lobbyDocRef, { players });
+  });
+});
+
+export const verifyExpiration = functions.https.onCall((data, context): Promise<void> => {
   // check auth
   if (context.auth == undefined) {
     throw new functions.https.HttpsError("permission-denied", "User is not Authenticated");
@@ -234,6 +381,11 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
     if (lobby === undefined) {
       throw new functions.https.HttpsError("not-found", "Lobby does not exist.");
     }
+
+    if (lobby.expiration == undefined) {
+      throw new functions.https.HttpsError("failed-precondition", "Lobby has no expiration.");
+    }
+
     // if the time sent is less than expiration
     if (Date.now() < lobby.expiration.toMillis()) {
       throw new functions.https.HttpsError("invalid-argument", "Too early to make request.");
@@ -245,6 +397,12 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
     // if the state is chat then delete chatrooms
     if (lobby.state === "CHAT") {
       await deleteChatRooms(lobby, lobbyDocRef, transaction);
+    }
+    if (lobby.state === "VOTE") {
+      findVoteOff(lobby, lobbyDocRef, transaction);
+    }
+    if (lobby.state === "RESULT") {
+      await determineWinner(lobby, lobbyDocRef, transaction);
     }
 
     return;
