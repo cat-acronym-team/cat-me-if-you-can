@@ -7,6 +7,7 @@
   import { GAME_STATE_DURATIONS, type Lobby } from "$lib/firebase/firestore-types/lobby";
   import { authStore as user } from "$stores/auth";
   import { verifyExpiration } from "$lib/firebase/firebase-functions";
+    import { formatTimer } from "$lib/time";
 
   export let prompt: string | undefined;
 
@@ -66,7 +67,7 @@
 </script>
 
 {#if countdown != undefined}
-  <h1 class="mdc-typography--headline3" style="text-align:center ;">{countdown}</h1>
+  <h1 class="mdc-typography--headline3" style="text-align:center ;">{formatTimer(countdown)}</h1>
 {/if}
 <form class="wraper" on:submit|preventDefault={submitAnswer}>
   <label class="mdc-typography--headline5" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
