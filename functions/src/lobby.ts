@@ -195,7 +195,6 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
   });
 });
 
-
 export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
   const [catPrompt, catfishPrompt] = getRandomPromptPair();
 
