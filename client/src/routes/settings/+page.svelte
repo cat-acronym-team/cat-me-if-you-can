@@ -87,7 +87,6 @@
       linkPass = true;
       clearFields();
       showOptions = false;
-      window.location.reload();
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : String(err);
       outputErrMsg();
