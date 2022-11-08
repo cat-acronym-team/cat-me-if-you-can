@@ -35,9 +35,9 @@ export function assignRole(lobby: firestore.DocumentReference<Lobby>) {
 
         // get the list of uids, check the index and compare with catfishCheck. If equal, set to catfish
         if (catfishUids.has(uid)) {
-          transaction.set(privatePlayerDocRef, { role: "CATFISH" }, { merge: true });
+          transaction.create(privatePlayerDocRef, { role: "CATFISH" });
         } else {
-          transaction.set(privatePlayerDocRef, { role: "CAT" }, { merge: true });
+          transaction.create(privatePlayerDocRef, { role: "CAT" });
         }
       })
     );
