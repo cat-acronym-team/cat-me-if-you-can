@@ -27,6 +27,8 @@
   let confirmPassword = "";
   let googleErr = "";
   let microsoftErr = "";
+  let passErr = "";
+  let passCheck = false;
 
   function outputErrMsg() {
     switch (errorMsg) {
@@ -35,6 +37,9 @@
         return;
       case "a-microsoft-account-already-exists-for-this-user":
         microsoftErr = "A Microsft Account is Already Linked to this Account";
+        return;
+      case "Firebase: Password should be at least 6 characters (auth/weak-password).":
+        passErr = "Password should be at least 6 characters";
         return;
       default:
         errorMsg = "An unexpected error has occured";
@@ -59,6 +64,7 @@
     try {
       await linkWithGoogle();
       googleLinked = true;
+      showOptions = false;
       return;
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : String(err);
@@ -71,6 +77,7 @@
     try {
       await linkWithMicrosoft();
       microsoftLinked = true;
+      showOptions = false;
       return;
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : String(err);
@@ -80,9 +87,17 @@
   }
 
   async function linkPassword() {
+    if (password !== confirmPassword) {
+      passErr = "Passwords do not match";
+      return;
+    }
+
+    passCheck = true;
     try {
       await linkWithPassword(password);
       linkPass = true;
+      clearFields();
+      showOptions = false;
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : String(err);
       outputErrMsg();
@@ -93,15 +108,6 @@
   function clearFields() {
     password = "";
     confirmPassword = "";
-  }
-
-  function passValidator() {
-    if (password == confirmPassword) {
-      linkPassword();
-      clearFields();
-    } else {
-      return;
-    }
   }
 
   const googleSvgPaths: { color: string; path: string }[] = [
@@ -195,10 +201,10 @@
         </div>
         {#if linkPass}
           <p>Password Sucessfully Set</p>
-        {:else if password != confirmPassword}
-          <p class="error">Passwords do not Match</p>
+        {:else if passErr !== ""}
+          <p class="error">{passErr}</p>
         {/if}
-        <Button on:click={passValidator}>
+        <Button on:click={linkPassword}>
           <Label>Set Password</Label>
         </Button>
       </Content>
@@ -235,8 +241,8 @@
       <Dialog bind:open={errPrompt} aria-labelledby="reauth-title" aria-describedby="err-msg-content">
         <Title id="reauth-title">NOTICE!</Title>
         <Content id="err-msg-content"
-          >Last sign in too long ago.
-          <br />Please Signin and Try Again</Content
+          >Last sign in too long ago. <br />
+          Please Signin and Try Again</Content
         >
         <Actions>
           <Button

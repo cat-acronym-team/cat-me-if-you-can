@@ -86,9 +86,7 @@ export function linkWithPassword(password: string) {
   const user = auth.currentUser;
 
   if (user != null) {
-    const newPassword = password;
-
-    return updatePassword(user, newPassword);
+    return updatePassword(user, password);
   } else {
     return user;
   }
