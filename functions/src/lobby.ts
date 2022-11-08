@@ -197,7 +197,7 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
 
   if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {
     const expiration = firestore.Timestamp.fromMillis(
-      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.END * 1000 // TODO: replace with correct timer when doing pull request
+      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.CHAT * 1000
     );
     lobbyDocRef.update({ expiration });
   }
