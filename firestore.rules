@@ -17,12 +17,13 @@ service cloud.firestore {
 
       match /promptAnswers/{uid} {
         function validAnswer() {
-          return request.resource.data.answer is string
+          return request.resource.data.keys().hasOnly(['answer'])
+            && request.resource.data.answer is string
             && 0 < request.resource.data.answer.size() && request.resource.data.answer.size() <= 50
             && request.resource.data.answer == request.resource.data.answer.trim();
         }
 
-        allow create: if request.auth.uid == uid && validAnswer() && request.resource.data.keys().hasOnly(['answer']);
+        allow create: if request.auth.uid == uid && validAnswer() && inLobby() && lobbyData().state == "PROMPT";
       }
 
       match /chatRooms/{roomId} {
