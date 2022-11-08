@@ -13,21 +13,17 @@
         You are a <span class="green">{privatePlayer.role}</span>
       </div>
       <p class="description">Use your inner Purrlock Holmes and find the catfish!</p>
-      <!-- TODO: Use different cat picture -->
-      <img
-        src="/images/role/Cat.png"
-        alt="cat"
-      />
+      <div class="imgContainer">
+        <img src="/images/role/Cat.png" alt="cat" />
+      </div>
     {:else}
       <div class="role">
         You are a <span class="red">{privatePlayer.role}</span>
       </div>
       <p class="description">Try to cat-mo-flauge with the rest of the cats!</p>
-      <!-- TODO: Use different catfish picture -->
-      <img
-        src="/images/role/CatfishRoleWithEars.png"
-        alt="catfish"
-      />
+      <div class="imgContainer">
+        <img src="/images/role/CatfishRoleWithEars.png" alt="catfish" />
+      </div>
     {/if}
   </div>
 {/if}
@@ -61,19 +57,25 @@
 
   .description {
     position: absolute;
-    font-size: 2.6em;
+    font-size: 3em;
     width: 75%;
-    left: 15%;
+    left: 12.5%;
     top: 70%;
     text-align: center;
   }
 
-  img {
+  .imgContainer {
     position: absolute;
     width: 30%;
     left: 35%;
     top: 30%;
     height: 35%;
+  }
+
+  img {
+    height: 100%;
+    width: 100%;
+    padding-bottom: 20%;
   }
 
   .green {
