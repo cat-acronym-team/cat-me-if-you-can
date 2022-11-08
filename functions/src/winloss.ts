@@ -7,7 +7,8 @@ import { Lobby } from "./firestore-types/lobby";
 
 // this function will likely be obsolete once timers are introduced
 export const lobbyReturn = functions.https.onCall(async (data: unknown, context): Promise<void> => {
-  if (context.auth === undefined) {
+  const auth = context.auth;
+  if (auth === undefined) {
     throw new functions.https.HttpsError("permission-denied", "Not Signed In");
   }
 
@@ -18,23 +19,23 @@ export const lobbyReturn = functions.https.onCall(async (data: unknown, context)
 
   // get lobby doc
   const lobbyDocRef = lobbyCollection.doc(data.code);
-  const lobbyDoc = await lobbyDocRef.get();
-  if (lobbyDoc.exists === false) {
-    throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
-  }
-
-  const lobbyData = lobbyDoc.data() as Lobby;
-  // check if host
-  if (context.auth.uid !== lobbyData.uids[0]) {
-    throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
-  }
-
-  // check game state
-  if (lobbyData.state !== "END") {
-    throw new functions.https.HttpsError("failed-precondition", "Wrong game state!");
-  }
 
   await db.runTransaction(async (transaction) => {
+    const lobbyDoc = await transaction.get(lobbyDocRef);
+    if (lobbyDoc.exists === false) {
+      throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
+    }
+
+    const lobbyData = lobbyDoc.data() as Lobby;
+    // check if host
+    if (auth.uid !== lobbyData.uids[0]) {
+      throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
+    }
+
+    // check game state
+    if (lobbyData.state !== "END") {
+      throw new functions.https.HttpsError("failed-precondition", "Wrong game state!");
+    }
     await endGameProcess(lobbyData, lobbyDocRef, transaction);
   });
 });
