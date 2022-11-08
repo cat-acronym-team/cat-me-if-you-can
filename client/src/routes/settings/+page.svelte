@@ -13,6 +13,8 @@
   import { Svg, Icon } from "@smui/common";
   import IconButton from "@smui/icon-button";
   import Textfield from "@smui/textfield";
+  import { authStore as user } from "$stores/auth";
+  import { EmailAuthCredential } from "firebase/auth";
 
   let showDeletionPrompt = false;
   let showOptions = false;
@@ -133,7 +135,7 @@
 <html lang="en">
   <main class="settings-wrapper">
     <h2>Account Settings</h2>
-    <p id="email">Email: {getEmail()}</p>
+    <p id="email">Email: {$user?.email == null ? "Anonymous User" : $user.email}</p>
     <div>
       <Button on:click={() => (showOptions = true)}>
         <Label>Link Account Options</Label>
