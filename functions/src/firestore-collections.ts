@@ -1,4 +1,4 @@
-import { ChatMessage, ChatRoom, Lobby, PrivatePlayer, PromptAnswer } from "./firestore-types/lobby";
+import { ChatMessage, ChatRoom, Lobby, PrivatePlayer, PromptAnswer, Vote } from "./firestore-types/lobby";
 import { db } from "./app";
 import { UserData } from "./firestore-types/users";
 import type { CollectionReference, DocumentReference } from "firebase-admin/firestore";
@@ -25,4 +25,8 @@ export function getPrivatePlayerCollection(lobbyDoc: DocumentReference<Lobby>): 
 
 export function getPromptAnswerCollection(lobbyDoc: DocumentReference<Lobby>): CollectionReference<PromptAnswer> {
   return lobbyDoc.collection("promptAnswers") as CollectionReference<PromptAnswer>;
+}
+
+export function getVoteCollection(lobbyDoc: DocumentReference<Lobby>): CollectionReference<Vote> {
+  return lobbyDoc.collection("votes") as CollectionReference<Vote>;
 }

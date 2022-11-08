@@ -37,48 +37,6 @@ export const lobbyReturn = functions.https.onCall(async (data: unknown, context)
   await deletePrivatePlayers(lobby, getPrivatePlayerCollection(lobby.ref));
 });
 
-export function findWinner(lobbyDocRef: firestore.DocumentReference<Lobby>) {
-  return db.runTransaction(async (transaction) => {
-    const lobby = await transaction.get(lobbyDocRef);
-    const lobbyData = lobby.data();
-
-    if (lobbyData === undefined) {
-      throw new Error("Lobby does not exist!");
-    }
-    const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
-    const { players, uids } = lobbyData;
-    await Promise.all(
-      lobbyData.uids.map(async (uid) => {
-        const privatePlayerDocRef = privatePlayerCollection.doc(uid);
-        const privatePlayerDoc = await transaction.get(privatePlayerDocRef);
-        const privatePlayerData = privatePlayerDoc.data();
-
-        if (!privatePlayerData) {
-          throw new Error(`Private player not found for uid ${uid}`);
-        }
-        const playerId: string = uid;
-        players[uids.indexOf(playerId)].role = privatePlayerData.role;
-      })
-    );
-
-    let catfishCount = 0;
-    for (let i = 0; i < uids.length; i++) {
-      // check the alive players
-      if (lobbyData.players[i].alive == true) {
-        if (lobbyData.players[i].role == "CATFISH") {
-          catfishCount++;
-        }
-      }
-    }
-    if (catfishCount == 0) {
-      lobbyData.winner = "CAT";
-    } else {
-      lobbyData.winner = "CATFISH";
-    }
-    transaction.set(lobbyDocRef, lobbyData);
-  });
-}
-
 // when returning to the lobby, make every player alive again and delete the role, winner, and the private player collection
 export function resetLobby(lobbyDoc: firestore.DocumentSnapshot<Lobby>) {
   return db.runTransaction(async (transaction) => {
@@ -93,7 +51,7 @@ export function resetLobby(lobbyDoc: firestore.DocumentSnapshot<Lobby>) {
     // loop through each player and set their alive status to true and remove the role property from the player
     let { players } = lobbyData;
     players = players.map(({ role, ...rest }) => {
-      return { ...rest, alive: true };
+      return { ...rest, alive: true, votes: 0 };
     });
 
     transaction.update(lobbyDocRef, { state: "WAIT", players, winner: firestore.FieldValue.delete() });

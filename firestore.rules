@@ -2,12 +2,13 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /lobbies/{code} {
-      // to combat the delete room issue where the host is potentially stalker
-      // allow the second player in the lobby to be co-host 
-      // since in the future the second player in the lobby might become host if the host leaves
-      function isHost(){
-        return request.auth.uid == resource.data.uids[0] || request.auth.uid == resource.data.uids[1];
+      function lobbyData(){
+        return get(/databases/$(database)/documents/lobbies/$(code)).data
       }
+      function inLobby(){
+        return request.auth.uid in lobbyData().uids
+      }
+
       allow get: if true;
 
       match /privatePlayers/{uid} {
@@ -50,6 +51,21 @@ service cloud.firestore {
           allow read: if canRead();
           allow create: if inPair() && validateChatMessage();
         }
+      }
+
+      match /votes/{uid} {
+        function checkTarget(){
+          return request.resource.data.keys().hasOnly(['target'])
+          && request.resource.data.target is string
+          && request.resource.data.target in lobbyData().uids
+          && request.resource.data.target != request.auth.uid;
+        }
+        function notPastTarget(){
+          return checkTarget() && request.resource.data.target != resource.data.target;
+        }
+
+        allow create: if request.auth.uid == uid && inLobby() && checkTarget();
+        allow update: if request.auth.uid == uid && inLobby() && notPastTarget();
       }
     }
 
