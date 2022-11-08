@@ -1,5 +1,5 @@
 import type { DocumentReference, Transaction } from "firebase-admin/firestore";
-import { getChatRoomCollection, getChatRoomMessagesCollection, getLobbyChatCollection } from "./firestore-collections";
+import { getChatRoomCollection, getChatRoomMessagesCollection } from "./firestore-collections";
 import { Lobby } from "./firestore-types/lobby";
 
 // export async function deleteLobbyChatMessages(
