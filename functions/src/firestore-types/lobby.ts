@@ -23,7 +23,7 @@ export type Player = {
   /**
    * the number of players that have voted for this player
    */
-  votes?: number;
+  votes: number;
 
   /**
    * the role that the player played; used at the end of the game
@@ -36,7 +36,7 @@ export type Player = {
   promptAnswer?: string;
 };
 
-export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
+export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "RESULT" | "END";
 
 /**
  * the duration in seconds for each game state
@@ -46,6 +46,7 @@ export const GAME_STATE_DURATIONS: { [state in GameState]: number } = {
   PROMPT: 60,
   CHAT: 2 * 60,
   VOTE: 3 * 60,
+  RESULT: 10,
   END: 10,
 };
 
@@ -79,6 +80,12 @@ export type Lobby = {
    * the role that won the game
    */
   winner?: Role;
+
+  /**
+   * the uid of the player that was voted off for the round
+   * @note this can be a uid, NONE, or undefined
+   */
+  votedOff?: string | "NONE";
 };
 
 /**
