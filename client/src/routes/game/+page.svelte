@@ -2,7 +2,10 @@
   import Prompt from "$components/Prompt.svelte";
   import Role from "$components/ReceiveRole.svelte";
   import LobbyComponent from "$components/Lobby.svelte";
+  import WinLoss from "$components/WinLoss.svelte";
   import ChatRoom from "$components/ChatRoom.svelte";
+  import Vote from "$components/Vote.svelte";
+  import Result from "$components/Result.svelte";
   import CircularProgress from "@smui/circular-progress";
 
   import { onSnapshot, doc, getDoc } from "firebase/firestore";
@@ -80,7 +83,13 @@
       state: { errorMessage: errorMessage },
     });
   }
+
+  function onbeforeunload(event: BeforeUnloadEvent) {
+    event.returnValue = true;
+  }
 </script>
+
+<svelte:window on:beforeunload={onbeforeunload} />
 
 <!-- I do this check because the html was rendering the Lobby component before the onmount happened due to lobby having default values -->
 <!-- So the code was displaying undefined in the Lobby Component -->
@@ -102,6 +111,12 @@
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
   {:else if lobby.state === "CHAT"}
     <ChatRoom lobbyData={{ ...lobby, id: lobbyCode }} />
+  {:else if lobby.state === "VOTE"}
+    <Vote {lobby} {lobbyCode} />
+  {:else if lobby.state === "RESULT"}
+    <Result {lobby} {lobbyCode} />
+  {:else if lobby.state === "END"}
+    <WinLoss {lobbyCode} {lobby} {privatePlayer} />
   {:else}
     unknown lobby state: {lobby.state}
   {/if}
