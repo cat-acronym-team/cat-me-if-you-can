@@ -1,16 +1,33 @@
 <script lang="ts">
-  import type { PrivatePlayer, Lobby } from "../../../functions/src/firestore-types/lobby";
-  import { lobbyReturn } from "$lib/firebase/firebase-functions";
+  import { verifyExpiration } from "$lib/firebase/firebase-functions";
+  import { GAME_STATE_DURATIONS, type Lobby, type PrivatePlayer } from "$lib/firebase/firestore-types/lobby";
+  import { onDestroy, onMount } from "svelte";
   import { authStore as user } from "$stores/auth";
+  import { lobbyReturn } from "$lib/firebase/firebase-functions";
 
   export let lobbyCode: string;
   export let lobby: Lobby;
   export let privatePlayer: PrivatePlayer;
 
+  let countdown = GAME_STATE_DURATIONS.END;
+  let timer: ReturnType<typeof setInterval>;
+
   let end: "Cat Win" | "Cat Lose" | "Catfish Lose" | "Catfish Win" | null = null;
   let catfishList: string = "";
   let catfishes: string[];
   let isHost: boolean;
+
+  onMount(() => {
+    timer = setInterval(() => {
+      if (lobby.expiration != undefined) {
+        const diff = Math.floor((lobby.expiration.toMillis() - Date.now()) / 1000);
+        countdown = diff;
+      }
+    }, 1000);
+  });
+  onDestroy(() => {
+    clearInterval(timer);
+  });
 
   // check if the user is the host
   $: if ($user !== null) {
@@ -45,6 +62,16 @@
         end = "Catfish Win";
       }
     }
+  }
+
+  // apply stats
+  $: if (countdown <= 0 && $user?.uid == lobby.uids[0]) {
+    clearInterval(timer);
+    verifyExpiration({ code: lobbyCode });
+  }
+  $: if (countdown <= -5) {
+    clearInterval(timer);
+    verifyExpiration({ code: lobbyCode });
   }
 </script>
 

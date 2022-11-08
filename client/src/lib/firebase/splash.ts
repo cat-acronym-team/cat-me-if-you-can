@@ -56,5 +56,9 @@ export const createUser = async (uid: string, name: string) => {
   await setDoc(doc(userCollection, uid), {
     displayName: name,
     avatar: 0,
+    catfishWins: 0,
+    catWins: 0,
+    playedAsCat: 0,
+    playedAsCatfish: 0,
   });
 };
