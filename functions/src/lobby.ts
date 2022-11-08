@@ -15,6 +15,7 @@ import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 import { deleteChatRooms } from "./chat";
+import { assignRole } from "./role";
 
 function generateLobbyCode() {
   const chars = new Array(6);
@@ -84,12 +85,8 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
     throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
   }
 
-  const privatePlayerCollection = getPrivatePlayerCollection(lobby.ref);
-  for (const uid of uids) {
-    privatePlayerCollection.doc(uid).create({ role: "CAT" });
-  }
-
-  await lobbyCollection.doc(data.code).update({ state: "PROMPT" });
+  await lobbyCollection.doc(data.code).update({ state: "ROLE" });
+  await assignRole(lobby.ref);
 });
 
 export const joinLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
@@ -149,9 +146,7 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   if (lobby.state == "PROMPT" && oldLobby.state != "PROMPT") {
     await startPrompt(lobbyDocRef);
   }
-  if (lobby.state == "ROLE" && oldLobby.state != "ROLE") {
-    await setRole(lobbyDocRef);
-  }
+
   if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {
     const expiration = firestore.Timestamp.fromMillis(
       firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.CHAT * 1000
@@ -195,32 +190,6 @@ function startPrompt(lobbyDocRef: firestore.DocumentReference<Lobby>) {
     );
 
     transaction.set(lobbyDocRef, { state: "PROMPT" }, { merge: true });
-  });
-}
-
-function setRole(lobbyDocRef: firestore.DocumentReference<Lobby>) {
-  const numCatFish = 1;
-  const check: number[] = [];
-  let current = 0;
-  const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
-
-  return db.runTransaction(async (transaction) => {
-    const lobbyDoc = await transaction.get(lobbyDocRef);
-
-    const lobbyData = lobbyDoc.data();
-
-    for (let i = 0; i < numCatFish; i++) {
-      current = Math.floor(Math.random() * (lobbyData.uids.length - 1) + 0);
-      if (check.indexOf(current) === -1) {
-        check.push(current);
-      } else i--;
-    }
-
-    for (let j = 0; j < lobbyData.uids.length; j++) {
-      const privatePlayerDocRef = privatePlayerCollection.doc(lobbyData.uids[j]);
-
-      transaction.set(privatePlayerDocRef, { role: check.indexOf(j) === -1 ? "CAT" : "CATFISH" }, { merge: true });
-    }
   });
 }
 

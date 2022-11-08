@@ -96,12 +96,12 @@
     <div class="spinner-wraper">
       <CircularProgress indeterminate />
     </div>
+  {:else if lobby.state === "ROLE"}
+    <Role {privatePlayer} />
   {:else if lobby.state === "PROMPT"}
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
   {:else if lobby.state === "CHAT"}
     <ChatRoom lobbyData={{ ...lobby, id: lobbyCode }} />
-  {:else if lobby.state === "ROLE"}
-    <Role {lobbyCode} />
   {:else}
     unknown lobby state: {lobby.state}
   {/if}
