@@ -1,12 +1,5 @@
 <script lang="ts">
-  import {
-    deleteAccount,
-    getEmail,
-    linkWithGoogle,
-    linkWithMicrosoft,
-    linkWithPassword,
-    logOut,
-  } from "$lib/firebase/auth";
+  import { deleteAccount, linkWithGoogle, linkWithMicrosoft, linkWithPassword, logOut } from "$lib/firebase/auth";
   import { goto } from "$app/navigation";
   import Dialog, { Title, Content, Actions } from "@smui/dialog";
   import Button, { Label } from "@smui/button";
@@ -14,7 +7,6 @@
   import IconButton from "@smui/icon-button";
   import Textfield from "@smui/textfield";
   import { authStore as user } from "$stores/auth";
-  import { EmailAuthCredential } from "firebase/auth";
 
   let showDeletionPrompt = false;
   let showOptions = false;

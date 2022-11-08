@@ -95,13 +95,3 @@ export function linkWithPassword(password: string) {
 export function logOut() {
   return signOut(auth);
 }
-
-export function getEmail() {
-  const user = auth.currentUser;
-
-  if (user != null) {
-    return user.email;
-  } else {
-    return user;
-  }
-}
