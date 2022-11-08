@@ -1,7 +1,7 @@
 import type { DocumentReference, Transaction } from "firebase-admin/firestore";
 import { Lobby, Player } from "./firestore-types/lobby";
 
-export async function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lobby>, transaction: Transaction) {
+export function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lobby>, transaction: Transaction) {
   const { players, uids } = lobbyData;
   let votedOff: string | undefined = undefined;
 
@@ -28,7 +28,7 @@ export async function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReferen
   }
 
   // update the state of the game
-  await transaction.update(lobbyDocRef, {
+  transaction.update(lobbyDocRef, {
     state: "RESULT",
     players: players,
     votedOff: votedOff ?? "NONE",

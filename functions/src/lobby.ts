@@ -360,7 +360,7 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
   });
 });
 
-export const verifyExpiration = functions.https.onCall(async (data, context) => {
+export const verifyExpiration = functions.https.onCall((data, context): Promise<void> => {
   // check auth
   if (context.auth == undefined) {
     throw new functions.https.HttpsError("permission-denied", "User is not Authenticated");
@@ -397,7 +397,7 @@ export const verifyExpiration = functions.https.onCall(async (data, context) => 
       await deleteChatRooms(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "VOTE") {
-      await findVoteOff(lobby, lobbyDocRef, transaction);
+      findVoteOff(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "RESULT") {
       await determineWinner(lobby, lobbyDocRef, transaction);
