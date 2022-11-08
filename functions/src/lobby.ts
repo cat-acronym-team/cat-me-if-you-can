@@ -15,6 +15,7 @@ import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 import { deleteChatRooms } from "./chat";
+import { endGameProcess } from "./winloss";
 import { findVoteOff } from "./vote";
 import { determineWinner } from "./result";
 
@@ -136,8 +137,13 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     }
 
     // add player
-    await transaction.update(lobby, {
-      players: firestore.FieldValue.arrayUnion({ ...userInfo, alive: true, votes: 0 }),
+    transaction.update(lobby, {
+      players: firestore.FieldValue.arrayUnion({
+        displayName: userInfo.displayName,
+        avatar: userInfo.avatar,
+        alive: true,
+        votes: 0,
+      }),
       uids: firestore.FieldValue.arrayUnion(auth.uid),
     });
   });
@@ -210,6 +216,12 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   if (lobby.state == "RESULT" && oldLobby.state != "RESULT") {
     const expiration = firestore.Timestamp.fromMillis(
       firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.RESULT * 1000
+    );
+    lobbyDocRef.update({ expiration });
+  }
+  if (lobby.state == "END" && oldLobby.state != "END") {
+    const expiration = firestore.Timestamp.fromMillis(
+      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.END * 1000
     );
     lobbyDocRef.update({ expiration });
   }
@@ -395,6 +407,10 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
     // if the state is chat then delete chatrooms
     if (lobby.state === "CHAT") {
       await deleteChatRooms(lobby, lobbyDocRef, transaction);
+    }
+    // Applies the stats once the timer on the end screen ends
+    if (lobby.state === "END") {
+      await endGameProcess(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "VOTE") {
       findVoteOff(lobby, lobbyDocRef, transaction);

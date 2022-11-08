@@ -77,15 +77,15 @@ export type Lobby = {
   expiration?: Timestamp;
 
   /**
+   * the role that won the game
+   */
+  winner?: Role;
+
+  /**
    * the uid of the player that was voted off for the round
    * @note this can be a uid, NONE, or undefined
    */
   votedOff?: string | "NONE";
-
-  /**
-   * the role that won the game
-   */
-  winner?: Role;
 };
 
 /**
