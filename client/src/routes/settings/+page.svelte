@@ -15,6 +15,7 @@
   let googleLinked = false;
   let microsoftLinked = false;
   let linkPass = false;
+  let passCheck = false;
 
   let errorMsg = "";
   let password = "";
@@ -22,7 +23,6 @@
   let googleErr = "";
   let microsoftErr = "";
   let passErr = "";
-  let passCheck = false;
 
   function outputErrMsg() {
     switch (errorMsg) {
@@ -45,7 +45,6 @@
       deleteAccount();
       // If no error
       errorMsg = "";
-
       goto("/");
     } catch (err) {
       errPrompt = true;
@@ -58,6 +57,7 @@
       await linkWithGoogle();
       googleLinked = true;
       showOptions = false;
+      window.location.reload();
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : String(err);
       outputErrMsg();
@@ -69,6 +69,7 @@
       await linkWithMicrosoft();
       microsoftLinked = true;
       showOptions = false;
+      window.location.reload();
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : String(err);
       outputErrMsg();
@@ -86,6 +87,7 @@
       linkPass = true;
       clearFields();
       showOptions = false;
+      window.location.reload();
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : String(err);
       outputErrMsg();
