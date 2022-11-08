@@ -47,7 +47,6 @@
       errorMsg = "";
 
       goto("/");
-      return;
     } catch (err) {
       errPrompt = true;
       errorMsg = err instanceof Error ? err.message : String(err);
@@ -59,11 +58,9 @@
       await linkWithGoogle();
       googleLinked = true;
       showOptions = false;
-      return;
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : String(err);
       outputErrMsg();
-      return;
     }
   }
 
@@ -72,18 +69,15 @@
       await linkWithMicrosoft();
       microsoftLinked = true;
       showOptions = false;
-      return;
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : String(err);
       outputErrMsg();
-      return;
     }
   }
 
   async function linkPassword() {
     if (password !== confirmPassword) {
       passErr = "Passwords do not match";
-      return;
     }
 
     passCheck = true;
@@ -95,7 +89,6 @@
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : String(err);
       outputErrMsg();
-      return;
     }
   }
 
