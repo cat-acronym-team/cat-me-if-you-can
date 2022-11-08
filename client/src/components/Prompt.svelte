@@ -4,8 +4,9 @@
   import HelperText from "@smui/textfield/helper-text";
   import { getPromptAnswerCollection } from "$lib/firebase/firestore-collections";
   import { doc, setDoc } from "firebase/firestore";
-  import type { Lobby } from "$lib/firebase/firestore-types/lobby";
+  import { GAME_STATE_DURATIONS, type Lobby } from "$lib/firebase/firestore-types/lobby";
   import { authStore as user } from "$stores/auth";
+  import { verifyExpiration } from "$lib/firebase/firebase-functions";
 
   export let prompt: string | undefined;
 
@@ -17,30 +18,30 @@
 
   let answer = "";
   let dirty = false;
-  let countdown: number | undefined = undefined;
+  let countdown: number = GAME_STATE_DURATIONS.PROMPT;
   let timer: ReturnType<typeof setInterval>;
 
   $: answerDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
 
   $: error = getErrorMessage(answer);
 
-  $: if (countdown == 0 && lobbyData.uids[0] == $user?.uid) {
+  $: if (countdown <= 0 && lobbyData.uids[0] == $user?.uid) {
     clearInterval(timer);
     // call this function so it can continue onto the next state
-    // Also submits their answer if they had anything in the text field
-    submitAnswer();
+    verifyExpiration({ code: lobbyCode });
   }
 
-  $: if (countdown == -5) {
+  $: if (countdown <= -5) {
     clearInterval(timer);
     // call this function so it can continue onto the next state
-    // Also submits their answer if they had anything in the text field
-    submitAnswer();
+    verifyExpiration({ code: lobbyCode });
   }
 
   timer = setInterval(() => {
-    const diff = Math.floor((lobbyData.expiration.toMillis() - Date.now()) / 1000);
-    countdown = diff;
+    if (lobbyData.expiration != undefined) {
+      const diff = Math.floor((lobbyData.expiration.toMillis() - Date.now()) / 1000);
+      countdown = diff;
+    }
   }, 500);
 
   function getErrorMessage(answer: string): string | undefined {
