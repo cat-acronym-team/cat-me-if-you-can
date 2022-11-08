@@ -138,7 +138,7 @@ export async function endGameProcess(
   // create a WriteBatch
   const batch = db.batch();
   const privatePlayerCollectionRef = getPrivatePlayerCollection(lobbyDocRef);
-  
+
   // loop through each doc in the private player collection via uid and delete them one-by-one
   for (let i = 0; i < uids.length; i++) {
     const playerDoc = privatePlayerCollectionRef.doc(uids[i]);
