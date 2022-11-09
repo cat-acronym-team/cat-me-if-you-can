@@ -13,3 +13,19 @@ export const avatarAltText = [
   "Magic cat",
   "Torsten cat",
 ] as const;
+
+export const avatarColors = [
+  "#9e9e9e",
+  "#e53935",
+  "#e91e63",
+  "#ba68c8",
+  "#9575cd",
+  "#7986cb",
+  "#1e88e5",
+  "#03a9f4",
+  "#00acc1",
+  "#43a047",
+  "#8bc34a",
+  "#ffeb3b",
+  "#f57c00",
+] as const;
