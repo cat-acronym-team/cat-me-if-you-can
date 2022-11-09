@@ -253,8 +253,12 @@ export async function collectPromptAnswers(
   );
   transaction.update(lobbyDoc.ref, { state: "CHAT", expiration });
 
-  // TODO: check if we have a stalker
-  const { pairs } = generatePairs(lobbyData);
+  const { pairs, stalker } = generatePairs(lobbyData);
+
+  if (stalker != undefined) {
+    getPrivatePlayerCollection(lobbyDoc.ref).doc(stalker).update({ stalker: true });
+  }
+
   // create a chatroom for each pair
   for (const { one, two } of pairs) {
     const roomRef = getChatRoomCollection(lobbyDoc.ref).doc(one + two);

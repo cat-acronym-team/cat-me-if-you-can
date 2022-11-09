@@ -104,6 +104,11 @@ export type PrivatePlayer = {
   role: Role;
 
   /**
+   * states if a user is a stalker or not
+   */
+  stalker: boolean;
+
+  /**
    * the prompt that the user will be shown (this varies on the role)
    */
   prompt?: string;
