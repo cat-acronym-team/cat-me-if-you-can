@@ -33,12 +33,13 @@ service cloud.firestore {
 
       match /promptAnswers/{uid} {
         function validAnswer() {
-          return request.resource.data.answer is string
+          return request.resource.data.keys().hasOnly(['answer'])
+            && request.resource.data.answer is string
             && 0 < request.resource.data.answer.size() && request.resource.data.answer.size() <= 50
             && request.resource.data.answer == request.resource.data.answer.trim();
         }
 
-        allow create: if request.auth.uid == uid && validAnswer() && request.resource.data.keys().hasOnly(['answer']);
+        allow create: if request.auth.uid == uid && validAnswer() && inLobby() && lobbyData().state == "PROMPT";
       }
 
       match /chatRooms/{roomId} {
@@ -103,8 +104,8 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      function validateAttrs(){
-        return request.resource.data.keys().hasOnly(['displayName', 'avatar'])
+      function validateDisplayAndAvatar(){
+        return request.resource.data.keys().hasOnly(['displayName', 'avatar', 'catWins', 'catfishWins', 'playedAsCat', 'playedAsCatfish'])
           && request.resource.data.displayName is string && request.resource.data.displayName.size() >= 3 
           && request.resource.data.displayName.size() <= 15 
           && request.resource.data.displayName == request.resource.data.displayName.trim()
@@ -112,10 +113,23 @@ service cloud.firestore {
           && request.resource.data.avatar is number && int(request.resource.data.avatar) == request.resource.data.avatar 
           && request.resource.data.avatar >= 0 && request.resource.data.avatar <=12;
       }
+      function statsAreZero() {
+          return request.resource.data.catWins == 0 
+          && request.resource.data.catfishWins == 0
+          && request.resource.data.playedAsCat == 0 
+          && request.resource.data.playedAsCatfish == 0;
+      }
+      function statsAreNotChanged(){
+        return request.resource.data.catWins == resource.data.catWins
+          && request.resource.data.catfishWins == resource.data.catfishWins
+          && request.resource.data.playedAsCat == resource.data.playedAsCat
+          && request.resource.data.playedAsCatfish == resource.data.playedAsCatfish
+      }
 
       // allows anyone to read that information
       allow read;
-      allow create, update: if request.auth.uid == userId && validateAttrs();
+      allow create: if request.auth.uid == userId && validateDisplayAndAvatar() && statsAreZero()
+      allow update: if request.auth.uid == userId && validateDisplayAndAvatar() && statsAreNotChanged();
     }
   }
 }

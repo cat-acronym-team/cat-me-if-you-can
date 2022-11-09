@@ -1,6 +1,7 @@
+import { firestore } from "firebase-admin";
 import type { DocumentReference, Transaction } from "firebase-admin/firestore";
 import { getChatRoomCollection, getChatRoomMessagesCollection, getLobbyChatCollection } from "./firestore-collections";
-import { Lobby } from "./firestore-types/lobby";
+import { GAME_STATE_DURATIONS, Lobby } from "./firestore-types/lobby";
 
 export async function deleteLobbyChatMessages(
   lobbyData: Lobby,
@@ -47,5 +48,8 @@ export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentRefere
     })
   );
 
-  transaction.update(lobbyDoc, { state: "VOTE", players });
+  const expiration = firestore.Timestamp.fromMillis(
+    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.VOTE * 1000
+  );
+  transaction.update(lobbyDoc, { state: "VOTE", expiration, players });
 }

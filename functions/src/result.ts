@@ -1,21 +1,25 @@
-import type { DocumentReference, Transaction } from "firebase-admin/firestore";
+import { firestore } from "firebase-admin";
+import type { DocumentSnapshot, Transaction } from "firebase-admin/firestore";
 import { getPrivatePlayerCollection, getVoteCollection } from "./firestore-collections";
-import { Lobby, Player, Role } from "./firestore-types/lobby";
+import { GAME_STATE_DURATIONS, Lobby, Player, Role } from "./firestore-types/lobby";
+import { startPrompt } from "./lobby";
 
-export async function determineWinner(
-  lobbyData: Lobby,
-  lobbyDocRef: DocumentReference<Lobby>,
-  transaction: Transaction
-) {
+export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transaction: Transaction) {
+  const lobbyData = lobbyDoc.data();
+
+  if (lobbyData == undefined) {
+    throw new Error("Lobby not found");
+  }
+
   const { uids } = lobbyData;
-  let { players: currentPlayers } = lobbyData;
+  const { players: currentPlayers } = lobbyData;
   let winner: Role | undefined;
   const alteredPlayers: Player[] = JSON.parse(JSON.stringify(currentPlayers));
 
   // check the alive cats vs alive catfishes
   let aliveCats = 0;
   let aliveCatfishes = 0;
-  const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
+  const privatePlayerCollection = getPrivatePlayerCollection(lobbyDoc.ref);
 
   for (const uid of uids) {
     const privatePlayerRef = privatePlayerCollection.doc(uid);
@@ -50,20 +54,29 @@ export async function determineWinner(
   // if there's no winner clear out the votes for the current player
   if (winner == undefined) {
     // set their votes to zero
-    currentPlayers = currentPlayers.map((player) => {
+    for (const player of currentPlayers) {
       player.votes = 0;
-      return player;
-    });
-    // remove their vote document
-    const voteCollection = getVoteCollection(lobbyDocRef);
-    const voteDocs = await transaction.get(voteCollection);
-    await Promise.all(voteDocs.docs.map((voteSnap) => transaction.delete(voteSnap.ref)));
+    }
   }
 
+  // remove their vote document
+  const voteCollection = getVoteCollection(lobbyDoc.ref);
+  const voteDocs = await transaction.get(voteCollection);
+
   // update the lobby doc with the new information
-  transaction.update(lobbyDocRef, {
-    state: winner != undefined ? "END" : "PROMPT",
-    players: winner != undefined ? alteredPlayers : currentPlayers,
-    winner,
-  });
+  if (winner != undefined) {
+    // END
+    const expiration = firestore.Timestamp.fromMillis(
+      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.END * 1000
+    );
+    transaction.update(lobbyDoc.ref, { state: "END", players: alteredPlayers, winner, expiration });
+  } else {
+    // PROMPT
+    await startPrompt(lobbyDoc, transaction);
+    transaction.update(lobbyDoc.ref, { players: currentPlayers });
+  }
+
+  for (const voteDoc of voteDocs.docs) {
+    transaction.delete(voteDoc.ref);
+  }
 }

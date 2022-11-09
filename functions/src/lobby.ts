@@ -15,6 +15,7 @@ import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 import { deleteChatRooms, deleteLobbyChatMessages } from "./chat";
+import { endGameProcess } from "./winloss";
 import { findVoteOff } from "./vote";
 import { determineWinner } from "./result";
 
@@ -69,31 +70,35 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
 });
 
 export const startGame = functions.https.onCall(async (data: unknown, context): Promise<void> => {
+  const auth = context.auth;
   // no auth then you shouldn't be here
-  if (context.auth === undefined) {
+  if (auth === undefined) {
     throw new functions.https.HttpsError("permission-denied", "Not Signed In");
   }
   // validate code
   if (!isLobbyRequest(data)) {
     throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
   }
-  // get lobby doc
-  const lobby = await lobbyCollection.doc(data.code).get();
-  if (lobby.exists === false) {
-    throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
-  }
-  // check if the request is coming from the host of the game
-  const { uids } = lobby.data() as Lobby;
-  if (context.auth.uid !== uids[0]) {
-    throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
-  }
+  await db.runTransaction(async (transaction) => {
+    // get lobby doc
+    const lobby = await transaction.get(lobbyCollection.doc(data.code));
+    if (lobby.exists === false) {
+      throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
+    }
+    // check if the request is coming from the host of the game
+    const { uids } = lobby.data() as Lobby;
+    if (auth.uid !== uids[0]) {
+      throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
+    }
 
-  const privatePlayerCollection = getPrivatePlayerCollection(lobby.ref);
-  for (const uid of uids) {
-    privatePlayerCollection.doc(uid).create({ role: "CAT" });
-  }
+    const privatePlayerCollection = getPrivatePlayerCollection(lobby.ref);
+    for (const uid of uids) {
+      privatePlayerCollection.doc(uid).create({ role: "CAT" });
+    }
 
-  await lobbyCollection.doc(data.code).update({ state: "PROMPT" });
+    // await lobbyCollection.doc(data.code).update({ state: "PROMPT" });
+    await startPrompt(lobby, transaction);
+  });
 });
 
 export const joinLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
@@ -137,8 +142,13 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     }
 
     // add player
-    await transaction.update(lobby, {
-      players: firestore.FieldValue.arrayUnion({ ...userInfo, alive: true, votes: 0 }),
+    transaction.update(lobby, {
+      players: firestore.FieldValue.arrayUnion({
+        displayName: userInfo.displayName,
+        avatar: userInfo.avatar,
+        alive: true,
+        votes: 0,
+      }),
       uids: firestore.FieldValue.arrayUnion(auth.uid),
     });
   });
@@ -222,111 +232,95 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   }
 });
 
-function startPrompt(lobbyDocRef: firestore.DocumentReference<Lobby>) {
+export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
   const [catPrompt, catfishPrompt] = getRandomPromptPair();
 
-  const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
+  const privatePlayerCollection = getPrivatePlayerCollection(lobbyDoc.ref);
 
-  return db.runTransaction(async (transaction) => {
-    const lobbyDoc = await transaction.get(lobbyDocRef);
+  const lobbyData = lobbyDoc.data();
 
-    const lobbyData = lobbyDoc.data();
+  if (lobbyData == undefined) {
+    throw new Error("Lobby not found");
+  }
 
-    if (!lobbyData) {
-      throw new Error("Lobby not found");
-    }
+  await Promise.all(
+    lobbyData.uids.map(async (uid) => {
+      const privatePlayerDocRef = privatePlayerCollection.doc(uid);
 
-    await Promise.all(
-      lobbyData.uids.map(async (uid) => {
-        const privatePlayerDocRef = privatePlayerCollection.doc(uid);
+      const privatePlayerDoc = await transaction.get(privatePlayerDocRef);
 
-        const privatePlayerDoc = await transaction.get(privatePlayerDocRef);
+      const privatePlayerData = privatePlayerDoc.data();
 
-        const privatePlayerData = privatePlayerDoc.data();
+      if (!privatePlayerData) {
+        throw new Error(`Private player not found for uid ${uid}`);
+      }
 
-        if (!privatePlayerData) {
-          throw new Error(`Private player not found for uid ${uid}`);
-        }
+      transaction.update(privatePlayerDocRef, {
+        prompt: privatePlayerData.role == "CAT" ? catPrompt : catfishPrompt,
+      });
+    })
+  );
+  // expiration
+  const expiration = firestore.Timestamp.fromMillis(
+    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.PROMPT * 1000
+  );
 
-        transaction.set(
-          privatePlayerDocRef,
-          { prompt: privatePlayerData.role == "CAT" ? catPrompt : catfishPrompt },
-          { merge: true }
-        );
-      })
-    );
-
-    transaction.set(lobbyDocRef, { state: "PROMPT" }, { merge: true });
-  });
+  transaction.update(lobbyDoc.ref, { state: "PROMPT", expiration });
 }
 
-export const collectPromptAnswers = functions.firestore
-  .document("/lobbies/{code}/promptAnswers/{uid}")
-  .onCreate((change, context) => {
-    const { code, uid } = context.params;
+export async function collectPromptAnswers(
+  lobbyDoc: firestore.DocumentSnapshot<Lobby>,
+  transaction: firestore.Transaction
+) {
+  const lobbyData = lobbyDoc.data();
 
-    const lobbyDocRef = lobbyCollection.doc(code);
+  if (lobbyData == undefined) {
+    throw new functions.https.HttpsError("not-found", "There's no data in this lobby");
+  }
 
-    return db.runTransaction(async (transaction) => {
-      const lobbyDoc = await transaction.get(lobbyDocRef);
+  const promptAnswerCollection = getPromptAnswerCollection(lobbyDoc.ref);
 
-      const lobbyData = lobbyDoc.data();
+  const promptAnswerDocs = await transaction.get(promptAnswerCollection);
 
-      if (lobbyData == undefined || lobbyData.state !== "PROMPT" || !lobbyData.uids.includes(uid)) {
-        transaction.delete(change.ref);
-        return;
-      }
+  const promptAnswers = new Map<string, string>();
 
-      const missingUids = new Set(lobbyData.uids);
+  for (const promptAnswerDoc of promptAnswerDocs.docs) {
+    promptAnswers.set(promptAnswerDoc.id, promptAnswerDoc.data().answer);
+    transaction.delete(promptAnswerDoc.ref);
+  }
 
-      const promptAnswerCollection = getPromptAnswerCollection(lobbyDocRef);
+  // expiration set
+  const expiration = firestore.Timestamp.fromMillis(
+    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.CHAT * 1000
+  );
+  transaction.update(lobbyDoc.ref, { state: "CHAT", expiration });
 
-      const promptAnswerDocs = await transaction.get(promptAnswerCollection);
-
-      for (const promptAnswerDoc of promptAnswerDocs.docs) {
-        missingUids.delete(promptAnswerDoc.id);
-      }
-
-      if (missingUids.size > 0) {
-        return;
-      }
-
-      const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
-
-      const promptAnswers = new Map<string, string>();
-
-      for (const promptAnswerDoc of promptAnswerDocs.docs) {
-        promptAnswers.set(promptAnswerDoc.id, promptAnswerDoc.data().answer);
-        transaction.delete(promptAnswerDoc.ref);
-        transaction.update(privatePlayerCollection.doc(promptAnswerDoc.id), { prompt: firestore.FieldValue.delete() });
-      }
-
-      transaction.update(lobbyDocRef, { state: "CHAT" });
-
-      // TODO: check if we have a stalker
-      const { pairs } = generatePairs(lobbyData);
-      // create a chatroom for each pair
-      pairs.forEach(async ({ one, two }) => {
-        const room = await getChatRoomCollection(lobbyDocRef).add({ pair: [one, two], viewers: [] });
-        // get answers of the pair
-        const oneAnswer = promptAnswers.get(one) as string;
-        const twoAnswer = promptAnswers.get(two) as string;
-        // place answers in chatMessages inside their room
-        await getChatRoomMessagesCollection(room).add({
-          sender: one,
-          text: oneAnswer,
-          timestamp: firestore.Timestamp.now(),
-          isPromptAnswer: true,
-        });
-        await getChatRoomMessagesCollection(room).add({
-          sender: two,
-          text: twoAnswer,
-          timestamp: firestore.Timestamp.now(),
-          isPromptAnswer: true,
-        });
-      });
+  // TODO: check if we have a stalker
+  const { pairs } = generatePairs(lobbyData);
+  // create a chatroom for each pair
+  for (const { one, two } of pairs) {
+    const roomRef = getChatRoomCollection(lobbyDoc.ref).doc(one + two);
+    transaction.create(roomRef, { pair: [one, two], viewers: [] });
+    // get answers of the pair
+    const oneAnswer = promptAnswers.get(one) ?? "No answer";
+    const twoAnswer = promptAnswers.get(two) ?? "No answer";
+    // place answers in chatMessages inside their room
+    const messageRef1 = getChatRoomMessagesCollection(roomRef).doc(one);
+    transaction.create(messageRef1, {
+      sender: one,
+      text: oneAnswer,
+      timestamp: firestore.Timestamp.now(),
+      isPromptAnswer: true,
     });
-  });
+    const messageRef2 = getChatRoomMessagesCollection(roomRef).doc(two);
+    transaction.create(messageRef2, {
+      sender: two,
+      text: twoAnswer,
+      timestamp: firestore.Timestamp.now(),
+      isPromptAnswer: true,
+    });
+  }
+}
 
 export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{uid}").onWrite((change, context) => {
   const { code } = context.params;
@@ -374,7 +368,7 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
   }
   // check the data request
   if (!isLobbyRequest(data)) {
-    throw new functions.https.HttpsError("invalid-argument", "Data is not of ExpirationRequest type.");
+    throw new functions.https.HttpsError("invalid-argument", "Data is not of LobbyRequest type.");
   }
   // get lobby doc
   const lobbyDocRef = lobbyCollection.doc(data.code);
@@ -400,15 +394,22 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
 
     // TODO: potential if checks for other states that require a timer
     // if the state is chat then delete chatrooms
+    if (lobby.state === "PROMPT") {
+      await collectPromptAnswers(lobbyDoc, transaction);
+    }
     if (lobby.state === "CHAT") {
       await deleteChatRooms(lobby, lobbyDocRef, transaction);
+    }
+    // Applies the stats once the timer on the end screen ends
+    if (lobby.state === "END") {
+      await endGameProcess(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "VOTE") {
       await deleteLobbyChatMessages(lobby, lobbyDocRef, transaction);
       findVoteOff(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "RESULT") {
-      await determineWinner(lobby, lobbyDocRef, transaction);
+      await determineWinner(lobbyDoc, transaction);
     }
 
     return;
