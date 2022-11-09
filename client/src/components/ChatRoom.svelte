@@ -160,6 +160,6 @@
   }
 
   .matched-with {
-    justify-self: center;
+    text-align: center;
   }
 </style>
