@@ -1,44 +1,41 @@
 import type { Lobby } from "./firestore-types/lobby";
 import { getPrivatePlayerCollection } from "./firestore-collections";
-import { db } from "./app";
 import { firestore } from "firebase-admin";
 
-export function assignRole(lobby: firestore.DocumentReference<Lobby>) {
+export async function assignRole(lobbySnap: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
   // Number of catfish below, will later be made to be changable by users.
   const numCatFish = 1;
+  const lobby = lobbySnap.ref;
+  const validLobby = await transaction.get(lobby);
+  const lobbyData = validLobby.data();
 
-  return db.runTransaction(async (transaction) => {
-    const validLobby = await transaction.get(lobby);
-    const lobbyData = validLobby.data();
+  // Checks to see if lobby is indeed valid.
+  if (lobbyData === undefined) {
+    throw new Error("Invalid Lobby");
+  }
 
-    // Checks to see if lobby is indeed valid.
-    if (lobbyData === undefined) {
-      throw new Error("Invalid Lobby");
+  // Gets uids from lobby.
+  const { uids } = lobbyData;
+
+  // The uids of the players that will be catfish
+  const catfishUids = new Set<string>();
+
+  // Adds catfish to catfishUids until there are numCatFish catfish.
+  while (catfishUids.size < numCatFish) {
+    catfishUids.add(uids[Math.floor(Math.random() * uids.length)]);
+  }
+  const privatePlayerCollection = getPrivatePlayerCollection(lobby);
+
+  for (const uid of uids) {
+    const privatePlayerDocRef = privatePlayerCollection.doc(uid);
+
+    // check set to catfish if it is inside catfishUids
+    if (catfishUids.has(uid)) {
+      transaction.create(privatePlayerDocRef, { role: "CATFISH" });
+    } else {
+      transaction.create(privatePlayerDocRef, { role: "CAT" });
     }
-
-    // Gets uids from lobby.
-    const { uids } = lobbyData;
-
-    // The uids of the players that will be catfish
-    const catfishUids = new Set<string>();
-
-    // Adds catfish to catfishUids until there are numCatFish catfish.
-    while (catfishUids.size < numCatFish) {
-      catfishUids.add(uids[Math.floor(Math.random() * uids.length)]);
-    }
-    const privatePlayerCollection = getPrivatePlayerCollection(lobby);
-
-    for (const uid of uids) {
-      const privatePlayerDocRef = privatePlayerCollection.doc(uid);
-
-      // check set to catfish if it is inside catfishUids
-      if (catfishUids.has(uid)) {
-        transaction.create(privatePlayerDocRef, { role: "CATFISH" });
-      } else {
-        transaction.create(privatePlayerDocRef, { role: "CAT" });
-      }
-      transaction.update(lobby, { state: "ROLE" });
-    }
-    // TODO: Change game state to "PROMPT" with timer
-  });
+  }
+  transaction.update(lobby, { state: "ROLE" });
+  // TODO: Change game state to "PROMPT" with timer
 }
