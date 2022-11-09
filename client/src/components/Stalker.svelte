@@ -106,6 +106,17 @@
     transform: scaleX(-1);
   }
 
+  @media (max-width: 550px) {
+    .button-content {
+      grid-template-columns: auto auto;
+      padding-inline: 24px;
+    }
+
+    .button-content > img {
+      display: none;
+    }
+  }
+
   .first-name {
     justify-self: start;
   }
