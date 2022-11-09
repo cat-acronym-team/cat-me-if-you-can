@@ -93,7 +93,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
 
     const privatePlayerCollection = getPrivatePlayerCollection(lobby.ref);
     for (const uid of uids) {
-      privatePlayerCollection.doc(uid).create({ role: "CAT" });
+      privatePlayerCollection.doc(uid).create({ role: "CAT", stalker: false });
     }
 
     // await lobbyCollection.doc(data.code).update({ state: "PROMPT" });
@@ -272,8 +272,12 @@ export async function collectPromptAnswers(
   );
   transaction.update(lobbyDoc.ref, { state: "CHAT", expiration });
 
-  // TODO: check if we have a stalker
-  const { pairs } = generatePairs(lobbyData);
+  const { pairs, stalker } = generatePairs(lobbyData);
+
+  if (stalker != undefined) {
+    getPrivatePlayerCollection(lobbyDoc.ref).doc(stalker).update({ stalker: true });
+  }
+
   // create a chatroom for each pair
   for (const { one, two } of pairs) {
     const roomRef = getChatRoomCollection(lobbyDoc.ref).doc(one + two);

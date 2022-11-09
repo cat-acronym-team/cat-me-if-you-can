@@ -1,6 +1,11 @@
 import { firestore } from "firebase-admin";
 import type { DocumentReference, Transaction } from "firebase-admin/firestore";
-import { getChatRoomCollection, getChatRoomMessagesCollection, getLobbyChatCollection } from "./firestore-collections";
+import {
+  getChatRoomCollection,
+  getChatRoomMessagesCollection,
+  getPrivatePlayerCollection,
+  getLobbyChatCollection,
+} from "./firestore-collections";
 import { GAME_STATE_DURATIONS, Lobby } from "./firestore-types/lobby";
 
 export async function deleteLobbyChatMessages(
@@ -19,34 +24,38 @@ export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentRefere
   const chatRoomsSnapshot = await transaction.get(getChatRoomCollection(lobbyDoc));
   const chatRooms = chatRoomsSnapshot.docs.map((room) => room.ref);
 
-  await Promise.all(
+  const chatMessages = await Promise.all(
     chatRooms.map(async (room) => {
-      // get the messages from the chatroom
-      const messages = await transaction.get(getChatRoomMessagesCollection(room));
-      // get the prompt answers from the messages
-      const answers = new Map<string, string>();
-      messages.forEach((messageDoc) => {
-        // get message info
-        const message = messageDoc.data();
-        // if the message is the prompt answer then add to map
-        if (message.isPromptAnswer) {
-          answers.set(message.sender, message.text);
-        }
-        // delete all messages
-        transaction.delete(messageDoc.ref);
-      });
-
-      // add the prompt answers to their player object
-      for (const [key, value] of answers) {
-        // get index and add their prompt answer to their player object
-        const playerIndex = uids.indexOf(key);
-        players[playerIndex].promptAnswer = value;
-      }
-
-      // then delete room
-      transaction.delete(room);
+      const chatMessagesSnapshot = await transaction.get(getChatRoomMessagesCollection(room));
+      return chatMessagesSnapshot.docs;
     })
   );
+
+  // delete stalker
+  const stalkers = await transaction.get(getPrivatePlayerCollection(lobbyDoc).where("stalker", "==", true));
+
+  for (const messageDoc of chatMessages.flat()) {
+    // get message info
+    const message = messageDoc.data();
+    // if the message is the prompt answer then add it to their player object
+    if (message.isPromptAnswer) {
+      // get index and add their prompt answer to their player object
+      const senderIndex = uids.indexOf(message.sender);
+      players[senderIndex].promptAnswer = message.text;
+    }
+    // delete all messages
+    transaction.delete(messageDoc.ref);
+  }
+
+  for (const room of chatRooms) {
+    transaction.delete(room);
+  }
+
+  for (const stalker of stalkers.docs) {
+    transaction.update(stalker.ref, { stalker: false });
+  }
+
+  transaction.update(lobbyDoc, { state: "VOTE", players });
 
   const expiration = firestore.Timestamp.fromMillis(
     firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.VOTE * 1000
