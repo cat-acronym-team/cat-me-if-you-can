@@ -32,7 +32,7 @@ export function assignRole(lobby: firestore.DocumentReference<Lobby>) {
     for (const uid in uids) {
       const privatePlayerDocRef = privatePlayerCollection.doc(uid);
 
-      // get the list of uids, check the index and compare with catfishCheck. If equal, set to catfish
+      // check set to catfish if it is inside catfishUids
       if (catfishUids.has(uid)) {
         transaction.create(privatePlayerDocRef, { role: "CATFISH" });
       } else {
