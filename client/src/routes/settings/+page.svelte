@@ -51,6 +51,10 @@
         const newUserData: UserData = {
           displayName: newPreferences.displayName,
           avatar: newPreferences.avatar ?? 0,
+          catWins: 0,
+          catfishWins: 0,
+          playedAsCat: 0,
+          playedAsCatfish: 0,
         };
         await setDoc(userDataDocRef, newUserData);
       } else {
