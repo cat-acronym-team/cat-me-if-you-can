@@ -22,7 +22,7 @@
       </div>
       <p class="description">Try to cat-mo-flauge with the rest of the cats!</p>
       <div class="imgContainer">
-        <img src="/images/role/CatfishRoleWithEars.png" alt="catfish" />
+        <img src="/images/role/Catfish.png" alt="catfish" />
       </div>
     {/if}
   </div>

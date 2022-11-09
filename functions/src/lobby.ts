@@ -88,7 +88,6 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
     throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
   }
 
-  await lobbyCollection.doc(data.code).update({ state: "ROLE" });
   await assignRole(lobby.ref);
 });
 

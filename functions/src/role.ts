@@ -8,7 +8,6 @@ export function assignRole(lobby: firestore.DocumentReference<Lobby>) {
   const numCatFish = 1;
 
   return db.runTransaction(async (transaction) => {
-    // const validLobby = await getDoc(lobby);
     const validLobby = await transaction.get(lobby);
     const lobbyData = validLobby.data();
 
@@ -29,7 +28,7 @@ export function assignRole(lobby: firestore.DocumentReference<Lobby>) {
     }
     const privatePlayerCollection = getPrivatePlayerCollection(lobby);
 
-    for (const uid in uids) {
+    for (const uid of uids) {
       const privatePlayerDocRef = privatePlayerCollection.doc(uid);
 
       // check set to catfish if it is inside catfishUids
@@ -38,6 +37,7 @@ export function assignRole(lobby: firestore.DocumentReference<Lobby>) {
       } else {
         transaction.create(privatePlayerDocRef, { role: "CAT" });
       }
+      transaction.update(lobby, { state: "ROLE" });
     }
     // TODO: Change game state to "PROMPT" with timer
   });
