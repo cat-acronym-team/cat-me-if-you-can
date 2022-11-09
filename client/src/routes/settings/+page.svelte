@@ -1,7 +1,8 @@
 <script lang="ts">
   import SelectAvatar from "$components/SelectAvatar.svelte";
   import Dialog, { Title, Content, Actions } from "@smui/dialog";
-  import Button, { Label } from "@smui/button";
+  import Button, { Label, Icon } from "@smui/button";
+  import IconButton from "@smui/icon-button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
   import { avatarAltText } from "$lib/avatar";
@@ -51,9 +52,10 @@
 <main>
   <h2 class="mdc-typography--headline2">Account Settings</h2>
 
-  <button class="avatar" on:click={() => (showAvatarDialog = true)}>
+  <div class="avatar">
     <img src="/avatars/{avatar}.webp" alt={avatarAltText[avatar]} />
-  </button>
+    <IconButton class="material-icons" on:click={() => (showAvatarDialog = true)}>edit</IconButton>
+  </div>
 
   <Dialog
     bind:open={showAvatarDialog}
@@ -67,7 +69,9 @@
     </Content>
   </Dialog>
 
-  <div class="mdc-typography--headline3" on:click={() => (showDisplayNameDialog = true)}>{displayName}</div>
+  <div class="mdc-typography--headline3">
+    {displayName}<IconButton class="material-icons" on:click={() => (showDisplayNameDialog = true)}>edit</IconButton>
+  </div>
 
   <Dialog
     bind:open={showDisplayNameDialog}
@@ -131,17 +135,21 @@
 
 <style>
   .avatar {
-    appearance: none;
-    border: none;
-    padding: 0px;
-    background: none;
-
     height: 128px;
     width: 128px;
+
+    display: grid;
+    grid-template-areas: "only";
   }
 
-  .avatar img {
+  .avatar > img {
+    grid-area: only;
     height: 100%;
     width: 100%;
+  }
+
+  .avatar > :global(.mdc-icon-button) {
+    grid-area: only;
+    place-self: start end;
   }
 </style>
