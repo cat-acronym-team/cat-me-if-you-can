@@ -1,7 +1,10 @@
 <script lang="ts">
   import Prompt from "$components/Prompt.svelte";
   import LobbyComponent from "$components/Lobby.svelte";
+  import WinLoss from "$components/WinLoss.svelte";
   import ChatRoom from "$components/ChatRoom.svelte";
+  import Vote from "$components/Vote.svelte";
+  import Result from "$components/Result.svelte";
   import CircularProgress from "@smui/circular-progress";
 
   import { onSnapshot, doc, getDoc } from "firebase/firestore";
@@ -102,9 +105,15 @@
       <CircularProgress indeterminate />
     </div>
   {:else if lobby.state === "PROMPT"}
-    <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
+    <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} lobbyData={lobby} />
   {:else if lobby.state === "CHAT"}
     <ChatRoom {lobby} {lobbyCode} isStalker={privatePlayer.stalker} />
+  {:else if lobby.state === "VOTE"}
+    <Vote {lobby} {lobbyCode} />
+  {:else if lobby.state === "RESULT"}
+    <Result {lobby} {lobbyCode} />
+  {:else if lobby.state === "END"}
+    <WinLoss {lobbyCode} {lobby} {privatePlayer} />
   {:else}
     unknown lobby state: {lobby.state}
   {/if}
