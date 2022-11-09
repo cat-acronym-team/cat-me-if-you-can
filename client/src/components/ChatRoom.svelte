@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
-  import { onSnapshot, orderBy, query, QueryDocumentSnapshot } from "firebase/firestore";
+  import { onSnapshot, orderBy, query, QueryDocumentSnapshot, type Unsubscribe } from "firebase/firestore";
   import {
     GAME_STATE_DURATIONS,
     type ChatMessage,
@@ -11,7 +11,7 @@
   } from "$lib/firebase/firestore-types/lobby";
   import { findChatRoom, addChatMessage } from "$lib/firebase/chat";
   import { getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
-  import type { Unsubscribe, User } from "firebase/auth";
+  import type { User } from "firebase/auth";
   import { verifyExpiration } from "$lib/firebase/firebase-functions";
   // props
   export let lobbyData: Lobby & { id: string };
