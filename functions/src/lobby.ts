@@ -196,12 +196,10 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
   });
 });
 
-<<<<<<< HEAD
 // TODO: replace with the correct trigger
 export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate(async (change, context) => {
   const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
   const lobby = change.after.data() as Lobby;
-  const oldLobby = change.before.data() as Lobby;
   const alivePlayers = [];
   for (let i = 0; i < lobby.uids.length; i++) {
     if (lobby.players[i].alive) {
@@ -209,38 +207,8 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
     }
   }
   lobbyDocRef.update({ alivePlayers: alivePlayers });
-  if (lobby.state == "PROMPT" && oldLobby.state != "PROMPT") {
-    await startPrompt(lobbyDocRef);
-  }
-
-  if (lobby.state == "CHAT" && oldLobby.state != "CHAT") {
-    const expiration = firestore.Timestamp.fromMillis(
-      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.CHAT * 1000
-    );
-    lobbyDocRef.update({ expiration });
-  }
-  if (lobby.state == "VOTE" && oldLobby.state != "VOTE") {
-    const expiration = firestore.Timestamp.fromMillis(
-      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.VOTE * 1000
-    );
-    lobbyDocRef.update({ expiration });
-  }
-  if (lobby.state == "RESULT" && oldLobby.state != "RESULT") {
-    const expiration = firestore.Timestamp.fromMillis(
-      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.RESULT * 1000
-    );
-    lobbyDocRef.update({ expiration });
-  }
-  if (lobby.state == "END" && oldLobby.state != "END") {
-    const expiration = firestore.Timestamp.fromMillis(
-      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.END * 1000
-    );
-    lobbyDocRef.update({ expiration });
-  }
 });
 
-=======
->>>>>>> 7dd26d272883451f0488b5f02a3aad5419b4a7df
 export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
   const [catPrompt, catfishPrompt] = getRandomPromptPair();
 
