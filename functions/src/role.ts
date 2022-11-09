@@ -3,7 +3,7 @@ import { getPrivatePlayerCollection } from "./firestore-collections";
 import { firestore } from "firebase-admin";
 
 export async function assignRole(lobbySnap: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
-  // Number of catfish below, will later be made to be changable by users.
+  // Number of catfish below, will later be made to be changeable by users.
   const numCatFish = 1;
   const lobby = lobbySnap.ref;
   const validLobby = await transaction.get(lobby);
