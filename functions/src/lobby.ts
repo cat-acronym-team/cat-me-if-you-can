@@ -356,6 +356,9 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
 
     // TODO: potential if checks for other states that require a timer
     // if the state is chat then delete chatrooms
+    if (lobby.state === "ROLE") {
+      await startPrompt(lobbyDoc, transaction);
+    }
     if (lobby.state === "PROMPT") {
       await collectPromptAnswers(lobbyDoc, transaction);
     }

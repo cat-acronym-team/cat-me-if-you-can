@@ -1,4 +1,4 @@
-import type { Lobby } from "./firestore-types/lobby";
+import { GAME_STATE_DURATIONS, Lobby } from "./firestore-types/lobby";
 import { getPrivatePlayerCollection } from "./firestore-collections";
 import { firestore } from "firebase-admin";
 
@@ -36,6 +36,10 @@ export async function assignRole(lobbySnap: firestore.DocumentSnapshot<Lobby>, t
       transaction.create(privatePlayerDocRef, { role: "CAT", stalker: false });
     }
   }
-  transaction.update(lobby, { state: "ROLE" });
-  // TODO: Change game state to "PROMPT" with timer
+
+  // expiration
+  const expiration = firestore.Timestamp.fromMillis(
+    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.ROLE * 1000
+  );
+  transaction.update(lobby, { state: "ROLE", expiration });
 }

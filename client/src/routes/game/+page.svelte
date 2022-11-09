@@ -106,7 +106,7 @@
       <CircularProgress indeterminate />
     </div>
   {:else if lobby.state === "ROLE"}
-    <Role {privatePlayer} />
+    <Role {lobby} {lobbyCode} {privatePlayer} />
   {:else if lobby.state === "PROMPT"}
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} lobbyData={lobby} />
   {:else if lobby.state === "CHAT"}
