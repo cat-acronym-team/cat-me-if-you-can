@@ -19,7 +19,7 @@
   export let lobbyData: Lobby & { id: string };
   // variables
   let user = $authStore as User;
-  // let userInfo: Player;
+  let userInfo: Player;
   let partnerInfo: Player | undefined;
   let chatRoomInfo: QueryDocumentSnapshot<ChatRoom>;
   let chatMessages: ChatMessage[] = [];
@@ -40,7 +40,7 @@
     );
 
     // Get userInfo
-    // userInfo = lobbyData.players[lobbyData.uids.indexOf(user.uid)];
+    userInfo = lobbyData.players[lobbyData.uids.indexOf(user.uid)];
     // Get partnerInfo
     const partner = chatRoomInfo.data().pair.find((uid) => {
       return user.uid !== uid;
