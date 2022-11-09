@@ -1,7 +1,7 @@
 <script lang="ts">
   import SelectAvatar from "$components/SelectAvatar.svelte";
   import Dialog, { Title, Content, Actions } from "@smui/dialog";
-  import Button, { Label, Icon } from "@smui/button";
+  import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
@@ -9,24 +9,72 @@
   import type { Avatar } from "$lib/firebase/firestore-types/lobby";
   import { deleteAccount, logOut } from "$lib/firebase/auth";
   import { goto } from "$app/navigation";
-  import { displayNameValidator } from "$lib/firebase/firestore-types/users";
+  import { displayNameValidator, type UserData } from "$lib/firebase/firestore-types/users";
+  import { doc, DocumentReference, onSnapshot, setDoc, updateDoc, type Unsubscribe } from "firebase/firestore";
+  import { userCollection } from "$lib/firebase/firestore-collections";
+  import { authStore as user } from "$stores/auth";
+  import { onDestroy } from "svelte";
 
-  let avatar: 0 | Avatar = 0;
+  let userData: UserData | undefined = undefined;
+  let userDataDocRef: DocumentReference<UserData> | undefined = undefined;
+  let unsubscribeUserData: Unsubscribe | undefined = undefined;
+
+  $: if ($user != null) {
+    userDataDocRef = doc(userCollection, $user.uid);
+  }
+
+  $: if (userDataDocRef != undefined) {
+    // unsubscribe from old user doc
+    unsubscribeUserData?.();
+
+    // subscribe to new user doc
+    unsubscribeUserData = onSnapshot(userDataDocRef, (doc) => {
+      userData = doc.data();
+    });
+  }
+
+  onDestroy(() => {
+    unsubscribeUserData?.();
+  });
+
+  let preferenceErrorMessage = "";
+
+  async function updatePreferences(newPreferences: { avatar?: 0 | Avatar; displayName?: string }) {
+    try {
+      if (userDataDocRef == undefined) {
+        throw new Error("You are not logged in!");
+      }
+      if (userData == undefined) {
+        if (newPreferences.displayName == undefined) {
+          throw new Error("You must enter a display name!");
+        }
+        const newUserData: UserData = {
+          displayName: newPreferences.displayName,
+          avatar: newPreferences.avatar ?? 0,
+        };
+        await setDoc(userDataDocRef, newUserData);
+      } else {
+        await updateDoc(userDataDocRef, newPreferences);
+      }
+    } catch (error) {
+      preferenceErrorMessage = error instanceof Error ? error.message : String(error);
+    }
+  }
+
   let showAvatarDialog = false;
 
   function selectAvatar(newAvatar: Avatar) {
-    avatar = newAvatar; // TODO: update avatar in firestore
+    updatePreferences({ avatar: newAvatar });
     showAvatarDialog = false;
   }
 
-  let displayName = "Loading...";
   let showDisplayNameDialog = false;
 
-  $: newDisplayName = displayName;
+  let newDisplayName = "";
   $: nameValidation = displayNameValidator(newDisplayName.trim());
 
   function updateDisplayName() {
-    displayName = newDisplayName.trim(); // TODO: update displayName in firestore
+    updatePreferences({ displayName: newDisplayName.trim() });
     showDisplayNameDialog = false;
   }
 
@@ -52,10 +100,28 @@
 <main>
   <h2 class="mdc-typography--headline2">Account Settings</h2>
 
-  <div class="avatar">
-    <img src="/avatars/{avatar}.webp" alt={avatarAltText[avatar]} />
-    <IconButton class="material-icons" on:click={() => (showAvatarDialog = true)}>edit</IconButton>
+  <div class="preferences">
+    <div class="avatar">
+      <img src="/avatars/{userData?.avatar ?? 0}.webp" alt={avatarAltText[userData?.avatar ?? 0]} />
+      {#if userData?.displayName != undefined}
+        <IconButton class="material-icons" on:click={() => (showAvatarDialog = true)}>edit</IconButton>
+      {/if}
+    </div>
+
+    <div class="mdc-typography--headline3">
+      {userData?.displayName ?? "No Name"}<IconButton
+        class="material-icons"
+        on:click={() => {
+          newDisplayName = userData?.displayName ?? "";
+          showDisplayNameDialog = true;
+        }}>edit</IconButton
+      >
+    </div>
   </div>
+
+  {#if preferenceErrorMessage !== ""}
+    <p class="error">{preferenceErrorMessage}</p>
+  {/if}
 
   <Dialog
     bind:open={showAvatarDialog}
@@ -65,13 +131,9 @@
   >
     <Title id="avatar-dialog-title">Select Your Default Avatar</Title>
     <Content id="avatar-dialog-content">
-      <SelectAvatar selectedAvatar={avatar} on:change={(event) => selectAvatar(event.detail.value)} />
+      <SelectAvatar selectedAvatar={userData?.avatar ?? 0} on:change={(event) => selectAvatar(event.detail.value)} />
     </Content>
   </Dialog>
-
-  <div class="mdc-typography--headline3">
-    {displayName}<IconButton class="material-icons" on:click={() => (showDisplayNameDialog = true)}>edit</IconButton>
-  </div>
 
   <Dialog
     bind:open={showDisplayNameDialog}
@@ -134,22 +196,26 @@
 </main>
 
 <style>
+  .preferences {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
   .avatar {
+    position: relative;
     height: 128px;
     width: 128px;
-
-    display: grid;
-    grid-template-areas: "only";
   }
 
   .avatar > img {
-    grid-area: only;
     height: 100%;
     width: 100%;
   }
 
   .avatar > :global(.mdc-icon-button) {
-    grid-area: only;
-    place-self: start end;
+    position: absolute;
+    top: -8px;
+    right: -8px;
   }
 </style>
