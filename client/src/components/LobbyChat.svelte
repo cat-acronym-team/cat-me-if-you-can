@@ -1,5 +1,7 @@
 <script lang="ts">
+  import "@material/typography/mdc-typography.scss";
   import Modal from "./Modal.svelte";
+  import IconButton from "@smui/icon-button";
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
   import { onSnapshot, orderBy, query, where } from "firebase/firestore";
@@ -57,6 +59,7 @@
 
 <main>
   <Modal open={openSignInModal}>
+    <IconButton on:click={() => (openSignInModal = false)} class="material-icons">close</IconButton>
     <ChatMessages {lobby} messages={chatMessages} on:send={(event) => submitMessage(event.detail.text)}>
       <h2>Lobby Chat</h2>
       {#if errorMessage !== ""}

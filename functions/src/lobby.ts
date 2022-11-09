@@ -386,7 +386,7 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
       await endGameProcess(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "VOTE") {
-      await deleteLobbyChatMessages(lobby, lobbyDocRef, transaction);
+      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       findVoteOff(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "RESULT") {
