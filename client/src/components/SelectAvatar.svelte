@@ -1,40 +1,97 @@
 <script lang="ts">
-  import { changeAvatar } from "$lib/firebase/firebase-functions";
   import type { Lobby, Avatar } from "$lib/firebase/firestore-types/lobby";
 
-  export let lobbyCode: string;
-  export let lobby: Lobby;
+  import { createEventDispatcher } from "svelte";
+  import { authStore as user } from "$stores/auth";
+  import { avatarAltText } from "$lib/avatar";
+  import Menu from "@smui/menu/src/Menu.svelte";
+  import List, {Item, Text} from '@smui/list';
+  import IconButton from '@smui/icon-button';
 
-  $: avatarChoices = updateAvatarChoices(lobby);
+  export let selectedAvatar: 0 | Avatar = 0;
+  export let lobby: Lobby | undefined = undefined;
 
-  function updateAvatarChoices(lobby: Lobby) {
-    const newAvatarChoices: { avatar: Avatar; displayName?: string }[] = [];
+  let menu: Menu;
+
+  type $$Props = { selectedAvatar: 0 | Avatar } | { lobby: Lobby };
+
+  $: avatarChoices = updateAvatarChoices(lobby, selectedAvatar);
+
+  type AvatarChoice = {
+    avatar: Avatar;
+    altText: string;
+    displayName?: string;
+    uid?: string;
+    available: boolean;
+    selected: boolean;
+  };
+
+  function updateAvatarChoices(lobby: Lobby | undefined, selectedAvatar: 0 | Avatar): AvatarChoice[] {
+    const newAvatarChoices: AvatarChoice[] = [];
 
     for (let i = 1; i <= 12; i++) {
-      newAvatarChoices.push({ avatar: i as Avatar });
+      newAvatarChoices.push({ avatar: i as Avatar, altText: avatarAltText[i], available: true, selected: false });
     }
 
-    for (const player of lobby.players) {
-      newAvatarChoices[player.avatar - 1].displayName = player.displayName;
+    if (lobby != undefined) {
+      for (const player of lobby.players) {
+        newAvatarChoices[player.avatar - 1].displayName = player.displayName;
+        newAvatarChoices[player.avatar - 1].uid = player.uid;
+        newAvatarChoices[player.avatar - 1].available = false;
+      }
+
+      if ($user !== null) {
+        const userIndex = lobby.uids.indexOf($user.uid);
+        newAvatarChoices[lobby.players[userIndex].avatar - 1].selected = true;
+      }
+    } else {
+      for (const avatarChoice of newAvatarChoices) {
+        avatarChoice.selected = avatarChoice.avatar === selectedAvatar;
+        avatarChoice.available = !avatarChoice.selected;
+      }
     }
 
     return newAvatarChoices;
   }
 
+  const dispatch = createEventDispatcher<{ change: { value: Avatar } }>();
+
   function selectAvatar(avatar: Avatar) {
-    try {
-      changeAvatar({ lobbyCode, avatar });
-    } catch (err) {
-      console.error(err);
-    }
+    dispatch("change", {
+      value: avatar,
+    });
   }
+
+  function kick(){
+    
+  }
+
+  function ban(){
+    
+  }
+
 </script>
 
-<div class="grid">
-  {#each avatarChoices as { avatar, displayName }}
-    <button class="avatar" on:click={() => selectAvatar(avatar)}>
-      <img src="/avatars/{avatar}.webp" alt="cat picture {avatar}" />
-      <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
+<div class="grid {lobby != undefined ? 'lobby' : ''}">
+  {#each avatarChoices as { avatar, altText, displayName, available, selected }}
+    <button class="avatar" on:click={() => selectAvatar(avatar)} disabled={!available} aria-selected={selected}>
+      <img src="/avatars/{avatar}.webp" alt={altText} />
+      {#if lobby != undefined}
+        <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
+      {/if}
+      {#if !available}
+      <IconButton class="material-symbols-outlined" on:click={() => menu.setOpen(true)}>more_vert</IconButton>
+        <Menu bind:this={menu}>
+          <List>
+            <Item on:SMUI:action={() = kick()}>
+              <Text> Kick </Text>
+            </Item>
+            <Item on:SMUI:action={() => ban()}>
+              <Text> Ban </Text>
+            </Item>
+          </List>
+        </Menu>
+      {/if}
     </button>
   {/each}
 </div>
@@ -49,8 +106,12 @@
     grid-template-columns: repeat(4, auto);
     grid-template-rows: repeat(3, auto);
     place-content: center;
-    gap: 12px 24px;
+    gap: 24px 24px;
     height: 100%;
+  }
+
+  .grid.lobby {
+    gap: 12px 24px;
   }
 
   @media (max-width: 600px) {
@@ -67,18 +128,35 @@
     background: none;
 
     display: grid;
-    grid-template-rows: auto 16px;
+    grid-template-rows: auto;
     gap: 12px;
     place-items: center;
     color: unset;
   }
 
+  .lobby .avatar {
+    grid-template-rows: auto 16px;
+  }
+
   .avatar img {
     height: 18vmin;
     width: 18vmin;
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-    border: 1px currentColor solid;
+    outline: 1px currentColor solid;
+    outline-offset: -1px;
+    border-radius: 8px;
+  }
+
+  .avatar:focus {
+    outline: none;
+  }
+
+  .avatar:focus-visible img {
+    outline-offset: -2px;
+    outline: 2px currentColor solid;
+  }
+
+  .avatar[aria-selected="true"] img {
+    outline-offset: -2px;
+    outline: 2px var(--primary-theme-color) solid;
   }
 </style>
