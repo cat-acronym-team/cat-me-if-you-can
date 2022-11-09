@@ -196,6 +196,7 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
   });
 });
 
+<<<<<<< HEAD
 // TODO: replace with the correct trigger
 export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate(async (change, context) => {
   const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
@@ -238,6 +239,8 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   }
 });
 
+=======
+>>>>>>> 7dd26d272883451f0488b5f02a3aad5419b4a7df
 export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
   const [catPrompt, catfishPrompt] = getRandomPromptPair();
 
