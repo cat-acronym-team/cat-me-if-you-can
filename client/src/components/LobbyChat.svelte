@@ -7,13 +7,13 @@
   import type { Unsubscribe, User } from "firebase/auth";
   import { getLobbyChatCollection } from "$lib/firebase/firestore-collections";
   import { addLobbyChatMessages } from "$lib/firebase/chat";
+  import ChatMessages from "./ChatMessages.svelte";
 
   export let lobbyData: Lobby & { id: string };
 
   let user = $authStore as User;
   let userInfo: Player;
   let openSignInModal = false;
-  let message: string = "";
   let errorMessage: string = "";
   let chatMessages: LobbyChatMessage[] = [];
   let unsubscribeChatMessages: Unsubscribe | undefined = undefined;
@@ -40,7 +40,7 @@
   onDestroy(() => {
     unsubscribeChatMessages?.();
   });
-  async function submitMessage() {
+  async function submitMessage(message: string) {
     if (message === "") {
       return;
     }
@@ -56,34 +56,13 @@
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
-  function isUser(uid: string) {
-    return (user as User).uid === uid;
-  }
 </script>
 
 <main>
   <Modal open={openSignInModal}>
-    <div class="chatroom">
-      <button class="close" on:click={() => (openSignInModal = false)}>X</button>
-      <div class="messages">
-        {#each chatMessages as message}
-          {#if isUser(message.sender)}
-            <p class="user-msg">You: {message.text}</p>
-          {:else}
-            <p class="lobby-msg">{message.sender}: {message.text}</p>
-          {/if}
-        {/each}
-      </div>
-      <div class="chatRoom">
-        <form on:submit|preventDefault={submitMessage}>
-          <input type="text" bind:value={message} />
-          <button type="submit" disabled={message === ""}>Send</button>
-          {#if errorMessage !== ""}
-            <p class="error">{errorMessage}</p>
-          {/if}
-        </form>
-      </div>
-    </div>
+    <ChatMessages lobby={lobbyData} messages={chatMessages} on:send={(event) => submitMessage(event.detail.text)}>
+      <h2>Lobby Chat</h2>
+    </ChatMessages>
   </Modal>
   <button
     on:click={() => {
@@ -92,40 +71,3 @@
     class="Lobby Chat">Lobby Chat</button
   >
 </main>
-
-<style>
-  .messages {
-    width: 100%;
-    height: 60%;
-    overflow-y: scroll;
-  }
-  .user-msg {
-    text-align: right;
-    background-color: skyblue;
-    width: fit-content;
-    margin-left: auto;
-    padding: 5px;
-    border-radius: 15px;
-  }
-  .lobby-msg {
-    text-align: left;
-    background-color: red;
-    width: fit-content;
-    padding: 5px;
-    border-radius: 15px;
-  }
-  .chatroom {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    width: 90%;
-    height: 100%;
-    margin: auto;
-    text-align: center;
-  }
-</style>
