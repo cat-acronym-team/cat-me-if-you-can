@@ -31,9 +31,9 @@ export async function assignRole(lobbySnap: firestore.DocumentSnapshot<Lobby>, t
 
     // check set to catfish if it is inside catfishUids
     if (catfishUids.has(uid)) {
-      transaction.create(privatePlayerDocRef, { role: "CATFISH" });
+      transaction.create(privatePlayerDocRef, { role: "CATFISH", stalker: false });
     } else {
-      transaction.create(privatePlayerDocRef, { role: "CAT" });
+      transaction.create(privatePlayerDocRef, { role: "CAT", stalker: false });
     }
   }
   transaction.update(lobby, { state: "ROLE" });
