@@ -193,7 +193,7 @@
       <List>
         <Item tag="a" href="/settings"><Text>Account Settings</Text></Item>
         {#if userData != undefined}
-          <Item tag="a" href="/stats"><Text>Stats</Text></Item>
+          <Item tag="a" href={`/stats?user=${$user.uid}`}><Text>Stats</Text></Item>
         {/if}
         <Separator />
         <Item on:SMUI:action={logOut}><Text>Logout</Text></Item>
