@@ -96,7 +96,7 @@
 </script>
 
 <header>
-  <SigninButton />
+  <SigninButton {userData} />
 </header>
 
 <div class="cat-join-container">

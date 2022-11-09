@@ -8,7 +8,9 @@
   import { Svg, Icon } from "@smui/common";
   import { authStore as user } from "$stores/auth";
   import { loginWithGoogle, loginWithMicrosoft, loginWithEmail, logOut, createUser } from "$lib/firebase/auth";
+  import type { UserData } from "$lib/firebase/firestore-types/users";
 
+  export let userData: UserData | undefined;
   let showSignInDialog = false;
   let menu: Menu;
   let email = "";
@@ -190,7 +192,9 @@
     <Menu bind:this={menu}>
       <List>
         <Item tag="a" href="/settings"><Text>Account Settings</Text></Item>
-        <Item tag="a" href="/stats"><Text>Stats</Text></Item>
+        {#if userData != undefined}
+          <Item tag="a" href="/stats"><Text>Stats</Text></Item>
+        {/if}
         <Separator />
         <Item on:SMUI:action={logOut}><Text>Logout</Text></Item>
       </List>
