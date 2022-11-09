@@ -34,4 +34,4 @@ Hello my name is Cameron, I'm currently a Junior and am probably the least prepa
 
 ### [Josh Salkeld](https://github.com/mrjoshua520) - Team Member
 
-I'll be graduating EMU in december if all ges well. I am most familar with c# and java however have used many other langauges in the past. In my free time I like to play D&D and also mentor a robotics team.
+I'll be graduating EMU in december if all goes well. I am most familar with c# and java however have used many other langauges in the past. In my free time I like to play D&D and also mentor a robotics team.
