@@ -1,7 +1,12 @@
 import { firestore } from "firebase-admin";
 import * as functions from "firebase-functions";
 import { db } from "./app";
-import { getPrivatePlayerCollection, lobbyCollection, userCollection } from "./firestore-collections";
+import {
+  getPrivatePlayerCollection,
+  getVoteCollection,
+  lobbyCollection,
+  userCollection,
+} from "./firestore-collections";
 import { isLobbyRequest } from "./firebase-functions-types";
 import { Lobby } from "./firestore-types/lobby";
 
@@ -49,6 +54,9 @@ export async function endGameProcess(
   let { players } = lobbyData;
   const { uids, winner } = lobbyData;
 
+  const voteCollection = getVoteCollection(lobbyDocRef);
+  const voteDocs = await transaction.get(voteCollection); // reading before for transaction issues
+
   // update each players doc
   await Promise.all(
     uids.map(async (uid, index) => {
@@ -93,6 +101,11 @@ export async function endGameProcess(
   players = players.map(({ role, ...rest }) => {
     return { ...rest, alive: true, votes: 0 };
   });
+
+  // delete vote documents
+  for (const voteDoc of voteDocs.docs) {
+    transaction.delete(voteDoc.ref);
+  }
 
   // create a WriteBatch
   const batch = db.batch();

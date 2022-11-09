@@ -230,6 +230,12 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
     );
     lobbyDocRef.update({ expiration });
   }
+  if (lobby.state == "END" && oldLobby.state != "END") {
+    const expiration = firestore.Timestamp.fromMillis(
+      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.END * 1000
+    );
+    lobbyDocRef.update({ expiration });
+  }
 });
 
 export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
