@@ -6,6 +6,7 @@
   import Vote from "$components/Vote.svelte";
   import Result from "$components/Result.svelte";
   import CircularProgress from "@smui/circular-progress";
+
   import { onSnapshot, doc, getDoc } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
   import { getPrivatePlayerCollection, lobbyCollection } from "$lib/firebase/firestore-collections";

@@ -25,7 +25,7 @@ export async function addLobbyChatMessages(lobbyId: string, sender: string, text
     throw new Error(isValid.reason);
   }
   // Add Message Doc
-  addDoc(getLobbyChatCollection(lobbyId), {
+  await addDoc(getLobbyChatCollection(lobbyId), {
     text,
     sender,
     timestamp: serverTimestamp(),

@@ -99,6 +99,7 @@
 
       // add Message
       await addChatMessage(lobbyCode, chatRoomId, user.uid, message);
+
       // if there's an error message then clear it
       errorMessage = "";
     } catch (err) {

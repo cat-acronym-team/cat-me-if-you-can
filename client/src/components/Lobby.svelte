@@ -64,7 +64,7 @@
       <h3>Players: {lobby.players.length}</h3>
     </div>
     <div class="lobbyChat-level">
-      <LobbyChat lobbyData={{ ...lobby, id: lobbyCode }} />
+      <LobbyChat {lobby} {lobbyCode} />
     </div>
     <SelectAvatar {lobby} {lobbyCode} />
     {#if auth.currentUser?.uid === lobby.uids[0]}

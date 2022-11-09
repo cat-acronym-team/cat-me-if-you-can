@@ -8,11 +8,7 @@ import {
 } from "./firestore-collections";
 import { GAME_STATE_DURATIONS, Lobby } from "./firestore-types/lobby";
 
-export async function deleteLobbyChatMessages(
-  lobbyData: Lobby,
-  lobbyDoc: DocumentReference<Lobby>,
-  transaction: Transaction
-) {
+export async function deleteLobbyChatMessages(lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
   const messages = await transaction.get(getLobbyChatCollection(lobbyDoc));
   messages.forEach((messageDoc) => {
     transaction.delete(messageDoc.ref);

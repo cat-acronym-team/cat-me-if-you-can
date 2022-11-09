@@ -9,7 +9,8 @@
   import { addLobbyChatMessages } from "$lib/firebase/chat";
   import ChatMessages from "./ChatMessages.svelte";
 
-  export let lobbyData: Lobby & { id: string };
+  export let lobby: Lobby;
+  export let lobbyCode: string;
 
   let user = $authStore as User;
   let userInfo: Player;
@@ -21,13 +22,9 @@
   onMount(async () => {
     let messageQuery;
     if (userInfo.alive) {
-      messageQuery = query(
-        getLobbyChatCollection(lobbyData.id),
-        where("alive", "==", true),
-        orderBy("timestamp", "asc")
-      );
+      messageQuery = query(getLobbyChatCollection(lobbyCode), where("alive", "==", true), orderBy("timestamp", "asc"));
     } else {
-      messageQuery = query(getLobbyChatCollection(lobbyData.id), orderBy("timestamp", "asc"));
+      messageQuery = query(getLobbyChatCollection(lobbyCode), orderBy("timestamp", "asc"));
     }
     unsubscribeChatMessages = onSnapshot(messageQuery, (collection) => {
       chatMessages = collection.docs.map((message) => message.data());
@@ -35,7 +32,7 @@
     });
   });
 
-  userInfo = lobbyData.players[lobbyData.uids.indexOf(user.uid)];
+  userInfo = lobby.players[lobby.uids.indexOf(user.uid)];
 
   onDestroy(() => {
     unsubscribeChatMessages?.();
@@ -46,7 +43,7 @@
     }
     try {
       // add Message
-      await addLobbyChatMessages(lobbyData.id, user.uid, message, userInfo.alive);
+      await addLobbyChatMessages(lobbyCode, user.uid, message, userInfo.alive);
       // clear the input
       message = "";
       // if there's an error message then clear it
@@ -60,8 +57,11 @@
 
 <main>
   <Modal open={openSignInModal}>
-    <ChatMessages lobby={lobbyData} messages={chatMessages} on:send={(event) => submitMessage(event.detail.text)}>
+    <ChatMessages {lobby} messages={chatMessages} on:send={(event) => submitMessage(event.detail.text)}>
       <h2>Lobby Chat</h2>
+      {#if errorMessage !== ""}
+        <p class="error">{errorMessage}</p>
+      {/if}
     </ChatMessages>
   </Modal>
   <button

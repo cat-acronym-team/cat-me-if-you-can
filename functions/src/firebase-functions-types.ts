@@ -1,4 +1,5 @@
 export type LobbyRequest = { code: string };
+
 export type LobbyCreationResponse = { code: string };
 
 export function isLobbyRequest(data: unknown): data is LobbyRequest {
