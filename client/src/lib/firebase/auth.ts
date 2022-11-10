@@ -48,36 +48,34 @@ export function deleteAccount() {
 
 export function linkWithGoogle() {
   const user = auth.currentUser;
-  if (user != null) {
-    const signInMethods = user.providerData;
 
-    signInMethods.forEach((provider) => {
-      if (provider.providerId == "google.com") {
-        throw new Error("a-google-account-already-exists-for-this-user");
-      }
-    });
+  if (user === undefined) {
+    throw new Error("Not signed in");
+  }
+
+  if (user != null) {
+    if (userHasGoogleProvider()) {
+      throw new Error("google-account-already-linked");
+    }
     const google = new GoogleAuthProvider();
     return linkWithPopup(user, google);
-  } else {
-    return user;
   }
 }
 
 export function linkWithMicrosoft() {
   const user = auth.currentUser;
-  if (user != null) {
-    const signInMethods = user.providerData;
 
-    signInMethods.forEach((provider) => {
-      if (provider.providerId == "microsoft.com") {
-        throw new Error("a-microsoft-account-already-exists-for-this-user");
-      }
-    });
+  if (user === undefined) {
+    throw new Error("Not signed in");
+  }
+
+  if (user != null) {
+    if (userHasMicrosoftProvider()) {
+      throw new Error("microsoft-account-already-linked");
+    }
 
     const microsoft = new OAuthProvider("microsoft.com");
     return linkWithPopup(user, microsoft);
-  } else {
-    return user;
   }
 }
 
@@ -93,4 +91,36 @@ export function linkWithPassword(password: string) {
 
 export function logOut() {
   return signOut(auth);
+}
+
+function userHasGoogleProvider() {
+  const user = auth.currentUser;
+
+  if (user != null) {
+    const signInMethods = user.providerData;
+
+    for (const provider of signInMethods) {
+      if (provider.providerId == "google.com") {
+        return true;
+      }
+    }
+  } else {
+    return false;
+  }
+}
+
+function userHasMicrosoftProvider() {
+  const user = auth.currentUser;
+
+  if (user != null) {
+    const signInMethods = user.providerData;
+
+    for (const provider of signInMethods) {
+      if (provider.providerId == "microsoft.com") {
+        return true;
+      }
+    }
+  } else {
+    return false;
+  }
 }

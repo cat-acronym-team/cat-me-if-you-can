@@ -24,14 +24,14 @@
 
   function outputErrMsg() {
     switch (errorMsg) {
-      case "a-google-account-already-exists-for-this-user":
-        googleErr = "A Google Account is Already Linked to this Account";
-        return;
-      case "a-microsoft-account-already-exists-for-this-user":
-        microsoftErr = "A Microsft Account is Already Linked to this Account";
-        return;
       case "Firebase: Password should be at least 6 characters (auth/weak-password).":
         passErr = "Password should be at least 6 characters";
+        return;
+      case "google-account-already-linked":
+        googleErr = "google account already linked";
+        return;
+      case "microsoft-account-already-linked":
+        microsoftErr = "microsoft account already linked";
         return;
       default:
         errorMsg = "An unexpected error has occured";
@@ -131,11 +131,11 @@
             </Icon>
             <Label>Sign in with Google</Label>
           </Button>
-          {#if googleErr !== ""}
-            <p class="error">{googleErr}</p>
-          {:else if googleLinked && googleErr === ""}
+
+          {#if googleLinked && googleErr === ""}
             <p class="success">Successfully Linked Google Account</p>
           {/if}
+
           <Button id="sign-in-with-microsoft" variant="raised" on:click={linkMicrosoftAccount}>
             <Icon component={Svg} viewBox="0 0 21 21">
               <rect x="1" y="1" width="9" height="9" fill="#f25022" />
@@ -145,9 +145,8 @@
             </Icon>
             <Label>Sign in with Microsoft</Label>
           </Button>
-          {#if microsoftErr !== ""}
-            <p class="error">{microsoftErr}</p>
-          {:else if microsoftLinked && microsoftErr === ""}
+
+          {#if microsoftLinked && microsoftErr === ""}
             <p class="success">Successfully Linked Microsoft Account</p>
           {/if}
         </div>
