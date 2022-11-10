@@ -35,7 +35,6 @@
     unsubscribeChatMessages?.();
     unsubscribeChatMessages = onSnapshot(messageQuery, (collection) => {
       chatMessages = collection.docs.map((message) => message.data());
-      console.log(collection.docs);
     });
   }
 
@@ -48,7 +47,6 @@
     }
     try {
       // add Message
-      console.log(userInfo.alive);
       await addLobbyChatMessages(lobbyCode, user.uid, message, userInfo.alive);
       // clear the input
       message = "";

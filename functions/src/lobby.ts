@@ -51,7 +51,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
       },
     ],
     state: "WAIT",
-    alivePlayers: [],
+    alivePlayers: [context.auth.uid],
   };
 
   // try making lobby 5 times before giving up
@@ -200,13 +200,20 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
 export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate((change, context) => {
   const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
   const lobby = change.after.data() as Lobby;
+  const lobbyBefore = change.before.data() as Lobby;
+  let hasChanged = false;
   const alivePlayers = [];
   for (let i = 0; i < lobby.uids.length; i++) {
+    if (lobby.players[i].alive != lobbyBefore.players[i].alive) {
+      hasChanged = true;
+    }
     if (lobby.players[i].alive) {
       alivePlayers.push(lobby.uids[i]);
     }
   }
-  lobbyDocRef.update({ alivePlayers: alivePlayers });
+  if (hasChanged) {
+    lobbyDocRef.update({ alivePlayers: alivePlayers });
+  }
 });
 
 export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
