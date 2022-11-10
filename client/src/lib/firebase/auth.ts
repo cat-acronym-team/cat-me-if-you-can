@@ -46,5 +46,6 @@ export function deleteAccount() {
 }
 
 export function logOut() {
+  window.location.href = "/";
   return signOut(auth);
 }
