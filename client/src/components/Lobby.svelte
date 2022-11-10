@@ -63,7 +63,7 @@
       <h3>Code: {lobbyCode}</h3>
       <h3>Players: {lobby.players.length}</h3>
     </div>
-    <div class="lobbyChat-level">
+    <div class="lobby-chat-level">
       <LobbyChat {lobby} {lobbyCode} />
     </div>
     <SelectAvatar {lobby} {lobbyCode} />
@@ -98,6 +98,13 @@
     justify-content: center;
   }
 
+  .lobby-chat-level {
+    width: 100%;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+  }
+
   .actions {
     display: grid;
     place-items: center;
@@ -110,11 +117,5 @@
 
   .invite-link {
     margin: 0;
-  }
-  .lobbyChat-level {
-    width: 100%;
-    display: flex;
-    justify-content: left;
-    align-items: center;
   }
 </style>

@@ -70,10 +70,12 @@ export type Lobby = {
    * the current state of the game
    */
   state: GameState;
+
   /**
    * expiration time of the current phase with a timer
    */
   expiration?: Timestamp;
+
   /**
    * array of alive players
    */
