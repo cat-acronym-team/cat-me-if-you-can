@@ -40,7 +40,6 @@
   <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
     {formatTimer(Math.max(countdown, 0))}
   </p>
-
   <div class="voting-grid">
     {#each lobby.players as { avatar, displayName, votes }, i}
       <div class="vote-container">
