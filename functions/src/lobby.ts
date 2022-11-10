@@ -196,10 +196,10 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
   const lobby = change.after.data() as Lobby;
   const lobbyBefore = change.before.data() as Lobby;
-  let hasChanged = false;
+  let hasChanged = lobby.players.length != lobbyBefore.players.length;
   const alivePlayers = [];
   for (let i = 0; i < lobby.uids.length; i++) {
-    if (lobby.players[i].alive !== lobbyBefore.players[i].alive) {
+    if (!hasChanged && lobby.players[i].alive != lobbyBefore.players[i].alive) {
       hasChanged = true;
     }
     if (lobby.players[i].alive) {
