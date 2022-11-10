@@ -12,9 +12,6 @@ import {
   updatePassword,
 } from "firebase/auth";
 
-const google = new GoogleAuthProvider();
-const microsoft = new OAuthProvider("microsoft.com");
-
 // Google login/signup
 export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
@@ -59,6 +56,7 @@ export function linkWithGoogle() {
         throw new Error("a-google-account-already-exists-for-this-user");
       }
     });
+    const google = new GoogleAuthProvider();
     return linkWithPopup(user, google);
   } else {
     return user;
@@ -76,6 +74,7 @@ export function linkWithMicrosoft() {
       }
     });
 
+    const microsoft = new OAuthProvider("microsoft.com");
     return linkWithPopup(user, microsoft);
   } else {
     return user;

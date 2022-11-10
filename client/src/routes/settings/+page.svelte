@@ -255,7 +255,6 @@
 <style>
   .settings-wrapper {
     display: grid;
-    grid-template-rows: repeat(5, 50px [row-start]);
     margin-top: 50px;
     margin-left: 20px;
   }
