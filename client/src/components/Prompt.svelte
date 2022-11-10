@@ -66,9 +66,9 @@
   }
 </script>
 
-{#if countdown != undefined}
-  <h1 class="mdc-typography--headline3" style="text-align:center ;">{formatTimer(countdown)}</h1>
-{/if}
+<p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
+  {formatTimer(Math.max(countdown, 0))}
+</p>
 <form class="wraper" on:submit|preventDefault={submitAnswer}>
   <label class="mdc-typography--headline5" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
 
@@ -81,6 +81,11 @@
 </form>
 
 <style>
+  .countdown {
+    margin: 0;
+    text-align: center;
+  }
+
   .wraper {
     height: 100%;
     display: grid;
