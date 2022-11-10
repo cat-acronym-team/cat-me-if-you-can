@@ -52,6 +52,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
       },
     ],
     state: "WAIT",
+    alivePlayers: [context.auth.uid],
   };
 
   // try making lobby 5 times before giving up
@@ -188,6 +189,22 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
       });
     }
   });
+});
+
+export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate(async (change, context) => {
+  const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
+  const oldLobby = change.before.data() as Lobby;
+  const newLobby = change.after.data() as Lobby;
+  const alivePlayers = [];
+
+  for (let i = 0; i < newLobby.uids.length; i++) {
+    if (newLobby.players[i].alive) {
+      alivePlayers.push(newLobby.uids[i]);
+    }
+  }
+  if (oldLobby.alivePlayers.length !== alivePlayers.length) {
+    lobbyDocRef.update({ alivePlayers });
+  }
 });
 
 export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
