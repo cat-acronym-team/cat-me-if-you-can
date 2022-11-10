@@ -22,17 +22,17 @@ export async function saveOrCreate(user: User | null, userData: UserData | undef
   // create anon user and user doc with display name
   if (user === null && userData === undefined) {
     const anon = (await loginAnonymous()).user;
-    createUser(anon.uid, name);
+    await createUser(anon.uid, name);
   }
   // this is a user without user doc
   // create user doc with display name
   if (user !== null && userData === undefined) {
-    createUser(user.uid, name);
+    await createUser(user.uid, name);
   }
   // this is user with a user doc
   // just update their current display name
   if (user !== null && userData !== undefined) {
-    saveDisplayName(user.uid, name);
+    await saveDisplayName(user.uid, name);
   }
 }
 // users collection
@@ -56,5 +56,9 @@ export const createUser = async (uid: string, name: string) => {
   await setDoc(doc(userCollection, uid), {
     displayName: name,
     avatar: 0,
+    catfishWins: 0,
+    catWins: 0,
+    playedAsCat: 0,
+    playedAsCatfish: 0,
   });
 };

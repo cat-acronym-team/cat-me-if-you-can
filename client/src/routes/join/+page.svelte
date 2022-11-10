@@ -2,21 +2,40 @@
   import SigninButton from "$components/SigninButton.svelte";
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
+  import HelperText from "@smui/textfield/helper-text";
   import { authStore as user } from "$stores/auth";
   import { findAndJoinLobby } from "$lib/firebase/join-lobby";
   import { saveOrCreate } from "$lib/firebase/splash";
   import { getUser } from "$lib/firebase/splash";
-  import type { UserData } from "$lib/firebase/firestore-types/users";
+  import { displayNameValidator, type UserData } from "$lib/firebase/firestore-types/users";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import { page } from "$app/stores";
-  import type { User } from "firebase/auth";
 
-  let name: string = "";
   let userData: UserData | undefined;
   let errorMessage: string = "";
   let queryCode: string | null;
+
+  let name: string = "";
+  let nameDirty: boolean = false;
+  $: nameValidation = displayNameValidator(name);
+
   let code: string = "";
+  let codeDirty: boolean = false;
+  $: codeValidation = lobbyCodeValidator(code);
+
+  function lobbyCodeValidator(code: string): { valid: true } | { valid: false; reason: string } {
+    if (code.length === 0) {
+      return { valid: false, reason: "Please enter a lobby code" };
+    }
+    if (!/^[a-zA-Z]+$/.test(code)) {
+      return { valid: false, reason: "Lobby code can only contain letters" };
+    }
+    if (code.length !== 6) {
+      return { valid: false, reason: "Lobby code must be 6 letters" };
+    }
+    return { valid: true };
+  }
 
   // Checks to see if the join page has the code query paramter
   onMount(() => {
@@ -31,20 +50,16 @@
 
     // sets it the code var for two way binding
     if (queryCode !== null) {
+      codeDirty = true;
       code = queryCode;
     }
   });
   async function joinLobby() {
+    code = code.toLowerCase();
     try {
       await saveOrCreate($user, userData, name.trim());
-      // get the current user info
-      const { displayName, avatar } = (await getUser(($user as User).uid)) as UserData;
       // enter lobby with the user's info
-      await findAndJoinLobby(code, {
-        displayName,
-        avatar,
-        uid: ($user as User).uid,
-      });
+      await findAndJoinLobby(code);
       // go to game page
       goto(`/game?code=${code}`);
     } catch (err) {
@@ -80,27 +95,55 @@
   }
 </script>
 
-<!-- If not then show regular page -->
-<nav class="temp-nav">
-  <SigninButton />
-</nav>
+<header>
+  <SigninButton {userData} />
+</header>
+
 <div class="cat-join-container">
   <h2 class="mdc-typography--headline2">Join Lobby!</h2>
   {#if errorMessage !== ""}
-    <p style="color:red;">{errorMessage}</p>
+    <p class="error">{errorMessage}</p>
   {/if}
-  <form on:submit|preventDefault={joinLobby}>
-    <Textfield type="text" label="Display name" bind:value={name} />
-    <Textfield type="text" label="Lobby code" bind:value={code} />
-    <Button><Label>Join</Label></Button>
+  <form on:submit|once={joinLobby} on:submit|preventDefault>
+    <div>
+      <Textfield
+        type="text"
+        label="Display name"
+        bind:value={name}
+        bind:dirty={nameDirty}
+        invalid={nameDirty && !nameValidation.valid}
+        required
+      >
+        <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
+      </Textfield>
+    </div>
+    <div>
+      <Textfield
+        type="text"
+        label="Lobby code"
+        bind:value={code}
+        bind:dirty={codeDirty}
+        invalid={codeDirty && !codeValidation.valid}
+        input$autocapitalize="none"
+        on:input={() => (code = code.toLowerCase())}
+        required
+      >
+        <HelperText validationMsg slot="helper">{codeValidation.valid ? "" : codeValidation.reason}</HelperText>
+      </Textfield>
+    </div>
+    <Button disabled={!nameValidation.valid || !codeValidation.valid}><Label>Join</Label></Button>
   </form>
 </div>
 
 <style>
-  .temp-nav {
+  header {
+    height: 64px;
     display: flex;
     justify-content: right;
+    align-items: center;
+    padding-right: 16px;
   }
+
   .cat-join-container {
     width: 60%;
     margin: auto;

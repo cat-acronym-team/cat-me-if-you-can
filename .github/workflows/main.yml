@@ -105,6 +105,26 @@ jobs:
       - name: Lint
         run: npm --prefix client run lint
 
+  svelte-check:
+    name: Svelte Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install Node Dependencies
+        run: npm --prefix client ci
+
+      - name: Check
+        run: npm --prefix client run check
+
   build-client:
     name: Build Client
     runs-on: ubuntu-latest
@@ -179,7 +199,8 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/development'
-    needs: [prettier, lint-functions, test-functions, build-functions, lint-client, build-client, playwright]
+    needs:
+      [prettier, lint-functions, test-functions, build-functions, lint-client, svelte-check, build-client, playwright]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -208,7 +229,7 @@ jobs:
         run: npm i -g firebase-tools
 
       - name: Deploy
-        run: firebase deploy --project stage --message "${{ github.event.head_commit.message }}"
+        run: firebase deploy --project stage --message "${{ github.event.head_commit.message }}" --force
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
@@ -216,7 +237,8 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/production'
-    needs: [prettier, lint-functions, test-functions, build-functions, lint-client, build-client, playwright]
+    needs:
+      [prettier, lint-functions, test-functions, build-functions, lint-client, svelte-check, build-client, playwright]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -245,6 +267,6 @@ jobs:
         run: npm i -g firebase-tools
 
       - name: Deploy
-        run: firebase deploy --project prod --message "${{ github.event.head_commit.message }}"
+        run: firebase deploy --project prod --message "${{ github.event.head_commit.message }}" --force
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}

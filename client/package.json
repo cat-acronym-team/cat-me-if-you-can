@@ -21,12 +21,15 @@
     "@material/typography": "^14.0.0",
     "@playwright/test": "^1.25.0",
     "@smui/button": "^7.0.0-beta.0",
+    "@smui/circular-progress": "^7.0.0-beta.0",
     "@smui/dialog": "^7.0.0-beta.0",
     "@smui/icon-button": "^7.0.0-beta.0",
     "@smui/menu": "^7.0.0-beta.0",
+    "@smui/ripple": "^7.0.0-beta.0",
     "@smui/textfield": "^7.0.0-beta.0",
     "@sveltejs/adapter-static": "^1.0.0-next.43",
     "@sveltejs/kit": "next",
+    "@types/d3-interpolate": "^3.0.1",
     "@typescript-eslint/eslint-plugin": "^5.27.0",
     "@typescript-eslint/parser": "^5.27.0",
     "eslint": "^8.16.0",
@@ -40,6 +43,7 @@
     "vite": "^3.1.0"
   },
   "dependencies": {
+    "d3-interpolate": "^3.0.1",
     "firebase": "^9.10.0"
   },
   "type": "module"

@@ -16,7 +16,8 @@
 }
 
 html,
-body {
+body,
+.base-theme-colors {
   background-color: theme.$background;
   color: theme.$on-surface;
 }
@@ -26,4 +27,8 @@ a {
 }
 a:visited {
   color: color.scale(theme.$primary, $lightness: -35%);
+}
+
+.error {
+  color: theme.$error;
 }
