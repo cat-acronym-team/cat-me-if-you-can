@@ -15,6 +15,7 @@ import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 import { deleteChatRooms } from "./chat";
+import { assignRole } from "./role";
 import { endGameProcess } from "./winloss";
 import { findVoteOff } from "./vote";
 import { determineWinner } from "./result";
@@ -91,13 +92,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
     }
 
-    const privatePlayerCollection = getPrivatePlayerCollection(lobby.ref);
-    for (const uid of uids) {
-      privatePlayerCollection.doc(uid).create({ role: "CAT", stalker: false });
-    }
-
-    // await lobbyCollection.doc(data.code).update({ state: "PROMPT" });
-    await startPrompt(lobby, transaction);
+    assignRole(lobby, transaction);
   });
 });
 
@@ -374,6 +369,9 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
 
     // TODO: potential if checks for other states that require a timer
     // if the state is chat then delete chatrooms
+    if (lobby.state === "ROLE") {
+      await startPrompt(lobbyDoc, transaction);
+    }
     if (lobby.state === "PROMPT") {
       await collectPromptAnswers(lobbyDoc, transaction);
     }
