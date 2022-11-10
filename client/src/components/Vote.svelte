@@ -39,7 +39,7 @@
   onDestroy(() => {
     unsubscribeVote?.();
   });
-
+  // reactive timer calls
   $: if (countdown <= 0 && lobby.uids[0] == $user?.uid) {
     clearInterval(timer);
     verifyExpiration({ code: lobbyCode });
