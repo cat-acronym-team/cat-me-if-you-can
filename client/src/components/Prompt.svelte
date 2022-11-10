@@ -82,7 +82,8 @@
 
 <style>
   .countdown {
-    margin: 0 auto;
+    margin: 0;
+    text-align: center;
   }
 
   .wraper {
