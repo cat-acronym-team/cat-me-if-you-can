@@ -12,6 +12,7 @@
 
   let countdown = GAME_STATE_DURATIONS.VOTE;
   let timer: ReturnType<typeof setInterval>;
+  let selected: number;
 
   onMount(() => {
     timer = setInterval(() => {
@@ -36,18 +37,29 @@
   <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
     {formatTimer(Math.max(countdown, 0))}
   </p>
+  <p class="mdc-typography--headline4">Vote out the catfish</p>
   <div class="voting-grid">
-    {#each lobby.players as { avatar, displayName, votes }, i}
+    {#each lobby.players as { avatar, displayName, votes, alive, promptAnswer }, i}
       <div class="vote-container">
         <button
-          class="avatar"
-          disabled={$user?.uid == lobby.uids[i]}
-          on:click={() => addVote(lobbyCode, $user?.uid ?? "", lobby.uids[i])}
+          class="avatar {!alive ? 'dead' : ''} {selected == i ? 'selected' : ''}"
+          disabled={!alive}
+          on:click={async () => {
+            await addVote(lobbyCode, $user?.uid ?? "", lobby.uids[i]);
+            selected = i;
+          }}
         >
-          <img src="/avatars/{avatar}.webp" alt={avatarAltText[avatar]} />
+          <img class={!alive ? "dead" : ""} src="/avatars/{avatar}.webp" alt={avatarAltText[avatar]} />
           <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
+          <div class="mdc-typography--caption">
+            {#if alive}
+              {promptAnswer ?? "no answer"}
+            {:else}
+              Im dead
+            {/if}
+          </div>
         </button>
-        <span class="mdc-typography--heading6">{votes ?? 0}</span>
+        <span class="mdc-typography--heading6 {!alive ? 'dead' : ''}">{votes ?? 0}</span>
       </div>
     {/each}
   </div>
@@ -55,17 +67,16 @@
 
 <style>
   .voting {
-    /* height: 100%; */
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     justify-items: center;
   }
   .voting-grid {
     display: grid;
-    grid-template-columns: repeat(4, auto);
-    grid-template-rows: repeat(3, auto);
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(6, auto);
     place-content: center;
-    gap: 12px 24px;
+    gap: 12px 12px;
     height: 100%;
   }
   .vote-container {
@@ -92,5 +103,69 @@
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
+  }
+
+  @media (min-width: 800px) {
+    .voting {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      justify-items: center;
+    }
+    .voting-grid {
+      display: grid;
+      grid-template-columns: repeat(3, auto);
+      grid-template-rows: repeat(4, auto);
+      place-content: center;
+      gap: 12px 24px;
+      height: 100%;
+    }
+
+  }
+  @media (min-width: 1000px) {
+    .voting {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      justify-items: center;
+    }
+    .voting-grid {
+      display: grid;
+      grid-template-columns: repeat(4, auto);
+      grid-template-rows: repeat(3, auto);
+      place-content: center;
+      gap: 12px 24px;
+      height: 100%;
+    }
+    .vote-container {
+      display: grid;
+      row-gap: 10px;
+      text-align: center;
+    }
+    .avatar {
+      appearance: none;
+      border: none;
+      padding: 10px;
+      background: none;
+
+      display: grid;
+      grid-template-rows: auto 16px;
+      place-items: center;
+      color: unset;
+      border: 1px currentColor solid;
+    }
+
+    .avatar img {
+      height: 18vmin;
+      width: 18vmin;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+  }
+
+  .dead {
+    opacity: 0.5;
+  }
+  .selected {
+    border-color: green;
   }
 </style>
