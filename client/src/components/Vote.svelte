@@ -53,7 +53,7 @@
           <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
           <div class="mdc-typography--caption">
             {#if alive}
-              {promptAnswer ?? "no answer"}
+              Answer: {promptAnswer ?? "no answer"}
             {:else}
               Im dead
             {/if}
