@@ -79,7 +79,7 @@
   </div>
 </div>
 
-<style>
+<style lang="scss">
   .voting {
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
@@ -136,6 +136,6 @@
     opacity: 0.5;
   }
   .selected {
-    border-color: green;
+    border-color: var(--primary-theme-color);
   }
 </style>
