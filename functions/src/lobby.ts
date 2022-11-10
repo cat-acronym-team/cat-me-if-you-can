@@ -51,7 +51,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
       },
     ],
     state: "WAIT",
-    alivePlayers: []
+    alivePlayers: [],
   };
 
   // try making lobby 5 times before giving up
