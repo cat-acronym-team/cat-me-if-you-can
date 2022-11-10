@@ -74,7 +74,7 @@
     <div class="lobby-chat-level">
       <LobbyChat {lobby} {lobbyCode} />
     </div>
-    <SelectAvatar {lobby} {lobbyCode} on:change={(event) => onAvatarSelect(event.detail.value)} />
+    <SelectAvatar {lobby} on:change={(event) => onAvatarSelect(event.detail.value)} />
     {#if auth.currentUser?.uid === lobby.uids[0]}
       <div class="actions">
         <Button on:click|once={() => start()}><Label>Start Game</Label></Button>
