@@ -1,4 +1,5 @@
 <script lang="ts">
+  import LobbyChat from "./LobbyChat.svelte";
   import SelectAvatar from "./SelectAvatar.svelte";
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
@@ -70,6 +71,9 @@
       <h3>Code: {lobbyCode}</h3>
       <h3>Players: {lobby.players.length}</h3>
     </div>
+    <div class="lobby-chat-level">
+      <LobbyChat {lobby} {lobbyCode} />
+    </div>
     <SelectAvatar {lobby} {lobbyCode} on:change={(event) => onAvatarSelect(event.detail.value)} />
     {#if auth.currentUser?.uid === lobby.uids[0]}
       <div class="actions">
@@ -100,6 +104,13 @@
 <style>
   main {
     justify-content: center;
+  }
+
+  .lobby-chat-level {
+    width: 100%;
+    display: flex;
+    justify-content: left;
+    align-items: center;
   }
 
   .actions {

@@ -4,8 +4,16 @@ import {
   getChatRoomCollection,
   getChatRoomMessagesCollection,
   getPrivatePlayerCollection,
+  getLobbyChatCollection,
 } from "./firestore-collections";
 import { GAME_STATE_DURATIONS, Lobby } from "./firestore-types/lobby";
+
+export async function deleteLobbyChatMessages(lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
+  const messages = await transaction.get(getLobbyChatCollection(lobbyDoc));
+  messages.forEach((messageDoc) => {
+    transaction.delete(messageDoc.ref);
+  });
+}
 
 export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
   const { players, uids } = lobbyData;

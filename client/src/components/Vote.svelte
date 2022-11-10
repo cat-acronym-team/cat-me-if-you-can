@@ -1,5 +1,6 @@
 <script lang="ts">
   import { type Lobby, GAME_STATE_DURATIONS } from "$lib/firebase/firestore-types/lobby";
+  import LobbyChat from "./LobbyChat.svelte";
   import { addVote } from "$lib/firebase/vote";
   import { formatTimer } from "$lib/time";
   import { authStore as user } from "$stores/auth";
@@ -32,6 +33,9 @@
   }
 </script>
 
+<div class="lobby-chat-level">
+  <LobbyChat {lobby} {lobbyCode} />
+</div>
 <div class="voting">
   <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
     {formatTimer(Math.max(countdown, 0))}
@@ -72,6 +76,12 @@
     display: grid;
     row-gap: 10px;
     text-align: center;
+  }
+  .lobby-chat-level {
+    width: 100%;
+    display: flex;
+    justify-content: left;
+    align-items: center;
   }
   .avatar {
     appearance: none;
