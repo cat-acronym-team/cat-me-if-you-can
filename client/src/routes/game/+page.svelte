@@ -1,5 +1,6 @@
 <script lang="ts">
   import Prompt from "$components/Prompt.svelte";
+  import Role from "$components/ReceiveRole.svelte";
   import LobbyComponent from "$components/Lobby.svelte";
   import WinLoss from "$components/WinLoss.svelte";
   import ChatRoom from "$components/ChatRoom.svelte";
@@ -104,6 +105,8 @@
     <div class="spinner-wraper">
       <CircularProgress indeterminate />
     </div>
+  {:else if lobby.state === "ROLE"}
+    <Role {lobby} {lobbyCode} {privatePlayer} />
   {:else if lobby.state === "PROMPT"}
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} lobbyData={lobby} />
   {:else if lobby.state === "CHAT"}
