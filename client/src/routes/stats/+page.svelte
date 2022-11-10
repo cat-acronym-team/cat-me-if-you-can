@@ -18,10 +18,9 @@
   let catfishLosses: number;
   let catRatio: number;
   let catfishRatio: number;
-  let userId: string | null;
 
   onMount(() => {
-    userId = $page.url.searchParams.get("user");
+    const userId = $page.url.searchParams.get("user");
 
     if (userId !== null) {
       unsubscribeUser = onSnapshot(doc(userCollection, userId), (userDoc) => {
