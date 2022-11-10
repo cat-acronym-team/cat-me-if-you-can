@@ -8,9 +8,6 @@ service cloud.firestore {
       function inLobby(){
         return request.auth.uid in lobbyData().uids
       }
-      function isAlive(){
-        return request.auth.uid in lobbyData().alivePlayers;
-      }
 
       allow get: if true;
 
@@ -66,15 +63,15 @@ service cloud.firestore {
         function checkTarget(){
           return request.resource.data.keys().hasOnly(['target'])
           && request.resource.data.target is string
-          && request.resource.data.target in lobbyData().alivePlayers;
+          && request.resource.data.target in lobbyData().uids
+          && request.resource.data.target != request.auth.uid;
         }
         function notPastTarget(){
           return checkTarget() && request.resource.data.target != resource.data.target;
         }
 
-        allow get: if request.auth.uid == uid;
-        allow create: if request.auth.uid == uid && inLobby() && checkTarget() && isAlive();
-        allow update: if request.auth.uid == uid && inLobby() && notPastTarget() && isAlive();
+        allow create: if request.auth.uid == uid && inLobby() && checkTarget();
+        allow update: if request.auth.uid == uid && inLobby() && notPastTarget();
       }
     }
 
