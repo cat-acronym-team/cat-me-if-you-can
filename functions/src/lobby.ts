@@ -51,6 +51,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
       },
     ],
     state: "WAIT",
+    alivePlayers: []
   };
 
   // try making lobby 5 times before giving up
@@ -193,6 +194,18 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
       });
     }
   });
+});
+
+export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate(async (change, context) => {
+  const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
+  const lobby = change.after.data() as Lobby;
+  const alivePlayers = [];
+  for (let i = 0; i < lobby.uids.length; i++) {
+    if (lobby.players[i].alive) {
+      alivePlayers.push(lobby.uids[i]);
+    }
+  }
+  lobbyDocRef.update({ alivePlayers });
 });
 
 export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
