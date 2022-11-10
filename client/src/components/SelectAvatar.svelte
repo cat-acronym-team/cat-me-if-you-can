@@ -17,6 +17,7 @@
 
   type $$Props = { selectedAvatar: 0 | Avatar } | { lobby: Lobby; lobbyCode: string };
 
+
   $: avatarChoices = updateAvatarChoices(lobby, selectedAvatar);
 
   type AvatarChoice = {
@@ -65,6 +66,15 @@
       value: avatar,
     });
   }
+
+  function kick(){
+    
+  }
+
+  function ban(){
+    
+  }
+
 </script>
 
 <div class="grid {lobby != undefined ? 'lobby' : ''}">
