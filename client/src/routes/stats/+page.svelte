@@ -6,7 +6,8 @@
   import { doc, onSnapshot } from "firebase/firestore";
   import { userCollection } from "$lib/firebase/firestore-collections";
   import type { Unsubscribe } from "firebase/auth";
-  import { onDestroy } from "svelte";
+  import { onDestroy, onMount } from "svelte";
+  import { page } from "$app/stores";
 
   // variables
   let userInfo: UserData | undefined;
@@ -18,12 +19,16 @@
   let catRatio: number;
   let catfishRatio: number;
 
-  // reactive calls
-  $: if ($user !== null) {
-    unsubscribeUser = onSnapshot(doc(userCollection, $user.uid), (userDoc) => {
-      userInfo = userDoc.data();
-    });
-  }
+  onMount(() => {
+    const userId = $page.url.searchParams.get("user");
+
+    if (userId !== null) {
+      unsubscribeUser = onSnapshot(doc(userCollection, userId), (userDoc) => {
+        userInfo = userDoc.data();
+      });
+    }
+  });
+
   $: if (userInfo !== undefined) {
     totalPlayed = userInfo.playedAsCat + userInfo.playedAsCatfish;
     catLosses = userInfo.playedAsCat - userInfo.catWins;
