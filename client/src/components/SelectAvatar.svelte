@@ -16,7 +16,7 @@
     avatar: Avatar;
     altText: string;
     displayName?: string;
-    avalible: boolean;
+    available: boolean;
     selected: boolean;
   };
 
@@ -24,13 +24,13 @@
     const newAvatarChoices: AvatarChoice[] = [];
 
     for (let i = 1; i <= 12; i++) {
-      newAvatarChoices.push({ avatar: i as Avatar, altText: avatarAltText[i], avalible: true, selected: false });
+      newAvatarChoices.push({ avatar: i as Avatar, altText: avatarAltText[i], available: true, selected: false });
     }
 
     if (lobby != undefined) {
       for (const player of lobby.players) {
         newAvatarChoices[player.avatar - 1].displayName = player.displayName;
-        newAvatarChoices[player.avatar - 1].avalible = false;
+        newAvatarChoices[player.avatar - 1].available = false;
       }
 
       if ($user !== null) {
@@ -40,7 +40,7 @@
     } else {
       for (const avatarChoice of newAvatarChoices) {
         avatarChoice.selected = avatarChoice.avatar === selectedAvatar;
-        avatarChoice.avalible = !avatarChoice.selected;
+        avatarChoice.available = !avatarChoice.selected;
       }
     }
 
