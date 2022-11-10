@@ -33,16 +33,6 @@
       <li>Do not talk to other players during the game until the voting phase has arrived.</li>
     </ul>
 
-    <h3 class="mdc-typography--headline5">Phases</h3>
-    <ul class="mdc-typography--body1">
-      <li>Lobby</li>
-      <li>Recieve A Role</li>
-      <li>Answer Prompt</li>
-      <li>Chatting</li>
-      <li>Voting</li>
-      <li>End</li>
-    </ul>
-
     <h3 class="mdc-typography--headline5">Before the game</h3>
     <p class="mdc-typography--body1">
       If you have an account/want to create one, head to the sign-in button and enter your information to create an
