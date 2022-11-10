@@ -81,6 +81,11 @@
 </form>
 
 <style>
+  .countdown {
+    margin: 0;
+    text-align: center;
+  }
+
   .wraper {
     height: 100%;
     display: grid;
