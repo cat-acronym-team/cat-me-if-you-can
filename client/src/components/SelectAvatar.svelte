@@ -5,15 +5,17 @@
   import { authStore as user } from "$stores/auth";
   import { avatarAltText } from "$lib/avatar";
   import Menu from "@smui/menu/src/Menu.svelte";
-  import List, {Item, Text} from '@smui/list';
-  import IconButton from '@smui/icon-button';
+  import List, { Item, Text } from "@smui/list";
+  import IconButton from "@smui/icon-button";
+  import { kick, ban } from "$lib/firebase/firebase-functions";
 
   export let selectedAvatar: 0 | Avatar = 0;
   export let lobby: Lobby | undefined = undefined;
+  export let lobbyCode: string | undefined = undefined;
 
   let menu: Menu;
 
-  type $$Props = { selectedAvatar: 0 | Avatar } | { lobby: Lobby };
+  type $$Props = { selectedAvatar: 0 | Avatar } | { lobby: Lobby; lobbyCode: string };
 
   $: avatarChoices = updateAvatarChoices(lobby, selectedAvatar);
 
@@ -36,8 +38,10 @@
     if (lobby != undefined) {
       for (const player of lobby.players) {
         newAvatarChoices[player.avatar - 1].displayName = player.displayName;
-        newAvatarChoices[player.avatar - 1].uid = player.uid;
         newAvatarChoices[player.avatar - 1].available = false;
+
+        const playerIndex = lobby.players.indexOf(player);
+        newAvatarChoices[player.avatar - 1].uid = lobby.uids[playerIndex];
       }
 
       if ($user !== null) {
@@ -61,38 +65,32 @@
       value: avatar,
     });
   }
-
-  function kick(){
-    
-  }
-
-  function ban(){
-    
-  }
-
 </script>
 
 <div class="grid {lobby != undefined ? 'lobby' : ''}">
-  {#each avatarChoices as { avatar, altText, displayName, available, selected }}
-    <button class="avatar" on:click={() => selectAvatar(avatar)} disabled={!available} aria-selected={selected}>
-      <img src="/avatars/{avatar}.webp" alt={altText} />
-      {#if lobby != undefined}
-        <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
-      {/if}
+  {#each avatarChoices as { avatar, altText, displayName, uid, available, selected }}
+    <div>
       {#if !available}
-      <IconButton class="material-symbols-outlined" on:click={() => menu.setOpen(true)}>more_vert</IconButton>
+        <IconButton class="material-icons" on:click={() => menu.setOpen(true)}>more_vert</IconButton>
+        <!-- change bind this to something else so it works for every option -->
         <Menu bind:this={menu}>
           <List>
-            <Item on:SMUI:action={() = kick()}>
-              <Text> Kick </Text>
+            <Item on:SMUI:action={() => kick({ code: lobbyCode ?? "", uid: uid ?? "" })}>
+              <Text>Kick</Text>
             </Item>
-            <Item on:SMUI:action={() => ban()}>
-              <Text> Ban </Text>
+            <Item on:SMUI:action={() => ban({ code: lobbyCode ?? "", uid: uid ?? "" })}>
+              <Text>Ban</Text>
             </Item>
           </List>
         </Menu>
       {/if}
-    </button>
+      <button class="avatar" on:click={() => selectAvatar(avatar)} disabled={!available} aria-selected={selected}>
+        <img src="/avatars/{avatar}.webp" alt={altText} />
+        {#if lobby != undefined}
+          <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
+        {/if}
+      </button>
+    </div>
   {/each}
 </div>
 

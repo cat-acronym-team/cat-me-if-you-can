@@ -3,7 +3,7 @@
   import Stalker from "$components/Stalker.svelte";
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
-  import { onSnapshot, orderBy, Query, query, where } from "firebase/firestore";
+  import { onSnapshot, orderBy, Query, query, where, type Unsubscribe } from "firebase/firestore";
   import {
     GAME_STATE_DURATIONS,
     type ChatMessage,
@@ -13,7 +13,7 @@
   } from "$lib/firebase/firestore-types/lobby";
   import { addChatMessage } from "$lib/firebase/chat";
   import { getChatRoomCollection, getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
-  import type { Unsubscribe, User } from "firebase/auth";
+  import type { User } from "firebase/auth";
   import { verifyExpiration } from "$lib/firebase/firebase-functions";
   import { formatTimer } from "$lib/time";
   // props

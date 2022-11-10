@@ -1,5 +1,6 @@
 <script lang="ts">
   import Prompt from "$components/Prompt.svelte";
+  import Role from "$components/ReceiveRole.svelte";
   import LobbyComponent from "$components/Lobby.svelte";
   import WinLoss from "$components/WinLoss.svelte";
   import ChatRoom from "$components/ChatRoom.svelte";
@@ -7,14 +8,13 @@
   import Result from "$components/Result.svelte";
   import CircularProgress from "@smui/circular-progress";
 
-  import { onSnapshot, doc, getDoc } from "firebase/firestore";
+  import { onSnapshot, doc, getDoc, type Unsubscribe } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
   import { getPrivatePlayerCollection, lobbyCollection } from "$lib/firebase/firestore-collections";
   import type { Lobby, PrivatePlayer } from "$lib/firebase/firestore-types/lobby";
   import { page } from "$app/stores";
   import { authStore as user } from "$stores/auth";
   import { goto } from "$app/navigation";
-  import type { Unsubscribe } from "firebase/auth";
 
   let lobbyCode: string | null = null;
 
@@ -104,6 +104,8 @@
     <div class="spinner-wraper">
       <CircularProgress indeterminate />
     </div>
+  {:else if lobby.state === "ROLE"}
+    <Role {lobby} {lobbyCode} {privatePlayer} />
   {:else if lobby.state === "PROMPT"}
     <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} lobbyData={lobby} />
   {:else if lobby.state === "CHAT"}
