@@ -199,7 +199,7 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   let hasChanged = false;
   const alivePlayers = [];
   for (let i = 0; i < lobby.uids.length; i++) {
-    if (lobby.players[i].alive != lobbyBefore.players[i].alive) {
+    if (lobby.players[i].alive !== lobbyBefore.players[i].alive) {
       hasChanged = true;
     }
     if (lobby.players[i].alive) {
