@@ -79,7 +79,7 @@
   </div>
 </div>
 
-<style lang="scss">
+<style>
   .voting {
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
