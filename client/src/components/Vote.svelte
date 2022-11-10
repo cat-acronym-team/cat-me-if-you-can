@@ -119,7 +119,6 @@
       gap: 12px 24px;
       height: 100%;
     }
-
   }
   @media (min-width: 1000px) {
     .voting {
