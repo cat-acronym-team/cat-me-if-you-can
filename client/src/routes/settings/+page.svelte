@@ -15,11 +15,9 @@
   let googleLinked = false;
   let microsoftLinked = false;
   let linkPass = false;
-  let passCheck = false;
 
   let errorMsg = "";
   let password = "";
-  let confirmPassword = "";
   let googleErr = "";
   let microsoftErr = "";
   let passErr = "";
@@ -77,11 +75,6 @@
   }
 
   async function linkPassword() {
-    if (password !== confirmPassword) {
-      passErr = "Passwords do not match";
-    }
-
-    passCheck = true;
     try {
       await linkWithPassword(password);
       linkPass = true;
@@ -95,7 +88,6 @@
 
   function clearFields() {
     password = "";
-    confirmPassword = "";
   }
 
   const googleSvgPaths: { color: string; path: string }[] = [
@@ -178,15 +170,7 @@
             <Icon class="material-icons">visibility_off</Icon>
           </IconButton>
         </Textfield>
-        <div>
-          <Textfield
-            name="confirmpass"
-            label="Confirm Password"
-            type={showPassword ? "text" : "password"}
-            bind:value={confirmPassword}
-            required
-          />
-        </div>
+
         {#if linkPass}
           <p>Password Sucessfully Set</p>
         {:else if passErr !== ""}
