@@ -1,10 +1,5 @@
 <script lang="ts">
-  import {
-    GAME_STATE_DURATIONS,
-    type Lobby,
-    type Player,
-    type PrivatePlayer,
-  } from "$lib/firebase/firestore-types/lobby";
+  import { GAME_STATE_DURATIONS, type Lobby, type PrivatePlayer } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
   import { authStore as user } from "$stores/auth";
   import { verifyExpiration } from "$lib/firebase/firebase-functions";
@@ -15,13 +10,8 @@
 
   let countdown = GAME_STATE_DURATIONS.VOTE;
   let timer: ReturnType<typeof setInterval>;
-  let votedOffUser: Player | undefined;
 
   onMount(() => {
-    if (lobby.votedOff != undefined && lobby.votedOff != "NONE") {
-      votedOffUser = lobby.players[lobby.uids.indexOf(lobby.votedOff)];
-    }
-
     timer = setInterval(() => {
       if (lobby.expiration != undefined) {
         const diff = Math.floor((lobby.expiration.toMillis() - Date.now()) / 1000);

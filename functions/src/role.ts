@@ -2,12 +2,12 @@ import { GAME_STATE_DURATIONS, Lobby } from "./firestore-types/lobby";
 import { getPrivatePlayerCollection } from "./firestore-collections";
 import { firestore } from "firebase-admin";
 
-export async function assignRole(lobbySnap: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
+export function assignRole(lobbySnap: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
   // Number of catfish below, will later be made to be changeable by users.
   const numCatFish = 1;
+  const lobbyData = lobbySnap.data();
+  // lobby reference used for getPrivatePlayerCollection and transaction
   const lobby = lobbySnap.ref;
-  const validLobby = await transaction.get(lobby);
-  const lobbyData = validLobby.data();
 
   // Checks to see if lobby is indeed valid.
   if (lobbyData === undefined) {
