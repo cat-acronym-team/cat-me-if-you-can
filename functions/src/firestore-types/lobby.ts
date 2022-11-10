@@ -1,8 +1,8 @@
 import type { Timestamp } from "firebase-admin/firestore";
 
-export const avatars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
+export const AVATARS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
 
-export type Avatar = typeof avatars[number];
+export type Avatar = typeof AVATARS[number];
 
 export type Player = {
   /**
@@ -23,10 +23,33 @@ export type Player = {
   /**
    * the number of players that have voted for this player
    */
-  votes?: number;
+  votes: number;
+
+  /**
+   * the role that the player played; used at the end of the game
+   */
+  role?: Role;
+
+  /**
+   * the answer for their prompt
+   */
+  promptAnswer?: string;
 };
 
-export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
+export type GameState = "WAIT" | "ROLE" | "PROMPT" | "CHAT" | "VOTE" | "RESULT" | "END";
+
+/**
+ * the duration in seconds for each game state
+ */
+export const GAME_STATE_DURATIONS: { [state in GameState]: number } = {
+  WAIT: 2 * 60 * 60,
+  ROLE: 15,
+  PROMPT: 60,
+  CHAT: 2 * 60,
+  VOTE: 3 * 60,
+  RESULT: 10,
+  END: 10,
+};
 
 /**
  * the type of documents `/lobbies/{code}`
@@ -48,6 +71,22 @@ export type Lobby = {
    * the current state of the game
    */
   state: GameState;
+
+  /**
+   * expiration time of the current phase with a timer
+   */
+  expiration?: Timestamp;
+
+  /**
+   * the role that won the game
+   */
+  winner?: Role;
+
+  /**
+   * the uid of the player that was voted off for the round
+   * @note this can be a uid, NONE, or undefined
+   */
+  votedOff?: string | "NONE";
 };
 
 /**
@@ -63,6 +102,11 @@ export type PrivatePlayer = {
    * the role of the player
    */
   role: Role;
+
+  /**
+   * states if a user is a stalker or not
+   */
+  stalker: boolean;
 
   /**
    * the prompt that the user will be shown (this varies on the role)
@@ -139,6 +183,10 @@ export type ChatMessage = {
    * the time when the message was sent (used for sorting)
    */
   timestamp: Timestamp;
+  /**
+   * checks if this is the prompt answer
+   */
+  isPromptAnswer?: true;
 };
 
 /**
@@ -151,16 +199,16 @@ export type LobbyChatMessage = ChatMessage & {
   alive: boolean;
 };
 
-export function chatMessageValidator(displayName: string): { valid: true } | { valid: false; reason: string } {
-  if (displayName.length == 0) {
+export function chatMessageValidator(message: string): { valid: true } | { valid: false; reason: string } {
+  if (message.length == 0) {
     return { valid: false, reason: "Chat message may not be empty" };
   }
 
-  if (displayName.length > 100) {
+  if (message.length > 100) {
     return { valid: false, reason: "Chat message must be at most 100 characters long" };
   }
 
-  if (displayName !== displayName.trim()) {
+  if (message !== message.trim()) {
     return { valid: false, reason: "Chat message must not contain leading or trailing whitespace" };
   }
 

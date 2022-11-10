@@ -1,13 +1,18 @@
 <script lang="ts">
   import SelectAvatar from "./SelectAvatar.svelte";
+  import Button, { Label } from "@smui/button";
+  import IconButton from "@smui/icon-button";
   import { page } from "$app/stores";
-  import type { Lobby } from "$lib/firebase/firestore-types/lobby";
+  import type { Avatar, Lobby } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { startGame } from "$lib/firebase/firestore-functions";
+  import { changeAvatar, startGame, leaveLobby } from "$lib/firebase/firebase-functions";
+  import { goto } from "$app/navigation";
+  import { auth } from "$lib/firebase/app";
 
   // Props
   export let lobbyCode: string;
   export let lobby: Lobby;
+  let errorMessage: string = "";
 
   // better link to share since it's redirecting to this page anyways
   // Josh's suggestion that I agreed on
@@ -33,6 +38,30 @@
   function copyLink() {
     navigator.clipboard.writeText(url);
   }
+
+  async function onAvatarSelect(avatar: Avatar) {
+    try {
+      await changeAvatar({ lobbyCode, avatar });
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+    }
+  }
+
+  async function start() {
+    try {
+      await startGame({ code: lobbyCode });
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+    }
+  }
+
+  async function leave() {
+    try {
+      await leaveLobby({ code: lobbyCode });
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+    }
+  }
 </script>
 
 <main>
@@ -41,19 +70,29 @@
       <h3>Code: {lobbyCode}</h3>
       <h3>Players: {lobby.players.length}</h3>
     </div>
-    <SelectAvatar {lobby} {lobbyCode} />
-    <div class="start">
-      <button
-        id="start-game"
-        on:click={async () => {
-          startGame({ code: lobbyCode });
-        }}>Start Game</button
+    <SelectAvatar {lobby} on:change={(event) => onAvatarSelect(event.detail.value)} />
+    {#if auth.currentUser?.uid === lobby.uids[0]}
+      <div class="actions">
+        <Button on:click|once={() => start()}><Label>Start Game</Label></Button>
+      </div>
+    {/if}
+    <div class="actions">
+      <Button
+        on:click|once={async () => {
+          await leave();
+          goto("/");
+        }}><Label>Leave Lobby</Label></Button
       >
+    </div>
+    <div class="actions">
+      {#if errorMessage !== ""}
+        <p>{errorMessage}</p>
+      {/if}
     </div>
     <div class="buttons">
       <h3 class="invite-link">Invite Link: {url}</h3>
-      <button id="copy" on:click={copyLink}>Copy Link</button>
-      {#if canShare}<button id="share" on:click={share}>Share Link</button>{/if}
+      <IconButton class="material-icons" on:click={copyLink}>content_copy</IconButton>
+      {#if canShare}<IconButton class="material-icons" on:click={share}>share</IconButton>{/if}
     </div>
   </div>
 </main>
@@ -63,12 +102,7 @@
     justify-content: center;
   }
 
-  #start-game {
-    width: 100px;
-    height: 35px;
-  }
-
-  .start {
+  .actions {
     display: grid;
     place-items: center;
   }

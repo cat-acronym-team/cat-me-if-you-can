@@ -1,6 +1,13 @@
 <script lang="ts">
+  import Button, { Label } from "@smui/button";
+  import Textfield from "@smui/textfield";
+  import HelperText from "@smui/textfield/helper-text";
   import { getPromptAnswerCollection } from "$lib/firebase/firestore-collections";
   import { doc, setDoc } from "firebase/firestore";
+  import { GAME_STATE_DURATIONS, type Lobby } from "$lib/firebase/firestore-types/lobby";
+  import { authStore as user } from "$stores/auth";
+  import { verifyExpiration } from "$lib/firebase/firebase-functions";
+  import { formatTimer } from "$lib/time";
 
   export let prompt: string | undefined;
 
@@ -8,11 +15,35 @@
 
   export let lobbyCode: string;
 
+  export let lobbyData: Lobby;
+
   let answer = "";
+  let dirty = false;
+  let countdown: number = GAME_STATE_DURATIONS.PROMPT;
+  let timer: ReturnType<typeof setInterval>;
 
   $: answerDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
 
   $: error = getErrorMessage(answer);
+
+  $: if (countdown <= 0 && lobbyData.uids[0] == $user?.uid) {
+    clearInterval(timer);
+    // call this function so it can continue onto the next state
+    verifyExpiration({ code: lobbyCode });
+  }
+
+  $: if (countdown <= -5) {
+    clearInterval(timer);
+    // call this function so it can continue onto the next state
+    verifyExpiration({ code: lobbyCode });
+  }
+
+  timer = setInterval(() => {
+    if (lobbyData.expiration != undefined) {
+      const diff = Math.floor((lobbyData.expiration.toMillis() - Date.now()) / 1000);
+      countdown = diff;
+    }
+  }, 500);
 
   function getErrorMessage(answer: string): string | undefined {
     const trimmed = answer.trim();
@@ -35,52 +66,30 @@
   }
 </script>
 
+<p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
+  {formatTimer(Math.max(countdown, 0))}
+</p>
 <form class="wraper" on:submit|preventDefault={submitAnswer}>
-  <label class="question" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
+  <label class="mdc-typography--headline5" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
 
   <div class="input">
-    <input id="prompt-answer" type="text" bind:value={answer} />
-    <label class="error" for="prompt-answer">{error ?? ""}</label>
-    <button type="submit" disabled={error != undefined}>Done</button>
+    <Textfield input$id="prompt-answer" bind:value={answer} bind:dirty invalid={dirty && error != undefined} required>
+      <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
+    </Textfield>
+    <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
   </div>
 </form>
 
 <style>
+  .countdown {
+    margin: 0;
+    text-align: center;
+  }
+
   .wraper {
     height: 100%;
     display: grid;
     grid-template-rows: 1fr 1fr 1fr;
     place-items: center;
-  }
-
-  .question {
-    font-size: 2rem;
-    font-weight: bold;
-  }
-
-  .input {
-    display: grid;
-    grid-template:
-      "input done" auto
-      "error none" auto
-      / auto auto;
-    gap: 0 8px;
-  }
-
-  #prompt-answer {
-    grid-area: input;
-    font-size: 2rem;
-    font-weight: bold;
-  }
-
-  .error {
-    grid-area: error;
-    display: block;
-    height: 16px;
-    color: red;
-  }
-
-  button {
-    grid-area: done;
   }
 </style>

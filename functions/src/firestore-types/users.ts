@@ -13,9 +13,32 @@ export type UserData = {
    * 1 - 12: cat picture 1 - 12
    */
   avatar: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+
+  /**
+   * amount of times won as cat
+   */
+  catWins: number;
+
+  /**
+   * amount of times won as catfish
+   */
+  catfishWins: number;
+
+  /**
+   * amount of times you played as cat
+   */
+  playedAsCat: number;
+
+  /**
+   * amount of times you played as catfish
+   */
+  playedAsCatfish: number;
 };
 
 export function displayNameValidator(displayName: string): { valid: true } | { valid: false; reason: string } {
+  if (displayName === "") {
+    return { valid: false, reason: "Display name must not be empty" };
+  }
   if (displayName.length < 3) {
     return { valid: false, reason: "Display name must be at least 3 characters long" };
   }
@@ -26,6 +49,10 @@ export function displayNameValidator(displayName: string): { valid: true } | { v
 
   if (displayName !== displayName.trim()) {
     return { valid: false, reason: "Display name must not contain leading or trailing whitespace" };
+  }
+
+  if (displayName.search(/[^A-Za-z0-9-_ ]+/) >= 0) {
+    return { valid: false, reason: "Display name must not have special characters" };
   }
 
   return { valid: true };
