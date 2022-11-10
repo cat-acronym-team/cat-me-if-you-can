@@ -4,9 +4,9 @@
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
   import { page } from "$app/stores";
-  import type { Lobby } from "$lib/firebase/firestore-types/lobby";
+  import type { Avatar, Lobby } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { startGame, leaveLobby } from "$lib/firebase/firebase-functions";
+  import { changeAvatar, startGame, leaveLobby } from "$lib/firebase/firebase-functions";
   import { goto } from "$app/navigation";
   import { auth } from "$lib/firebase/app";
 
@@ -40,6 +40,14 @@
     navigator.clipboard.writeText(url);
   }
 
+  async function onAvatarSelect(avatar: Avatar) {
+    try {
+      await changeAvatar({ lobbyCode, avatar });
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+    }
+  }
+
   async function start() {
     try {
       await startGame({ code: lobbyCode });
@@ -66,7 +74,7 @@
     <div class="lobby-chat-level">
       <LobbyChat {lobby} {lobbyCode} />
     </div>
-    <SelectAvatar {lobby} {lobbyCode} />
+    <SelectAvatar {lobby} {lobbyCode} on:change={(event) => onAvatarSelect(event.detail.value)} />
     {#if auth.currentUser?.uid === lobby.uids[0]}
       <div class="actions">
         <Button on:click|once={() => start()}><Label>Start Game</Label></Button>
