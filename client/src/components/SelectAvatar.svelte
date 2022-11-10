@@ -57,8 +57,8 @@
 </script>
 
 <div class="grid {lobby != undefined ? 'lobby' : ''}">
-  {#each avatarChoices as { avatar, altText, displayName, avalible, selected }}
-    <button class="avatar" on:click={() => selectAvatar(avatar)} disabled={!avalible} aria-selected={selected}>
+  {#each avatarChoices as { avatar, altText, displayName, available, selected }}
+    <button class="avatar" on:click={() => selectAvatar(avatar)} disabled={!available} aria-selected={selected}>
       <img src="/avatars/{avatar}.webp" alt={altText} />
       {#if lobby != undefined}
         <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
