@@ -53,6 +53,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
     ],
     state: "WAIT",
     alivePlayers: [context.auth.uid],
+    expiration: firestore.Timestamp.now(),
   };
 
   // try making lobby 5 times before giving up
