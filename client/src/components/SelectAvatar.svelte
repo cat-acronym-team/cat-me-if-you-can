@@ -4,16 +4,11 @@
   import { createEventDispatcher } from "svelte";
   import { authStore as user } from "$stores/auth";
   import { avatarAltText } from "$lib/avatar";
-  import Menu from "@smui/menu/src/Menu.svelte";
-  import List, { Item, Text } from "@smui/list";
-  import IconButton from "@smui/icon-button";
-  import { kick, ban } from "$lib/firebase/firebase-functions";
+  import PlayerMenu from "./PlayerMenu.svelte";
 
   export let selectedAvatar: 0 | Avatar = 0;
   export let lobby: Lobby | undefined = undefined;
   export let lobbyCode: string | undefined = undefined;
-
-  let menu: Menu;
 
   type $$Props = { selectedAvatar: 0 | Avatar } | { lobby: Lobby; lobbyCode: string };
 
@@ -71,18 +66,7 @@
   {#each avatarChoices as { avatar, altText, displayName, uid, available, selected }}
     <div>
       {#if !available}
-        <IconButton class="material-icons" on:click={() => menu.setOpen(true)}>more_vert</IconButton>
-        <!-- change bind this to something else so it works for every option -->
-        <Menu bind:this={menu}>
-          <List>
-            <Item on:SMUI:action={() => kick({ code: lobbyCode ?? "", uid: uid ?? "" })}>
-              <Text>Kick</Text>
-            </Item>
-            <Item on:SMUI:action={() => ban({ code: lobbyCode ?? "", uid: uid ?? "" })}>
-              <Text>Ban</Text>
-            </Item>
-          </List>
-        </Menu>
+        <PlayerMenu {lobbyCode} {uid} />
       {/if}
       <button class="avatar" on:click={() => selectAvatar(avatar)} disabled={!available} aria-selected={selected}>
         <img src="/avatars/{avatar}.webp" alt={altText} />

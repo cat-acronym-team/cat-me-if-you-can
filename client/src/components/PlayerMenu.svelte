@@ -6,11 +6,13 @@
 
   // variables
   let menu: Menu;
+
+  export let lobbyCode: string | undefined = undefined;
+  export let uid: string | undefined = undefined;
 </script>
 
 <div class="chatroom">
   <IconButton class="material-icons" on:click={() => menu.setOpen(true)}>more_vert</IconButton>
-  <!-- change bind this to something else so it works for every option -->
   <Menu bind:this={menu}>
     <List>
       <Item on:SMUI:action={() => kick({ code: lobbyCode ?? "", uid: uid ?? "" })}>
@@ -27,4 +29,5 @@
   * {
     box-sizing: border-box;
   }
+  /* absolute position relative to  */
 </style>
