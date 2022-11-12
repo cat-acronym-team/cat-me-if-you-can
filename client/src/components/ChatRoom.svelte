@@ -1,6 +1,7 @@
 <script lang="ts">
   import ChatMessages from "$components/ChatMessages.svelte";
   import Stalker from "$components/Stalker.svelte";
+  import LobbyChat from "./LobbyChat.svelte";
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
   import { onSnapshot, orderBy, Query, query, where, type Unsubscribe } from "firebase/firestore";
@@ -24,6 +25,7 @@
   let user = $authStore as User;
   let partnerInfo: Player | undefined;
   let pairInfo: [Player, Player] | undefined;
+  let userInfo: Player;
   let chatRoomId: string | undefined = undefined;
   let chatMessages: ChatMessage[] = [];
   let timer: ReturnType<typeof setInterval>;
@@ -109,6 +111,8 @@
   }
 
   // Reactive Calls
+  $: userInfo = lobby.players[lobby.uids.indexOf(user.uid)];
+
   $: if (countdown <= 0 && lobby.uids[0] === user.uid) {
     clearInterval(timer);
     verifyExpiration({ code: lobbyCode });
@@ -125,6 +129,8 @@
   </p>
   {#if isStalker && chatRoomId == undefined}
     <Stalker {lobby} {lobbyCode} />
+  {:else if !userInfo.alive}
+    <LobbyChat {lobby} {lobbyCode} />
   {:else}
     <ChatMessages
       {lobby}

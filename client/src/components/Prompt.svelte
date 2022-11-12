@@ -2,12 +2,14 @@
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
+  import LobbyChat from "./LobbyChat.svelte";
   import { getPromptAnswerCollection } from "$lib/firebase/firestore-collections";
   import { doc, setDoc } from "firebase/firestore";
   import { GAME_STATE_DURATIONS, type Lobby } from "$lib/firebase/firestore-types/lobby";
-  import { authStore as user } from "$stores/auth";
+  import { authStore, authStore as user } from "$stores/auth";
   import { verifyExpiration } from "$lib/firebase/firebase-functions";
   import { formatTimer } from "$lib/time";
+  import type { User } from "firebase/auth";
 
   export let prompt: string | undefined;
 
@@ -17,10 +19,14 @@
 
   export let lobbyData: Lobby;
 
+  let lobby = lobbyData;
+  let userData = $authStore as User;
   let answer = "";
   let dirty = false;
   let countdown: number = GAME_STATE_DURATIONS.PROMPT;
   let timer: ReturnType<typeof setInterval>;
+
+  $: userInfo = lobbyData.players[lobbyData.uids.indexOf(userData.uid)];
 
   $: answerDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
 
@@ -66,6 +72,9 @@
   }
 </script>
 
+{#if !userInfo.alive}
+  <LobbyChat {lobby} {lobbyCode} />
+{/if}
 <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
   {formatTimer(Math.max(countdown, 0))}
 </p>
