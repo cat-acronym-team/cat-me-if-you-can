@@ -114,43 +114,43 @@
   <main class="settings-wrapper">
     <h2>Account Settings</h2>
     <p id="email">Email: {$user?.email == null ? "Anonymous User" : $user.email}</p>
+    <div class="signin-buttons">
+      <h3>Link Provider Options</h3>
+      <Button id="sign-in-with-google" variant="raised" on:click={linkGoogleAccount}>
+        <Icon component={Svg} viewBox="0 0 48 48">
+          {#each googleSvgPaths as path}
+            <path fill={path.color} d={path.path} />
+          {/each}
+        </Icon>
+        <Label>Sign in with Google</Label>
+      </Button>
+
+      {#if googleLinked && googleErr === ""}
+        <p class="success">Successfully Linked Google Account</p>
+      {/if}
+
+      <Button id="sign-in-with-microsoft" variant="raised" on:click={linkMicrosoftAccount}>
+        <Icon component={Svg} viewBox="0 0 21 21">
+          <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+          <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+          <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+          <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
+        </Icon>
+        <Label>Sign in with Microsoft</Label>
+      </Button>
+
+      {#if microsoftLinked && microsoftErr === ""}
+        <p class="success">Successfully Linked Microsoft Account</p>
+      {/if}
+    </div>
     <div>
       <Button on:click={() => (showOptions = true)}>
-        <Label>Link Account Options</Label>
+        <Label>Set Password</Label>
       </Button>
     </div>
-    <Dialog bind:open={showOptions} aria-labelledby="link-options-title" aria-describedby="link-options-content">
-      <Title id="link-options-title">Link Account Options</Title>
-      <Content id="link-options-content">
-        <div class="signin-buttons">
-          <Button id="sign-in-with-google" variant="raised" on:click={linkGoogleAccount}>
-            <Icon component={Svg} viewBox="0 0 48 48">
-              {#each googleSvgPaths as path}
-                <path fill={path.color} d={path.path} />
-              {/each}
-            </Icon>
-            <Label>Sign in with Google</Label>
-          </Button>
-
-          {#if googleLinked && googleErr === ""}
-            <p class="success">Successfully Linked Google Account</p>
-          {/if}
-
-          <Button id="sign-in-with-microsoft" variant="raised" on:click={linkMicrosoftAccount}>
-            <Icon component={Svg} viewBox="0 0 21 21">
-              <rect x="1" y="1" width="9" height="9" fill="#f25022" />
-              <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
-              <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
-              <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
-            </Icon>
-            <Label>Sign in with Microsoft</Label>
-          </Button>
-
-          {#if microsoftLinked && microsoftErr === ""}
-            <p class="success">Successfully Linked Microsoft Account</p>
-          {/if}
-        </div>
-        <h3>Set Password</h3>
+    <Dialog bind:open={showOptions} aria-labelledby="set-password-title" aria-describedby="link-options-content">
+      <Title id="set-password-title">Set Password</Title>
+      <Content id="set-password-content">
         <Textfield
           name="password"
           label="Password"
@@ -169,15 +169,16 @@
             <Icon class="material-icons">visibility_off</Icon>
           </IconButton>
         </Textfield>
-
+        <div>
+          <Button on:click={linkPassword}>
+            <Label>Set Password</Label>
+          </Button>
+        </div>
         {#if linkPass}
           <p>Password Sucessfully Set</p>
         {:else if passErr !== ""}
           <p class="error">{passErr}</p>
         {/if}
-        <Button on:click={linkPassword}>
-          <Label>Set Password</Label>
-        </Button>
       </Content>
     </Dialog>
     <div>
