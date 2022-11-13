@@ -65,9 +65,18 @@
           <img src="/avatars/{message.avatar}.webp" alt={avatarAltText[message.avatar]} />
         </div>
         <div class="display-name mdc-typography--body2">{message.displayName}</div>
-        <div class="text mdc-typography--body1" style="background-color: {avatarColors[message.avatar]}">
-          {message.text}
-        </div>
+        {#if lobby.alivePlayers.includes(message.sender)}
+          <div class="text mdc-typography--body1" style="background-color: {avatarColors[message.avatar]}">
+            {message.text}
+          </div>
+        {:else}
+          <div
+            class="text mdc-typography--body1"
+            style="background-color: {avatarColors[message.avatar]}; filter: grayscale(80%)"
+          >
+            {message.text}
+          </div>
+        {/if}
       </div>
     {/each}
   </div>
