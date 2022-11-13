@@ -97,7 +97,7 @@ export type Lobby = {
 /**
  * the role of a player
  */
-export type Role = "CAT" | "CATFISH";
+export type Role = "CAT" | "CATFISH" | "SPECTATOR";
 
 /**
  * the type of documents `/lobbies/{code}/privatePlayers/{uid}`
