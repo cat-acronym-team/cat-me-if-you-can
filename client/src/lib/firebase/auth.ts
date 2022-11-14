@@ -10,6 +10,7 @@ import {
   signInWithEmailAndPassword,
   linkWithPopup,
   updatePassword,
+  type User,
 } from "firebase/auth";
 
 // Google login/signup
@@ -46,15 +47,13 @@ export function deleteAccount() {
   deleteUser(user);
 }
 
-export function linkWithGoogle() {
-  const user = auth.currentUser;
-
+export function linkWithGoogle(user: User | null) {
   if (user === undefined) {
     throw new Error("Not signed in");
   }
 
   if (user != null) {
-    if (userHasGoogleProvider()) {
+    if (userHasGoogleProvider(user)) {
       throw new Error("google-account-already-linked");
     }
     const google = new GoogleAuthProvider();
@@ -62,15 +61,13 @@ export function linkWithGoogle() {
   }
 }
 
-export function linkWithMicrosoft() {
-  const user = auth.currentUser;
-
+export function linkWithMicrosoft(user: User | null) {
   if (user === undefined) {
     throw new Error("Not signed in");
   }
 
   if (user != null) {
-    if (userHasMicrosoftProvider()) {
+    if (userHasMicrosoftProvider(user)) {
       throw new Error("microsoft-account-already-linked");
     }
 
@@ -81,6 +78,9 @@ export function linkWithMicrosoft() {
 
 export function linkWithPassword(password: string) {
   const user = auth.currentUser;
+  if (user === undefined) {
+    throw new Error("Not Signed In");
+  }
 
   if (user != null) {
     return updatePassword(user, password);
@@ -89,14 +89,9 @@ export function linkWithPassword(password: string) {
   }
 }
 
-export function logOut() {
-  return signOut(auth);
-}
-
-function userHasGoogleProvider() {
-  const user = auth.currentUser;
-
-  if (user != null) {
+export function userHasGoogleProvider(user: User | null) {
+  if (user) {
+    // Definitely Signed In
     const signInMethods = user.providerData;
 
     for (const provider of signInMethods) {
@@ -104,15 +99,19 @@ function userHasGoogleProvider() {
         return true;
       }
     }
+
+    return false;
   } else {
+    // Definitely not Signed In
     return false;
   }
+  // Unknown State
+  return true;
 }
 
-function userHasMicrosoftProvider() {
-  const user = auth.currentUser;
-
-  if (user != null) {
+export function userHasMicrosoftProvider(user: User | null) {
+  if (user) {
+    // Definitely Signed In
     const signInMethods = user.providerData;
 
     for (const provider of signInMethods) {
@@ -120,7 +119,14 @@ function userHasMicrosoftProvider() {
         return true;
       }
     }
+    console.log("doesn't have account");
+    return false;
   } else {
+    // Definitely not Signed In
     return false;
   }
+}
+
+export function logOut() {
+  return signOut(auth);
 }

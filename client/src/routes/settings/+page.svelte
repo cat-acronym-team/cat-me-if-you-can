@@ -1,5 +1,13 @@
 <script lang="ts">
-  import { deleteAccount, linkWithGoogle, linkWithMicrosoft, linkWithPassword, logOut } from "$lib/firebase/auth";
+  import {
+    deleteAccount,
+    linkWithGoogle,
+    linkWithMicrosoft,
+    linkWithPassword,
+    logOut,
+    userHasGoogleProvider,
+    userHasMicrosoftProvider,
+  } from "$lib/firebase/auth";
   import { goto } from "$app/navigation";
   import Dialog, { Title, Content, Actions } from "@smui/dialog";
   import Button, { Label } from "@smui/button";
@@ -12,8 +20,6 @@
   let showOptions = false;
   let showPassword = false;
   let errPrompt = false;
-  let googleLinked = false;
-  let microsoftLinked = false;
   let linkPass = false;
 
   let errorMsg = "";
@@ -52,9 +58,7 @@
 
   async function linkGoogleAccount() {
     try {
-      await linkWithGoogle();
-      googleLinked = true;
-      showOptions = false;
+      await linkWithGoogle($user);
       window.location.reload();
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : String(err);
@@ -64,12 +68,10 @@
 
   async function linkMicrosoftAccount() {
     try {
-      await linkWithMicrosoft();
-      microsoftLinked = true;
-      showOptions = false;
+      await linkWithMicrosoft($user);
       window.location.reload();
     } catch (err) {
-      errorMsg = err instanceof Error ? err.message : String(err);
+      microsoftErr = err instanceof Error ? err.message : String(err);
       outputErrMsg();
     }
   }
@@ -78,14 +80,15 @@
     try {
       await linkWithPassword(password);
       linkPass = true;
-      clearFields();
       showOptions = false;
+      clearFields();
     } catch (err) {
       errorMsg = err instanceof Error ? err.message : String(err);
       outputErrMsg();
     }
   }
 
+  $: hasMicrosoftAccount = userHasMicrosoftProvider($user);
   function clearFields() {
     password = "";
   }
@@ -114,33 +117,29 @@
   <main class="settings-wrapper">
     <h2>Account Settings</h2>
     <p id="email">Email: {$user?.email == null ? "Anonymous User" : $user.email}</p>
+    <h3>Link Provider Options</h3>
+
     <div class="signin-buttons">
-      <h3>Link Provider Options</h3>
-      <Button id="sign-in-with-google" variant="raised" on:click={linkGoogleAccount}>
-        <Icon component={Svg} viewBox="0 0 48 48">
-          {#each googleSvgPaths as path}
-            <path fill={path.color} d={path.path} />
-          {/each}
-        </Icon>
-        <Label>Sign in with Google</Label>
-      </Button>
-
-      {#if googleLinked && googleErr === ""}
-        <p class="success">Successfully Linked Google Account</p>
+      {#if !userHasGoogleProvider($user)}
+        <Button id="sign-in-with-google" variant="raised" on:click={linkGoogleAccount}>
+          <Icon component={Svg} viewBox="0 0 48 48">
+            {#each googleSvgPaths as path}
+              <path fill={path.color} d={path.path} />
+            {/each}
+          </Icon>
+          <Label>Sign in with Google</Label>
+        </Button>
       {/if}
-
-      <Button id="sign-in-with-microsoft" variant="raised" on:click={linkMicrosoftAccount}>
-        <Icon component={Svg} viewBox="0 0 21 21">
-          <rect x="1" y="1" width="9" height="9" fill="#f25022" />
-          <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
-          <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
-          <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
-        </Icon>
-        <Label>Sign in with Microsoft</Label>
-      </Button>
-
-      {#if microsoftLinked && microsoftErr === ""}
-        <p class="success">Successfully Linked Microsoft Account</p>
+      {#if !userHasMicrosoftProvider($user)}
+        <Button id="sign-in-with-microsoft" variant="raised" on:click={linkMicrosoftAccount}>
+          <Icon component={Svg} viewBox="0 0 21 21">
+            <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+            <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+            <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+            <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
+          </Icon>
+          <Label>Sign in with Microsoft</Label>
+        </Button>
       {/if}
     </div>
     <div>
@@ -248,10 +247,6 @@
     justify-content: center;
     gap: 4px;
     max-width: 230px;
-  }
-
-  .success {
-    color: rgb(34, 187, 51);
   }
 
   :global(#sign-in-with-google),
