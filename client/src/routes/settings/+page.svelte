@@ -84,7 +84,6 @@
     }
   }
 
-  $: hasMicrosoftAccount = userHasMicrosoftProvider($user);
   function clearFields() {
     password = "";
   }
