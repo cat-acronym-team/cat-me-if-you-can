@@ -22,37 +22,34 @@
   let errPrompt = false;
   let linkPass = false;
 
-  let errorMsg = "";
   let password = "";
+  let errorMsg = "";
   let googleErr = "";
   let microsoftErr = "";
   let passErr = "";
+  let deleteErr = "";
 
-  function outputErrMsg() {
-    switch (errorMsg) {
+  function outputErrMsg(error: string) {
+    switch (error) {
       case "Firebase: Password should be at least 6 characters (auth/weak-password).":
-        passErr = "Password should be at least 6 characters";
-        return;
+        return "Password should be at least 6 characters";
       case "google-account-already-linked":
-        googleErr = "google account already linked";
-        return;
+        return "google account already linked";
       case "microsoft-account-already-linked":
-        microsoftErr = "microsoft account already linked";
-        return;
+        return "microsoft account already linked";
       default:
-        errorMsg = "An unexpected error has occured";
-        return;
+        return "An unexpected error has occured";
     }
   }
   function verifyDelete() {
     try {
       deleteAccount();
       // If no error
-      errorMsg = "";
       goto("/");
     } catch (err) {
       errPrompt = true;
-      errorMsg = err instanceof Error ? err.message : String(err);
+      deleteErr = err instanceof Error ? err.message : String(err);
+      outputErrMsg(deleteErr);
     }
   }
 
@@ -61,8 +58,8 @@
       await linkWithGoogle($user);
       window.location.reload();
     } catch (err) {
-      errorMsg = err instanceof Error ? err.message : String(err);
-      outputErrMsg();
+      googleErr = err instanceof Error ? err.message : String(err);
+      outputErrMsg(googleErr);
     }
   }
 
@@ -72,7 +69,7 @@
       window.location.reload();
     } catch (err) {
       microsoftErr = err instanceof Error ? err.message : String(err);
-      outputErrMsg();
+      outputErrMsg(microsoftErr);
     }
   }
 
@@ -83,8 +80,7 @@
       showOptions = false;
       clearFields();
     } catch (err) {
-      errorMsg = err instanceof Error ? err.message : String(err);
-      outputErrMsg();
+      passErr = err instanceof Error ? err.message : String(err);
     }
   }
 
@@ -130,6 +126,10 @@
           <Label>Sign in with Google</Label>
         </Button>
       {/if}
+      {#if googleErr !== ""}
+        <!--In case there's somehow an error-->
+        <p class="error">{outputErrMsg(googleErr)}</p>
+      {/if}
       {#if !userHasMicrosoftProvider($user)}
         <Button id="sign-in-with-microsoft" variant="raised" on:click={linkMicrosoftAccount}>
           <Icon component={Svg} viewBox="0 0 21 21">
@@ -140,6 +140,10 @@
           </Icon>
           <Label>Sign in with Microsoft</Label>
         </Button>
+      {/if}
+      {#if microsoftErr !== ""}
+        <!--In case there's somehow an error-->
+        <p class="error">{outputErrMsg(microsoftErr)}</p>
       {/if}
     </div>
     <div>
@@ -176,7 +180,7 @@
         {#if linkPass}
           <p>Password Sucessfully Set</p>
         {:else if passErr !== ""}
-          <p class="error">{passErr}</p>
+          <p class="error">{outputErrMsg(passErr)}</p>
         {/if}
       </Content>
     </Dialog>
