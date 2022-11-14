@@ -91,7 +91,6 @@ export function linkWithPassword(password: string) {
 
 export function userHasGoogleProvider(user: User | null) {
   if (user) {
-    // Definitely Signed In
     const signInMethods = user.providerData;
 
     for (const provider of signInMethods) {
@@ -99,19 +98,14 @@ export function userHasGoogleProvider(user: User | null) {
         return true;
       }
     }
-
     return false;
   } else {
-    // Definitely not Signed In
     return false;
   }
-  // Unknown State
-  return true;
 }
 
 export function userHasMicrosoftProvider(user: User | null) {
   if (user) {
-    // Definitely Signed In
     const signInMethods = user.providerData;
 
     for (const provider of signInMethods) {
@@ -119,10 +113,8 @@ export function userHasMicrosoftProvider(user: User | null) {
         return true;
       }
     }
-    console.log("doesn't have account");
     return false;
   } else {
-    // Definitely not Signed In
     return false;
   }
 }
