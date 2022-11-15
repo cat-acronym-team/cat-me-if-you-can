@@ -94,15 +94,6 @@
       <Button on:click|once={createLobbyHandler} disabled={!nameValidation.valid}><Label>Create Lobby</Label></Button>
       <Button on:click|once={joinLobbyHandler} disabled={!nameValidation.valid}><Label>Join Lobby</Label></Button>
     </div>
-    <!-- TODO: remove if not testing -->
-    <Button
-      on:click={async () => {
-        await fetch("http://localhost:5001/cat-me-if-you-can-game-dev/us-central1/testLogic", {
-          method: "POST",
-          body: JSON.stringify({ message: "Hi" }),
-        });
-      }}>CLICK TO DELETE OLD LOBBIES</Button
-    >
   </div>
 </main>
 
