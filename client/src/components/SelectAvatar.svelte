@@ -64,7 +64,7 @@
 
 <div class="grid {lobby != undefined ? 'lobby' : ''}">
   {#each avatarChoices as { avatar, altText, displayName, uid, available, selected }}
-    <div>
+    <div class="parent">
       {#if !available}
         <PlayerMenu {lobbyCode} {uid} />
       {/if}
@@ -95,7 +95,9 @@
   .grid.lobby {
     gap: 12px 24px;
   }
-
+  .parent {
+    position: relative;
+  }
   @media (max-width: 600px) {
     .grid {
       grid-template-columns: repeat(3, auto);

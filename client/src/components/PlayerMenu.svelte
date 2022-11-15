@@ -11,7 +11,7 @@
   export let uid: string | undefined = undefined;
 </script>
 
-<div class="chatroom">
+<div id="icon-id">
   <IconButton class="material-icons" on:click={() => menu.setOpen(true)}>more_vert</IconButton>
   <Menu bind:this={menu}>
     <List>
@@ -28,6 +28,11 @@
 <style>
   * {
     box-sizing: border-box;
+  }
+
+  #icon-id {
+    position: absolute;
+    right: 0px;
   }
   /* absolute position relative to  */
 </style>
