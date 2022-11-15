@@ -261,8 +261,8 @@
     <Dialog bind:open={errPrompt} aria-labelledby="reauth-title" aria-describedby="err-msg-content">
       <Title id="reauth-title">NOTICE!</Title>
       <Content id="err-msg-content"
-        >Last sign in too long ago.
-        <br />Please Signin and Try Again</Content
+        >Last Sign In too long ago.
+        <br />Please Sign In and Try Again</Content
       >
       <Actions>
         <Button
