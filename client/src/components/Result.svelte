@@ -1,4 +1,5 @@
 <script lang="ts">
+  import LobbyChat from "./LobbyChat.svelte";
   import { type Lobby, GAME_STATE_DURATIONS, type Player } from "$lib/firebase/firestore-types/lobby";
   import { authStore as user } from "$stores/auth";
   import { onMount } from "svelte";
@@ -35,6 +36,9 @@
   }
 </script>
 
+<div class="lobby-chat-level">
+  <LobbyChat {lobby} {lobbyCode} />
+</div>
 <div class="result">
   {#if lobby.votedOff == undefined}
     <h1>Somehow undefined</h1>
@@ -53,6 +57,13 @@
     height: 100%;
     display: grid;
     justify-content: center;
+    align-items: center;
+  }
+
+  .lobby-chat-level {
+    width: 100%;
+    display: flex;
+    justify-content: left;
     align-items: center;
   }
 
