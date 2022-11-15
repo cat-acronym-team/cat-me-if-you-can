@@ -53,7 +53,7 @@ export function linkWithGoogle(user: User | null) {
   }
 
   if (user != null) {
-    if (userHasGoogleProvider(user)) {
+    if (hasGoogleProvider(user)) {
       throw new Error("google-account-already-linked");
     }
     const google = new GoogleAuthProvider();
@@ -67,7 +67,7 @@ export function linkWithMicrosoft(user: User | null) {
   }
 
   if (user != null) {
-    if (userHasMicrosoftProvider(user)) {
+    if (hasMicrosoftProvider(user)) {
       throw new Error("microsoft-account-already-linked");
     }
 
@@ -89,7 +89,7 @@ export function linkWithPassword(password: string) {
   }
 }
 
-export function userHasGoogleProvider(user: User | null) {
+export function hasGoogleProvider(user: User | null) {
   if (user) {
     const signInMethods = user.providerData;
 
@@ -104,7 +104,7 @@ export function userHasGoogleProvider(user: User | null) {
   }
 }
 
-export function userHasMicrosoftProvider(user: User | null) {
+export function hasMicrosoftProvider(user: User | null) {
   if (user) {
     const signInMethods = user.providerData;
 

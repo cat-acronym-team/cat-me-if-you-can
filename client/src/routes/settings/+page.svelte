@@ -13,8 +13,8 @@
     linkWithGoogle,
     linkWithMicrosoft,
     linkWithPassword,
-    userHasGoogleProvider,
-    userHasMicrosoftProvider,
+    hasGoogleProvider,
+    hasMicrosoftProvider,
   } from "$lib/firebase/auth";
   import { goto } from "$app/navigation";
   import { Svg, Icon } from "@smui/common";
@@ -280,7 +280,7 @@
   <h3>Link Provider Options</h3>
 
   <div class="signin-buttons">
-    {#if !userHasGoogleProvider($user)}
+    {#if !hasGoogleProvider($user)}
       <Button id="sign-in-with-google" variant="raised" on:click={linkGoogleAccount}>
         <Icon component={Svg} viewBox="0 0 48 48">
           {#each googleSvgPaths as path}
@@ -294,7 +294,7 @@
       <!--In case there's somehow an error-->
       <p class="error">{outputErrMsg(googleErr)}</p>
     {/if}
-    {#if !userHasMicrosoftProvider($user)}
+    {#if !hasMicrosoftProvider($user)}
       <Button id="sign-in-with-microsoft" variant="raised" on:click={linkMicrosoftAccount}>
         <Icon component={Svg} viewBox="0 0 21 21">
           <rect x="1" y="1" width="9" height="9" fill="#f25022" />
