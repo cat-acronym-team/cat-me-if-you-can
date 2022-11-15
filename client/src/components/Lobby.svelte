@@ -65,47 +65,41 @@
   }
 </script>
 
-<main>
-  <div class="container">
-    <div class="lobby-info">
-      <h3>Code: {lobbyCode}</h3>
-      <h3>Players: {lobby.players.length}</h3>
-    </div>
-    <div class="lobby-chat-level">
-      <LobbyChat {lobby} {lobbyCode} />
-    </div>
-    <SelectAvatar {lobby} {lobbyCode} on:change={(event) => onAvatarSelect(event.detail.value)} />
-    {#if auth.currentUser?.uid === lobby.uids[0]}
-      <div class="actions">
-        <Button on:click|once={() => start()}><Label>Start Game</Label></Button>
-      </div>
-    {/if}
-    <div class="actions">
-      <Button
-        on:click|once={async () => {
-          await leave();
-          goto("/");
-        }}><Label>Leave Lobby</Label></Button
-      >
-    </div>
-    <div class="actions">
-      {#if errorMessage !== ""}
-        <p>{errorMessage}</p>
-      {/if}
-    </div>
-    <div class="buttons">
-      <h3 class="invite-link">Invite Link: {url}</h3>
-      <IconButton class="material-icons" on:click={copyLink}>content_copy</IconButton>
-      {#if canShare}<IconButton class="material-icons" on:click={share}>share</IconButton>{/if}
-    </div>
+<div class="container">
+  <div class="lobby-info">
+    <h3>Code: {lobbyCode}</h3>
+    <h3>Players: {lobby.players.length}</h3>
   </div>
-</main>
+  <div class="lobby-chat-level">
+    <LobbyChat {lobby} {lobbyCode} />
+  </div>
+  <SelectAvatar {lobby} {lobbyCode} on:change={(event) => onAvatarSelect(event.detail.value)} />
+  {#if auth.currentUser?.uid === lobby.uids[0]}
+    <div class="actions">
+      <Button on:click|once={() => start()}><Label>Start Game</Label></Button>
+    </div>
+  {/if}
+  <div class="actions">
+    <Button
+      on:click|once={async () => {
+        await leave();
+        goto("/");
+      }}><Label>Leave Lobby</Label></Button
+    >
+  </div>
+  <div class="actions">
+    {#if errorMessage !== ""}
+      <p>{errorMessage}</p>
+    {/if}
+  </div>
+  <div class="buttons">
+    <h3 class="invite-link">Invite Link: {url}</h3>
+    <IconButton class="material-icons" on:click={copyLink}>content_copy</IconButton>
+    {#if canShare}<IconButton class="material-icons" on:click={share}>share</IconButton>{/if}
+  </div>
+</div>
 
 <style>
-  main {
-    justify-content: center;
-  }
-
   .lobby-chat-level {
     width: 100%;
     display: flex;
