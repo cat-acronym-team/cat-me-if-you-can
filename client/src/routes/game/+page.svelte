@@ -11,10 +11,17 @@
   import { onSnapshot, doc, getDoc, type Unsubscribe } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
   import { getPrivatePlayerCollection, lobbyCollection } from "$lib/firebase/firestore-collections";
-  import type { Lobby, PrivatePlayer } from "$lib/firebase/firestore-types/lobby";
+  import {
+    GAME_STATE_DURATIONS,
+    DISPLAY_TIMERS,
+    type Lobby,
+    type PrivatePlayer,
+  } from "$lib/firebase/firestore-types/lobby";
   import { page } from "$app/stores";
   import { authStore as user } from "$stores/auth";
   import { goto } from "$app/navigation";
+  import { verifyExpiration } from "$lib/firebase/firebase-functions";
+  import { formatTimer } from "$lib/time";
 
   let lobbyCode: string | null = null;
 
@@ -23,6 +30,9 @@
 
   let privatePlayer: PrivatePlayer | undefined = undefined;
   let unsubscribePrivatePlayer: Unsubscribe | undefined = undefined;
+
+  let countdown = GAME_STATE_DURATIONS.WAIT;
+  let timer: ReturnType<typeof setInterval>;
 
   onMount(async () => {
     // gets code from url search
@@ -59,7 +69,18 @@
     // We want them to subscribe to the lobby on mount
     unsubscribeLobby = onSnapshot(lobbyDocRef, (doc) => {
       // will change lobby to the new doc data
-      lobby = doc.data();
+      const newLobby = doc.data();
+      if (lobby?.state != newLobby?.state && newLobby?.state != null) {
+        countdown = GAME_STATE_DURATIONS[newLobby?.state];
+        timer = setInterval(() => {
+          if (lobby?.expiration != undefined) {
+            const diff = Math.floor((lobby.expiration.toMillis() - Date.now()) / 1000);
+            countdown = diff;
+          }
+        }, 500);
+        console.log(countdown);
+      }
+      lobby = newLobby;
     });
 
     // We want them to subscribe to the privatePlayer on mount
@@ -86,6 +107,16 @@
   function onbeforeunload(event: BeforeUnloadEvent) {
     event.returnValue = true;
   }
+
+  // Reactive Calls
+  $: if (countdown <= 0 && lobby?.uids[0] === $user?.uid && lobbyCode != null) {
+    clearInterval(timer);
+    verifyExpiration({ code: lobbyCode });
+  }
+  $: if (countdown <= -5 && lobbyCode != null) {
+    clearInterval(timer);
+    verifyExpiration({ code: lobbyCode });
+  }
 </script>
 
 <svelte:window on:beforeunload={onbeforeunload} />
@@ -94,6 +125,12 @@
 <!-- So the code was displaying undefined in the Lobby Component -->
 <!-- We could have a loading animation until the lobby is not undefined -->
 <main>
+  {#if lobby != null && DISPLAY_TIMERS[lobby.state] == true}
+    <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
+      {formatTimer(Math.max(countdown, 0))}
+    </p>
+  {/if}
+
   {#if $user == null || lobby == undefined || lobbyCode == null}
     <div class="spinner-wraper">
       <CircularProgress indeterminate />
@@ -105,9 +142,9 @@
       <CircularProgress indeterminate />
     </div>
   {:else if lobby.state === "ROLE"}
-    <Role {lobby} {lobbyCode} {privatePlayer} />
+    <Role {privatePlayer} />
   {:else if lobby.state === "PROMPT"}
-    <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} lobbyData={lobby} />
+    <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
   {:else if lobby.state === "CHAT"}
     <ChatRoom {lobby} {lobbyCode} isStalker={privatePlayer.stalker} />
   {:else if lobby.state === "VOTE"}
@@ -122,6 +159,9 @@
 </main>
 
 <style>
+  .countdown {
+    text-align: center;
+  }
   main {
     box-sizing: border-box;
     height: 100%;
