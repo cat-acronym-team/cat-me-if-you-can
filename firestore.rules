@@ -2,11 +2,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /lobbies/{code} {
+      
       function lobbyData(){
-        return get(/databases/$(database)/documents/lobbies/$(code)).data
+        return get(/databases/$(database)/documents/lobbies/$(code)).data;
       }
       function inLobby(){
-        return request.auth.uid in lobbyData().uids
+        return request.auth.uid in lobbyData().uids;
       }
       function isAlive(){
         return request.auth.uid in lobbyData().alivePlayers;
@@ -62,19 +63,36 @@ service cloud.firestore {
         }
       }
 
+      match /chatMessages/{messageId}{
+        function validateLobbyChatMessage() {
+          return request.resource.data.keys().hasOnly(['sender', 'text', 'timestamp', 'alive'])
+            && request.resource.data.sender == request.auth.uid && request.resource.data.text is string 
+            && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 100
+            && request.resource.data.text.trim() == request.resource.data.text
+            && request.resource.data.timestamp is timestamp && request.resource.data.timestamp == request.time
+            && request.resource.data.alive == isAlive();
+        }
+        function chatSenderAlive(){
+          return resource.data.alive;
+        }
+          //if in lobby and message sender is alive allow read
+          //if in lobby and player is dead allow read
+          allow read: if inLobby() && (chatSenderAlive() || ! isAlive());
+          allow create: if validateLobbyChatMessage();
+      }
       match /votes/{uid} {
         function checkTarget(){
           return request.resource.data.keys().hasOnly(['target'])
           && request.resource.data.target is string
-          && request.resource.data.target in lobbyData().alivePlayers;
+          && request.resource.data.target in lobbyData().uids
+          && request.resource.data.target != request.auth.uid;
         }
         function notPastTarget(){
           return checkTarget() && request.resource.data.target != resource.data.target;
         }
 
-        allow get: if request.auth.uid == uid;
-        allow create: if request.auth.uid == uid && inLobby() && checkTarget() && isAlive();
-        allow update: if request.auth.uid == uid && inLobby() && notPastTarget() && isAlive();
+        allow create: if request.auth.uid == uid && inLobby() && checkTarget();
+        allow update: if request.auth.uid == uid && inLobby() && notPastTarget();
       }
     }
 

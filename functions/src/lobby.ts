@@ -14,7 +14,7 @@ import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
-import { deleteChatRooms } from "./chat";
+import { deleteChatRooms, deleteLobbyChatMessages } from "./chat";
 import { assignRole } from "./role";
 import { endGameProcess } from "./winloss";
 import { findVoteOff } from "./vote";
@@ -191,19 +191,23 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
   });
 });
 
-export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate(async (change, context) => {
+// TODO: replace with the correct trigger
+export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate((change, context) => {
   const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
-  const oldLobby = change.before.data() as Lobby;
-  const newLobby = change.after.data() as Lobby;
+  const lobby = change.after.data() as Lobby;
+  const lobbyBefore = change.before.data() as Lobby;
+  let hasChanged = lobby.players.length != lobbyBefore.players.length;
   const alivePlayers = [];
-
-  for (let i = 0; i < newLobby.uids.length; i++) {
-    if (newLobby.players[i].alive) {
-      alivePlayers.push(newLobby.uids[i]);
+  for (let i = 0; i < lobby.uids.length; i++) {
+    if (!hasChanged && lobby.players[i].alive != lobbyBefore.players[i].alive) {
+      hasChanged = true;
+    }
+    if (lobby.players[i].alive) {
+      alivePlayers.push(lobby.uids[i]);
     }
   }
-  if (oldLobby.alivePlayers.length !== alivePlayers.length) {
-    lobbyDocRef.update({ alivePlayers });
+  if (hasChanged) {
+    lobbyDocRef.update({ alivePlayers: alivePlayers });
   }
 });
 
@@ -387,6 +391,7 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
       await endGameProcess(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "VOTE") {
+      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       findVoteOff(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "RESULT") {

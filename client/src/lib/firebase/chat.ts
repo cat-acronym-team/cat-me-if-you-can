@@ -1,5 +1,5 @@
 import { addDoc, serverTimestamp } from "firebase/firestore";
-import { getChatRoomMessagesCollection } from "./firestore-collections";
+import { getChatRoomMessagesCollection, getLobbyChatCollection } from "./firestore-collections";
 import { chatMessageValidator } from "./firestore-types/lobby";
 
 /**
@@ -16,5 +16,19 @@ export async function addChatMessage(lobbyId: string, roomId: string, sender: st
     text,
     sender,
     timestamp: serverTimestamp(),
+  });
+}
+export async function addLobbyChatMessages(lobbyId: string, sender: string, text: string, alive: boolean) {
+  // Validate Chat Message
+  const isValid = chatMessageValidator(text);
+  if (!isValid.valid) {
+    throw new Error(isValid.reason);
+  }
+  // Add Message Doc
+  await addDoc(getLobbyChatCollection(lobbyId), {
+    text,
+    sender,
+    timestamp: serverTimestamp(),
+    alive,
   });
 }
