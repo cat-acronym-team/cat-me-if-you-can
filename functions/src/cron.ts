@@ -3,14 +3,15 @@ import * as functions from "firebase-functions";
 import { db } from "./app";
 
 // TODO: Remove if not testing the logic
-// export const testLogic = functions.https.onRequest(async (req, res) => {
-//   deleteOldLobbies();
-//   res.send({ message: "Hi" });
-// });
+export const testLogic = functions.https.onRequest(async (req, res) => {
+  deleteOldLobbies();
+  res.send({ message: "Hi" });
+});
 
-// Schedule for every day at 8AM
-export const deleteOldLobbies = functions.pubsub.schedule("0 8 * * *").onRun(async (context) => {
-  // const deleteOldLobbies = async () => { // TODO: Remove if not testing the logic
+// Schedule for every day at 3:15AM
+// export const deleteOldLobbies = functions.pubsub.schedule("15 3 * * *").onRun(async (context) => {
+const deleteOldLobbies = async () => {
+  // TODO: Remove if not testing the logic
   const dayFromTodaySecs = firestore.Timestamp.now().seconds - 86_400; // A day ago from today in seconds
   const dayFromTodayDate = firestore.Timestamp.fromDate(new Date(dayFromTodaySecs * 1000)); // a day ago from today in date object
 
@@ -28,4 +29,5 @@ export const deleteOldLobbies = functions.pubsub.schedule("0 8 * * *").onRun(asy
   }
 
   await batch.commit();
-});
+}; // TODO: remove this once tested
+// });
