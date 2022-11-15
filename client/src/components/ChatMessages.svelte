@@ -72,7 +72,7 @@
         {:else}
           <div
             class="text mdc-typography--body1"
-            style="background-color: {avatarColors[message.avatar]}; filter: grayscale(80%)"
+            style="background-color: {avatarColors[message.avatar]}; filter: grayscale(80%); opacity: 0.5;"
           >
             {message.text}
           </div>
