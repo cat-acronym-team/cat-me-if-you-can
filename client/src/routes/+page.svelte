@@ -1,5 +1,5 @@
 <script lang="ts">
-  import SigninButton from "$components/SigninButton.svelte";
+  import Account from "$components/Account.svelte";
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
@@ -9,7 +9,7 @@
   import { goto } from "$app/navigation";
   import { authStore } from "$stores/auth";
 
-  let userData: UserData | undefined;
+  export let userData: UserData | undefined;
 
   let name: string = "";
   let nameDirty: boolean = false;
@@ -69,7 +69,7 @@
 </script>
 
 <header>
-  <SigninButton {userData} />
+  <Account {userData} />
 </header>
 
 <main class="cat-main-container">
