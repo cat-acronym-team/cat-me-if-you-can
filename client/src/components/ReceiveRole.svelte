@@ -42,7 +42,7 @@
       <div class="imgContainer">
         <img src="/images/role/Cat.png" alt="cat" />
       </div>
-    {:else}
+    {:else if privatePlayer.role == "CATFISH"}
       <div class="role">
         You are a <span class="red">{privatePlayer.role}</span>
       </div>
@@ -50,6 +50,11 @@
       <div class="imgContainer">
         <img src="/images/role/Catfish.png" alt="catfish" />
       </div>
+    {:else}
+      <div class="role">
+        You are a {privatePlayer.role}
+      </div>
+      <p class="description">Please wait till next game to get in on the fun</p>
     {/if}
   </div>
 {/if}

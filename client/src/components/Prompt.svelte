@@ -81,12 +81,14 @@
 <form class="wraper" on:submit|preventDefault={submitAnswer}>
   <label class="mdc-typography--headline5" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
 
-  <div class="input">
-    <Textfield input$id="prompt-answer" bind:value={answer} bind:dirty invalid={dirty && error != undefined} required>
-      <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
-    </Textfield>
-    <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
-  </div>
+  {#if userInfo.alive}
+    <div class="input">
+      <Textfield input$id="prompt-answer" bind:value={answer} bind:dirty invalid={dirty && error != undefined} required>
+        <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
+      </Textfield>
+      <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
+    </div>
+  {/if}
 </form>
 
 <style>
