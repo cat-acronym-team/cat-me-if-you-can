@@ -4,18 +4,11 @@
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
   import { onSnapshot, orderBy, Query, query, where, type Unsubscribe } from "firebase/firestore";
-  import {
-    GAME_STATE_DURATIONS,
-    type ChatMessage,
-    type ChatRoom,
-    type Lobby,
-    type Player,
-  } from "$lib/firebase/firestore-types/lobby";
+  import type { ChatMessage, ChatRoom, Lobby, Player } from "$lib/firebase/firestore-types/lobby";
   import { addChatMessage } from "$lib/firebase/chat";
   import { getChatRoomCollection, getChatRoomMessagesCollection } from "$lib/firebase/firestore-collections";
   import type { User } from "firebase/auth";
-  import { verifyExpiration } from "$lib/firebase/firebase-functions";
-  import { formatTimer } from "$lib/time";
+
   // props
   export let lobby: Lobby;
   export let lobbyCode: string;
@@ -26,8 +19,6 @@
   let pairInfo: [Player, Player] | undefined;
   let chatRoomId: string | undefined = undefined;
   let chatMessages: ChatMessage[] = [];
-  let timer: ReturnType<typeof setInterval>;
-  let countdown = GAME_STATE_DURATIONS.CHAT;
   let errorMessage: string = "";
   let unsubscribeChatRooms: Unsubscribe | undefined = undefined;
   let unsubscribeChatMessages: Unsubscribe | undefined = undefined;
@@ -74,18 +65,9 @@
         }
       );
     });
-
-    // create timer
-    timer = setInterval(() => {
-      if (lobby.expiration != undefined) {
-        const diff = Math.floor((lobby.expiration.toMillis() - Date.now()) / 1000);
-        countdown = diff;
-      }
-    }, 100);
   });
 
   onDestroy(() => {
-    clearInterval(timer);
     unsubscribeChatRooms?.();
     unsubscribeChatMessages?.();
   });
@@ -107,22 +89,9 @@
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
-
-  // Reactive Calls
-  $: if (countdown <= 0 && lobby.uids[0] === user.uid) {
-    clearInterval(timer);
-    verifyExpiration({ code: lobbyCode });
-  }
-  $: if (countdown < -5) {
-    clearInterval(timer);
-    verifyExpiration({ code: lobbyCode });
-  }
 </script>
 
 <div class="chatroom">
-  <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
-    {formatTimer(Math.max(countdown, 0))}
-  </p>
   {#if isStalker && chatRoomId == undefined}
     <Stalker {lobby} {lobbyCode} />
   {:else}
@@ -153,10 +122,6 @@
     grid-template-rows: auto minmax(0, 1fr);
     gap: 12px;
     justify-items: center;
-  }
-
-  .countdown {
-    margin: 0;
   }
 
   .matched-with {

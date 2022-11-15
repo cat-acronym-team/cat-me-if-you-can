@@ -1,45 +1,18 @@
 <script lang="ts">
-  import { type Lobby, GAME_STATE_DURATIONS } from "$lib/firebase/firestore-types/lobby";
+  import type { Lobby } from "$lib/firebase/firestore-types/lobby";
   import LobbyChat from "./LobbyChat.svelte";
   import { addVote } from "$lib/firebase/vote";
-  import { formatTimer } from "$lib/time";
   import { authStore as user } from "$stores/auth";
-  import { onMount } from "svelte";
-  import { verifyExpiration } from "$lib/firebase/firebase-functions";
   import { avatarAltText } from "$lib/avatar";
 
   export let lobby: Lobby;
   export let lobbyCode: string;
-
-  let countdown = GAME_STATE_DURATIONS.VOTE;
-  let timer: ReturnType<typeof setInterval>;
-
-  onMount(() => {
-    timer = setInterval(() => {
-      if (lobby.expiration != undefined) {
-        const diff = Math.floor((lobby.expiration.toMillis() - Date.now()) / 1000);
-        countdown = diff;
-      }
-    }, 500);
-  });
-
-  $: if (countdown <= 0 && lobby.uids[0] == $user?.uid) {
-    clearInterval(timer);
-    verifyExpiration({ code: lobbyCode });
-  }
-  $: if (countdown <= -5) {
-    clearInterval(timer);
-    verifyExpiration({ code: lobbyCode });
-  }
 </script>
 
 <div class="lobby-chat-level">
   <LobbyChat {lobby} {lobbyCode} />
 </div>
 <div class="voting">
-  <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
-    {formatTimer(Math.max(countdown, 0))}
-  </p>
   <div class="voting-grid">
     {#each lobby.players as { avatar, displayName, votes }, i}
       <div class="vote-container">
