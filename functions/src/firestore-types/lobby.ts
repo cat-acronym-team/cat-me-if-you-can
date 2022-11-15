@@ -23,7 +23,7 @@ export type Player = {
   /**
    * the number of players that have voted for this player
    */
-  votes?: number;
+  votes: number;
 
   /**
    * the role that the player played; used at the end of the game
@@ -36,16 +36,18 @@ export type Player = {
   promptAnswer?: string;
 };
 
-export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
+export type GameState = "WAIT" | "ROLE" | "PROMPT" | "CHAT" | "VOTE" | "RESULT" | "END";
 
 /**
  * the duration in seconds for each game state
  */
 export const GAME_STATE_DURATIONS: { [state in GameState]: number } = {
   WAIT: 2 * 60 * 60,
+  ROLE: 15,
   PROMPT: 60,
   CHAT: 2 * 60,
   VOTE: 3 * 60,
+  RESULT: 10,
   END: 10,
 };
 
@@ -71,14 +73,25 @@ export type Lobby = {
   state: GameState;
 
   /**
-   * the role that won at the end of the game
+   * expiration time of the current phase with a timer
+   */
+  expiration?: Timestamp;
+
+  /**
+   * array of alive players
+   */
+  alivePlayers: string[];
+
+  /**
+   * the role that won the game
    */
   winner?: Role;
 
   /**
-   * expiration time of the current phase with a timer
+   * the uid of the player that was voted off for the round
+   * @note this can be a uid, NONE, or undefined
    */
-  expiration?: Timestamp;
+  votedOff?: string | "NONE";
 };
 
 /**
@@ -94,6 +107,11 @@ export type PrivatePlayer = {
    * the role of the player
    */
   role: Role;
+
+  /**
+   * states if a user is a stalker or not
+   */
+  stalker: boolean;
 
   /**
    * the prompt that the user will be shown (this varies on the role)

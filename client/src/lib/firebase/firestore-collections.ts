@@ -1,10 +1,22 @@
-import type { Lobby, PrivatePlayer, PromptAnswer, ChatRoom, ChatMessage } from "./firestore-types/lobby";
+import type {
+  Lobby,
+  PrivatePlayer,
+  PromptAnswer,
+  ChatRoom,
+  ChatMessage,
+  Vote,
+  LobbyChatMessage,
+} from "./firestore-types/lobby";
 import type { UserData } from "./firestore-types/users";
 import { collection, type CollectionReference, type DocumentReference } from "firebase/firestore";
 import { db } from "$lib/firebase/app";
 
 export const userCollection = collection(db, "users") as CollectionReference<UserData>;
 export const lobbyCollection = collection(db, "lobbies") as CollectionReference<Lobby>;
+
+export function getLobbyChatCollection(lobbyId: string) {
+  return collection(lobbyCollection, lobbyId, "chatMessages") as CollectionReference<LobbyChatMessage>;
+}
 
 export function getChatRoomCollection(lobbyId: string) {
   return collection(lobbyCollection, lobbyId, "chatRooms") as CollectionReference<ChatRoom>;
@@ -20,4 +32,8 @@ export function getPrivatePlayerCollection(lobbyDoc: DocumentReference<Lobby>): 
 
 export function getPromptAnswerCollection(lobbyCode: string): CollectionReference<PromptAnswer> {
   return collection(lobbyCollection, lobbyCode, "promptAnswers") as CollectionReference<PromptAnswer>;
+}
+
+export function getVoteCollection(lobbyCode: string): CollectionReference<Vote> {
+  return collection(lobbyCollection, lobbyCode, "votes") as CollectionReference<Vote>;
 }

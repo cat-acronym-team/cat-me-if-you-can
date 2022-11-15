@@ -120,5 +120,6 @@ export function userHasMicrosoftProvider(user: User | null) {
 }
 
 export function logOut() {
+  window.location.href = "/";
   return signOut(auth);
 }
