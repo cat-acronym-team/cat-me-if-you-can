@@ -117,11 +117,11 @@
 
 <style>
   .chatroom {
-    height: 100%;
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
-    gap: 12px;
-    justify-items: center;
+    display: flex;
+    justify-content: center;
+    height: 80%;
+    width: 75%;
+    margin: auto;
   }
 
   .matched-with {
