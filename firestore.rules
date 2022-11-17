@@ -82,6 +82,7 @@ service cloud.firestore {
         allow read: if inLobby() && (chatSenderAlive() || ! isAlive());
         allow create: if validateLobbyChatMessage();
       }
+
       match /votes/{uid} {
         function checkTarget(){
           return request.resource.data.keys().hasOnly(['target'])
