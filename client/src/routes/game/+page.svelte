@@ -78,7 +78,6 @@
             countdown = diff;
           }
         }, 500);
-        console.log(countdown);
       }
       lobby = newLobby;
     });
@@ -150,7 +149,7 @@
   {:else if lobby.state === "VOTE"}
     <Vote {lobby} {lobbyCode} />
   {:else if lobby.state === "RESULT"}
-    <Result {lobby} {lobbyCode} />
+    <Result {lobby} />
   {:else if lobby.state === "END"}
     <WinLoss {lobbyCode} {lobby} {privatePlayer} />
   {:else}
