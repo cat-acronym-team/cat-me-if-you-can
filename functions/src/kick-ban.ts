@@ -56,6 +56,7 @@ export const ban = functions.https.onCall((data: unknown, context): Promise<void
 
     const playerPos = lobbyData.uids.indexOf(data.uid);
     transaction.update(lobbyRef, {
+      bannedPlayers: firestore.FieldValue.arrayUnion(data.uid),
       players: firestore.FieldValue.arrayRemove(lobbyData.players[playerPos]),
       uids: firestore.FieldValue.arrayRemove(data.uid),
     });

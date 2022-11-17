@@ -24,6 +24,14 @@
   let privatePlayer: PrivatePlayer | undefined = undefined;
   let unsubscribePrivatePlayer: Unsubscribe | undefined = undefined;
 
+  // if the user isn't signed in or not apart of this lobby then redirect them on update
+  $: if (lobby !== undefined && ($user === null || !lobby.uids.includes($user.uid))) {
+    // then return to join
+    goto(`/join?code=${lobbyCode}`, {
+      replaceState: true,
+    });
+  }
+
   onMount(async () => {
     // gets code from url search
     // the svelte magic with searchparams wasnt working
@@ -42,14 +50,6 @@
     lobby = lobbyDoc.data();
     if (lobby == undefined) {
       errorToJoin("Lobby doesnt exist!");
-      return;
-    }
-    // if the user isn't signed in or not apart of this lobby then redirect them
-    if ($user === null || !lobby.uids.includes($user.uid)) {
-      // then return to join
-      goto(`/join?code=${lobbyCode}`, {
-        replaceState: true,
-      });
       return;
     }
 

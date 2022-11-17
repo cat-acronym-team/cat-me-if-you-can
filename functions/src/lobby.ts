@@ -51,6 +51,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
         votes: 0,
       },
     ],
+    bannedPlayers: [],
     state: "WAIT",
     alivePlayers: [context.auth.uid],
   };

@@ -92,6 +92,11 @@ export type Lobby = {
    * @note this can be a uid, NONE, or undefined
    */
   votedOff?: string | "NONE";
+
+  /**
+   * array of uids of banned players
+   */
+  bannedPlayers: string[];
 };
 
 /**
