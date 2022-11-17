@@ -24,7 +24,7 @@
   import { authStore as user } from "$stores/auth";
   import { onDestroy } from "svelte";
 
-  let userData: UserData | undefined = undefined;
+  export let userData: UserData | undefined = undefined;
   let userDataDocRef: DocumentReference<UserData> | undefined = undefined;
   let unsubscribeUserData: Unsubscribe | undefined = undefined;
 
