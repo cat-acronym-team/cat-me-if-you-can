@@ -92,6 +92,11 @@ export type Lobby = {
    * @note this can be a uid, NONE, or undefined
    */
   votedOff?: string | "NONE";
+
+  /**
+   * the number of catfish in a game
+   */
+  catfishAmount: number;
 };
 
 /**

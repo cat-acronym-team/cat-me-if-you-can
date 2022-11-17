@@ -3,8 +3,6 @@ import { getPrivatePlayerCollection } from "./firestore-collections";
 import { firestore } from "firebase-admin";
 
 export function assignRole(lobbySnap: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
-  // Number of catfish below, will later be made to be changeable by users.
-  const numCatFish = 1;
   const lobbyData = lobbySnap.data();
   // lobby reference used for getPrivatePlayerCollection and transaction
   const lobby = lobbySnap.ref;
@@ -21,7 +19,7 @@ export function assignRole(lobbySnap: firestore.DocumentSnapshot<Lobby>, transac
   const catfishUids = new Set<string>();
 
   // Adds catfish to catfishUids until there are numCatFish catfish.
-  while (catfishUids.size < numCatFish) {
+  while (catfishUids.size < lobbyData?.catfishAmount) {
     catfishUids.add(uids[Math.floor(Math.random() * uids.length)]);
   }
   const privatePlayerCollection = getPrivatePlayerCollection(lobby);

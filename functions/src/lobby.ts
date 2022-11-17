@@ -53,6 +53,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
     ],
     state: "WAIT",
     alivePlayers: [context.auth.uid],
+    catfishAmount: 1,
   };
 
   // try making lobby 5 times before giving up
