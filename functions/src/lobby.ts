@@ -53,6 +53,8 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
     ],
     state: "WAIT",
     alivePlayers: [context.auth.uid],
+    maxPlayers: 8,
+    minPlayers: 4,
   };
 
   // try making lobby 5 times before giving up
@@ -71,8 +73,6 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
 });
 
 export const startGame = functions.https.onCall(async (data: unknown, context): Promise<void> => {
-  // minimum players required for the game to be able to start
-  const minPlayers = 4;
   const auth = context.auth;
   // no auth then you shouldn't be here
   if (auth === undefined) {
@@ -89,7 +89,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
       throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
     // check if the request is coming from the host of the game
-    const { uids } = lobby.data() as Lobby;
+    const { uids, minPlayers } = lobby.data() as Lobby;
     if (auth.uid !== uids[0]) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
     }
@@ -104,8 +104,6 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
 });
 
 export const joinLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
-  // max number of players allowed in a given lobby
-  const maxPlayers = 8;
   const auth = context.auth;
   // no auth then you shouldn't be here
   if (auth === undefined) {
@@ -134,7 +132,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     const userInfo = user.data() as UserData;
 
     // get lobby data
-    const { players, uids } = lobbyInfo.data() as Lobby;
+    const { players, uids, maxPlayers } = lobbyInfo.data() as Lobby;
     if (uids.includes(auth.uid)) {
       throw new functions.https.HttpsError("already-exists", "You are already in the lobby!");
     }

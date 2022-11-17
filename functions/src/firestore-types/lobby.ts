@@ -92,6 +92,16 @@ export type Lobby = {
    * @note this can be a uid, NONE, or undefined
    */
   votedOff?: string | "NONE";
+
+  /**
+   * the maximum players allowed in a current lobby session
+   */
+  maxPlayers: number;
+
+  /**
+   * the minimum players required to start a game session
+   */
+  minPlayers: number;
 };
 
 /**

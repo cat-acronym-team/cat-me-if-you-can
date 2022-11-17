@@ -9,6 +9,7 @@
   import { changeAvatar, startGame, leaveLobby } from "$lib/firebase/firebase-functions";
   import { goto } from "$app/navigation";
   import { auth } from "$lib/firebase/app";
+    import { missing_component } from "svelte/internal";
 
   // Props
   export let lobbyCode: string;
@@ -69,7 +70,18 @@
 <div class="container">
   <div class="lobby-info">
     <h3>Code: {lobbyCode}</h3>
-    <h3>Players: {lobby.players.length}</h3>
+    <h3>Players: {lobby.players.length} / {lobby.maxPlayers}</h3>
+    {#if lobby.players.length < lobby.minPlayers}
+      <!-- Display the number of players needed to start the current game session -->
+      {#if lobby.minPlayers - lobby.players.length !== 1} 
+      <!-- Grammar check -->
+        <h3 class="minPlayers">{lobby.minPlayers - lobby.players.length} more players required to start game...</h3>
+      {:else}
+        <h3 class="minPlayers">{lobby.minPlayers - lobby.players.length} more player required to start game...</h3>
+      {/if}
+    {:else}
+    <h3>Waiting for host to start game...</h3>
+    {/if}
   </div>
   <div class="lobby-chat-level">
     <LobbyChat {lobby} {lobbyCode} />
@@ -101,6 +113,10 @@
 </div>
 
 <style>
+  .minPlayers {
+    color: red;
+  }
+  
   .lobby-chat-level {
     width: 100%;
     display: flex;
