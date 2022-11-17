@@ -40,7 +40,7 @@
   onDestroy(() => {
     unsubscribeVote?.();
   });
-  
+
   // reactive timer calls
   $: if (countdown <= 0 && lobby.uids[0] == $user?.uid) {
     clearInterval(timer);
@@ -65,7 +65,7 @@
       <div class="vote-container {!alive ? 'dead' : ''}">
         <button
           class="avatar {votedFor == i ? 'selected' : ''}"
-          disabled={!lobby.alivePlayers.includes($user?.uid ?? "")}
+          disabled={!lobby.alivePlayers.includes($user?.uid ?? "") || !alive}
           on:click={() => addVote(lobbyCode, $user?.uid ?? "", lobby.uids[i])}
         >
           <img src="/avatars/{avatar}.webp" alt={avatarAltText[avatar]} />
