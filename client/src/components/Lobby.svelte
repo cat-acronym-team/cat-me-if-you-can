@@ -43,6 +43,7 @@
   async function onAvatarSelect(avatar: Avatar) {
     try {
       await changeAvatar({ lobbyCode, avatar });
+      errorMessage = "";
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : String(err);
     }
