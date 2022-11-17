@@ -71,6 +71,8 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
 });
 
 export const startGame = functions.https.onCall(async (data: unknown, context): Promise<void> => {
+  // minimum players required for the game to be able to start
+  const minPlayers = 4;
   const auth = context.auth;
   // no auth then you shouldn't be here
   if (auth === undefined) {
@@ -92,11 +94,18 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
     }
 
+    // throw an error if there aren't enough players in the lobby
+    if (uids.length < minPlayers) {
+      throw new functions.https.HttpsError("permission-denied", "Not enough players to start the game!");
+    }
+
     assignRole(lobby, transaction);
   });
 });
 
 export const joinLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
+  // max number of players allowed in a given lobby
+  const maxPlayers = 10;
   const auth = context.auth;
   // no auth then you shouldn't be here
   if (auth === undefined) {
@@ -128,6 +137,11 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     const { players, uids } = lobbyInfo.data() as Lobby;
     if (uids.includes(auth.uid)) {
       throw new functions.https.HttpsError("already-exists", "You are already in the lobby!");
+    }
+
+    // throw an error if the lobby is already full
+    if (uids.length == maxPlayers) {
+      throw new functions.https.HttpsError("permission-denied", "Lobby is full!");
     }
 
     // change avatar randomly if it is already taken
