@@ -5,19 +5,17 @@
   import ChatMessages from "./ChatMessages.svelte";
   import IconButton from "@smui/icon-button";
   import { onDestroy } from "svelte";
-  import { authStore } from "$stores/auth";
   import { onSnapshot, orderBy, query, where } from "firebase/firestore";
-  import type { LobbyChatMessage, Lobby, Player } from "$lib/firebase/firestore-types/lobby";
+  import type { LobbyChatMessage, Lobby } from "$lib/firebase/firestore-types/lobby";
   import type { Unsubscribe, User } from "firebase/auth";
   import { getLobbyChatCollection } from "$lib/firebase/firestore-collections";
   import { addLobbyChatMessages } from "$lib/firebase/chat";
 
   export let lobby: Lobby;
   export let lobbyCode: string;
+  export let user: User;
 
   let showLobbyChat = false;
-  let user = $authStore as User;
-  let userInfo: Player;
   let errorMessage: string = "";
   let chatMessages: LobbyChatMessage[] = [];
   let unsubscribeChatMessages: Unsubscribe | undefined = undefined;

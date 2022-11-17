@@ -7,6 +7,7 @@
   import Vote from "$components/Vote.svelte";
   import Result from "$components/Result.svelte";
   import CircularProgress from "@smui/circular-progress";
+  import LobbyChat from "$components/LobbyChat.svelte";
 
   import { onSnapshot, doc, getDoc, type Unsubscribe } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
@@ -98,7 +99,10 @@
     <div class="spinner-wraper">
       <CircularProgress indeterminate />
     </div>
+  {:else if !userInfo.alive}
+    <LobbyChat {lobby} {lobbyCode} />
   {:else if lobby.state === "WAIT"}
+    <LobbyChat {lobby} {lobbyCode} />
     <LobbyComponent {lobbyCode} {lobby} />
   {:else if privatePlayer == undefined}
     <div class="spinner-wraper">
@@ -111,6 +115,7 @@
   {:else if lobby.state === "CHAT"}
     <ChatRoom {lobby} {lobbyCode} isStalker={privatePlayer.stalker} />
   {:else if lobby.state === "VOTE"}
+    <LobbyChat {lobby} {lobbyCode} />
     <Vote {lobby} {lobbyCode} />
   {:else if lobby.state === "RESULT"}
     <Result {lobby} {lobbyCode} />
@@ -119,6 +124,7 @@
   {:else}
     unknown lobby state: {lobby.state}
   {/if}
+  <!-- put lobbychat were alive users will be able to access it -->
 </main>
 
 <style>
