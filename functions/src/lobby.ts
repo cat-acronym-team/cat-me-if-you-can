@@ -105,7 +105,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
 
 export const joinLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
   // max number of players allowed in a given lobby
-  const maxPlayers = 10;
+  const maxPlayers = 8;
   const auth = context.auth;
   // no auth then you shouldn't be here
   if (auth === undefined) {
@@ -140,7 +140,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     }
 
     // throw an error if the lobby is already full
-    if (uids.length == maxPlayers) {
+    if (uids.length >= maxPlayers) {
       throw new functions.https.HttpsError("permission-denied", "Lobby is full!");
     }
 
