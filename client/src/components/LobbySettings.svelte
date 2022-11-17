@@ -23,6 +23,17 @@
     </Header>
     <Content>
       <p>Where settings will be</p>
+
+      <div class="settings">
+        <p>This will be something for catfish number</p>
+        <p>This will be something for the recieve role timer</p>
+        <p>This will be something for the prompt timer</p>
+        <p>This will be something for the chating timer</p>
+        <p>This will be something for the voting timer</p>
+        <p>This will be something for the result timer</p>
+        <p>This will be something for the win/loss timer</p>
+        <Button><Label>Apply Settings</Label></Button>
+      </div>
     </Content>
   </Dialog>
   <Button
@@ -34,4 +45,8 @@
 </main>
 
 <style>
+  .settings {
+    display: grid;
+    place-items: center;
+  }
 </style>
