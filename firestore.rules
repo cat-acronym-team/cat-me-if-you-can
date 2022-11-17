@@ -2,16 +2,15 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /lobbies/{code} {
-      
+
       function lobbyData(){
         return get(/databases/$(database)/documents/lobbies/$(code)).data;
       }
+
       function inLobby(){
         return request.auth.uid in lobbyData().uids;
       }
-      function isAlive(){
-        return request.auth.uid in lobbyData().alivePlayers;
-      }
+
       function isAlive(){
         return request.auth.uid in lobbyData().alivePlayers;
       }
@@ -78,16 +77,17 @@ service cloud.firestore {
         function chatSenderAlive(){
           return resource.data.alive;
         }
-          //if in lobby and message sender is alive allow read
-          //if in lobby and player is dead allow read
-          allow read: if inLobby() && (chatSenderAlive() || ! isAlive());
-          allow create: if validateLobbyChatMessage();
+        //if in lobby and message sender is alive allow read
+        //if in lobby and player is dead allow read
+        allow read: if inLobby() && (chatSenderAlive() || ! isAlive());
+        allow create: if validateLobbyChatMessage();
       }
+
       match /votes/{uid} {
         function checkTarget(){
           return request.resource.data.keys().hasOnly(['target'])
-          && request.resource.data.target is string
-          && request.resource.data.target in lobbyData().alivePlayers;
+            && request.resource.data.target is string
+            && request.resource.data.target in lobbyData().alivePlayers;
         }
         function notPastTarget(){
           return checkTarget() && request.resource.data.target != resource.data.target;
@@ -110,7 +110,7 @@ service cloud.firestore {
           && request.resource.data.avatar >= 0 && request.resource.data.avatar <=12;
       }
       function statsAreZero() {
-          return request.resource.data.catWins == 0 
+        return request.resource.data.catWins == 0 
           && request.resource.data.catfishWins == 0
           && request.resource.data.playedAsCat == 0 
           && request.resource.data.playedAsCatfish == 0;
