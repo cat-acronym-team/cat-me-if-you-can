@@ -15,6 +15,8 @@
   export let lobby: Lobby;
   let errorMessage: string = "";
 
+  let once: boolean = false;
+
   // better link to share since it's redirecting to this page anyways
   // Josh's suggestion that I agreed on
   let url = `${$page.url.origin}/join?code=${lobbyCode}`;
@@ -50,9 +52,11 @@
   }
 
   async function start() {
+    once = true;
     try {
       await startGame({ code: lobbyCode });
     } catch (err) {
+      once = false;
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
@@ -77,7 +81,13 @@
   <SelectAvatar {lobby} on:change={(event) => onAvatarSelect(event.detail.value)} />
   {#if auth.currentUser?.uid === lobby.uids[0]}
     <div class="actions">
-      <Button on:click|once={() => start()}><Label>Start Game</Label></Button>
+      <Button
+        on:click|once={async () => {
+          if (once == false) {
+            await start();
+          }
+        }}><Label>Start Game</Label></Button
+      >
     </div>
   {/if}
   <div class="actions">
