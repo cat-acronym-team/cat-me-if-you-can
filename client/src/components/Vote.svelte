@@ -10,7 +10,6 @@
 
   export let lobby: Lobby;
   export let lobbyCode: string;
-
   let countdown = GAME_STATE_DURATIONS.VOTE;
   let timer: ReturnType<typeof setInterval>;
 
@@ -41,18 +40,20 @@
     {formatTimer(Math.max(countdown, 0))}
   </p>
   <div class="voting-grid">
-    {#each lobby.players as { avatar, displayName, votes }, i}
-      <div class="vote-container">
-        <button
-          class="avatar"
-          disabled={$user?.uid == lobby.uids[i]}
-          on:click={() => addVote(lobbyCode, $user?.uid ?? "", lobby.uids[i])}
-        >
-          <img src="/avatars/{avatar}.webp" alt={avatarAltText[avatar]} />
-          <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
-        </button>
-        <span class="mdc-typography--heading6">{votes ?? 0}</span>
-      </div>
+    {#each lobby.players as { avatar, displayName, votes, role, alive }, i}
+      {#if role != "SPECTATOR"}
+        <div class="vote-container">
+          <button
+            class="avatar"
+            disabled={$user?.uid == lobby.uids[i]}
+            on:click={() => addVote(lobbyCode, $user?.uid ?? "", lobby.uids[i], alive)}
+          >
+            <img src="/avatars/{avatar}.webp" alt={avatarAltText[avatar]} />
+            <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
+          </button>
+          <span class="mdc-typography--heading6">{votes ?? 0}</span>
+        </div>
+      {/if}
     {/each}
   </div>
 </div>
