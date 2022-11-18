@@ -123,14 +123,14 @@
   }
 </script>
 
-{#if !userInfo.alive}
+{#if !lobby.alivePlayers.includes(user.uid)}
   <LobbyChat {lobby} {lobbyCode} />
 {/if}
 <div class="chatroom">
   <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
     {formatTimer(Math.max(countdown, 0))}
   </p>
-  {#if (isStalker && chatRoomId == undefined) || !userInfo.alive}
+  {#if (isStalker && chatRoomId == undefined) || !lobby.alivePlayers.includes(user.uid)}
     <Stalker {lobby} {lobbyCode} />
   {:else}
     <ChatMessages
