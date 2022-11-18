@@ -1,41 +1,18 @@
 <script lang="ts">
-  import IconButton from "@smui/icon-button";
-  import Textfield from "@smui/textfield";
-  import { Svg, Icon } from "@smui/common";
   import Button, { Label } from "@smui/button";
+  import { Svg, Icon } from "@smui/common";
   import { createEventDispatcher } from "svelte";
 
-  export let errorMessage: string;
-  export let selectedForm: "SIGN_IN" | "SIGN_UP" | "NONE";
-  export let email: string;
-  export let password: string;
-  export let showPassword: boolean;
-  export let compLocation: string;
+  export let hideGoogle = false;
+  export let hideMicrosoft = false;
+  let dispatch = createEventDispatcher<{ "google-clicked": undefined; "microsoft-clicked": undefined }>();
 
-  let dispatch = createEventDispatcher();
-
-  function googleLogin() {
-    dispatch("googleClicked");
+  function googleButton() {
+    dispatch("google-clicked");
   }
 
-  function microsoftLogin() {
-    dispatch("microsoftClicked");
-  }
-
-  function createAccount() {
-    dispatch("createAccountClicked");
-  }
-
-  function submitLogin() {
-    dispatch("submitLoginClicked");
-  }
-
-  function signInDropDown() {
-    dispatch("signInDropDownClicked");
-  }
-
-  function createAccountDropDown() {
-    dispatch("createAccountDropDownClicked");
+  function microsoftButton() {
+    dispatch("microsoft-clicked");
   }
 
   const googleSvgPaths: { color: string; path: string }[] = [
@@ -58,8 +35,8 @@
   ];
 </script>
 
-<div class="buttons">
-  <Button id="sign-in-with-google" variant="raised" on:click={googleLogin}>
+{#if !hideGoogle}
+  <Button id="sign-in-with-google" variant="raised" on:click={googleButton}>
     <Icon component={Svg} viewBox="0 0 48 48">
       {#each googleSvgPaths as path}
         <path fill={path.color} d={path.path} />
@@ -67,7 +44,10 @@
     </Icon>
     <Label>Sign in with Google</Label>
   </Button>
-  <Button id="sign-in-with-microsoft" variant="raised" on:click={microsoftLogin}>
+{/if}
+
+{#if !hideMicrosoft}
+  <Button id="sign-in-with-microsoft" variant="raised" on:click={microsoftButton}>
     <Icon component={Svg} viewBox="0 0 21 21">
       <rect x="1" y="1" width="9" height="9" fill="#f25022" />
       <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
@@ -76,59 +56,9 @@
     </Icon>
     <Label>Sign in with Microsoft</Label>
   </Button>
-  {#if compLocation == "sign-in"}
-    <Button id="sign-in-with-email" variant="raised" on:click={signInDropDown}>
-      <Icon class="material-icons">email</Icon>
-      <Label>Sign in with email</Label>
-    </Button>
-    <Button id="sign-up-with-email" variant="raised" on:click={createAccountDropDown}>
-      <Icon class="material-icons">email</Icon>
-      <Label>Sign up with email</Label>
-    </Button>
-    {#if selectedForm != "NONE"}
-      <form on:submit|preventDefault={selectedForm == "SIGN_IN" ? submitLogin : createAccount}>
-        <Textfield label="Email" type="email" bind:value={email} required input$autocomplete="username" />
-        <Textfield
-          label="Password"
-          type={showPassword ? "text" : "password"}
-          bind:value={password}
-          required
-          input$autocomplete={selectedForm == "SIGN_IN" ? "current-password" : "new-password"}
-        >
-          <IconButton
-            type="button"
-            on:click={(event) => event.preventDefault()}
-            slot="trailingIcon"
-            toggle
-            bind:pressed={showPassword}
-          >
-            <Icon class="material-icons" on>visibility</Icon>
-            <Icon class="material-icons">visibility_off</Icon>
-          </IconButton>
-        </Textfield>
-        {#if errorMessage !== ""}
-          <p class="error">{errorMessage}</p>
-        {/if}
-        <Button type="submit">
-          <Label>{selectedForm == "SIGN_IN" ? "Sign In" : "Sign Up"}</Label>
-        </Button>
-      </form>
-    {/if}
-  {/if}
-</div>
+{/if}
 
 <style>
-  .buttons {
-    display: grid;
-    justify-content: center;
-    gap: 12px;
-  }
-
-  form {
-    display: grid;
-    gap: 12px;
-  }
-
   :global(#sign-in-with-google),
   :global(#sign-in-with-microsoft),
   :global(#sign-in-with-email),
