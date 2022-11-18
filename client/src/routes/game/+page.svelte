@@ -99,7 +99,7 @@
     <div class="spinner-wraper">
       <CircularProgress indeterminate />
     </div>
-  {:else if !userInfo.alive}
+  {:else if !lobby.alivePlayers.includes($user.uid)}
     <LobbyChat {lobby} {lobbyCode} />
   {:else if lobby.state === "WAIT"}
     <LobbyChat {lobby} {lobbyCode} />
