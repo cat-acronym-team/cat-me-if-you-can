@@ -15,6 +15,8 @@
   export let lobby: Lobby;
   let errorMessage: string = "";
 
+  // variable that will be set true if the corresponding function has no errors thrown
+  // this will then allow the button to be pressed again if there is an error thrown
   let once: boolean = false;
 
   // better link to share since it's redirecting to this page anyways
@@ -62,9 +64,11 @@
   }
 
   async function leave() {
+    once = true;
     try {
       await leaveLobby({ code: lobbyCode });
     } catch (err) {
+      once = false;
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
@@ -82,7 +86,7 @@
   {#if auth.currentUser?.uid === lobby.uids[0]}
     <div class="actions">
       <Button
-        on:click|once={async () => {
+        on:click={async () => {
           if (once == false) {
             await start();
           }
@@ -92,9 +96,11 @@
   {/if}
   <div class="actions">
     <Button
-      on:click|once={async () => {
+      on:click={async () => {
+        if(once == false) {
         await leave();
         goto("/");
+        }
       }}><Label>Leave Lobby</Label></Button
     >
   </div>
