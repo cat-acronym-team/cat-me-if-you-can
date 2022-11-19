@@ -24,6 +24,7 @@
   let privatePlayer: PrivatePlayer | undefined = undefined;
   let unsubscribePrivatePlayer: Unsubscribe | undefined = undefined;
 
+  // TODO: redirect after being banned or kicked does NOT work
   // if the user isn't signed in or not apart of this lobby then redirect them on update
   $: if (lobby !== undefined && ($user === null || !lobby.uids.includes($user.uid))) {
     // then return to join
