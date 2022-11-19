@@ -65,7 +65,7 @@
 <div class="grid {lobby != undefined ? 'lobby' : ''}">
   {#each avatarChoices as { avatar, altText, displayName, uid, available, selected }}
     <div class="parent">
-      {#if !available}
+      {#if !available && $user !== null && lobby?.uids[0] == $user.uid}
         <PlayerMenu {lobbyCode} {uid} />
       {/if}
       <button class="avatar" on:click={() => selectAvatar(avatar)} disabled={!available} aria-selected={selected}>
