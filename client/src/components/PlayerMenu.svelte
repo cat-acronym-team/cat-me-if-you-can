@@ -34,5 +34,4 @@
     position: absolute;
     right: 0px;
   }
-  /* absolute position relative to  */
 </style>
