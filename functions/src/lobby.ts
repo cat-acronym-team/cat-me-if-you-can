@@ -96,7 +96,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
 
     // throw an error if there aren't enough players in the lobby
     if (uids.length < minPlayers) {
-      throw new functions.https.HttpsError("permission-denied", "Not enough players to start the game!");
+      throw new functions.https.HttpsError("failed-precondition", "Not enough players to start the game!");
     }
 
     assignRole(lobby, transaction);
@@ -139,7 +139,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
 
     // throw an error if the lobby is already full
     if (uids.length >= maxPlayers) {
-      throw new functions.https.HttpsError("permission-denied", "Lobby is full!");
+      throw new functions.https.HttpsError("failed-precondition", "Lobby is full!");
     }
 
     // change avatar randomly if it is already taken
