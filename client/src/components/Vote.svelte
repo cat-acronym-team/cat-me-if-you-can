@@ -35,6 +35,7 @@
   <LobbyChat {lobby} {lobbyCode} />
 </div>
 <div class="voting">
+  <p class="mdc-typography--headline4">Vote out the catfish</p>
   <div class="voting-grid">
     {#each lobby.players as { avatar, displayName, votes, alive, promptAnswer }, i}
       <div class="vote-container {!alive ? 'dead' : ''}">
