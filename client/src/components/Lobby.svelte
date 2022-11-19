@@ -9,7 +9,6 @@
   import { changeAvatar, startGame, leaveLobby } from "$lib/firebase/firebase-functions";
   import { goto } from "$app/navigation";
   import { auth } from "$lib/firebase/app";
-  import { missing_component } from "svelte/internal";
 
   // Props
   export let lobbyCode: string;
