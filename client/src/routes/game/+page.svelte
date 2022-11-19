@@ -53,6 +53,14 @@
       return;
     }
 
+    // check for user being null so privatePlayerDocRef can work
+    if ($user === null) {
+      goto(`/join?code=${lobbyCode}`, {
+        replaceState: true,
+      });
+      return;
+    }
+
     const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
     const privatePlayerDocRef = doc(privatePlayerCollection, $user.uid);
 
