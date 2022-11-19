@@ -52,19 +52,6 @@ export const GAME_STATE_DURATIONS: { [state in GameState]: number } = {
 };
 
 /**
- * whether to show timer or not
- */
-export const DISPLAY_TIMERS: { [state in GameState]: boolean | null } = {
-  WAIT: null,
-  ROLE: false,
-  PROMPT: true,
-  CHAT: true,
-  VOTE: true,
-  RESULT: false,
-  END: false,
-};
-
-/**
  * the type of documents `/lobbies/{code}`
  */
 export type Lobby = {
