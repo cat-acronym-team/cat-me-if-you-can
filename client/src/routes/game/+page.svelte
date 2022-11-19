@@ -11,17 +11,12 @@
   import { onSnapshot, doc, getDoc, type Unsubscribe } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
   import { getPrivatePlayerCollection, lobbyCollection } from "$lib/firebase/firestore-collections";
-  import {
-    GAME_STATE_DURATIONS,
-    DISPLAY_TIMERS,
-    type Lobby,
-    type PrivatePlayer,
-  } from "$lib/firebase/firestore-types/lobby";
+  import { GAME_STATE_DURATIONS, type Lobby, type PrivatePlayer } from "$lib/firebase/firestore-types/lobby";
   import { page } from "$app/stores";
   import { authStore as user } from "$stores/auth";
   import { goto } from "$app/navigation";
   import { verifyExpiration } from "$lib/firebase/firebase-functions";
-  import { formatTimer } from "$lib/time";
+  import { formatTimer, DISPLAY_TIMERS } from "$lib/time";
 
   let lobbyCode: string | null = null;
 
@@ -70,8 +65,10 @@
     unsubscribeLobby = onSnapshot(lobbyDocRef, (doc) => {
       // will change lobby to the new doc data
       const newLobby = doc.data();
-      if (lobby?.state != newLobby?.state && newLobby?.state != null) {
-        countdown = GAME_STATE_DURATIONS[newLobby?.state];
+      if (lobby?.state != newLobby?.state && newLobby != undefined) {
+        countdown = GAME_STATE_DURATIONS[newLobby.state];
+
+        clearInterval(timer);
         timer = setInterval(() => {
           if (lobby?.expiration != undefined) {
             const diff = Math.floor((lobby.expiration.toMillis() - Date.now()) / 1000);
@@ -90,6 +87,8 @@
   });
 
   onDestroy(() => {
+    // clear timer
+    clearInterval(timer);
     // unsub from lobby
     unsubscribeLobby?.();
     // unsub from privatePlayer
@@ -108,11 +107,17 @@
   }
 
   // Reactive Calls
-  $: if (countdown <= 0 && lobby?.uids[0] === $user?.uid && lobbyCode != null) {
+  $: if (
+    countdown <= 0 &&
+    lobby != null &&
+    lobby.uids[0] === $user?.uid &&
+    lobbyCode != null &&
+    DISPLAY_TIMERS[lobby.state] != null
+  ) {
     clearInterval(timer);
     verifyExpiration({ code: lobbyCode });
   }
-  $: if (countdown <= -5 && lobbyCode != null) {
+  $: if (countdown <= -5 && lobby != null && lobbyCode != null && DISPLAY_TIMERS[lobby.state] != null) {
     clearInterval(timer);
     verifyExpiration({ code: lobbyCode });
   }
@@ -159,9 +164,10 @@
 
 <style>
   .countdown {
-    margin-top: 0;
+    margin: 0;
     text-align: center;
   }
+
   main {
     box-sizing: border-box;
     height: 100%;
