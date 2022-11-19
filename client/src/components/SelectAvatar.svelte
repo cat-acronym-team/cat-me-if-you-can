@@ -34,7 +34,6 @@
       for (const player of lobby.players) {
         newAvatarChoices[player.avatar - 1].displayName = player.displayName;
         newAvatarChoices[player.avatar - 1].available = false;
-
         const playerIndex = lobby.players.indexOf(player);
         newAvatarChoices[player.avatar - 1].uid = lobby.uids[playerIndex];
       }
