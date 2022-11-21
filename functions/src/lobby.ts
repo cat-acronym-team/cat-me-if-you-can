@@ -133,6 +133,12 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
       throw new functions.https.HttpsError("already-exists", "You are already in the lobby!");
     }
 
+    // change avatar randomly if it is already taken
+    const takenAvatars = players.map((player) => player.avatar);
+    while (userInfo.avatar == 0 || takenAvatars.includes(userInfo.avatar)) {
+      userInfo.avatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
+    }
+
     //add spectator
     if (lobbyState?.state != "WAIT") {
       const privatePlayerDocRef = privatePlayerCollection.doc(user.id);
@@ -147,11 +153,6 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
         uids: firestore.FieldValue.arrayUnion(auth.uid),
       });
     } else {
-      // change avatar randomly if it is already taken
-      const takenAvatars = players.map((player) => player.avatar);
-      while (userInfo.avatar == 0 || takenAvatars.includes(userInfo.avatar)) {
-        userInfo.avatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
-      }
       // add player
       transaction.update(lobby, {
         players: firestore.FieldValue.arrayUnion({

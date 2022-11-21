@@ -59,7 +59,6 @@ export async function endGameProcess(
         functions.logger.error("This player's role doesn't exist!");
         return;
       } else if (players[index].role == "SPECTATOR") {
-        functions.logger.error("This player's role is a spectator");
         return;
       }
 
