@@ -95,11 +95,15 @@ export type Lobby = {
 
   /**
    * the maximum players allowed in a current lobby session
+   * this number may be changed depending on the number of catfish in the current session
+   * likely range 8-10
    */
   maxPlayers: number;
 
   /**
    * the minimum players required to start a game session
+   * this number will be changed depending on the number of catfish in the current session
+   * this value should be set to (numberOfCatfish * 2) + 2 for optimal gameplay
    */
   minPlayers: number;
 };
