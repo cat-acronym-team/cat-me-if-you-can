@@ -36,13 +36,14 @@ export type Player = {
   promptAnswer?: string;
 };
 
-export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "RESULT" | "END";
+export type GameState = "WAIT" | "ROLE" | "PROMPT" | "CHAT" | "VOTE" | "RESULT" | "END";
 
 /**
  * the duration in seconds for each game state
  */
 export const GAME_STATE_DURATIONS: { [state in GameState]: number } = {
   WAIT: 2 * 60 * 60,
+  ROLE: 15,
   PROMPT: 60,
   CHAT: 2 * 60,
   VOTE: 3 * 60,
@@ -74,7 +75,12 @@ export type Lobby = {
   /**
    * expiration time of the current phase with a timer
    */
-  expiration?: Timestamp;
+  expiration: Timestamp;
+
+  /**
+   * array of alive players
+   */
+  alivePlayers: string[];
 
   /**
    * the role that won the game

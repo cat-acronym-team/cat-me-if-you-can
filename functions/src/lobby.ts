@@ -14,7 +14,8 @@ import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
-import { deleteChatRooms } from "./chat";
+import { deleteChatRooms, deleteLobbyChatMessages } from "./chat";
+import { assignRole } from "./role";
 import { endGameProcess } from "./winloss";
 import { findVoteOff } from "./vote";
 import { determineWinner } from "./result";
@@ -51,6 +52,8 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
       },
     ],
     state: "WAIT",
+    alivePlayers: [context.auth.uid],
+    expiration: firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 3_600_000 * 3),
   };
 
   // try making lobby 5 times before giving up
@@ -90,13 +93,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
     }
 
-    const privatePlayerCollection = getPrivatePlayerCollection(lobby.ref);
-    for (const uid of uids) {
-      privatePlayerCollection.doc(uid).create({ role: "CAT", stalker: false });
-    }
-
-    // await lobbyCollection.doc(data.code).update({ state: "PROMPT" });
-    await startPrompt(lobby, transaction);
+    assignRole(lobby, transaction);
   });
 });
 
@@ -193,6 +190,26 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
       });
     }
   });
+});
+
+// TODO: replace with the correct trigger
+export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate((change, context) => {
+  const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
+  const lobby = change.after.data() as Lobby;
+  const lobbyBefore = change.before.data() as Lobby;
+  let hasChanged = lobby.players.length != lobbyBefore.players.length;
+  const alivePlayers = [];
+  for (let i = 0; i < lobby.uids.length; i++) {
+    if (!hasChanged && lobby.players[i].alive != lobbyBefore.players[i].alive) {
+      hasChanged = true;
+    }
+    if (lobby.players[i].alive) {
+      alivePlayers.push(lobby.uids[i]);
+    }
+  }
+  if (hasChanged) {
+    lobbyDocRef.update({ alivePlayers: alivePlayers });
+  }
 });
 
 export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
@@ -361,6 +378,9 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
 
     // TODO: potential if checks for other states that require a timer
     // if the state is chat then delete chatrooms
+    if (lobby.state === "ROLE") {
+      await startPrompt(lobbyDoc, transaction);
+    }
     if (lobby.state === "PROMPT") {
       await collectPromptAnswers(lobbyDoc, transaction);
     }
@@ -372,6 +392,7 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
       await endGameProcess(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "VOTE") {
+      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       findVoteOff(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "RESULT") {
