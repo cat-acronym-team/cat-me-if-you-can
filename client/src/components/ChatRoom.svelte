@@ -25,7 +25,6 @@
   let user = $authStore as User;
   let partnerInfo: Player | undefined;
   let pairInfo: [Player, Player] | undefined;
-  let userInfo: Player;
   let chatRoomId: string | undefined = undefined;
   let chatMessages: ChatMessage[] = [];
   let timer: ReturnType<typeof setInterval>;
@@ -110,9 +109,6 @@
     }
   }
 
-  // Reactive Calls
-  $: userInfo = lobby.players[lobby.uids.indexOf(user.uid)];
-
   $: if (countdown <= 0 && lobby.uids[0] === user.uid) {
     clearInterval(timer);
     verifyExpiration({ code: lobbyCode });
@@ -120,6 +116,9 @@
   $: if (countdown < -5) {
     clearInterval(timer);
     verifyExpiration({ code: lobbyCode });
+  }
+  $: if (!lobby.alivePlayers.includes(user.uid)) {
+    isStalker = true;
   }
 </script>
 
@@ -130,7 +129,7 @@
   <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
     {formatTimer(Math.max(countdown, 0))}
   </p>
-  {#if (isStalker && chatRoomId == undefined) || !lobby.alivePlayers.includes(user.uid)}
+  {#if isStalker && chatRoomId == undefined}
     <Stalker {lobby} {lobbyCode} />
   {:else}
     <ChatMessages
