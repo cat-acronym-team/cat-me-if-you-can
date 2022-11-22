@@ -24,7 +24,11 @@
   let codeDirty: boolean = false;
   $: codeValidation = lobbyCodeValidator(code);
 
-  let once: boolean = false;
+  /**
+  variable that will be set true if the corresponding function has no errors thrown
+  this will then allow the button to be pressed again if there is an error thrown
+  */
+  let waiting: boolean = false;
 
   function lobbyCodeValidator(code: string): { valid: true } | { valid: false; reason: string } {
     if (code.length === 0) {
@@ -59,7 +63,7 @@
 
   async function joinLobby() {
     code = code.toLowerCase();
-    once = true;
+    waiting = true;
     try {
       await saveOrCreate($user, userData, name.trim());
       // enter lobby with the user's info
@@ -67,11 +71,11 @@
       // go to game page
       goto(`/game?code=${code}`);
     } catch (err) {
-      once = false;
+      waiting = false;
       // if the lobby doesn't exist then error is thrown
       errorMessage = err instanceof Error ? err.message : String(err);
       if (errorMessage == "You are already in the lobby!") {
-        once = true;
+        waiting = true;
         goto(`/game?code=${code}`);
       }
       // this checks if the query code is set
@@ -112,10 +116,11 @@
   {/if}
   <form
     on:submit|preventDefault={async () => {
-      if (once == false) {
+      if (waiting == false) {
         await joinLobby();
       }
     }}
+    disabled={waiting}
   >
     <div>
       <Textfield
