@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { Lobby } from "$lib/firebase/firestore-types/lobby";
-  import LobbyChat from "./LobbyChat.svelte";
   import { addVote } from "$lib/firebase/vote";
   import { authStore as user } from "$stores/auth";
   import { onDestroy, onMount } from "svelte";
@@ -31,9 +30,6 @@
   });
 </script>
 
-<div class="lobby-chat-level">
-  <LobbyChat {lobby} {lobbyCode} />
-</div>
 <div class="voting">
   <p class="mdc-typography--headline4">Vote out the catfish</p>
   <div class="voting-grid">
@@ -78,12 +74,6 @@
     display: grid;
     row-gap: 10px;
     text-align: center;
-  }
-  .lobby-chat-level {
-    width: 100%;
-    display: flex;
-    justify-content: left;
-    align-items: center;
   }
   .avatar {
     appearance: none;
