@@ -89,7 +89,7 @@
     <div class="actions">
       <Button
         on:click={async () => {
-            await start();
+          await start();
         }}
         disabled={waiting}><Label>Start Game</Label></Button
       >
@@ -98,8 +98,8 @@
   <div class="actions">
     <Button
       on:click={async () => {
-          await leave();
-          goto("/");
+        await leave();
+        goto("/");
       }}
       disabled={waiting}><Label>Leave Lobby</Label></Button
     >
