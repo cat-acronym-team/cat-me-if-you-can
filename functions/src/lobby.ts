@@ -88,6 +88,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
     }
     // check if the request is coming from the host of the game
     const { players } = lobby.data() as Lobby;
+    // TODO: Host needs to be fixed
     if (auth.uid !== Object.keys(players)[0]) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
     }
@@ -194,13 +195,13 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   const lobbyBefore = change.before.data() as Lobby;
   let hasChanged = Object.keys(lobby.players).length != Object.keys(lobbyBefore.players).length;
   const alivePlayers = [];
-  for (let i = 0; i < Object.keys(lobby.players).length; i++) {
-    Object.values(lobby.players)[i].alive;
-    if (!hasChanged && Object.values(lobby.players)[i].alive != Object.values(lobby.players)[i].alive) {
+
+  for (const uid in lobby.players) {
+    if (!hasChanged && lobby.players[uid].alive != lobbyBefore.players[uid].alive) {
       hasChanged = true;
     }
-    if (lobby.players[i].alive) {
-      alivePlayers.push(Object.keys(lobby.players)[i]);
+    if (lobby.players[uid].alive) {
+      alivePlayers.push(uid);
     }
   }
   if (hasChanged) {

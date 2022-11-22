@@ -23,17 +23,16 @@ export const changeAvatar = functions.https.onCall((data: unknown, context): Pro
       throw new functions.https.HttpsError("not-found", "Lobby does not exist.");
     }
 
-    const playerIndex = lobbyData.uids.findIndex((uid) => uid === auth.uid);
-    if (playerIndex == -1) {
+    if (auth.uid in lobbyData.players) {
       throw new functions.https.HttpsError("permission-denied", "User is not in the lobby.");
     }
 
-    const taken = lobbyData.players.some((player) => player.avatar === data.avatar);
+    const taken = Object.values(lobbyData.players).some((player) => player.avatar === data.avatar);
     if (taken) {
       throw new functions.https.HttpsError("already-exists", "Avatar is already taken.");
     }
 
-    lobbyData.players[playerIndex].avatar = data.avatar;
+    lobbyData.players[auth.uid].avatar = data.avatar;
 
     await transaction.update(lobbyDocRef, lobbyData);
   });
