@@ -90,6 +90,9 @@ export function linkWithPassword(password: string) {
 }
 
 export function hasGoogleProvider(user: User | null) {
+  if (user == null) {
+    return false;
+  }
   if (user) {
     const signInMethods = user.providerData;
 
@@ -99,12 +102,13 @@ export function hasGoogleProvider(user: User | null) {
       }
     }
     return false;
-  } else {
-    return false;
   }
 }
 
 export function hasMicrosoftProvider(user: User | null) {
+  if (user == null) {
+    return false;
+  }
   if (user) {
     const signInMethods = user.providerData;
 
@@ -113,8 +117,6 @@ export function hasMicrosoftProvider(user: User | null) {
         return true;
       }
     }
-    return false;
-  } else {
     return false;
   }
 }
