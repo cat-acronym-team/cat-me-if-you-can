@@ -14,7 +14,7 @@
   export let lobbyCode: string;
   export let lobby: Lobby;
   let errorMessage: string = "";
-  let minPlayers = (lobby.catfishAmount * 2) + 2;
+  let minPlayers = lobby.catfishAmount * 2 + 2;
 
   // better link to share since it's redirecting to this page anyways
   // Josh's suggestion that I agreed on

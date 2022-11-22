@@ -91,7 +91,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
     // check if the request is coming from the host of the game
     const { uids, catfishAmount } = lobby.data() as Lobby;
 
-    const minPlayers = (catfishAmount * 2) + 2;
+    const minPlayers = catfishAmount * 2 + 2;
 
     if (auth.uid !== uids[0]) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
