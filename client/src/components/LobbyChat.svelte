@@ -14,6 +14,7 @@
 
   export let lobby: Lobby;
   export let lobbyCode: string;
+
   let showLobbyChat = false;
   let errorMessage: string = "";
   let chatMessages: LobbyChatMessage[] = [];
