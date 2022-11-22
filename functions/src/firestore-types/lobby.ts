@@ -65,7 +65,7 @@ export type Lobby = {
    *
    * @note uids[x] and players[x] belong to the same player
    */
-  players: Player[];
+  players: { [uid: string]: Player };
 
   /**
    * the current state of the game

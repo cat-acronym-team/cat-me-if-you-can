@@ -43,14 +43,14 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
 
   const lobbyData: Lobby = {
     uids: [context.auth.uid],
-    players: [
-      {
+    players: {
+      [context.auth.uid]: {
         alive: true,
         avatar: userData.avatar || AVATARS[Math.floor(Math.random() * AVATARS.length)],
         displayName: userData.displayName,
         votes: 0,
       },
-    ],
+    },
     state: "WAIT",
     alivePlayers: [context.auth.uid],
     expiration: firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 3_600_000 * 3),
