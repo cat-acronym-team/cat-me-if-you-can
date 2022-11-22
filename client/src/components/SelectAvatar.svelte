@@ -35,7 +35,9 @@
 
       if ($user !== null) {
         const userIndex = lobby.uids.indexOf($user.uid);
-        newAvatarChoices[lobby.players[userIndex].avatar - 1].selected = true;
+        if (userIndex != -1) {
+          newAvatarChoices[lobby.players[userIndex].avatar - 1].selected = true;
+        }
       }
     } else {
       for (const avatarChoice of newAvatarChoices) {
