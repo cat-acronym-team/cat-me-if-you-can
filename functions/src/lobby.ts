@@ -53,6 +53,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
     state: "WAIT",
     alivePlayers: [context.auth.uid],
     expiration: firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 3_600_000 * 3),
+    host: context.auth.uid,
   };
 
   // try making lobby 5 times before giving up
@@ -86,10 +87,9 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
     if (lobby.exists === false) {
       throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
+
     // check if the request is coming from the host of the game
-    const { players } = lobby.data() as Lobby;
-    // TODO: Host needs to be fixed
-    if (auth.uid !== Object.keys(players)[0]) {
+    if (auth.uid !== lobby.data()?.host) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
     }
 

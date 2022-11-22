@@ -85,6 +85,11 @@ export type Lobby = {
    * @note this can be a uid, NONE, or undefined
    */
   votedOff?: string | "NONE";
+
+  /**
+   * the uid of the host player
+   */
+  host: string;
 };
 
 /**
