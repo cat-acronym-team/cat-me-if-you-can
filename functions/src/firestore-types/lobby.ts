@@ -75,7 +75,7 @@ export type Lobby = {
   /**
    * expiration time of the current phase with a timer
    */
-  expiration?: Timestamp;
+  expiration: Timestamp;
 
   /**
    * array of alive players

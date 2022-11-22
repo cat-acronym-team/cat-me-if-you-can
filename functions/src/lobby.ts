@@ -55,6 +55,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
     alivePlayers: [context.auth.uid],
     maxPlayers: 8,
     minPlayers: 4,
+    expiration: firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 3_600_000 * 3),
   };
 
   // try making lobby 5 times before giving up
