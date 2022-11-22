@@ -192,7 +192,6 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
   });
 });
 
-// TODO: replace with the correct trigger
 export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate((change, context) => {
   const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
   const lobby = change.after.data() as Lobby;
