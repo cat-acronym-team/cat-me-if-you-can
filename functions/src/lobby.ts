@@ -42,7 +42,6 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
   }
 
   const lobbyData: Lobby = {
-    uids: [context.auth.uid],
     players: {
       [context.auth.uid]: {
         alive: true,
@@ -88,8 +87,8 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
       throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
     // check if the request is coming from the host of the game
-    const { uids } = lobby.data() as Lobby;
-    if (auth.uid !== uids[0]) {
+    const { players } = lobby.data() as Lobby;
+    if (auth.uid !== Object.keys(players)[0]) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
     }
 
@@ -126,26 +125,27 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     const userInfo = user.data() as UserData;
 
     // get lobby data
-    const { players, uids } = lobbyInfo.data() as Lobby;
-    if (uids.includes(auth.uid)) {
+    const { players } = lobbyInfo.data() as Lobby;
+    if (Object.keys(players).includes(auth.uid)) {
       throw new functions.https.HttpsError("already-exists", "You are already in the lobby!");
     }
 
     // change avatar randomly if it is already taken
-    const takenAvatars = players.map((player) => player.avatar);
+    const takenAvatars = Object.values(players).map((player) => player.avatar);
     while (userInfo.avatar == 0 || takenAvatars.includes(userInfo.avatar)) {
       userInfo.avatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
     }
 
     // add player
     transaction.update(lobby, {
-      players: firestore.FieldValue.arrayUnion({
-        displayName: userInfo.displayName,
-        avatar: userInfo.avatar,
-        alive: true,
-        votes: 0,
-      }),
-      uids: firestore.FieldValue.arrayUnion(auth.uid),
+      players: {
+        [auth.uid]: {
+          alive: true,
+          avatar: userInfo.avatar,
+          displayName: userInfo.displayName,
+          votes: 0,
+        },
+      },
     });
   });
 });
@@ -174,19 +174,15 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
     }
 
     // get lobby data
-    const { players, uids } = lobbyInfo.data() as Lobby;
-
-    // Get position of the Player
-    const playerPos = uids.indexOf(auth.uid);
+    const { players } = lobbyInfo.data() as Lobby;
 
     // If the last player is leaving delete the document instead
-    if (uids.length === 1) {
+    if (Object.keys(players).length === 1) {
       transaction.delete(lobby);
     } else {
       // Remove player from the lobby
       transaction.update(lobby, {
-        players: firestore.FieldValue.arrayRemove(players[playerPos]),
-        uids: firestore.FieldValue.arrayRemove(auth.uid),
+        players: firestore.FieldValue.arrayRemove(auth.uid),
       });
     }
   });
@@ -197,14 +193,15 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
   const lobby = change.after.data() as Lobby;
   const lobbyBefore = change.before.data() as Lobby;
-  let hasChanged = lobby.players.length != lobbyBefore.players.length;
+  let hasChanged = Object.keys(lobby.players).length != Object.keys(lobbyBefore.players).length;
   const alivePlayers = [];
-  for (let i = 0; i < lobby.uids.length; i++) {
-    if (!hasChanged && lobby.players[i].alive != lobbyBefore.players[i].alive) {
+  for (let i = 0; i < Object.keys(lobby.players).length; i++) {
+    Object.values(lobby.players)[i].alive;
+    if (!hasChanged && Object.values(lobby.players)[i].alive != Object.values(lobby.players)[i].alive) {
       hasChanged = true;
     }
     if (lobby.players[i].alive) {
-      alivePlayers.push(lobby.uids[i]);
+      alivePlayers.push(Object.keys(lobby.players)[i]);
     }
   }
   if (hasChanged) {
@@ -224,7 +221,7 @@ export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, t
   }
 
   await Promise.all(
-    lobbyData.uids.map(async (uid) => {
+    Object.keys(lobbyData.players).map(async (uid) => {
       const privatePlayerDocRef = privatePlayerCollection.doc(uid);
 
       const privatePlayerDoc = await transaction.get(privatePlayerDocRef);
@@ -328,18 +325,18 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
       return;
     }
 
-    const { players, uids } = lobbyData;
+    const { players } = lobbyData;
 
     // decrement old target
     if (oldVoteDoc != undefined) {
-      const oldTarget = players[uids.indexOf(oldVoteDoc.target)];
+      const oldTarget = players[oldVoteDoc.target];
       if (oldTarget.votes != 0) {
         oldTarget.votes -= 1;
       }
     }
 
     // increment new target
-    players[uids.indexOf(latestVoteDoc.target)].votes += 1;
+    players[latestVoteDoc.target].votes += 1;
 
     transaction.update(lobbyDocRef, { players });
   });

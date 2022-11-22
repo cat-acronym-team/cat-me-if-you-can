@@ -56,14 +56,7 @@ export const GAME_STATE_DURATIONS: { [state in GameState]: number } = {
  */
 export type Lobby = {
   /**
-   * the UIDs of the players in this lobby
-   */
-  uids: string[];
-
-  /**
    * data about each player in the lobby
-   *
-   * @note uids[x] and players[x] belong to the same player
    */
   players: { [uid: string]: Player };
 
