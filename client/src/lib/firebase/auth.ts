@@ -93,32 +93,29 @@ export function hasGoogleProvider(user: User | null) {
   if (user == null) {
     return false;
   }
-  if (user) {
-    const signInMethods = user.providerData;
 
-    for (const provider of signInMethods) {
-      if (provider.providerId == "google.com") {
-        return true;
-      }
+  const signInMethods = user.providerData;
+
+  for (const provider of signInMethods) {
+    if (provider.providerId == "google.com") {
+      return true;
     }
-    return false;
   }
+  return false;
 }
 
 export function hasMicrosoftProvider(user: User | null) {
   if (user == null) {
     return false;
   }
-  if (user) {
-    const signInMethods = user.providerData;
+  const signInMethods = user.providerData;
 
-    for (const provider of signInMethods) {
-      if (provider.providerId == "microsoft.com") {
-        return true;
-      }
+  for (const provider of signInMethods) {
+    if (provider.providerId == "microsoft.com") {
+      return true;
     }
-    return false;
   }
+  return false;
 }
 
 export function logOut() {
