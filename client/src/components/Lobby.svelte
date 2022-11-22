@@ -83,9 +83,6 @@
       <h3 class="error">Waiting for host to start game...</h3>
     {/if}
   </div>
-  <div class="lobby-chat-level">
-    <LobbyChat {lobby} {lobbyCode} />
-  </div>
   <SelectAvatar {lobby} on:change={(event) => onAvatarSelect(event.detail.value)} />
   {#if auth.currentUser?.uid === lobby.uids[0]}
     <div class="actions">
@@ -113,13 +110,6 @@
 </div>
 
 <style>
-  .lobby-chat-level {
-    width: 100%;
-    display: flex;
-    justify-content: left;
-    align-items: center;
-  }
-
   .actions {
     display: grid;
     place-items: center;
