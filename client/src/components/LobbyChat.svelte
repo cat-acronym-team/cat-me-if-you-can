@@ -7,25 +7,26 @@
   import { onDestroy } from "svelte";
   import { onSnapshot, orderBy, query, where } from "firebase/firestore";
   import type { LobbyChatMessage, Lobby } from "$lib/firebase/firestore-types/lobby";
-  import type { Unsubscribe, User } from "firebase/auth";
+  import type { Unsubscribe } from "firebase/auth";
   import { getLobbyChatCollection } from "$lib/firebase/firestore-collections";
   import { addLobbyChatMessages } from "$lib/firebase/chat";
+  import { authStore as user } from "../store/auth";
 
   export let lobby: Lobby;
   export let lobbyCode: string;
-  export let user: User;
-
   let showLobbyChat = false;
   let errorMessage: string = "";
   let chatMessages: LobbyChatMessage[] = [];
   let unsubscribeChatMessages: Unsubscribe | undefined = undefined;
 
-  $: userInfo = lobby.players[lobby.uids.indexOf(user.uid)];
+  $: userInfo = lobby.players[lobby.uids.indexOf($user?.uid ?? "")];
 
   $: lobby, onLobbyChange();
   function onLobbyChange() {
     let messageQuery;
-    if (userInfo.alive) {
+    if (userInfo == undefined) {
+      return;
+    } else if (userInfo.alive) {
       messageQuery = query(getLobbyChatCollection(lobbyCode), where("alive", "==", true), orderBy("timestamp", "asc"));
     } else {
       messageQuery = query(getLobbyChatCollection(lobbyCode), orderBy("timestamp", "asc"));
@@ -45,7 +46,7 @@
     }
     try {
       // add Message
-      await addLobbyChatMessages(lobbyCode, user.uid, message, userInfo.alive);
+      await addLobbyChatMessages(lobbyCode, $user?.uid ?? "", message, userInfo.alive);
       // clear the input
       message = "";
       // if there's an error message then clear it
