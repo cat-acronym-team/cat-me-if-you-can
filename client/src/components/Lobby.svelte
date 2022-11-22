@@ -94,7 +94,7 @@
   </div>
   <div class="actions">
     {#if errorMessage !== ""}
-      <p>{errorMessage}</p>
+      <p class="error">{errorMessage}</p>
     {/if}
   </div>
   <div class="buttons">
