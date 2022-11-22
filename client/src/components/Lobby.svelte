@@ -14,7 +14,7 @@
   export let lobbyCode: string;
   export let lobby: Lobby;
   let errorMessage: string = "";
-  let minPlayers = lobby.catfishAmount * 2 + 2;
+  $: minPlayers = lobby.catfishAmount * 2 + 2;
 
   // better link to share since it's redirecting to this page anyways
   // Josh's suggestion that I agreed on
@@ -77,7 +77,7 @@
         <!-- Grammar check -->
         <h3 class="error">{minPlayers - lobby.players.length} more players required to start game...</h3>
       {:else}
-        <h3 class="error">{minPlayers - lobby.players.length} more player required to start game...</h3>
+        <h3 class="error">1 more player required to start game...</h3>
       {/if}
     {:else}
       <h3 class="error">Waiting for host to start game...</h3>
