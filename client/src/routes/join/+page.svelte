@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Account from "$components/Account.svelte";
+  import AccountButton from "$components/AccountButton.svelte";
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
@@ -96,7 +96,7 @@
 </script>
 
 <header>
-  <Account {userData} />
+  <AccountButton {userData} />
 </header>
 
 <div class="cat-join-container">
