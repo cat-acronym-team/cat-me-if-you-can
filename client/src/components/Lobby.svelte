@@ -1,5 +1,4 @@
 <script lang="ts">
-  import LobbyChat from "./LobbyChat.svelte";
   import LobbySettings from "./LobbySettings.svelte";
   import SelectAvatar from "./SelectAvatar.svelte";
   import Button, { Label } from "@smui/button";
@@ -71,9 +70,6 @@
   <div class="lobby-info">
     <h3>Code: {lobbyCode}</h3>
     <h3>Players: {lobby.players.length}</h3>
-  </div>
-  <div class="lobby-info-level">
-    <LobbyChat {lobby} {lobbyCode} />
   </div>
   <div class="lobby-info-level">
     <LobbySettings {lobby} {lobbyCode} />

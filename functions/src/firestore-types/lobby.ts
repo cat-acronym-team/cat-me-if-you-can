@@ -38,12 +38,13 @@ export type Player = {
 
 export type GameState = "WAIT" | "ROLE" | "PROMPT" | "CHAT" | "VOTE" | "RESULT" | "END";
 
-export type ConfigurableTimers = "PROMPT" | "CHAT" | "VOTE";
+export const configurableTimers = ["PROMPT", "CHAT", "VOTE"] as const;
+export type ConfigurableTimer = typeof configurableTimers[number];
 
 /**
  * the minimum duration in seconds for each game state
  */
-export const GAME_STATE_DURATIONS_MIN: { [state in ConfigurableTimers]: number } = {
+export const GAME_STATE_DURATIONS_MIN: { [state in ConfigurableTimer]: number } = {
   PROMPT: 30,
   CHAT: 60,
   VOTE: 60,
@@ -65,7 +66,7 @@ export const GAME_STATE_DURATIONS_DEFAULT: { [state in GameState]: number } = {
 /**
  * the maximum duration in seconds for each game state
  */
-export const GAME_STATE_DURATIONS_MAX: { [state in ConfigurableTimers]: number } = {
+export const GAME_STATE_DURATIONS_MAX: { [state in ConfigurableTimer]: number } = {
   PROMPT: 2 * 60,
   CHAT: 5 * 60,
   VOTE: 5 * 60,
