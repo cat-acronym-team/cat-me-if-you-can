@@ -1,5 +1,4 @@
 <script lang="ts">
-  import LobbyChat from "./LobbyChat.svelte";
   import SelectAvatar from "./SelectAvatar.svelte";
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
@@ -72,7 +71,7 @@
     <h3>Players: {lobby.players.length}</h3>
   </div>
   <SelectAvatar {lobby} on:change={(event) => onAvatarSelect(event.detail.value)} />
-  {#if auth.currentUser?.uid === lobby.uids[0]}
+  {#if auth.currentUser?.uid === lobby.host}
     <div class="actions">
       <Button on:click|once={() => start()}><Label>Start Game</Label></Button>
     </div>
