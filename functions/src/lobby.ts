@@ -188,7 +188,6 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
   });
 });
 
-// TODO: replace with the correct trigger
 export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate((change, context) => {
   const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
   const lobby = change.after.data() as Lobby;
@@ -376,6 +375,7 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
     // TODO: potential if checks for other states that require a timer
     // if the state is chat then delete chatrooms
     if (lobby.state === "ROLE") {
+      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       await startPrompt(lobbyDoc, transaction);
     }
     if (lobby.state === "PROMPT") {
@@ -389,10 +389,10 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
       await endGameProcess(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "VOTE") {
-      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       findVoteOff(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "RESULT") {
+      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       await determineWinner(lobbyDoc, transaction);
     }
 
