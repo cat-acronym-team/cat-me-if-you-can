@@ -56,19 +56,13 @@
       return "Answer must be less than 50 characters";
     }
   }
-
+  let displayAnswer = "";
   function submitAnswer() {
     if (error != undefined) {
       return;
     }
-
-    setDoc(answerDoc, { answer });
-  }
-  let showUserAnswer = false;
-  let displayAnswer = "";
-  function showAnswer() {
-    showUserAnswer = true;
     displayAnswer = answer;
+    setDoc(answerDoc, { answer });
   }
 </script>
 
@@ -82,8 +76,8 @@
     <Textfield input$id="prompt-answer" bind:value={answer} bind:dirty invalid={dirty && error != undefined} required>
       <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
     </Textfield>
-    <Button type="submit" disabled={error != undefined} on:click={showAnswer}><Label>Done</Label></Button>
-    {#if showUserAnswer}
+    <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
+    {#if displayAnswer != ""}
       <p>Your Answer: {displayAnswer}</p>
     {/if}
   </div>
