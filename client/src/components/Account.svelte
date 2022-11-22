@@ -20,19 +20,17 @@
   let showPassword = false;
   let errorMessage: string = "";
 
-  function outputErrorMessage() {
-    switch (errorMessage) {
+  function getErrorMsg(error: unknown): string {
+    let errorMsg = error instanceof Error ? error.message : String(error);
+    switch (errorMsg) {
       case "Firebase: Error (auth/user-not-found).":
-        errorMessage = "The email you entered is not registered, please create an account.";
-        return;
+        return "The email you entered is not registered, please create an account.";
       case "Firebase: Error (auth/popup-closed-by-user).":
-        errorMessage = "";
-        return;
+        return "canceled by user";
       case "Firebase: Error (auth/wrong-password).":
-        errorMessage = "Incorrect Password.";
-        return;
+        return "Incorrect Password.";
       default:
-        return;
+        return errorMsg;
     }
   }
 
@@ -41,8 +39,7 @@
       await createUser(email, password);
       errorMessage = "";
     } catch (err) {
-      errorMessage = err instanceof Error ? err.message : String(err);
-      outputErrorMessage();
+      errorMessage = getErrorMsg(err);
       return;
     }
     selectedForm = "NONE";
@@ -55,8 +52,7 @@
       await loginWithEmail(email, password);
       errorMessage = "";
     } catch (err) {
-      errorMessage = err instanceof Error ? err.message : String(err);
-      outputErrorMessage();
+      errorMessage = getErrorMsg(err);
       return;
     }
     selectedForm = "NONE";
@@ -77,8 +73,7 @@
       await loginWithGoogle();
       errorMessage = "";
     } catch (err) {
-      errorMessage = err instanceof Error ? err.message : String(err);
-      outputErrorMessage();
+      errorMessage = getErrorMsg(err);
       return;
     }
     selectedForm = "NONE";
@@ -90,8 +85,7 @@
       await loginWithMicrosoft();
       errorMessage = "";
     } catch (err) {
-      errorMessage = err instanceof Error ? err.message : String(err);
-      outputErrorMessage();
+      errorMessage = getErrorMsg(err);
       return;
     }
     selectedForm = "NONE";

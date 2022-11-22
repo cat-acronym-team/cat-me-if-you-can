@@ -104,16 +104,14 @@
   let microsoftErr = "";
   let passErr = "";
   let deleteErr = "";
-  function outputErrMsg(error: string) {
-    switch (error) {
+
+  function getErrorMsg(error: unknown): string {
+    let errorMsg = error instanceof Error ? error.message : String(error);
+    switch (errorMsg) {
       case "Firebase: Password should be at least 6 characters (auth/weak-password).":
         return "Password should be at least 6 characters";
-      case "google-account-already-linked":
-        return "google account already linked";
-      case "microsoft-account-already-linked":
-        return "microsoft account already linked";
       default:
-        return "An unexpected error has occured";
+        return errorMsg;
     }
   }
   function verifyDelete() {
@@ -123,8 +121,8 @@
       goto("/");
     } catch (err) {
       errPrompt = true;
-      deleteErr = err instanceof Error ? err.message : String(err);
-      outputErrMsg(deleteErr);
+      deleteErr = getErrorMsg(err);
+      return;
     }
   }
 
@@ -133,8 +131,8 @@
       await linkWithGoogle($user);
       window.location.reload();
     } catch (err) {
-      googleErr = err instanceof Error ? err.message : String(err);
-      outputErrMsg(googleErr);
+      googleErr = getErrorMsg(err);
+      return;
     }
   }
 
@@ -143,8 +141,8 @@
       await linkWithMicrosoft($user);
       window.location.reload();
     } catch (err) {
-      microsoftErr = err instanceof Error ? err.message : String(err);
-      outputErrMsg(microsoftErr);
+      microsoftErr = getErrorMsg(err);
+      return;
     }
   }
 
@@ -155,7 +153,8 @@
       showOptions = false;
       clearFields();
     } catch (err) {
-      passErr = err instanceof Error ? err.message : String(err);
+      passErr = getErrorMsg(err);
+      return;
     }
   }
 
@@ -302,7 +301,7 @@
       {#if linkPass}
         <p>Password Sucessfully Set</p>
       {:else if passErr !== ""}
-        <p class="error">{outputErrMsg(passErr)}</p>
+        <p class="error">{passErr}</p>
       {/if}
     </Content>
   </Dialog>
