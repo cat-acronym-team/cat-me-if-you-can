@@ -124,7 +124,6 @@
   {:else}
     unknown lobby state: {lobby.state}
   {/if}
-  <!-- put lobbychat were alive users will be able to access it -->
 </main>
 
 <style>
