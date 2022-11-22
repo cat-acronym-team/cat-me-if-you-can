@@ -53,8 +53,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
     ],
     state: "WAIT",
     alivePlayers: [context.auth.uid],
-    maxPlayers: 8,
-    minPlayers: 4,
+    catfishAmount: 1,
     expiration: firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 3_600_000 * 3),
   };
 
@@ -90,7 +89,10 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
       throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
     // check if the request is coming from the host of the game
-    const { uids, minPlayers } = lobby.data() as Lobby;
+    const { uids, catfishAmount } = lobby.data() as Lobby;
+
+    const minPlayers = (catfishAmount * 2) + 2;
+
     if (auth.uid !== uids[0]) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
     }
@@ -106,6 +108,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
 
 export const joinLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
   const auth = context.auth;
+  const maxPlayers = 8;
   // no auth then you shouldn't be here
   if (auth === undefined) {
     throw new functions.https.HttpsError("permission-denied", "Not Signed In");
@@ -133,7 +136,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     const userInfo = user.data() as UserData;
 
     // get lobby data
-    const { players, uids, maxPlayers } = lobbyInfo.data() as Lobby;
+    const { players, uids } = lobbyInfo.data() as Lobby;
     if (uids.includes(auth.uid)) {
       throw new functions.https.HttpsError("already-exists", "You are already in the lobby!");
     }

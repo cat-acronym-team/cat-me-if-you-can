@@ -14,6 +14,7 @@
   export let lobbyCode: string;
   export let lobby: Lobby;
   let errorMessage: string = "";
+  let minPlayers = (lobby.catfishAmount * 2) + 2;
 
   // better link to share since it's redirecting to this page anyways
   // Josh's suggestion that I agreed on
@@ -69,14 +70,14 @@
 <div class="container">
   <div class="lobby-info">
     <h3>Code: {lobbyCode}</h3>
-    <h3>Players: {lobby.players.length} / {lobby.maxPlayers}</h3>
-    {#if lobby.players.length < lobby.minPlayers}
+    <h3>Players: {lobby.players.length} / 8</h3>
+    {#if lobby.players.length < minPlayers}
       <!-- Display the number of players needed to start the current game session -->
-      {#if lobby.minPlayers - lobby.players.length !== 1}
+      {#if minPlayers - lobby.players.length !== 1}
         <!-- Grammar check -->
-        <h3 class="error">{lobby.minPlayers - lobby.players.length} more players required to start game...</h3>
+        <h3 class="error">{minPlayers - lobby.players.length} more players required to start game...</h3>
       {:else}
-        <h3 class="error">{lobby.minPlayers - lobby.players.length} more player required to start game...</h3>
+        <h3 class="error">{minPlayers - lobby.players.length} more player required to start game...</h3>
       {/if}
     {:else}
       <h3 class="error">Waiting for host to start game...</h3>
