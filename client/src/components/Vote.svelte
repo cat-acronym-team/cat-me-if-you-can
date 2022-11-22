@@ -74,7 +74,7 @@
             {#if alive}
               Answer: {promptAnswer ?? "no answer"}
             {:else}
-              Im dead
+              I'm dead
             {/if}
           </div>
         </button>
