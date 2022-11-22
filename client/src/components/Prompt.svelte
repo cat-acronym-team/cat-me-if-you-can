@@ -64,6 +64,12 @@
 
     setDoc(answerDoc, { answer });
   }
+  let showUserAnswer = false;
+  let displayAnswer = "";
+  function showAnswer() {
+    showUserAnswer = true;
+    displayAnswer = answer;
+  }
 </script>
 
 <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
@@ -76,7 +82,10 @@
     <Textfield input$id="prompt-answer" bind:value={answer} bind:dirty invalid={dirty && error != undefined} required>
       <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
     </Textfield>
-    <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
+    <Button type="submit" disabled={error != undefined} on:click={showAnswer}><Label>Done</Label></Button>
+    {#if showUserAnswer}
+      <p>Your Answer: {displayAnswer}</p>
+    {/if}
   </div>
 </form>
 
