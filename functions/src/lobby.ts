@@ -9,7 +9,7 @@ import {
   userCollection,
 } from "./firestore-collections";
 import { isLobbyRequest, LobbyCreationResponse } from "./firebase-functions-types";
-import { AVATARS, GAME_STATE_DURATIONS, Lobby, Vote } from "./firestore-types/lobby";
+import { AVATARS, GAME_STATE_DURATIONS_DEFAULT, Lobby, Vote } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
@@ -53,6 +53,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
     ],
     state: "WAIT",
     alivePlayers: [context.auth.uid],
+    catfishAmount: 1,
     expiration: firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 3_600_000 * 3),
   };
 
@@ -241,7 +242,7 @@ export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, t
   );
   // expiration
   const expiration = firestore.Timestamp.fromMillis(
-    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.PROMPT * 1000
+    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS_DEFAULT.PROMPT * 1000
   );
 
   transaction.update(lobbyDoc.ref, { state: "PROMPT", expiration });
@@ -270,7 +271,7 @@ export async function collectPromptAnswers(
 
   // expiration set
   const expiration = firestore.Timestamp.fromMillis(
-    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.CHAT * 1000
+    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS_DEFAULT.CHAT * 1000
   );
   transaction.update(lobbyDoc.ref, { state: "CHAT", expiration });
 

@@ -3,6 +3,7 @@
   import Dialog, { Header, Title, Content } from "@smui/dialog";
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
+  import Slider from "@smui/slider";
   import type { Lobby } from "$lib/firebase/firestore-types/lobby";
 
   export let lobby: Lobby;

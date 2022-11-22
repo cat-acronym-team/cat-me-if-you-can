@@ -1,6 +1,6 @@
 import { firestore } from "firebase-admin";
 import type { DocumentReference, Transaction } from "firebase-admin/firestore";
-import { GAME_STATE_DURATIONS, Lobby, Player } from "./firestore-types/lobby";
+import { GAME_STATE_DURATIONS_DEFAULT, Lobby, Player } from "./firestore-types/lobby";
 
 export function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lobby>, transaction: Transaction) {
   const { players, uids } = lobbyData;
@@ -28,7 +28,7 @@ export function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lob
     }
   }
   const expiration = firestore.Timestamp.fromMillis(
-    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.RESULT * 1000
+    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS_DEFAULT.RESULT * 1000
   );
   // update the state of the game
   transaction.update(lobbyDocRef, {

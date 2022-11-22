@@ -1,4 +1,4 @@
-import { GAME_STATE_DURATIONS, Lobby } from "./firestore-types/lobby";
+import { GAME_STATE_DURATIONS_DEFAULT, Lobby } from "./firestore-types/lobby";
 import { getPrivatePlayerCollection } from "./firestore-collections";
 import { firestore } from "firebase-admin";
 
@@ -37,7 +37,7 @@ export function assignRole(lobbySnap: firestore.DocumentSnapshot<Lobby>, transac
 
   // expiration
   const expiration = firestore.Timestamp.fromMillis(
-    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.ROLE * 1000
+    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS_DEFAULT.ROLE * 1000
   );
   transaction.update(lobby, { state: "ROLE", expiration });
 }
