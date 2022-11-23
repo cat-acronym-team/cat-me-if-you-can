@@ -24,7 +24,6 @@
   import { authStore as user } from "$stores/auth";
   import { onDestroy } from "svelte";
   import ProviderButtons from "$components/ProviderButtons.svelte";
-  import { reload } from "firebase/auth";
 
   export let userData: UserData | undefined = undefined;
   let userDataDocRef: DocumentReference<UserData> | undefined = undefined;
@@ -119,8 +118,7 @@
     try {
       deleteAccount();
       // If no error
-      window.location.reload();
-      goto("/");
+      window.location.href = "/";
     } catch (err) {
       errPrompt = true;
       deleteErr = getErrorMsg(err);
