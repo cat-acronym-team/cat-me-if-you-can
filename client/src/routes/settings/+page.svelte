@@ -119,6 +119,7 @@
     try {
       deleteAccount();
       // If no error
+      window.location.reload();
       goto("/");
     } catch (err) {
       errPrompt = true;
