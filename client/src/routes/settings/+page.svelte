@@ -307,7 +307,6 @@
       on:click={() => {
         window.location.reload();
         logOut();
-        goto("/");
       }}
     >
       <Label>Sign Out</Label>
