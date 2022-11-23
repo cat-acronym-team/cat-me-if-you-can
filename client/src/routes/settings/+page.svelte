@@ -122,7 +122,6 @@
     } catch (err) {
       errPrompt = true;
       deleteErr = getErrorMsg(err);
-      return;
     }
   }
 
@@ -132,7 +131,6 @@
       window.location.reload();
     } catch (err) {
       googleErr = getErrorMsg(err);
-      return;
     }
   }
 
@@ -142,7 +140,6 @@
       window.location.reload();
     } catch (err) {
       microsoftErr = getErrorMsg(err);
-      return;
     }
   }
 
@@ -154,7 +151,6 @@
       clearFields();
     } catch (err) {
       passErr = getErrorMsg(err);
-      return;
     }
   }
 
