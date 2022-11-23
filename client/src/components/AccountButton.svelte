@@ -174,28 +174,6 @@
     gap: 12px;
   }
 
-  :global(#sign-in-with-google),
-  :global(#sign-in-with-microsoft),
-  :global(#sign-in-with-email),
-  :global(#sign-up-with-email) {
-    --mdc-typography-button-text-transform: none;
-    justify-content: start;
-    gap: 4px;
-  }
-
-  :global(#sign-in-with-google),
-  :global(#sign-in-with-microsoft) {
-    --mdc-theme-primary: #ffffff;
-    --mdc-theme-on-primary: #3c4043;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :global(#sign-in-with-microsoft) {
-      --mdc-theme-primary: #2f2f2f;
-      --mdc-theme-on-primary: #ffffff;
-    }
-  }
-
   form {
     display: grid;
     gap: 12px;
