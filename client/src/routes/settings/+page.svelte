@@ -244,7 +244,6 @@
         <Button
           on:click={() => {
             logOut();
-            goto("/");
           }}
           ><Label>Ok</Label>
         </Button>
