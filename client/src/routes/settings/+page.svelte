@@ -252,7 +252,7 @@
     </Dialog>
   {/if}
 
-  <p id="email">Email: {$user?.email == null ? "Anonymous User" : $user.email}</p>
+  <p id="email">Email: {$user?.email ?? "Anonymous User"}</p>
   <h3>Link Provider Options</h3>
 
   <div class="signin-buttons">
