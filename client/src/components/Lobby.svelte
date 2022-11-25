@@ -101,13 +101,6 @@
 </div>
 
 <style>
-  .lobby-chat-level {
-    width: 100%;
-    display: flex;
-    justify-content: left;
-    align-items: center;
-  }
-
   .actions {
     display: grid;
     place-items: center;
