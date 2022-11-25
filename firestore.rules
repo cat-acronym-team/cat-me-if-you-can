@@ -3,7 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /lobbies/{code} {
 
-      allow get: if !(request.auth.uid in resource.data.bannedPlayers)
+      allow get: if true;
 
       function lobbyData(){
         return get(/databases/$(database)/documents/lobbies/$(code)).data;
@@ -124,7 +124,7 @@ service cloud.firestore {
 
       // allows anyone to read that information
       allow read;
-      allow create: if request.auth.uid == userId && validateDisplayAndAvatar() && statsAreZero()
+      allow create: if request.auth.uid == userId && validateDisplayAndAvatar() && statsAreZero();
       allow update: if request.auth.uid == userId && validateDisplayAndAvatar() && statsAreNotChanged();
     }
   }
