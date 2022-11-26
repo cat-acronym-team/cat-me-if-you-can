@@ -51,7 +51,7 @@
       return;
     }
     // if the user isn't signed in or not apart of this lobby then redirect them
-    if ($user === null || !lobby.uids.includes($user.uid)) {
+    if ($user === null || !Object.keys(lobby.players).includes($user.uid)) {
       // then return to join
       goto(`/join?code=${lobbyCode}`, {
         replaceState: true,
@@ -111,7 +111,7 @@
   $: if (
     countdown <= 0 &&
     lobby != null &&
-    lobby.uids[0] === $user?.uid &&
+    lobby.host === $user?.uid &&
     lobbyCode != null &&
     DISPLAY_TIMERS[lobby.state] != null
   ) {
