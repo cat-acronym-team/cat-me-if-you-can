@@ -36,6 +36,28 @@ export type Player = {
   promptAnswer?: string;
 };
 
+export type LobbySettings = {
+  /**
+   * the number of catfish that are in play
+   */
+  catfishAmount: number;
+
+  /**
+   * duration for the PROMPT game state
+   */
+  promptTime: number;
+
+  /**
+   * duration for the CHAT game state
+   */
+  chatTime: number;
+
+  /**
+   * duration for the VOTE game state
+   */
+  voteTime: number;
+};
+
 export type GameState = "WAIT" | "ROLE" | "PROMPT" | "CHAT" | "VOTE" | "RESULT" | "END";
 
 export const configurableTimers = ["PROMPT", "CHAT", "VOTE"] as const;
@@ -115,9 +137,9 @@ export type Lobby = {
   votedOff?: string | "NONE";
 
   /**
-   * the number of catfish in a game
+   * settings that can be edited in the lobby
    */
-  catfishAmount: number;
+  lobbySettings: LobbySettings;
 };
 
 /**

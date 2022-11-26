@@ -19,7 +19,7 @@ export function assignRole(lobbySnap: firestore.DocumentSnapshot<Lobby>, transac
   const catfishUids = new Set<string>();
 
   // Adds catfish to catfishUids until there are numCatFish catfish.
-  while (catfishUids.size < lobbyData?.catfishAmount) {
+  while (catfishUids.size < lobbyData.lobbySettings.catfishAmount) {
     catfishUids.add(uids[Math.floor(Math.random() * uids.length)]);
   }
   const privatePlayerCollection = getPrivatePlayerCollection(lobby);

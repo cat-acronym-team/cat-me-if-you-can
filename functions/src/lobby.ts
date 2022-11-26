@@ -53,7 +53,12 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
     ],
     state: "WAIT",
     alivePlayers: [context.auth.uid],
-    catfishAmount: 1,
+    lobbySettings: {
+      catfishAmount: 1,
+      promptTime: GAME_STATE_DURATIONS_DEFAULT.PROMPT,
+      chatTime: GAME_STATE_DURATIONS_DEFAULT.CHAT,
+      voteTime: GAME_STATE_DURATIONS_DEFAULT.VOTE,
+    },
     expiration: firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 3_600_000 * 3),
   };
 
@@ -242,7 +247,7 @@ export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, t
   );
   // expiration
   const expiration = firestore.Timestamp.fromMillis(
-    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS_DEFAULT.PROMPT * 1000
+    firestore.Timestamp.now().toMillis() + lobbyData.lobbySettings.promptTime * 1000
   );
 
   transaction.update(lobbyDoc.ref, { state: "PROMPT", expiration });
@@ -271,7 +276,7 @@ export async function collectPromptAnswers(
 
   // expiration set
   const expiration = firestore.Timestamp.fromMillis(
-    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS_DEFAULT.CHAT * 1000
+    firestore.Timestamp.now().toMillis() + lobbyData.lobbySettings.chatTime * 1000
   );
   transaction.update(lobbyDoc.ref, { state: "CHAT", expiration });
 
