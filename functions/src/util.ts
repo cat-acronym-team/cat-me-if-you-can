@@ -11,11 +11,12 @@ export function generatePairs(lobbyData: Lobby): GeneratedPairs {
 
   // get only the uids of alive players
   const aliveUids: string[] = [];
-  lobbyData.players.forEach((player, playerIndex) => {
-    if (player.alive) {
-      aliveUids.push(lobbyData.uids[playerIndex]);
+
+  for (const uid in lobbyData.players) {
+    if (lobbyData.players[uid].alive) {
+      aliveUids.push(uid);
     }
-  });
+  }
 
   // pairs up on the alive players
   while (aliveUids.length > 1) {
