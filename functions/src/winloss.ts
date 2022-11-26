@@ -28,7 +28,7 @@ export const lobbyReturn = functions.https.onCall(async (data: unknown, context)
 
     const lobbyData = lobbyDoc.data() as Lobby;
     // check if host
-    if (auth.uid !== lobbyData.uids[0]) {
+    if (auth.uid === lobbyData.host) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
     }
 
@@ -47,7 +47,7 @@ export async function endGameProcess(
 ) {
   // apply the stats
   let { players } = lobbyData;
-  const { uids, winner } = lobbyData;
+  const { winner } = lobbyData;
 
   // update each players doc
   await Promise.all(
