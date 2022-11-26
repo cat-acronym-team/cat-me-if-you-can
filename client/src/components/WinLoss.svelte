@@ -14,7 +14,7 @@
 
   // check if the user is the host
   $: if ($user !== null) {
-    if (lobby.uids.indexOf($user.uid) == 0) {
+    if ($user.uid === lobby.host) {
       isHost = true;
     } else {
       isHost = false;
@@ -23,7 +23,7 @@
   // format a string list to have commas and "and" when needed
   const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
   // get the list of catfishes from lobby.ts and put them into a variable
-  $: catfishes = lobby.players
+  $: catfishes = Object.values(lobby.players)
     .filter((p) => {
       return p.role == "CATFISH";
     })
