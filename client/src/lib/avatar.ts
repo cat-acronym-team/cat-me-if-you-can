@@ -10,7 +10,7 @@ export const avatarAltText = [
   "Fantasy cat",
   "Fish cat",
   "Ghost cat",
-  "Magic cat",
+  "Magical Girl Cat",
   "Torsten cat",
 ] as const;
 
