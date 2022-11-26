@@ -23,7 +23,7 @@ export const changeAvatar = functions.https.onCall((data: unknown, context): Pro
       throw new functions.https.HttpsError("not-found", "Lobby does not exist.");
     }
 
-    if (auth.uid in lobbyData.players) {
+    if (!(auth.uid in lobbyData.players)) {
       throw new functions.https.HttpsError("permission-denied", "User is not in the lobby.");
     }
 
