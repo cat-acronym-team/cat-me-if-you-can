@@ -9,7 +9,7 @@
     type LobbyChatMessage,
     type Player,
   } from "$lib/firebase/firestore-types/lobby";
-  import { avatarAltText, avatarColors } from "$lib/avatar";
+  import { avatarAltText, avatarColors, onAvatarColors } from "$lib/avatar";
   import { authStore as user } from "$stores/auth";
   import { createEventDispatcher, tick } from "svelte";
 
@@ -176,7 +176,6 @@
     padding: 12px;
     margin-bottom: 16px;
     border-radius: 24px 24px 24px 0;
-    color: black;
   }
 
   .current-user .text {

@@ -75,7 +75,7 @@ export type Lobby = {
   /**
    * expiration time of the current phase with a timer
    */
-  expiration?: Timestamp;
+  expiration: Timestamp;
 
   /**
    * array of alive players
@@ -92,6 +92,9 @@ export type Lobby = {
    * @note this can be a uid, NONE, or undefined
    */
   votedOff?: string | "NONE";
+
+  // TODO: delete this once game settings is merged
+  catfishAmount: number;
 };
 
 /**

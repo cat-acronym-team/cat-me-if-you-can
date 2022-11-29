@@ -113,5 +113,6 @@ export async function endGameProcess(
     players,
     winner: firestore.FieldValue.delete(),
     votedOff: firestore.FieldValue.delete(),
+    expiration: firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 3_600_000 * 3),
   });
 }
