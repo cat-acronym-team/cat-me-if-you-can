@@ -23,7 +23,6 @@ export function isStalkChatroomRequest(data: unknown): data is StalkChatroomRequ
 }
 
 export function isKickBanRequest(data: unknown): data is KickBanRequest {
-  // will only return true if the data is an object with a code and uid property and string
   return (
     data != null &&
     typeof data === "object" &&
