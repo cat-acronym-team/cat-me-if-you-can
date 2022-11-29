@@ -124,11 +124,10 @@
     try {
       deleteAccount();
       // If no error
-      goto("/");
+      window.location.href = "/";
     } catch (err) {
       errPrompt = true;
       deleteErr = getErrorMsg(err);
-      return;
     }
   }
 
@@ -138,7 +137,6 @@
       window.location.reload();
     } catch (err) {
       googleErr = getErrorMsg(err);
-      return;
     }
   }
 
@@ -148,7 +146,6 @@
       window.location.reload();
     } catch (err) {
       microsoftErr = getErrorMsg(err);
-      return;
     }
   }
 
@@ -160,7 +157,6 @@
       clearFields();
     } catch (err) {
       passErr = getErrorMsg(err);
-      return;
     }
   }
 
@@ -254,7 +250,6 @@
         <Button
           on:click={() => {
             logOut();
-            goto("/");
           }}
           ><Label>Ok</Label>
         </Button>
@@ -262,7 +257,7 @@
     </Dialog>
   {/if}
 
-  <p id="email">Email: {$user?.email == null ? "Anonymous User" : $user.email}</p>
+  <p id="email">Email: {$user?.email ?? "Anonymous User"}</p>
   <h3>Link Provider Options</h3>
 
   <div class="signin-buttons">
@@ -317,8 +312,8 @@
   <div>
     <Button
       on:click={() => {
+        window.location.reload();
         logOut();
-        goto("/");
       }}
     >
       <Label>Sign Out</Label>

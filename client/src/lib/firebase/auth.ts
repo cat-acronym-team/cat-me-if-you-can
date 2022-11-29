@@ -101,6 +101,7 @@ export function hasMicrosoftProvider(user: User | null) {
   if (user == null) {
     return false;
   }
+
   const signInMethods = user.providerData;
 
   for (const provider of signInMethods) {

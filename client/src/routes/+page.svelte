@@ -9,7 +9,7 @@
   import { goto } from "$app/navigation";
   import { authStore } from "$stores/auth";
 
-  export let userData: UserData | undefined;
+  let userData: UserData | undefined;
 
   let name: string = "";
   let nameDirty: boolean = false;
