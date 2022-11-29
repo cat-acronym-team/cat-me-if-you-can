@@ -102,15 +102,11 @@
         <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
       </Textfield>
       <Button
-        on:click={async () => {
-          await createLobbyHandler();
-        }}
+        on:click={createLobbyHandler}
         disabled={!nameValidation.valid || waiting}><Label>Create Lobby</Label></Button
       >
       <Button
-        on:click={async () => {
-          await joinLobbyHandler();
-        }}
+        on:click={joinLobbyHandler}
         disabled={!nameValidation.valid || waiting}><Label>Join Lobby</Label></Button
       >
     </div>

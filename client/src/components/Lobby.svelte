@@ -84,12 +84,7 @@
   <SelectAvatar {lobby} on:change={(event) => onAvatarSelect(event.detail.value)} />
   {#if auth.currentUser?.uid === lobby.uids[0]}
     <div class="actions">
-      <Button
-        on:click={async () => {
-          await start();
-        }}
-        disabled={waiting}><Label>Start Game</Label></Button
-      >
+      <Button on:click={() => start()} disabled={waiting}><Label>Start Game</Label></Button>
     </div>
   {/if}
   <div class="actions">
