@@ -1,5 +1,4 @@
 <script lang="ts">
-  import LobbyChat from "./LobbyChat.svelte";
   import SelectAvatar from "./SelectAvatar.svelte";
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
