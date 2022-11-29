@@ -11,7 +11,7 @@ export const kick = functions.https.onCall((data: unknown, context): Promise<voi
   }
 
   if (!isKickBanRequest(data)) {
-    throw new functions.https.HttpsError("invalid-argument", "Data is not of LobbyRequest type");
+    throw new functions.https.HttpsError("invalid-argument", "Data is not of KickBanRequest type");
   }
 
   return db.runTransaction(async (transaction) => {
@@ -40,7 +40,7 @@ export const ban = functions.https.onCall((data: unknown, context): Promise<void
   }
 
   if (!isKickBanRequest(data)) {
-    throw new functions.https.HttpsError("invalid-argument", "Data is not of LobbyRequest type");
+    throw new functions.https.HttpsError("invalid-argument", "Data is not of KickBanRequest type");
   }
 
   return db.runTransaction(async (transaction) => {
