@@ -30,13 +30,6 @@
   let countdown = GAME_STATE_DURATIONS.WAIT;
   let timer: ReturnType<typeof setInterval>;
 
-  $: if (lobby !== undefined && $user !== null && !lobby.uids.includes($user.uid)) {
-    // then return to join
-    goto(`/join?code=${lobbyCode}`, {
-      replaceState: true,
-    });
-  }
-
   onMount(async () => {
     // gets code from url search
     // the svelte magic with searchparams wasnt working
@@ -116,6 +109,12 @@
   }
 
   // Reactive Calls
+  $: if (lobby !== undefined && $user !== null && !lobby.uids.includes($user.uid)) {
+    // then return to join
+    goto(`/join?code=${lobbyCode}`, {
+      replaceState: true,
+    });
+  }
   $: if (
     countdown <= 0 &&
     lobby != null &&
