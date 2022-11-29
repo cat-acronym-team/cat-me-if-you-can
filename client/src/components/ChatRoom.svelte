@@ -14,6 +14,7 @@
   export let lobbyCode: string;
   export let isStalker: boolean;
   // variables
+  let isSpectator: boolean;
   let user = $authStore as User;
   let partnerInfo: Player | undefined;
   let pairInfo: [Player, Player] | undefined;
@@ -26,7 +27,7 @@
   onMount(() => {
     const chatRoomCollection = getChatRoomCollection(lobbyCode);
     let roomQuerry: Query<ChatRoom>;
-    if (isStalker) {
+    if (isStalker || isSpectator) {
       roomQuerry = query(chatRoomCollection, where("viewers", "array-contains", user.uid));
     } else {
       roomQuerry = query(chatRoomCollection, where("pair", "array-contains", user.uid));
@@ -43,7 +44,7 @@
 
       // process chatroom data
       const chatRoom = roomsSnapshot.docs[0].data();
-      if (isStalker) {
+      if (isStalker || isSpectator) {
         // get pairInfo
         pairInfo = chatRoom.pair.map((uid) => lobby.players[lobby.uids.indexOf(uid)]) as [Player, Player];
       } else {
@@ -90,19 +91,19 @@
     }
   }
   $: if (!lobby.alivePlayers.includes(user.uid)) {
-    isStalker = true;
+    isSpectator = true;
   }
 </script>
 
 <div class="chatroom">
-  {#if isStalker && chatRoomId == undefined}
+  {#if (isStalker || isSpectator) && chatRoomId == undefined}
     <Stalker {lobby} {lobbyCode} />
   {:else}
     <ChatMessages
       {lobby}
       messages={chatMessages}
       on:send={(event) => submitMessage(event.detail.text)}
-      readOnly={isStalker}
+      readOnly={isStalker || isSpectator}
     >
       <div slot="before-messages" class="matched-with mdc-typography--headline5">
         {#if partnerInfo !== undefined}
