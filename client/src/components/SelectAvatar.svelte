@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { Lobby, Avatar } from "$lib/firebase/firestore-types/lobby";
+  import PlayerMenu from "./PlayerMenu.svelte";
 
+  import type { Lobby, Avatar } from "$lib/firebase/firestore-types/lobby";
   import { createEventDispatcher } from "svelte";
   import { authStore as user } from "$stores/auth";
   import { avatarAltText } from "$lib/avatar";
-  import PlayerMenu from "./PlayerMenu.svelte";
 
   export let selectedAvatar: 0 | Avatar = 0;
   export let lobby: Lobby | undefined = undefined;
@@ -96,9 +96,11 @@
   .grid.lobby {
     gap: 12px 24px;
   }
+
   .parent {
     position: relative;
   }
+
   @media (max-width: 600px) {
     .grid {
       grid-template-columns: repeat(3, auto);
