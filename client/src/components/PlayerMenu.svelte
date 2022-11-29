@@ -8,17 +8,17 @@
   let menu: Menu;
 
   export let lobbyCode: string;
-  export let uid: string | undefined = undefined;
+  export let uid: string;
 </script>
 
 <div id="icon-id">
   <IconButton class="material-icons" on:click={() => menu.setOpen(true)}>more_vert</IconButton>
   <Menu bind:this={menu}>
     <List>
-      <Item on:SMUI:action={() => kick({ code: lobbyCode, uid: uid ?? "" })}>
+      <Item on:SMUI:action={() => kick({ code: lobbyCode, uid: uid })}>
         <Text>Kick</Text>
       </Item>
-      <Item on:SMUI:action={() => ban({ code: lobbyCode, uid: uid ?? "" })}>
+      <Item on:SMUI:action={() => ban({ code: lobbyCode, uid: uid })}>
         <Text>Ban</Text>
       </Item>
     </List>
