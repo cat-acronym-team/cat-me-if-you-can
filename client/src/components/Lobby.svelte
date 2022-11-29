@@ -124,7 +124,7 @@
   .error {
     text-align: center;
     margin: auto 0;
-    padding: 10px;
+    padding: 20px;
   }
 
   .invite-link {
