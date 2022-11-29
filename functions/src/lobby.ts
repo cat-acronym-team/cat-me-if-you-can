@@ -148,6 +148,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
       // throw an error if the lobby is already full
     }
 
+    // throw an error if the lobby is already full
     if (uids.length >= maxPlayers) {
       throw new functions.https.HttpsError("failed-precondition", "Lobby is full!");
     }
