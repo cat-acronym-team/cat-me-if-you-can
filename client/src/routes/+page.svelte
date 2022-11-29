@@ -18,9 +18,9 @@
   let errorMessage: string = "";
 
   /**
-  variable that will be set true if the corresponding function has no errors thrown
-  this will then allow the button to be pressed again if there is an error thrown
-  */
+   * variable that will be set true if the corresponding function has no errors thrown
+   * this will then allow the button to be pressed again if there is an error thrown
+   */
   let waiting: boolean = false;
 
   // update user once auth store changes
@@ -101,14 +101,10 @@
       >
         <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
       </Textfield>
-      <Button
-        on:click={createLobbyHandler}
-        disabled={!nameValidation.valid || waiting}><Label>Create Lobby</Label></Button
+      <Button on:click={createLobbyHandler} disabled={!nameValidation.valid || waiting}
+        ><Label>Create Lobby</Label></Button
       >
-      <Button
-        on:click={joinLobbyHandler}
-        disabled={!nameValidation.valid || waiting}><Label>Join Lobby</Label></Button
-      >
+      <Button on:click={joinLobbyHandler} disabled={!nameValidation.valid || waiting}><Label>Join Lobby</Label></Button>
     </div>
   </div>
 </main>

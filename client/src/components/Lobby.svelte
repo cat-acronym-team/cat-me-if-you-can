@@ -16,9 +16,9 @@
   let errorMessage: string = "";
 
   /**
-  variable that will be set true if the corresponding function has no errors thrown
-  this will then allow the button to be pressed again if there is an error thrown
-  */
+   * variable that will be set true if the corresponding function has no errors thrown
+   * this will then allow the button to be pressed again if there is an error thrown
+   */
   let waiting: boolean = false;
 
   // better link to share since it's redirecting to this page anyways

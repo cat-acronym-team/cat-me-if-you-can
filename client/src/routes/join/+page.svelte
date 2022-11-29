@@ -25,9 +25,9 @@
   $: codeValidation = lobbyCodeValidator(code);
 
   /**
-  variable that will be set true if the corresponding function has no errors thrown
-  this will then allow the button to be pressed again if there is an error thrown
-  */
+   * variable that will be set true if the corresponding function has no errors thrown
+   * this will then allow the button to be pressed again if there is an error thrown
+   */
   let waiting: boolean = false;
 
   function lobbyCodeValidator(code: string): { valid: true } | { valid: false; reason: string } {
