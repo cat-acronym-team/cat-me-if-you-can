@@ -72,7 +72,7 @@
     <h3>Players: {lobby.players.length}</h3>
   </div>
   <div class="lobby-info-level">
-    <LobbySettings {lobby} {lobbyCode} />
+    <LobbySettings {lobbyCode} />
   </div>
   <SelectAvatar {lobby} on:change={(event) => onAvatarSelect(event.detail.value)} />
   {#if auth.currentUser?.uid === lobby.uids[0]}

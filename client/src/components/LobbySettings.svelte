@@ -6,12 +6,12 @@
   import Slider from "@smui/slider";
   import FormField from "@smui/form-field";
   import { GAME_STATE_DURATIONS_MIN, GAME_STATE_DURATIONS_MAX } from "$lib/firebase/firestore-types/lobby";
-  import { type Lobby, configurableTimers } from "$lib/firebase/firestore-types/lobby";
+  import { configurableTimers } from "$lib/firebase/firestore-types/lobby";
+  import { applyLobbySettings } from "$lib/firebase/firebase-functions";
 
-  export let lobby: Lobby;
   export let lobbyCode: string;
+  let errorMessage: string = "";
   let showLobbySettings = false;
-  let value = 70;
 
   const sliderLabels = new Map([
     ["PROMPT", "Prompt Timer"],
@@ -28,6 +28,14 @@
     ["CHAT", GAME_STATE_DURATIONS_MAX.CHAT],
     ["VOTE", GAME_STATE_DURATIONS_MAX.VOTE],
   ]);
+
+    async function apply(catfish: number, prompt: number, chat: number, vote: number) {
+    try {
+      await applyLobbySettings({ code: lobbyCode, catfishNumber: catfish, promptTimer: prompt, chatTimer: chat, voteTimer: vote});
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+    }
+  }
 </script>
 
 <main>
@@ -49,8 +57,6 @@
         {#each configurableTimers as state}
           <FormField align="end">
             <Slider
-              class="slider"
-              bind:value
               min={minimumTimes.get(state)}
               max={maximumTimes.get(state)}
               step={5}
@@ -61,7 +67,7 @@
           </FormField>
         {/each}
 
-        <Button><Label>Apply Settings</Label></Button>
+        <Button on:click={() => apply(0, 0, 0, 0)}><Label>Apply Settings</Label></Button>
       </div>
     </Content>
   </Dialog>
