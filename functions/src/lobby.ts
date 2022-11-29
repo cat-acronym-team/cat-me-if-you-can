@@ -111,7 +111,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     // lobby doc
     const lobby = lobbyCollection.doc(data.code);
     const lobbyInfo = await transaction.get(lobby);
-    const lobbyState = lobbyInfo.data();
+    const lobbyData = lobbyInfo.data();
     const privatePlayerCollection = getPrivatePlayerCollection(lobby);
 
     // extra validation to make sure it exist
@@ -140,30 +140,20 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     }
 
     //add spectator
-    if (lobbyState?.state != "WAIT") {
+    if (lobbyData?.state != "WAIT") {
       const privatePlayerDocRef = privatePlayerCollection.doc(user.id);
       transaction.create(privatePlayerDocRef, { role: "SPECTATOR", stalker: false });
-      transaction.update(lobby, {
-        players: firestore.FieldValue.arrayUnion({
-          displayName: userInfo.displayName,
-          avatar: userInfo.avatar,
-          alive: false,
-          votes: 0,
-        }),
-        uids: firestore.FieldValue.arrayUnion(auth.uid),
-      });
-    } else {
-      // add player
-      transaction.update(lobby, {
-        players: firestore.FieldValue.arrayUnion({
-          displayName: userInfo.displayName,
-          avatar: userInfo.avatar,
-          alive: true,
-          votes: 0,
-        }),
-        uids: firestore.FieldValue.arrayUnion(auth.uid),
-      });
     }
+    //add player
+    transaction.update(lobby, {
+      players: firestore.FieldValue.arrayUnion({
+        displayName: userInfo.displayName,
+        avatar: userInfo.avatar,
+        alive: false,
+        votes: 0,
+      }),
+      uids: firestore.FieldValue.arrayUnion(auth.uid),
+    });
   });
 });
 
@@ -396,10 +386,10 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
     // TODO: potential if checks for other states that require a timer
     // if the state is chat then delete chatrooms
     if (lobby.state === "ROLE") {
-      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       await startPrompt(lobbyDoc, transaction);
     }
     if (lobby.state === "PROMPT") {
+      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       await collectPromptAnswers(lobbyDoc, transaction);
     }
     if (lobby.state === "CHAT") {
@@ -410,10 +400,10 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
       await endGameProcess(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "VOTE") {
+      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       findVoteOff(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "RESULT") {
-      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       await determineWinner(lobbyDoc, transaction);
     }
 

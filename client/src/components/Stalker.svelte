@@ -7,9 +7,13 @@
   import { onMount } from "svelte";
   import { avatarAltText, avatarColors } from "$lib/avatar";
   import { generateHclGradient } from "$lib/color";
+  import { authStore } from "$stores/auth";
+  import type { User } from "firebase/auth";
 
   export let lobby: Lobby;
   export let lobbyCode: string;
+
+  let user = $authStore as User;
 
   let chatrooms: { players: [Player, Player]; id: string }[] = [];
 
@@ -35,7 +39,11 @@
 </script>
 
 <div class="container">
-  <h1 class="mdc-typography--headline4">Select a chat to stalk</h1>
+  {#if !lobby.alivePlayers.includes(user.uid)}
+    <h1 class="mdc-typography--headline4">Select a chat to spectate</h1>
+  {:else}
+    <h1 class="mdc-typography--headline4">Select a chat to stalk</h1>
+  {/if}
   {#if errorMessage != undefined}
     <p class="error">{errorMessage}</p>
   {/if}

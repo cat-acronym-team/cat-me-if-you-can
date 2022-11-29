@@ -19,14 +19,12 @@
 
   export let lobbyData: Lobby;
 
-  let lobby = lobbyData;
-  let userData = $authStore as User;
+  let userData = $user;
   let answer = "";
   let dirty = false;
   let countdown: number = GAME_STATE_DURATIONS.PROMPT;
   let timer: ReturnType<typeof setInterval>;
-
-  $: userInfo = lobbyData.players[lobbyData.uids.indexOf(userData.uid)];
+  let userInfo = lobbyData.players[lobbyData.uids.indexOf(userData?.uid ?? "")];
 
   $: answerDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
 
@@ -73,7 +71,7 @@
 </script>
 
 {#if !userInfo.alive}
-  <LobbyChat {lobby} {lobbyCode} />
+  <LobbyChat lobby={lobbyData} {lobbyCode} />
 {/if}
 <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
   {formatTimer(Math.max(countdown, 0))}
