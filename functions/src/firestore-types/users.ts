@@ -36,6 +36,11 @@ export type UserData = {
 };
 
 export function displayNameValidator(displayName: string): { valid: true } | { valid: false; reason: string } {
+  let newname = displayName;
+  while (newname.charAt(newname.length - 1) === " ") {
+    newname = newname.slice(0, -1);
+  }
+  displayName = newname;
   if (displayName === "") {
     return { valid: false, reason: "Display name must not be empty" };
   }
@@ -48,7 +53,7 @@ export function displayNameValidator(displayName: string): { valid: true } | { v
   }
 
   if (displayName !== displayName.trim()) {
-    return { valid: false, reason: "Display name must not contain leading or trailing whitespace" };
+    return { valid: false, reason: "Display name must not contain leading whitespace" };
   }
 
   if (displayName.search(/[^A-Za-z0-9-_ ]+/) >= 0) {
