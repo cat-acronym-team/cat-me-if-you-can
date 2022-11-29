@@ -53,9 +53,6 @@ export function linkWithGoogle(user: User | null) {
   }
 
   if (user != null) {
-    if (hasGoogleProvider(user)) {
-      throw new Error("google account already linked");
-    }
     const google = new GoogleAuthProvider();
     return linkWithPopup(user, google);
   }
@@ -67,10 +64,6 @@ export function linkWithMicrosoft(user: User | null) {
   }
 
   if (user != null) {
-    if (hasMicrosoftProvider(user)) {
-      throw new Error("microsoft account already linked");
-    }
-
     const microsoft = new OAuthProvider("microsoft.com");
     return linkWithPopup(user, microsoft);
   }

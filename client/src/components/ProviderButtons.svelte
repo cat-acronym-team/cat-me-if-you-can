@@ -44,6 +44,8 @@
     </Icon>
     <Label>Sign in with Google</Label>
   </Button>
+
+  <slot name="google-error" />
 {/if}
 
 {#if !hideMicrosoft}
@@ -56,6 +58,8 @@
     </Icon>
     <Label>Sign in with Microsoft</Label>
   </Button>
+
+  <slot name="microsoft-error" />
 {/if}
 
 <style>

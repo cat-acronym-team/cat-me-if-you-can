@@ -110,6 +110,12 @@
     switch (errorMsg) {
       case "Firebase: Password should be at least 6 characters (auth/weak-password).":
         return "Password should be at least 6 characters";
+      case "Not Signed in":
+        return errorMsg;
+      case "Firebase: Error (auth/popup-closed-by-user).":
+        return "canceled by user";
+      case "Firebase: Error (auth/email-already-in-use).":
+        return "Email already linked to an account";
       default:
         return errorMsg;
     }
@@ -237,7 +243,7 @@
     </Actions>
   </Dialog>
   <!--If user signed in too long ago, redirect them to sign in-->
-  {#if errorMsg !== ""}
+  {#if deleteErr !== ""}
     <Dialog bind:open={errPrompt} aria-labelledby="reauth-title" aria-describedby="err-msg-content">
       <Title id="reauth-title">NOTICE!</Title>
       <Content id="err-msg-content"
@@ -265,7 +271,10 @@
       on:microsoft-clicked={linkMicrosoftAccount}
       hideGoogle={hasGoogleProvider($user)}
       hideMicrosoft={hasMicrosoftProvider($user)}
-    />
+    >
+      <p class="error" slot="google-error">{googleErr}</p>
+      <p class="error" slot="microsoft-error">{microsoftErr}</p>
+    </ProviderButtons>
   </div>
   <div>
     <Button on:click={() => (showOptions = true)}>
