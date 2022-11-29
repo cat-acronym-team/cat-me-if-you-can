@@ -8,7 +8,7 @@ import {
   lobbyCollection,
   userCollection,
 } from "./firestore-collections";
-import { isLobbyRequest, LobbyCreationResponse } from "./firebase-functions-types";
+import { isLobbyRequest, LobbyCreationResponse, LobbySettingsRequest } from "./firebase-functions-types";
 import { AVATARS, GAME_STATE_DURATIONS_DEFAULT, Lobby, Vote } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
@@ -195,6 +195,41 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
         uids: firestore.FieldValue.arrayRemove(auth.uid),
       });
     }
+  });
+});
+
+export const applyLobbySettings = functions.https.onCall(async (data: LobbySettingsRequest, context): Promise<void> => {
+  const auth = context.auth;
+  // no auth then you shouldn't be here
+  if (auth === undefined) {
+    throw new functions.https.HttpsError("permission-denied", "Not Signed In");
+  }
+  // validate code
+  if (!isLobbyRequest(data)) {
+    throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
+  }
+  await db.runTransaction(async (transaction) => {
+    // get lobby doc
+    const lobby = lobbyCollection.doc(data.code);
+    const lobbyInfo = await transaction.get(lobby);
+
+    if (lobbyInfo.exists === false) {
+      throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
+    }
+    // check if the request is coming from the host of the game
+    const { uids } = lobbyInfo.data() as Lobby;
+    if (auth.uid !== uids[0]) {
+      throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
+    }
+
+    transaction.update(lobby, {
+      lobbySettings: {
+        catfishAmount: data.catfishNumber,
+        promptTime: data.promptTimer,
+        chatTime: data.chatTimer,
+        voteTime: data.voteTimer,
+      },
+    });
   });
 });
 

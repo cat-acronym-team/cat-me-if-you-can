@@ -1,5 +1,13 @@
 export type LobbyRequest = { code: string };
 
+export type LobbySettingsRequest = {
+  code: string;
+  catfishNumber: number;
+  promptTimer: number;
+  chatTimer: number;
+  voteTimer: number;
+};
+
 export type LobbyCreationResponse = { code: string };
 
 export function isLobbyRequest(data: unknown): data is LobbyRequest {
