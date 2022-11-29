@@ -92,6 +92,9 @@ export type Lobby = {
    * @note this can be a uid, NONE, or undefined
    */
   votedOff?: string | "NONE";
+
+  // TODO: delete this once game settings is merged
+  catfishAmount: number;
 };
 
 /**
