@@ -5,13 +5,20 @@
   import IconButton from "@smui/icon-button";
   import Slider from "@smui/slider";
   import FormField from "@smui/form-field";
-  import { GAME_STATE_DURATIONS_MIN, GAME_STATE_DURATIONS_MAX } from "$lib/firebase/firestore-types/lobby";
-  import { configurableTimers } from "$lib/firebase/firestore-types/lobby";
+  import {
+    GAME_STATE_DURATIONS_MIN,
+    GAME_STATE_DURATIONS_MAX,
+    GAME_STATE_DURATIONS_DEFAULT,
+  } from "$lib/firebase/firestore-types/lobby";
   import { applyLobbySettings } from "$lib/firebase/firebase-functions";
 
   export let lobbyCode: string;
   let errorMessage: string = "";
   let showLobbySettings = false;
+  let catfishValue: number = 1;
+  let promptTimerValue = GAME_STATE_DURATIONS_DEFAULT.PROMPT;
+  let chatTimerValue = GAME_STATE_DURATIONS_DEFAULT.CHAT;
+  let voteTimerValue = GAME_STATE_DURATIONS_DEFAULT.VOTE;
 
   const sliderLabels = new Map([
     ["PROMPT", "Prompt Timer"],
@@ -29,9 +36,15 @@
     ["VOTE", GAME_STATE_DURATIONS_MAX.VOTE],
   ]);
 
-    async function apply(catfish: number, prompt: number, chat: number, vote: number) {
+  async function apply(catfish: number, prompt: number, chat: number, vote: number) {
     try {
-      await applyLobbySettings({ code: lobbyCode, catfishNumber: catfish, promptTimer: prompt, chatTimer: chat, voteTimer: vote});
+      await applyLobbySettings({
+        code: lobbyCode,
+        catfishNumber: catfish,
+        promptTimer: prompt,
+        chatTimer: chat,
+        voteTimer: vote,
+      });
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : String(err);
     }
@@ -52,20 +65,57 @@
       <p>Where settings will be</p>
 
       <div class="settings">
-        <p>This will be something for catfish number</p>
+        <FormField align="end">
+          <Slider
+            bind:value={catfishValue}
+            min={1}
+            max={3}
+            step={1}
+            discrete
+            input$aria-label="Discrete slider"
+            style={"width:100%;"}
+          />
+          <span slot="label">Catfish Amount</span>
+        </FormField>
 
-        {#each configurableTimers as state}
-          <FormField align="end">
-            <Slider
-              min={minimumTimes.get(state)}
-              max={maximumTimes.get(state)}
-              step={5}
-              discrete
-              input$aria-label="Discrete slider"
-            />
-            <span slot="label">{sliderLabels.get(state)}</span>
-          </FormField>
-        {/each}
+        <FormField align="end">
+          <Slider
+            bind:value={promptTimerValue}
+            min={minimumTimes.get("PROMPT")}
+            max={maximumTimes.get("PROMPT")}
+            step={5}
+            discrete
+            input$aria-label="Discrete slider"
+            style={"width:100%;"}
+          />
+          <span slot="label">{sliderLabels.get("PROMPT")}</span>
+        </FormField>
+
+        <FormField align="end">
+          <Slider
+            bind:value={chatTimerValue}
+            min={minimumTimes.get("CHAT")}
+            max={maximumTimes.get("CHAT")}
+            step={5}
+            discrete
+            input$aria-label="Discrete slider"
+            style={"width:100%;"}
+          />
+          <span slot="label">{sliderLabels.get("CHAT")}</span>
+        </FormField>
+
+        <FormField align="end">
+          <Slider
+            bind:value={voteTimerValue}
+            min={minimumTimes.get("VOTE")}
+            max={maximumTimes.get("VOTE")}
+            step={5}
+            discrete
+            input$aria-label="Discrete slider"
+            style={"width:100%;"}
+          />
+          <span slot="label">{sliderLabels.get("VOTE")}</span>
+        </FormField>
 
         <Button on:click={() => apply(0, 0, 0, 0)}><Label>Apply Settings</Label></Button>
       </div>
