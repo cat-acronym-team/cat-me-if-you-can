@@ -28,6 +28,7 @@
    * variable that will be set true if the corresponding function has no errors thrown
    * this will then allow the button to be pressed again if there is an error thrown
    */
+
   let waiting: boolean = false;
 
   function lobbyCodeValidator(code: string): { valid: true } | { valid: false; reason: string } {
@@ -116,11 +117,8 @@
   {/if}
   <form
     on:submit|preventDefault={async () => {
-      if (waiting == false) {
         await joinLobby();
-      }
-    }}
-    disabled={waiting}
+      }}
   >
     <div>
       <Textfield
@@ -148,7 +146,7 @@
         <HelperText validationMsg slot="helper">{codeValidation.valid ? "" : codeValidation.reason}</HelperText>
       </Textfield>
     </div>
-    <Button disabled={!nameValidation.valid || !codeValidation.valid}><Label>Join</Label></Button>
+    <Button disabled={!nameValidation.valid || !codeValidation.valid || waiting}><Label>Join</Label></Button>
   </form>
 </div>
 
