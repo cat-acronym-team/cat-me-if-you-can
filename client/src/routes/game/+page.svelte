@@ -140,8 +140,6 @@
     <div class="spinner-wraper">
       <CircularProgress indeterminate />
     </div>
-  {:else if !lobby.alivePlayers.includes($user.uid)}
-    <LobbyChat {lobby} {lobbyCode} />
   {:else if lobby.state === "WAIT"}
     <LobbyChat {lobby} {lobbyCode} />
     <LobbyComponent {lobbyCode} {lobby} />
@@ -152,14 +150,20 @@
   {:else if lobby.state === "ROLE"}
     <Role {privatePlayer} />
   {:else if lobby.state === "PROMPT"}
-    <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
+    {#if !lobby.alivePlayers.includes($user.uid)}
+      <LobbyChat {lobby} {lobbyCode} />
+    {/if}
+    <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} lobbyData={lobby} />
   {:else if lobby.state === "CHAT"}
+    {#if !lobby.alivePlayers.includes($user.uid)}
+      <LobbyChat {lobby} {lobbyCode} />
+    {/if}
     <ChatRoom {lobby} {lobbyCode} isStalker={privatePlayer.stalker} />
   {:else if lobby.state === "VOTE"}
     <LobbyChat {lobby} {lobbyCode} />
     <Vote {lobby} {lobbyCode} />
   {:else if lobby.state === "RESULT"}
-    <Result {lobby} />
+    <Result {lobby} {lobbyCode} />
   {:else if lobby.state === "END"}
     <WinLoss {lobbyCode} {lobby} {privatePlayer} />
   {:else}

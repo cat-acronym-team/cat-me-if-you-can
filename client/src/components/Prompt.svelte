@@ -4,6 +4,8 @@
   import HelperText from "@smui/textfield/helper-text";
   import { getPromptAnswerCollection } from "$lib/firebase/firestore-collections";
   import { doc, setDoc } from "firebase/firestore";
+  import { authStore as user } from "$stores/auth";
+  import type { Lobby } from "$lib/firebase/firestore-types/lobby";
 
   export let prompt: string | undefined;
 
@@ -11,8 +13,13 @@
 
   export let lobbyCode: string;
 
+  export let lobbyData: Lobby;
+
+  let userData = $user;
   let answer = "";
   let dirty = false;
+
+  $: userInfo = lobbyData.players[lobbyData.uids.indexOf(userData?.uid ?? "")];
 
   $: answerDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
 
@@ -41,13 +48,14 @@
 
 <form class="wraper" on:submit|preventDefault={submitAnswer}>
   <label class="mdc-typography--headline5" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
-
-  <div class="input">
-    <Textfield input$id="prompt-answer" bind:value={answer} bind:dirty invalid={dirty && error != undefined} required>
-      <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
-    </Textfield>
-    <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
-  </div>
+  {#if userInfo.alive}
+    <div class="input">
+      <Textfield input$id="prompt-answer" bind:value={answer} bind:dirty invalid={dirty && error != undefined} required>
+        <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
+      </Textfield>
+      <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
+    </div>
+  {/if}
 </form>
 
 <style>

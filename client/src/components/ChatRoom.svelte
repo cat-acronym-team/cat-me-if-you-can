@@ -3,6 +3,7 @@
   import Stalker from "$components/Stalker.svelte";
   import { onMount, onDestroy } from "svelte";
   import { authStore } from "$stores/auth";
+  import LobbyChat from "./LobbyChat.svelte";
   import { onSnapshot, orderBy, Query, query, where, type Unsubscribe } from "firebase/firestore";
   import type { ChatMessage, ChatRoom, Lobby, Player } from "$lib/firebase/firestore-types/lobby";
   import { addChatMessage } from "$lib/firebase/chat";
@@ -88,6 +89,9 @@
       // catch and display erro
       errorMessage = err instanceof Error ? err.message : String(err);
     }
+  }
+  $: if (!lobby.alivePlayers.includes(user.uid)) {
+    isStalker = true;
   }
 </script>
 
