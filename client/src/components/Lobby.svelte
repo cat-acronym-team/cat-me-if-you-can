@@ -121,6 +121,12 @@
     grid-template-columns: 1fr auto auto;
   }
 
+  .error {
+    text-align: center;
+    margin: auto 0;
+    padding: 20px;
+  }
+
   .invite-link {
     margin: 0;
   }
