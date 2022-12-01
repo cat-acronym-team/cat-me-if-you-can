@@ -168,6 +168,13 @@
     display: inline-block;
   }
 
+  :global(#sign-in-with-email),
+  :global(#sign-up-with-email) {
+    --mdc-typography-button-text-transform: none;
+    justify-content: start;
+    gap: 4px;
+  }
+
   .buttons {
     display: grid;
     justify-content: center;

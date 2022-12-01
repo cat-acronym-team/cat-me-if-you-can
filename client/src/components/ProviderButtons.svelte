@@ -64,9 +64,7 @@
 
 <style>
   :global(#sign-in-with-google),
-  :global(#sign-in-with-microsoft),
-  :global(#sign-in-with-email),
-  :global(#sign-up-with-email) {
+  :global(#sign-in-with-microsoft) {
     --mdc-typography-button-text-transform: none;
     justify-content: start;
     gap: 4px;
