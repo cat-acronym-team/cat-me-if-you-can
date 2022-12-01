@@ -8,7 +8,7 @@ import {
   lobbyCollection,
   userCollection,
 } from "./firestore-collections";
-import { isLobbyRequest, LobbyCreationResponse, LobbySettingsRequest } from "./firebase-functions-types";
+import { isLobbyRequest, isLobbySettingsRequest, LobbyCreationResponse } from "./firebase-functions-types";
 import {
   AVATARS,
   GAME_STATE_DURATIONS_DEFAULT,
@@ -219,14 +219,14 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
   });
 });
 
-export const applyLobbySettings = functions.https.onCall(async (data: LobbySettingsRequest, context): Promise<void> => {
+export const applyLobbySettings = functions.https.onCall(async (data: unknown, context): Promise<void> => {
   const auth = context.auth;
   // no auth then you shouldn't be here
   if (auth === undefined) {
     throw new functions.https.HttpsError("permission-denied", "Not Signed In");
   }
   // validate code
-  if (!isLobbyRequest(data)) {
+  if (!isLobbySettingsRequest(data)) {
     throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
   }
   await db.runTransaction(async (transaction) => {
@@ -243,27 +243,27 @@ export const applyLobbySettings = functions.https.onCall(async (data: LobbySetti
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
     }
 
-    if (data.catfishNumber < 1 || data.catfishNumber > 3) {
+    if (data.lobbySettings.catfishAmount < 1 || data.lobbySettings.catfishAmount > 3) {
       throw new functions.https.HttpsError("permission-denied", "Cannot have less than 1 or more than 3 catfish!");
     }
 
     if (
-      data.promptTimer < GAME_STATE_DURATIONS_MIN.PROMPT ||
-      data.promptTimer > GAME_STATE_DURATIONS_MAX.PROMPT ||
-      data.chatTimer < GAME_STATE_DURATIONS_MIN.CHAT ||
-      data.chatTimer > GAME_STATE_DURATIONS_MAX.CHAT ||
-      data.voteTimer < GAME_STATE_DURATIONS_MIN.VOTE ||
-      data.voteTimer > GAME_STATE_DURATIONS_MAX.VOTE
+      data.lobbySettings.promptTime < GAME_STATE_DURATIONS_MIN.PROMPT ||
+      data.lobbySettings.promptTime > GAME_STATE_DURATIONS_MAX.PROMPT ||
+      data.lobbySettings.chatTime < GAME_STATE_DURATIONS_MIN.CHAT ||
+      data.lobbySettings.chatTime > GAME_STATE_DURATIONS_MAX.CHAT ||
+      data.lobbySettings.voteTime < GAME_STATE_DURATIONS_MIN.VOTE ||
+      data.lobbySettings.voteTime > GAME_STATE_DURATIONS_MAX.VOTE
     ) {
       throw new functions.https.HttpsError("permission-denied", "Timer must be within the proper range!");
     }
 
     transaction.update(lobby, {
       lobbySettings: {
-        catfishAmount: data.catfishNumber,
-        promptTime: data.promptTimer,
-        chatTime: data.chatTimer,
-        voteTime: data.voteTimer,
+        catfishAmount: data.lobbySettings.catfishAmount,
+        promptTime: data.lobbySettings.promptTime,
+        chatTime: data.lobbySettings.chatTime,
+        voteTime: data.lobbySettings.voteTime,
       },
     });
   });

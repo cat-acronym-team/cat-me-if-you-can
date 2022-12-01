@@ -44,10 +44,12 @@
     try {
       await applyLobbySettings({
         code: lobbyCode,
-        catfishNumber: catfish,
-        promptTimer: prompt,
-        chatTimer: chat,
-        voteTimer: vote,
+        lobbySettings: {
+          catfishAmount: catfish,
+          promptTime: prompt,
+          chatTime: chat,
+          voteTime: vote,
+        },
       });
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : String(err);
