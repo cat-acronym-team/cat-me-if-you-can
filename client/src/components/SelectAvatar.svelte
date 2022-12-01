@@ -28,16 +28,13 @@
     }
 
     if (lobby != undefined) {
-      for (const player of lobby.players) {
-        newAvatarChoices[player.avatar - 1].displayName = player.displayName;
-        newAvatarChoices[player.avatar - 1].available = false;
+      for (const uid in lobby.players) {
+        newAvatarChoices[lobby.players[uid].avatar - 1].displayName = lobby.players[uid].displayName;
+        newAvatarChoices[lobby.players[uid].avatar - 1].available = false;
       }
 
-      if ($user !== null) {
-        const userIndex = lobby.uids.indexOf($user.uid);
-        if (userIndex != -1) {
-          newAvatarChoices[lobby.players[userIndex].avatar - 1].selected = true;
-        }
+      if ($user !== null && $user.uid in lobby.players) {
+        newAvatarChoices[lobby.players[$user.uid].avatar - 1].selected = true;
       }
     } else {
       for (const avatarChoice of newAvatarChoices) {
