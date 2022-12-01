@@ -16,7 +16,7 @@ export async function deleteLobbyChatMessages(lobbyDoc: DocumentReference<Lobby>
 }
 
 export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
-  const { players, uids } = lobbyData;
+  const { players } = lobbyData;
   const chatRoomsSnapshot = await transaction.get(getChatRoomCollection(lobbyDoc));
   const chatRooms = chatRoomsSnapshot.docs.map((room) => room.ref);
 
@@ -36,8 +36,7 @@ export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentRefere
     // if the message is the prompt answer then add it to their player object
     if (message.isPromptAnswer) {
       // get index and add their prompt answer to their player object
-      const senderIndex = uids.indexOf(message.sender);
-      players[senderIndex].promptAnswer = message.text;
+      players[message.sender].promptAnswer = message.text;
     }
     // delete all messages
     transaction.delete(messageDoc.ref);
