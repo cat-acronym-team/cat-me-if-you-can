@@ -243,7 +243,7 @@ export const applyLobbySettings = functions.https.onCall(async (data: LobbySetti
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
     }
 
-    if (data.catfishNumber < 1 || data.chatTimer > 3) {
+    if (data.catfishNumber < 1 || data.catfishNumber > 3) {
       throw new functions.https.HttpsError("permission-denied", "Cannot have less than 1 or more than 3 catfish!");
     }
 
