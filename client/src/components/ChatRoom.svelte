@@ -45,12 +45,12 @@
       const chatRoom = roomsSnapshot.docs[0].data();
       if (isStalker) {
         // get pairInfo
-        pairInfo = chatRoom.pair.map((uid) => lobby.players[lobby.uids.indexOf(uid)]) as [Player, Player];
+        pairInfo = chatRoom.pair.map((uid) => lobby.players[uid]) as [Player, Player];
       } else {
         // Get partnerInfo
         const partner = chatRoom.pair.find((uid) => user.uid !== uid);
         if (partner !== undefined) {
-          partnerInfo = lobby.players[lobby.uids.indexOf(partner)];
+          partnerInfo = lobby.players[partner];
         }
       }
 
