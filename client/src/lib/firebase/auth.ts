@@ -38,13 +38,13 @@ export async function loginAnonymous() {
   return await signInAnonymously(auth);
 }
 
-export function deleteAccount() {
+export async function deleteAccount() {
   const user = auth.currentUser;
   if (user == null) {
     throw new Error("User is not defined.");
   }
 
-  deleteUser(user);
+  await deleteUser(user);
 }
 
 export function linkWithGoogle(user: User | null) {

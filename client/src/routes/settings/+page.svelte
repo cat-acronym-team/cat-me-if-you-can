@@ -120,9 +120,9 @@
         return errorMsg;
     }
   }
-  function verifyDelete() {
+  async function verifyDelete() {
     try {
-      deleteAccount();
+      await deleteAccount();
       // If no error
       window.location.href = "/";
     } catch (err) {
