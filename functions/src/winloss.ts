@@ -90,7 +90,6 @@ export async function endGameProcess(
   );
 
   // reset the lobby
-
   for (const uid in lobbyData.players) {
     lobbyData.players[uid].alive = true;
     lobbyData.players[uid].votes = 0;

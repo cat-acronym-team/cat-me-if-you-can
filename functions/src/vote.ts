@@ -3,28 +3,36 @@ import type { DocumentReference, Transaction } from "firebase-admin/firestore";
 import { GAME_STATE_DURATIONS, Lobby, Player } from "./firestore-types/lobby";
 
 export function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lobby>, transaction: Transaction) {
-  const { players, uids } = lobbyData;
+  const { players } = lobbyData;
   let votedOff: string | undefined = undefined;
 
   // find the player with the most votes
-  const [most, secondMost]: Player[] = JSON.parse(JSON.stringify(players)).sort((a: Player, b: Player) => {
-    return b.votes - a.votes;
-  });
+  let most: Player | null = null;
+  const mostValue = 0;
+
+  for (const uid in lobbyData.players) {
+    if (players[uid].votes > mostValue) {
+      most = players[uid];
+    } else {
+      most = null;
+    }
+  }
+
   // if they're not equal then most is voted off
-  if (most.votes != secondMost.votes) {
+  if (most != null) {
     // find index of most in the players array
-    let mostIndex: number | undefined;
-    for (let i = 0; i < players.length; i++) {
-      const player = players[i];
+    let mostUID: string | undefined;
+    for (const uid in lobbyData.players) {
+      const player = players[uid];
       if (player.votes == most.votes) {
-        mostIndex = i;
+        mostUID = uid;
       }
     }
     // replace the shallow one copy object with the deep copy object changes
-    if (mostIndex != undefined) {
-      players[mostIndex].alive = false;
+    if (mostUID != undefined) {
+      players[mostUID].alive = false;
       // save their name
-      votedOff = uids[mostIndex];
+      votedOff = mostUID;
     }
   }
   const expiration = firestore.Timestamp.fromMillis(
