@@ -25,7 +25,7 @@
   import { onDestroy } from "svelte";
   import ProviderButtons from "$components/ProviderButtons.svelte";
 
-  export let userData: UserData | undefined = undefined;
+  let userData: UserData | undefined = undefined;
   let userDataDocRef: DocumentReference<UserData> | undefined = undefined;
   let unsubscribeUserData: Unsubscribe | undefined = undefined;
 
