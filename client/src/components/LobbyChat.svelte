@@ -20,7 +20,7 @@
   let chatMessages: LobbyChatMessage[] = [];
   let unsubscribeChatMessages: Unsubscribe | undefined = undefined;
 
-  $: userInfo = lobby.players[lobby.uids.indexOf($user?.uid ?? "")];
+  $: userInfo = lobby.players[$user?.uid ?? ""];
 
   $: lobby, onLobbyChange();
   function onLobbyChange() {
