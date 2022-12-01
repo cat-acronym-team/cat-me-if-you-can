@@ -8,11 +8,11 @@ service cloud.firestore {
       }
 
       function inLobby(){
-        return request.auth.uid in lobbyData().uids;
+        return request.auth.uid in lobbyData().players;
       }
 
       function isAlive(){
-        return request.auth.uid in lobbyData().alivePlayers;
+        return request.auth.uid in lobbyData().alivePlayers; 
       }
 
       allow get: if true;
