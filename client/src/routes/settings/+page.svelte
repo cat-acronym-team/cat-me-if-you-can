@@ -297,18 +297,23 @@
           <Icon class="material-icons">visibility_off</Icon>
         </IconButton>
       </Textfield>
+    </Content>
+
+    <Actions>
       <div>
         <Button on:click={linkPassword}>
           <Label>Set Password</Label>
         </Button>
       </div>
-      {#if linkPass}
-        <p>Password Sucessfully Set</p>
-      {:else if passErr !== ""}
-        <p class="error">{passErr}</p>
-      {/if}
-    </Content>
+    </Actions>
   </Dialog>
+
+  {#if linkPass}
+    <p>Password Successfully Set</p>
+  {:else if passErr !== ""}
+    <p class="error">{passErr}</p>
+  {/if}
+
   <div>
     <Button
       on:click={() => {
