@@ -8,12 +8,13 @@
   import { onMount } from "svelte";
   import { changeAvatar, startGame, leaveLobby } from "$lib/firebase/firebase-functions";
   import { goto } from "$app/navigation";
-  import { auth } from "$lib/firebase/app";
+  import { authStore as user } from "../store/auth";
 
   // Props
   export let lobbyCode: string;
   export let lobby: Lobby;
   let errorMessage: string = "";
+  $: minPlayers = lobby.catfishAmount * 2 + 2;
 
   // better link to share since it's redirecting to this page anyways
   // Josh's suggestion that I agreed on
@@ -69,15 +70,28 @@
 <div class="container">
   <div class="lobby-info">
     <h3>Code: {lobbyCode}</h3>
-    <h3>Players: {lobby.players.length}</h3>
+    <h3>Players: {lobby.players.length} / 8</h3>
+    {#if lobby.players.length < minPlayers}
+      <!-- Display the number of players needed to start the current game session -->
+      {#if minPlayers - lobby.players.length !== 1}
+        <!-- Grammar check -->
+        <h3 class="error">{minPlayers - lobby.players.length} more players required to start game...</h3>
+      {:else}
+        <h3 class="error">1 more player required to start game...</h3>
+      {/if}
+    {:else}
+      <h3 class="error">Waiting for host to start game...</h3>
+    {/if}
   </div>
   <div class="lobby-info-level">
     <LobbySettings {lobbyCode} />
   </div>
   <SelectAvatar {lobby} on:change={(event) => onAvatarSelect(event.detail.value)} />
-  {#if auth.currentUser?.uid === lobby.uids[0]}
+  {#if $user?.uid === lobby.uids[0]}
     <div class="actions">
-      <Button on:click|once={() => start()}><Label>Start Game</Label></Button>
+      <Button on:click|once={() => start()} disabled={lobby.players.length < minPlayers}
+        ><Label>Start Game</Label></Button
+      >
     </div>
   {/if}
   <div class="actions">
@@ -116,6 +130,12 @@
   .buttons {
     display: grid;
     grid-template-columns: 1fr auto auto;
+  }
+
+  .error {
+    text-align: center;
+    margin: auto 0;
+    padding: 20px;
   }
 
   .invite-link {

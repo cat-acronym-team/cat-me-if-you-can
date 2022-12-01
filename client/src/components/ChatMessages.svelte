@@ -9,7 +9,7 @@
     type LobbyChatMessage,
     type Player,
   } from "$lib/firebase/firestore-types/lobby";
-  import { avatarAltText, avatarColors } from "$lib/avatar";
+  import { avatarAltText, avatarColors, onAvatarColors } from "$lib/avatar";
   import { authStore as user } from "$stores/auth";
   import { createEventDispatcher, tick } from "svelte";
 
@@ -65,7 +65,10 @@
           <img src="/avatars/{message.avatar}.webp" alt={avatarAltText[message.avatar]} />
         </div>
         <div class="display-name mdc-typography--body2">{message.displayName}</div>
-        <div class="text mdc-typography--body1" style="background-color: {avatarColors[message.avatar]}">
+        <div
+          class="text mdc-typography--body1"
+          style="background-color: {avatarColors[message.avatar]}; color: {onAvatarColors[message.avatar]}"
+        >
           {message.text}
         </div>
       </div>
@@ -167,7 +170,6 @@
     padding: 12px;
     margin-bottom: 16px;
     border-radius: 24px 24px 24px 0;
-    color: black;
   }
 
   .current-user .text {

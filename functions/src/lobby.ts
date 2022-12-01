@@ -94,9 +94,17 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
       throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
     // check if the request is coming from the host of the game
-    const { uids } = lobby.data() as Lobby;
+    const { uids, lobbySettings } = lobby.data() as Lobby;
+
+    const minPlayers = lobbySettings.catfishAmount * 2 + 2;
+
     if (auth.uid !== uids[0]) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
+    }
+
+    // throw an error if there aren't enough players in the lobby
+    if (uids.length < minPlayers) {
+      throw new functions.https.HttpsError("failed-precondition", "Not enough players to start the game!");
     }
 
     assignRole(lobby, transaction);
@@ -105,6 +113,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
 
 export const joinLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
   const auth = context.auth;
+  const maxPlayers = 8;
   // no auth then you shouldn't be here
   if (auth === undefined) {
     throw new functions.https.HttpsError("permission-denied", "Not Signed In");
@@ -135,6 +144,11 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     const { players, uids } = lobbyInfo.data() as Lobby;
     if (uids.includes(auth.uid)) {
       throw new functions.https.HttpsError("already-exists", "You are already in the lobby!");
+    }
+
+    // throw an error if the lobby is already full
+    if (uids.length >= maxPlayers) {
+      throw new functions.https.HttpsError("failed-precondition", "Lobby is full!");
     }
 
     // change avatar randomly if it is already taken
