@@ -117,8 +117,8 @@
   {/if}
   <form
     on:submit|preventDefault={async () => {
-        await joinLobby();
-      }}
+      await joinLobby();
+    }}
   >
     <div>
       <Textfield
@@ -146,7 +146,9 @@
         <HelperText validationMsg slot="helper">{codeValidation.valid ? "" : codeValidation.reason}</HelperText>
       </Textfield>
     </div>
-    <Button disabled={!nameValidation.valid || !codeValidation.valid || waiting}><Label>Join</Label></Button>
+    <Button disabled={!nameValidation.valid || !codeValidation.valid || waiting}>
+      <Label>Join</Label>
+    </Button>
   </form>
 </div>
 

@@ -95,9 +95,9 @@
   <SelectAvatar {lobby} on:change={(event) => onAvatarSelect(event.detail.value)} />
   {#if $user?.uid === lobby.uids[0]}
     <div class="actions">
-      <Button on:click={() => start()} disabled={lobby.players.length < minPlayers || waiting}
-        ><Label>Start Game</Label></Button
-      >
+      <Button on:click={() => start()} disabled={lobby.players.length < minPlayers || waiting}>
+        <Label>Start Game</Label>
+      </Button>
     </div>
   {/if}
   <div class="actions">
@@ -106,8 +106,10 @@
         await leave();
         goto("/");
       }}
-      disabled={waiting}><Label>Leave Lobby</Label></Button
+      disabled={waiting}
     >
+      <Label>Leave Lobby</Label>
+    </Button>
   </div>
   <div class="actions">
     {#if errorMessage !== ""}
