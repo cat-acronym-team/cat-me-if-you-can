@@ -33,6 +33,13 @@
     ["VOTE", GAME_STATE_DURATIONS_MAX.VOTE],
   ]);
 
+  function timeToMinutes(time: number) {
+    let minutes = Math.floor(time / 60);
+    let seconds = time - minutes * 60;
+
+    return ": " + minutes + ":" + seconds;
+  }
+
   async function apply(catfish: number, prompt: number, chat: number, vote: number) {
     try {
       await applyLobbySettings({
@@ -66,11 +73,10 @@
             min={1}
             max={3}
             step={1}
-            discrete
             input$aria-label="Discrete slider"
-            style={"width:100%;"}
+            style={"width:80%;"}
           />
-          <span slot="label">Catfish Amount</span>
+          <span slot="label">Catfish Amount: {catfishValue}</span>
         </FormField>
 
         <FormField align="end" style={"width:100%"}>
@@ -79,11 +85,10 @@
             min={minimumTimes.get("PROMPT")}
             max={maximumTimes.get("PROMPT")}
             step={5}
-            discrete
             input$aria-label="Discrete slider"
-            style={"width:100%;"}
+            style={"width:80%;"}
           />
-          <span slot="label">{sliderLabels.get("PROMPT")}</span>
+          <span slot="label">{sliderLabels.get("PROMPT")} {timeToMinutes(promptTimerValue)}</span>
         </FormField>
 
         <FormField align="end" style={"width:100%"}>
@@ -92,11 +97,10 @@
             min={minimumTimes.get("CHAT")}
             max={maximumTimes.get("CHAT")}
             step={5}
-            discrete
             input$aria-label="Discrete slider"
-            style={"width:100%;"}
+            style={"width:80%;"}
           />
-          <span slot="label">{sliderLabels.get("CHAT")}</span>
+          <span slot="label">{sliderLabels.get("CHAT")} {timeToMinutes(chatTimerValue)}</span>
         </FormField>
 
         <FormField align="end" style={"width:100%"}>
@@ -105,11 +109,10 @@
             min={minimumTimes.get("VOTE")}
             max={maximumTimes.get("VOTE")}
             step={5}
-            discrete
             input$aria-label="Discrete slider"
-            style={"width:100%;"}
+            style={"width:80%;"}
           />
-          <span slot="label">{sliderLabels.get("VOTE")}</span>
+          <span slot="label">{sliderLabels.get("VOTE")} {timeToMinutes(voteTimerValue)}</span>
         </FormField>
       </div>
     </Content>
