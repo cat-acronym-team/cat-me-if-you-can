@@ -312,7 +312,6 @@
   <div>
     <Button
       on:click={() => {
-        window.location.reload();
         logOut();
       }}
     >
