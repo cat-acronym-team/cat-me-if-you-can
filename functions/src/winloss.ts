@@ -46,16 +46,16 @@ export async function endGameProcess(
   transaction: firestore.Transaction
 ) {
   // apply the stats
-  let { players } = lobbyData;
+  const { players } = lobbyData;
   const { winner } = lobbyData;
 
   // update each players doc
   await Promise.all(
-    uids.map(async (uid, index) => {
+    Object.keys(lobbyData.players).map(async (uid) => {
       const userDocRef = userCollection.doc(uid);
       const userDoc = await transaction.get(userDocRef);
 
-      if (players[index].role == undefined) {
+      if (lobbyData.players[uid].role == undefined) {
         functions.logger.error("This player's role doesn't exist!");
         return;
       }
@@ -68,17 +68,17 @@ export async function endGameProcess(
       } = {};
 
       // increment played as role
-      if (players[index].role == "CAT") {
+      if (lobbyData.players[uid].role == "CAT") {
         newStats.playedAsCat = firestore.FieldValue.increment(1);
       } else {
         newStats.playedAsCatfish = firestore.FieldValue.increment(1);
       }
 
       // increment wins
-      if (winner == "CAT" && players[index].role == "CAT") {
+      if (winner == "CAT" && lobbyData.players[uid].role == "CAT") {
         newStats.catWins = firestore.FieldValue.increment(1);
       }
-      if (winner == "CATFISH" && players[index].role == "CATFISH") {
+      if (winner == "CATFISH" && lobbyData.players[uid].role == "CATFISH") {
         newStats.catfishWins = firestore.FieldValue.increment(1);
       }
       // update their user doc
@@ -90,17 +90,20 @@ export async function endGameProcess(
   );
 
   // reset the lobby
-  players = players.map(({ role, ...rest }) => {
-    return { ...rest, alive: true, votes: 0 };
-  });
+
+  for (const uid in lobbyData.players) {
+    lobbyData.players[uid].alive = true;
+    lobbyData.players[uid].votes = 0;
+    delete lobbyData.players[uid].role;
+  }
 
   // create a WriteBatch
   const batch = db.batch();
   const privatePlayerCollectionRef = getPrivatePlayerCollection(lobbyDocRef);
 
   // loop through each doc in the private player collection via uid and delete them one-by-one
-  for (let i = 0; i < uids.length; i++) {
-    const playerDoc = privatePlayerCollectionRef.doc(uids[i]);
+  for (const uid in lobbyData.players) {
+    const playerDoc = privatePlayerCollectionRef.doc(uid);
     // delete each private player document with the WriteBatch
     batch.delete(playerDoc);
   }
