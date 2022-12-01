@@ -53,6 +53,8 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
     ],
     state: "WAIT",
     alivePlayers: [context.auth.uid],
+    catfishAmount: 1,
+    expiration: firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 3_600_000 * 3),
   };
 
   // try making lobby 5 times before giving up
@@ -87,9 +89,17 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
       throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
     // check if the request is coming from the host of the game
-    const { uids } = lobby.data() as Lobby;
+    const { uids, catfishAmount } = lobby.data() as Lobby;
+
+    const minPlayers = catfishAmount * 2 + 2;
+
     if (auth.uid !== uids[0]) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
+    }
+
+    // throw an error if there aren't enough players in the lobby
+    if (uids.length < minPlayers) {
+      throw new functions.https.HttpsError("failed-precondition", "Not enough players to start the game!");
     }
 
     assignRole(lobby, transaction);
@@ -98,6 +108,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
 
 export const joinLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
   const auth = context.auth;
+  const maxPlayers = 8;
   // no auth then you shouldn't be here
   if (auth === undefined) {
     throw new functions.https.HttpsError("permission-denied", "Not Signed In");
@@ -128,6 +139,11 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     const { players, uids } = lobbyInfo.data() as Lobby;
     if (uids.includes(auth.uid)) {
       throw new functions.https.HttpsError("already-exists", "You are already in the lobby!");
+    }
+
+    // throw an error if the lobby is already full
+    if (uids.length >= maxPlayers) {
+      throw new functions.https.HttpsError("failed-precondition", "Lobby is full!");
     }
 
     // change avatar randomly if it is already taken
@@ -191,7 +207,6 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
   });
 });
 
-// TODO: replace with the correct trigger
 export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate((change, context) => {
   const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
   const lobby = change.after.data() as Lobby;
@@ -378,6 +393,7 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
     // TODO: potential if checks for other states that require a timer
     // if the state is chat then delete chatrooms
     if (lobby.state === "ROLE") {
+      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       await startPrompt(lobbyDoc, transaction);
     }
     if (lobby.state === "PROMPT") {
@@ -391,10 +407,10 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
       await endGameProcess(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "VOTE") {
-      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       findVoteOff(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "RESULT") {
+      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       await determineWinner(lobbyDoc, transaction);
     }
 
