@@ -20,7 +20,7 @@
     <h3 class="mdc-typography--headline5">Setting</h3>
     <p class="mdc-typography--body1">
       You are a very lonely cat, looking for another furry friend so you decide to try out online dating. In comes a
-      brand new, top-of-the-line dating app, Cat Me if You Can! You’ve heard great things about the world of online
+      brand new, top-of-the-line dating app, Cat Me If You Can! You’ve heard great things about the world of online
       dating and other cats instantly finding matches from other cats with owners from all across the world. Everything
       is great except for those slimy catfish that try to swim their way through this cat-only dating app and deceive
       all the innocent other cats. Your job is to remove these pesky catfish from the app and keep the app fish-free.<br
