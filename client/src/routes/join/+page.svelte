@@ -116,10 +116,8 @@
     <p class="error">{errorMessage}</p>
   {/if}
   <form
-    on:submit|preventDefault={async () => {
-      await joinLobby();
-    }}
-  >
+    on:submit|preventDefault={joinLobby}
+    >
     <div>
       <Textfield
         type="text"
