@@ -90,6 +90,9 @@ export type Lobby = {
    * the uid of the host player
    */
   host: string;
+
+  // TODO: delete this once game settings is merged
+  catfishAmount: number;
 };
 
 /**

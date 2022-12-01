@@ -52,6 +52,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
     },
     state: "WAIT",
     alivePlayers: [context.auth.uid],
+    catfishAmount: 1,
     expiration: firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 3_600_000 * 3),
     host: context.auth.uid,
   };
@@ -89,8 +90,17 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
     }
 
     // check if the request is coming from the host of the game
+    const { uids, catfishAmount } = lobby.data() as Lobby;
+
+    const minPlayers = catfishAmount * 2 + 2;
+
     if (auth.uid !== lobby.data()?.host) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
+    }
+
+    // throw an error if there aren't enough players in the lobby
+    if (uids.length < minPlayers) {
+      throw new functions.https.HttpsError("failed-precondition", "Not enough players to start the game!");
     }
 
     assignRole(lobby, transaction);
@@ -99,6 +109,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
 
 export const joinLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
   const auth = context.auth;
+  const maxPlayers = 8;
   // no auth then you shouldn't be here
   if (auth === undefined) {
     throw new functions.https.HttpsError("permission-denied", "Not Signed In");
@@ -129,6 +140,11 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     const { players } = lobbyInfo.data() as Lobby;
     if (Object.keys(players).includes(auth.uid)) {
       throw new functions.https.HttpsError("already-exists", "You are already in the lobby!");
+    }
+
+    // throw an error if the lobby is already full
+    if (uids.length >= maxPlayers) {
+      throw new functions.https.HttpsError("failed-precondition", "Lobby is full!");
     }
 
     // change avatar randomly if it is already taken
