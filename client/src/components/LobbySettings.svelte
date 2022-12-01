@@ -65,7 +65,7 @@
       <p>Where settings will be</p>
 
       <div class="settings">
-        <FormField align="end">
+        <FormField align="end" style={"width:100%"}>
           <Slider
             bind:value={catfishValue}
             min={1}
@@ -78,7 +78,7 @@
           <span slot="label">Catfish Amount</span>
         </FormField>
 
-        <FormField align="end">
+        <FormField align="end" style={"width:100%"}>
           <Slider
             bind:value={promptTimerValue}
             min={minimumTimes.get("PROMPT")}
@@ -91,7 +91,7 @@
           <span slot="label">{sliderLabels.get("PROMPT")}</span>
         </FormField>
 
-        <FormField align="end">
+        <FormField align="end" style={"width:100%"}>
           <Slider
             bind:value={chatTimerValue}
             min={minimumTimes.get("CHAT")}
@@ -104,7 +104,7 @@
           <span slot="label">{sliderLabels.get("CHAT")}</span>
         </FormField>
 
-        <FormField align="end">
+        <FormField align="end" style={"width:100%"}>
           <Slider
             bind:value={voteTimerValue}
             min={minimumTimes.get("VOTE")}
@@ -117,7 +117,9 @@
           <span slot="label">{sliderLabels.get("VOTE")}</span>
         </FormField>
 
-        <Button on:click={() => apply(0, 0, 0, 0)}><Label>Apply Settings</Label></Button>
+        <Button on:click={() => apply(catfishValue, promptTimerValue, chatTimerValue, voteTimerValue)} action="close"
+          ><Label>Apply Settings</Label></Button
+        >
       </div>
     </Content>
   </Dialog>
