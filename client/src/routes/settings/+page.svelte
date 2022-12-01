@@ -309,7 +309,7 @@
   </Dialog>
 
   {#if linkPass}
-    <p>Password Successfully Set</p>
+    <p class="set-pass">Password Successfully Set</p>
   {:else if passErr !== ""}
     <p class="error">{passErr}</p>
   {/if}
@@ -402,6 +402,10 @@
     justify-content: center;
     gap: 4px;
     max-width: 230px;
+  }
+
+  .set-pass {
+    color: rgb(15, 148, 15);
   }
 
   :global(#sign-in-with-google),
