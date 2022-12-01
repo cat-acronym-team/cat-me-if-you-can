@@ -1,6 +1,6 @@
 <script lang="ts">
   import "@material/typography/mdc-typography.scss";
-  import Dialog, { Header, Title, Content } from "@smui/dialog";
+  import Dialog, { Header, Title, Content, Actions } from "@smui/dialog";
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
   import Slider from "@smui/slider";
@@ -111,12 +111,13 @@
           />
           <span slot="label">{sliderLabels.get("VOTE")}</span>
         </FormField>
-
-        <Button on:click={() => apply(catfishValue, promptTimerValue, chatTimerValue, voteTimerValue)} action="close"
-          ><Label>Apply Settings</Label></Button
-        >
       </div>
     </Content>
+    <Actions class="settings">
+      <Button on:click={() => apply(catfishValue, promptTimerValue, chatTimerValue, voteTimerValue)} action="close"
+        ><Label>Apply Settings</Label></Button
+      >
+    </Actions>
   </Dialog>
   <Button
     on:click={() => {
