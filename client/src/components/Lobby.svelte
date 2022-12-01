@@ -71,6 +71,11 @@
   <div class="lobby-info">
     <h3>Code: {lobbyCode}</h3>
     <h3>Players: {lobby.players.length} / 8</h3>
+    <div class="lobby-info-level">
+      {#if $user?.uid === lobby.uids[0]}
+        <LobbySettings {lobbyCode} />
+      {/if}
+    </div>
     {#if lobby.players.length < minPlayers}
       <!-- Display the number of players needed to start the current game session -->
       {#if minPlayers - lobby.players.length !== 1}
@@ -83,9 +88,7 @@
       <h3 class="error">Waiting for host to start game...</h3>
     {/if}
   </div>
-  <div class="lobby-info-level">
-    <LobbySettings {lobbyCode} />
-  </div>
+
   <SelectAvatar {lobby} on:change={(event) => onAvatarSelect(event.detail.value)} />
   {#if $user?.uid === lobby.uids[0]}
     <div class="actions">

@@ -58,12 +58,10 @@
     aria-labelledby="rules-dialog-title"
     aria-describedby="rules-dialog-content"
     ><Header>
-      <Title id="lobby-settings-title">Lobby Settings</Title>
+      <Title>Lobby Settings</Title>
       <IconButton action="close" class="material-icons">close</IconButton>
     </Header>
     <Content>
-      <p>Where settings will be</p>
-
       <div class="settings">
         <FormField align="end" style={"width:100%"}>
           <Slider
