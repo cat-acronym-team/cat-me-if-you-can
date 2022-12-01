@@ -9,7 +9,7 @@
 
   onMount(() => {
     if (lobby.votedOff != undefined && lobby.votedOff != "NONE") {
-      votedOffUser = lobby.players[lobby.uids.indexOf(lobby.votedOff)];
+      votedOffUser = lobby.players[lobby.votedOff];
     }
   });
 </script>
