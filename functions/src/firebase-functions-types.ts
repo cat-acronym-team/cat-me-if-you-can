@@ -1,4 +1,4 @@
-import { LobbySettings } from "./firestore-types/lobby";
+import { type LobbySettings } from "./firestore-types/lobby";
 
 export type LobbyRequest = { code: string };
 
