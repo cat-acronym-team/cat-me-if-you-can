@@ -90,7 +90,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
     }
 
     // check if the request is coming from the host of the game
-    const { uids, catfishAmount } = lobby.data() as Lobby;
+    const { players, catfishAmount } = lobby.data() as Lobby;
 
     const minPlayers = catfishAmount * 2 + 2;
 
@@ -99,7 +99,7 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
     }
 
     // throw an error if there aren't enough players in the lobby
-    if (uids.length < minPlayers) {
+    if (Object.keys(players).length < minPlayers) {
       throw new functions.https.HttpsError("failed-precondition", "Not enough players to start the game!");
     }
 
@@ -143,7 +143,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     }
 
     // throw an error if the lobby is already full
-    if (uids.length >= maxPlayers) {
+    if (Object.keys(players).length >= maxPlayers) {
       throw new functions.https.HttpsError("failed-precondition", "Lobby is full!");
     }
 
@@ -205,7 +205,7 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
   });
 });
 
-export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate((change, context) => {
+export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate((change) => {
   const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
   const lobby = change.after.data() as Lobby;
   const lobbyBefore = change.before.data() as Lobby;
