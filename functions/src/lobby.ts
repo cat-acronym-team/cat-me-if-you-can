@@ -9,7 +9,14 @@ import {
   userCollection,
 } from "./firestore-collections";
 import { isLobbyRequest, LobbyCreationResponse, LobbySettingsRequest } from "./firebase-functions-types";
-import { AVATARS, GAME_STATE_DURATIONS_DEFAULT, Lobby, Vote } from "./firestore-types/lobby";
+import {
+  AVATARS,
+  GAME_STATE_DURATIONS_DEFAULT,
+  GAME_STATE_DURATIONS_MAX,
+  GAME_STATE_DURATIONS_MIN,
+  Lobby,
+  Vote,
+} from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
@@ -234,6 +241,21 @@ export const applyLobbySettings = functions.https.onCall(async (data: LobbySetti
     const { uids } = lobbyInfo.data() as Lobby;
     if (auth.uid !== uids[0]) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
+    }
+
+    if (data.catfishNumber < 1 || data.chatTimer > 3) {
+      throw new functions.https.HttpsError("permission-denied", "Cannot have less than 1 or more than 3 catfish!");
+    }
+
+    if (
+      data.promptTimer < GAME_STATE_DURATIONS_MIN.PROMPT ||
+      data.promptTimer > GAME_STATE_DURATIONS_MAX.PROMPT ||
+      data.chatTimer < GAME_STATE_DURATIONS_MIN.CHAT ||
+      data.chatTimer > GAME_STATE_DURATIONS_MAX.CHAT ||
+      data.voteTimer < GAME_STATE_DURATIONS_MIN.VOTE ||
+      data.voteTimer > GAME_STATE_DURATIONS_MAX.VOTE
+    ) {
+      throw new functions.https.HttpsError("permission-denied", "Timer must be within the proper range!");
     }
 
     transaction.update(lobby, {
