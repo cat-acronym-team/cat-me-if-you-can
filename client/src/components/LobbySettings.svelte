@@ -5,20 +5,17 @@
   import IconButton from "@smui/icon-button";
   import Slider from "@smui/slider";
   import FormField from "@smui/form-field";
-  import {
-    GAME_STATE_DURATIONS_MIN,
-    GAME_STATE_DURATIONS_MAX,
-    GAME_STATE_DURATIONS_DEFAULT,
-  } from "$lib/firebase/firestore-types/lobby";
+  import { GAME_STATE_DURATIONS_MIN, GAME_STATE_DURATIONS_MAX, type Lobby } from "$lib/firebase/firestore-types/lobby";
   import { applyLobbySettings } from "$lib/firebase/firebase-functions";
 
+  export let lobby: Lobby;
   export let lobbyCode: string;
   let errorMessage: string = "";
   let showLobbySettings = false;
   let catfishValue: number = 1;
-  let promptTimerValue = GAME_STATE_DURATIONS_DEFAULT.PROMPT;
-  let chatTimerValue = GAME_STATE_DURATIONS_DEFAULT.CHAT;
-  let voteTimerValue = GAME_STATE_DURATIONS_DEFAULT.VOTE;
+  let promptTimerValue = lobby.lobbySettings.promptTime;
+  let chatTimerValue = lobby.lobbySettings.chatTime;
+  let voteTimerValue = lobby.lobbySettings.voteTime;
 
   const sliderLabels = new Map([
     ["PROMPT", "Prompt Timer"],

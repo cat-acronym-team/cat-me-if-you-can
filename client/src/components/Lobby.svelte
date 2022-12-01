@@ -73,7 +73,7 @@
     <h3>Players: {lobby.players.length} / 8</h3>
     <div class="lobby-info-level">
       {#if $user?.uid === lobby.uids[0]}
-        <LobbySettings {lobbyCode} />
+        <LobbySettings {lobby} {lobbyCode} />
       {/if}
     </div>
     {#if lobby.players.length < minPlayers}
