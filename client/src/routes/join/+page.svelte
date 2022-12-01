@@ -24,6 +24,13 @@
   let codeDirty: boolean = false;
   $: codeValidation = lobbyCodeValidator(code);
 
+  /**
+   * variable that will be set true if the corresponding function has no errors thrown
+   * this will then allow the button to be pressed again if there is an error thrown
+   */
+
+  let waiting: boolean = false;
+
   function lobbyCodeValidator(code: string): { valid: true } | { valid: false; reason: string } {
     if (code.length === 0) {
       return { valid: false, reason: "Please enter a lobby code" };
@@ -54,8 +61,10 @@
       code = queryCode;
     }
   });
+
   async function joinLobby() {
     code = code.toLowerCase();
+    waiting = true;
     try {
       await saveOrCreate($user, userData, name.trim());
       // enter lobby with the user's info
@@ -63,9 +72,11 @@
       // go to game page
       goto(`/game?code=${code}`);
     } catch (err) {
+      waiting = false;
       // if the lobby doesn't exist then error is thrown
       errorMessage = err instanceof Error ? err.message : String(err);
       if (errorMessage == "You are already in the lobby!") {
+        waiting = true;
         goto(`/game?code=${code}`);
       }
       // this checks if the query code is set
@@ -104,7 +115,7 @@
   {#if errorMessage !== ""}
     <p class="error">{errorMessage}</p>
   {/if}
-  <form on:submit|once={joinLobby} on:submit|preventDefault>
+  <form on:submit|preventDefault={joinLobby}>
     <div>
       <Textfield
         type="text"
@@ -131,7 +142,9 @@
         <HelperText validationMsg slot="helper">{codeValidation.valid ? "" : codeValidation.reason}</HelperText>
       </Textfield>
     </div>
-    <Button disabled={!nameValidation.valid || !codeValidation.valid}><Label>Join</Label></Button>
+    <Button disabled={!nameValidation.valid || !codeValidation.valid || waiting}>
+      <Label>Join</Label>
+    </Button>
   </form>
 </div>
 

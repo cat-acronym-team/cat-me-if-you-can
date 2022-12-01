@@ -15,6 +15,12 @@
   let errorMessage: string = "";
   $: minPlayers = lobby.catfishAmount * 2 + 2;
 
+  /**
+   * variable that will be set true if the corresponding function has no errors thrown
+   * this will then allow the button to be pressed again if there is an error thrown
+   */
+  let waiting: boolean = false;
+
   // better link to share since it's redirecting to this page anyways
   // Josh's suggestion that I agreed on
   let url = `${$page.url.origin}/join?code=${lobbyCode}`;
@@ -50,17 +56,21 @@
   }
 
   async function start() {
+    waiting = true;
     try {
       await startGame({ code: lobbyCode });
     } catch (err) {
+      waiting = false;
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
 
   async function leave() {
+    waiting = true;
     try {
       await leaveLobby({ code: lobbyCode });
     } catch (err) {
+      waiting = false;
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
@@ -85,18 +95,21 @@
   <SelectAvatar {lobby} on:change={(event) => onAvatarSelect(event.detail.value)} />
   {#if $user?.uid === lobby.uids[0]}
     <div class="actions">
-      <Button on:click|once={() => start()} disabled={lobby.players.length < minPlayers}
-        ><Label>Start Game</Label></Button
-      >
+      <Button on:click={start} disabled={lobby.players.length < minPlayers || waiting}>
+        <Label>Start Game</Label>
+      </Button>
     </div>
   {/if}
   <div class="actions">
     <Button
-      on:click|once={async () => {
+      on:click={async () => {
         await leave();
         goto("/");
-      }}><Label>Leave Lobby</Label></Button
+      }}
+      disabled={waiting}
     >
+      <Label>Leave Lobby</Label>
+    </Button>
   </div>
   <div class="actions">
     {#if errorMessage !== ""}
