@@ -29,12 +29,12 @@
       return "Answer must be less than 50 characters";
     }
   }
-
+  let displayAnswer = "";
   function submitAnswer() {
     if (error != undefined) {
       return;
     }
-
+    displayAnswer = answer;
     setDoc(answerDoc, { answer });
   }
 </script>
@@ -47,6 +47,9 @@
       <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
     </Textfield>
     <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
+    {#if displayAnswer != ""}
+      <p>Your Answer: {displayAnswer}</p>
+    {/if}
   </div>
 </form>
 
