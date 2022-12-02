@@ -1,14 +1,16 @@
 <script lang="ts">
-  import type { Lobby, Avatar } from "$lib/firebase/firestore-types/lobby";
+  import PlayerMenu from "./PlayerMenu.svelte";
 
+  import type { Lobby, Avatar } from "$lib/firebase/firestore-types/lobby";
   import { createEventDispatcher } from "svelte";
   import { authStore as user } from "$stores/auth";
   import { avatarAltText } from "$lib/avatar";
 
   export let selectedAvatar: 0 | Avatar = 0;
   export let lobby: Lobby | undefined = undefined;
+  export let lobbyCode: string | undefined = undefined;
 
-  type $$Props = { selectedAvatar: 0 | Avatar } | { lobby: Lobby };
+  type $$Props = { selectedAvatar: 0 | Avatar } | { lobby: Lobby; lobbyCode: string };
 
   $: avatarChoices = updateAvatarChoices(lobby, selectedAvatar);
 
@@ -16,6 +18,7 @@
     avatar: Avatar;
     altText: string;
     displayName?: string;
+    uid?: string;
     available: boolean;
     selected: boolean;
   };
@@ -31,6 +34,8 @@
       for (const player of lobby.players) {
         newAvatarChoices[player.avatar - 1].displayName = player.displayName;
         newAvatarChoices[player.avatar - 1].available = false;
+        const playerIndex = lobby.players.indexOf(player);
+        newAvatarChoices[player.avatar - 1].uid = lobby.uids[playerIndex];
       }
 
       if ($user !== null) {
@@ -59,13 +64,18 @@
 </script>
 
 <div class="grid {lobby != undefined ? 'lobby' : ''}">
-  {#each avatarChoices as { avatar, altText, displayName, available, selected }}
-    <button class="avatar" on:click={() => selectAvatar(avatar)} disabled={!available} aria-selected={selected}>
-      <img src="/avatars/{avatar}.webp" alt={altText} />
-      {#if lobby != undefined}
-        <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
+  {#each avatarChoices as { avatar, altText, displayName, uid, available, selected }}
+    <div class="parent">
+      {#if uid != undefined && lobbyCode != undefined && $user !== null && lobby?.uids[0] == $user.uid}
+        <PlayerMenu {lobbyCode} {uid} />
       {/if}
-    </button>
+      <button class="avatar" on:click={() => selectAvatar(avatar)} disabled={!available} aria-selected={selected}>
+        <img src="/avatars/{avatar}.webp" alt={altText} />
+        {#if lobby != undefined}
+          <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
+        {/if}
+      </button>
+    </div>
   {/each}
 </div>
 
@@ -85,6 +95,10 @@
 
   .grid.lobby {
     gap: 12px 24px;
+  }
+
+  .parent {
+    position: relative;
   }
 
   @media (max-width: 600px) {
