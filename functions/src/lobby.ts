@@ -145,7 +145,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     // check if user is banned
     if (bannedPlayers.includes(auth.uid)) {
       throw new functions.https.HttpsError("permission-denied", "You are banned from this lobby!");
-      // throw an error if the lobby is already full
+      // throw an error if the user is banned
     }
 
     // throw an error if the lobby is already full
