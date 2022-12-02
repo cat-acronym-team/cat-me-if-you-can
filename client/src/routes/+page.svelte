@@ -17,6 +17,12 @@
 
   let errorMessage: string = "";
 
+  /**
+   * variable that will be set true if the corresponding function has no errors thrown
+   * this will then allow the button to be pressed again if there is an error thrown
+   */
+  let waiting: boolean = false;
+
   // update user once auth store changes
   $: user = $authStore;
   // this function will find user if the auth isnt null
@@ -45,6 +51,7 @@
   }
 
   async function createLobbyHandler() {
+    waiting = true;
     try {
       // Create User
       await saveOrCreate(user, userData, name.trim());
@@ -53,16 +60,19 @@
       // go to game page
       goto("/game?code=" + response.data.code);
     } catch (err) {
+      waiting = false;
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
   async function joinLobbyHandler() {
+    waiting = true;
     try {
       // Create User
       await saveOrCreate(user, userData, name.trim());
       // go to join page
       goto("/join");
     } catch (err) {
+      waiting = false;
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
@@ -91,8 +101,12 @@
       >
         <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
       </Textfield>
-      <Button on:click|once={createLobbyHandler} disabled={!nameValidation.valid}><Label>Create Lobby</Label></Button>
-      <Button on:click|once={joinLobbyHandler} disabled={!nameValidation.valid}><Label>Join Lobby</Label></Button>
+      <Button on:click={createLobbyHandler} disabled={!nameValidation.valid || waiting}>
+        <Label>Create Lobby</Label>
+      </Button>
+      <Button on:click={joinLobbyHandler} disabled={!nameValidation.valid || waiting}>
+        <Label>Join Lobby</Label>
+      </Button>
     </div>
   </div>
 </main>

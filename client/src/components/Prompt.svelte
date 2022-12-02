@@ -36,12 +36,12 @@
       return "Answer must be less than 50 characters";
     }
   }
-
+  let displayAnswer = "";
   function submitAnswer() {
     if (error != undefined) {
       return;
     }
-
+    displayAnswer = answer;
     setDoc(answerDoc, { answer });
   }
 </script>
@@ -55,6 +55,9 @@
       </Textfield>
       <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
     </div>
+    {#if displayAnswer != ""}
+      <p>Your Answer: {displayAnswer}</p>
+    {/if}
   {/if}
 </form>
 
