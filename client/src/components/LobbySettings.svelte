@@ -45,13 +45,13 @@
   <Dialog
     bind:open={showLobbySettings}
     fullscreen
-    aria-labelledby="rules-dialog-title"
-    aria-describedby="rules-dialog-content"
+    aria-labelledby="settings-dialog-title"
+    aria-describedby="settings-dialog-content"
     ><Header>
-      <Title>Lobby Settings</Title>
+      <Title id="settings-dialog-title">Lobby Settings</Title>
       <IconButton action="close" class="material-icons">close</IconButton>
     </Header>
-    <Content>
+    <Content id="settings-dialog-content">
       <div class="settings">
         <FormField align="end" style={"width:100%"}>
           <Slider
@@ -59,7 +59,8 @@
             min={1}
             max={3}
             step={1}
-            input$aria-label="Discrete slider"
+            id="Catfish Slider"
+            input$aria-label="Catfish Slider"
             style={"width:80%;"}
           />
           <span slot="label">Catfish Amount: {catfishValue}</span>
@@ -71,7 +72,8 @@
             min={GAME_STATE_DURATIONS_MIN.PROMPT}
             max={GAME_STATE_DURATIONS_MAX.PROMPT}
             step={5}
-            input$aria-label="Discrete slider"
+            id="Prompt Slider"
+            input$aria-label="Prompt Slider"
             style={"width:80%;"}
           />
           <span slot="label">{sliderLabels.get("PROMPT")} {formatTimer(promptTimerValue)}</span>
@@ -83,7 +85,8 @@
             min={GAME_STATE_DURATIONS_MIN.CHAT}
             max={GAME_STATE_DURATIONS_MAX.CHAT}
             step={5}
-            input$aria-label="Discrete slider"
+            id="Chat Slider"
+            input$aria-label="Chat Slider"
             style={"width:80%;"}
           />
           <span slot="label">{sliderLabels.get("CHAT")} {formatTimer(chatTimerValue)}</span>
@@ -95,7 +98,8 @@
             min={GAME_STATE_DURATIONS_MIN.VOTE}
             max={GAME_STATE_DURATIONS_MAX.VOTE}
             step={5}
-            input$aria-label="Discrete slider"
+            id="Vote Slider"
+            input$aria-label="Vote Slider"
             style={"width:80%;"}
           />
           <span slot="label">{sliderLabels.get("VOTE")} {formatTimer(voteTimerValue)}</span>
