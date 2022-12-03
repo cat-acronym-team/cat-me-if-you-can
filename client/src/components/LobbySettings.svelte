@@ -107,7 +107,7 @@
       </div>
     </Content>
     <Actions class="settings">
-      <Button on:click={() => apply()} action="close"><Label>Apply Settings</Label></Button>
+      <Button on:click={() => apply()}><Label>Apply Settings</Label></Button>
     </Actions>
   </Dialog>
   <Button
