@@ -24,15 +24,15 @@
     ["VOTE", "Vote Timer"],
   ]);
 
-  async function apply(catfish: number, prompt: number, chat: number, vote: number) {
+  async function apply() {
     try {
       await applyLobbySettings({
         code: lobbyCode,
         lobbySettings: {
-          catfishAmount: catfish,
-          promptTime: prompt,
-          chatTime: chat,
-          voteTime: vote,
+          catfishAmount: catfishValue,
+          promptTime: promptTimerValue,
+          chatTime: chatTimerValue,
+          voteTime: voteTimerValue,
         },
       });
     } catch (err) {
@@ -103,9 +103,7 @@
       </div>
     </Content>
     <Actions class="settings">
-      <Button on:click={() => apply(catfishValue, promptTimerValue, chatTimerValue, voteTimerValue)} action="close"
-        ><Label>Apply Settings</Label></Button
-      >
+      <Button on:click={() => apply()} action="close"><Label>Apply Settings</Label></Button>
     </Actions>
   </Dialog>
   <Button
