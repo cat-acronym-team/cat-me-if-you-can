@@ -110,12 +110,7 @@
       <Button on:click={() => apply()}><Label>Apply Settings</Label></Button>
     </Actions>
   </Dialog>
-  <Button
-    on:click={() => {
-      showLobbySettings = true;
-    }}
-    class="Lobby Settings"><Label>Lobby Settings</Label></Button
-  >
+  <Button on:click={() => (showLobbySettings = true)} class="Lobby Settings"><Label>Lobby Settings</Label></Button>
 </main>
 
 <style>
