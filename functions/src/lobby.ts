@@ -376,7 +376,7 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
   });
 });
 
-export const verifyExpiration = functions.https.onCall((data, context): Promise<void> => {
+export const verifyExpiration = functions.https.onCall(async (data, context): Promise<void> => {
   // check auth
   if (context.auth == undefined) {
     throw new functions.https.HttpsError("permission-denied", "User is not Authenticated");
@@ -389,7 +389,7 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
   const lobbyDocRef = lobbyCollection.doc(data.code);
 
   // start transaction
-  return db.runTransaction(async (transaction) => {
+  await db.runTransaction(async (transaction) => {
     const lobbyDoc = await transaction.get(lobbyDocRef);
     const lobby = lobbyDoc.data();
     if (lobby === undefined) {
@@ -429,5 +429,8 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
       await determineWinner(lobbyDoc, transaction);
     }
   });
-  deleteLobbyChatMessages(lobbyDocRef);
+  const lobby = (await lobbyDocRef.get()).data();
+  if (lobby?.state == "PROMPT") {
+    deleteLobbyChatMessages(lobbyDocRef);
+  }
 });
