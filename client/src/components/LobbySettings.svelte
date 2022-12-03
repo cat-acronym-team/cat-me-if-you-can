@@ -17,7 +17,7 @@
   export let lobbyCode: string;
   let errorMessage: string = "";
   let showLobbySettings = false;
-  let catfishValue: number = 1;
+  let catfishValue: 1 | 2 | 3 = 1;
   let promptTimerValue = lobby.lobbySettings.promptTime;
   let chatTimerValue = lobby.lobbySettings.chatTime;
   let voteTimerValue = lobby.lobbySettings.voteTime;
