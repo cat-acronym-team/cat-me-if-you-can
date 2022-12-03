@@ -81,11 +81,11 @@
   <div class="lobby-info">
     <h3>Code: {lobbyCode}</h3>
     <h3>Players: {lobby.players.length} / 8</h3>
-    <div class="lobby-info-level">
-      {#if $user?.uid === lobby.uids[0]}
+    {#if $user?.uid === lobby.uids[0]}
+      <div class="lobby-info-level">
         <LobbySettings {lobby} {lobbyCode} />
-      {/if}
-    </div>
+      </div>
+    {/if}
     {#if lobby.players.length < minPlayers}
       <!-- Display the number of players needed to start the current game session -->
       {#if minPlayers - lobby.players.length !== 1}
