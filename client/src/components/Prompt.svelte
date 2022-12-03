@@ -15,11 +15,10 @@
 
   export let lobbyData: Lobby;
 
-  let userData = $user;
   let answer = "";
   let dirty = false;
 
-  $: userInfo = lobbyData.players[lobbyData.uids.indexOf(userData?.uid ?? "")];
+  $: userInfo = lobbyData.players[lobbyData.uids.indexOf($user?.uid ?? "")];
 
   $: answerDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
 
