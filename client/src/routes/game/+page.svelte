@@ -50,7 +50,8 @@
       errorToJoin("Lobby doesnt exist!");
       return;
     }
-    // if the user isn't signed in or not apart of this lobby then redirect them
+
+    // check for user being null so privatePlayerDocRef can work
     if ($user === null || !lobby.uids.includes($user.uid)) {
       // then return to join
       goto(`/join?code=${lobbyCode}`, {
@@ -108,6 +109,12 @@
   }
 
   // Reactive Calls
+  $: if (lobby !== undefined && $user !== null && !lobby.uids.includes($user.uid)) {
+    // then return to join
+    goto(`/join?code=${lobbyCode}`, {
+      replaceState: true,
+    });
+  }
   $: if (
     countdown <= 0 &&
     lobby != null &&
