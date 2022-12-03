@@ -63,13 +63,13 @@
   <Dialog
     bind:open={showLobbyChat}
     fullscreen
-    aria-labelledby="rules-dialog-title"
-    aria-describedby="rules-dialog-content"
+    aria-labelledby="lobby-dialog-title"
+    aria-describedby="lobby-dialog-content"
     ><Header>
       <Title id="lobby-chat-title">LobbyChat</Title>
       <IconButton action="close" class="material-icons">close</IconButton>
     </Header>
-    <Content>
+    <Content id="lobby-dialog-content">
       <div class="lobby-chat-message">
         <ChatMessages {lobby} messages={chatMessages} on:send={(event) => submitMessage(event.detail.text)}>
           <h2>Lobby Chat</h2>
