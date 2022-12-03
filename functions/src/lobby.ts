@@ -437,7 +437,7 @@ export const verifyExpiration = functions.https.onCall(async (data, context): Pr
     }
   });
   const lobby = (await lobbyDocRef.get()).data();
-  if (lobby?.state == "PROMPT") {
+  if (lobby?.state == ("PROMPT" || "VOTE")) {
     deleteLobbyChatMessages(lobbyDocRef);
   }
 });
