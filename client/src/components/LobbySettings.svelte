@@ -22,16 +22,6 @@
     ["CHAT", "Chat Timer"],
     ["VOTE", "Vote Timer"],
   ]);
-  const minimumTimes = new Map([
-    ["PROMPT", GAME_STATE_DURATIONS_MIN.PROMPT],
-    ["CHAT", GAME_STATE_DURATIONS_MIN.CHAT],
-    ["VOTE", GAME_STATE_DURATIONS_MIN.VOTE],
-  ]);
-  const maximumTimes = new Map([
-    ["PROMPT", GAME_STATE_DURATIONS_MAX.PROMPT],
-    ["CHAT", GAME_STATE_DURATIONS_MAX.CHAT],
-    ["VOTE", GAME_STATE_DURATIONS_MAX.VOTE],
-  ]);
 
   function timeToMinutes(time: number) {
     let minutes = Math.floor(time / 60);
@@ -84,8 +74,8 @@
         <FormField align="end" style={"width:100%"}>
           <Slider
             bind:value={promptTimerValue}
-            min={minimumTimes.get("PROMPT")}
-            max={maximumTimes.get("PROMPT")}
+            min={GAME_STATE_DURATIONS_MIN.PROMPT}
+            max={GAME_STATE_DURATIONS_MAX.PROMPT}
             step={5}
             input$aria-label="Discrete slider"
             style={"width:80%;"}
@@ -96,8 +86,8 @@
         <FormField align="end" style={"width:100%"}>
           <Slider
             bind:value={chatTimerValue}
-            min={minimumTimes.get("CHAT")}
-            max={maximumTimes.get("CHAT")}
+            min={GAME_STATE_DURATIONS_MIN.CHAT}
+            max={GAME_STATE_DURATIONS_MAX.CHAT}
             step={5}
             input$aria-label="Discrete slider"
             style={"width:80%;"}
@@ -108,8 +98,8 @@
         <FormField align="end" style={"width:100%"}>
           <Slider
             bind:value={voteTimerValue}
-            min={minimumTimes.get("VOTE")}
-            max={maximumTimes.get("VOTE")}
+            min={GAME_STATE_DURATIONS_MIN.VOTE}
+            max={GAME_STATE_DURATIONS_MAX.VOTE}
             step={5}
             input$aria-label="Discrete slider"
             style={"width:80%;"}
