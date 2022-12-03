@@ -93,6 +93,10 @@ export type Lobby = {
    */
   votedOff?: string | "NONE";
 
+  /**
+   * array of uids of banned players
+   */
+  bannedPlayers: string[];
   // TODO: delete this once game settings is merged
   catfishAmount: number;
 };
