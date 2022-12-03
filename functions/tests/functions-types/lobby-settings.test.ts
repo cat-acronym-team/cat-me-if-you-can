@@ -2,8 +2,8 @@ import { isLobbySettingsRequest } from "../../src/firebase-functions-types";
 
 import { expect } from "chai";
 
-describe("isChangeAvatarData", () => {
-  it("should return true for a valid LobbySettingsData", () => {
+describe("isLobbySettingsRequest", () => {
+  it("should return true for valid LobbySettingsData", () => {
     const returnedValue = isLobbySettingsRequest({
       lobbyCode: "123456",
       lobbySettings: { catfishAmount: 2, promptTime: 80, chatTime: 80, voteTime: 80 },
