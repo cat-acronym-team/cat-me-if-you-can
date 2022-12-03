@@ -5,7 +5,12 @@
   import IconButton from "@smui/icon-button";
   import Slider from "@smui/slider";
   import FormField from "@smui/form-field";
-  import { GAME_STATE_DURATIONS_MIN, GAME_STATE_DURATIONS_MAX, type Lobby } from "$lib/firebase/firestore-types/lobby";
+  import {
+    GAME_STATE_DURATIONS_MIN,
+    GAME_STATE_DURATIONS_MAX,
+    type Lobby,
+    type ConfigurableTimer,
+  } from "$lib/firebase/firestore-types/lobby";
   import { applyLobbySettings } from "$lib/firebase/firebase-functions";
   import { formatTimer } from "$lib/time";
 
@@ -18,11 +23,11 @@
   let chatTimerValue = lobby.lobbySettings.chatTime;
   let voteTimerValue = lobby.lobbySettings.voteTime;
 
-  const sliderLabels = new Map([
-    ["PROMPT", "Prompt Timer"],
-    ["CHAT", "Chat Timer"],
-    ["VOTE", "Vote Timer"],
-  ]);
+  const sliderLabels: { [state in ConfigurableTimer]: string } = {
+    PROMPT: "Prompt Timer",
+    CHAT: "Chat Timer",
+    VOTE: "Vote Timer",
+  };
 
   async function apply() {
     try {
@@ -76,7 +81,7 @@
             input$aria-label="Prompt Slider"
             style={"width:80%;"}
           />
-          <span slot="label">{sliderLabels.get("PROMPT")} {formatTimer(promptTimerValue)}</span>
+          <span slot="label">{sliderLabels.PROMPT} {formatTimer(promptTimerValue)}</span>
         </FormField>
 
         <FormField align="end" style={"width:100%"}>
@@ -89,7 +94,7 @@
             input$aria-label="Chat Slider"
             style={"width:80%;"}
           />
-          <span slot="label">{sliderLabels.get("CHAT")} {formatTimer(chatTimerValue)}</span>
+          <span slot="label">{sliderLabels.CHAT} {formatTimer(chatTimerValue)}</span>
         </FormField>
 
         <FormField align="end" style={"width:100%"}>
@@ -102,7 +107,7 @@
             input$aria-label="Vote Slider"
             style={"width:80%;"}
           />
-          <span slot="label">{sliderLabels.get("VOTE")} {formatTimer(voteTimerValue)}</span>
+          <span slot="label">{sliderLabels.VOTE} {formatTimer(voteTimerValue)}</span>
         </FormField>
       </div>
     </Content>
