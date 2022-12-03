@@ -98,8 +98,7 @@
       <h3 class="error">Waiting for host to start game...</h3>
     {/if}
   </div>
-
-  <SelectAvatar {lobby} on:change={(event) => onAvatarSelect(event.detail.value)} />
+  <SelectAvatar {lobby} {lobbyCode} on:change={(event) => onAvatarSelect(event.detail.value)} />
   {#if $user?.uid === lobby.uids[0]}
     <div class="actions">
       <Button on:click={start} disabled={lobby.players.length < minPlayers || waiting}>

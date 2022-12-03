@@ -58,6 +58,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
         votes: 0,
       },
     ],
+    bannedPlayers: [],
     state: "WAIT",
     alivePlayers: [context.auth.uid],
     lobbySettings: {
@@ -148,9 +149,15 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     const userInfo = user.data() as UserData;
 
     // get lobby data
-    const { players, uids } = lobbyInfo.data() as Lobby;
+    const { players, uids, bannedPlayers } = lobbyInfo.data() as Lobby;
     if (uids.includes(auth.uid)) {
       throw new functions.https.HttpsError("already-exists", "You are already in the lobby!");
+    }
+
+    // check if user is banned
+    if (bannedPlayers.includes(auth.uid)) {
+      throw new functions.https.HttpsError("permission-denied", "You are banned from this lobby!");
+      // throw an error if the user is banned
     }
 
     // throw an error if the lobby is already full

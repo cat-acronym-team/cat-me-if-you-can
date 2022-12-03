@@ -140,6 +140,11 @@ export type Lobby = {
    * settings that can be edited in the lobby
    */
   lobbySettings: LobbySettings;
+
+  /*
+   * array of uids of banned players
+   */
+  bannedPlayers: string[];
 };
 
 /**
