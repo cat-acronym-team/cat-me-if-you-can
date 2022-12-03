@@ -229,6 +229,22 @@ export const applyLobbySettings = functions.https.onCall(async (data: unknown, c
   if (!isLobbySettingsRequest(data)) {
     throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
   }
+
+  if (data.lobbySettings.catfishAmount < 1 || data.lobbySettings.catfishAmount > 3) {
+    throw new functions.https.HttpsError("permission-denied", "Cannot have less than 1 or more than 3 catfish!");
+  }
+
+  if (
+    data.lobbySettings.promptTime < GAME_STATE_DURATIONS_MIN.PROMPT ||
+    data.lobbySettings.promptTime > GAME_STATE_DURATIONS_MAX.PROMPT ||
+    data.lobbySettings.chatTime < GAME_STATE_DURATIONS_MIN.CHAT ||
+    data.lobbySettings.chatTime > GAME_STATE_DURATIONS_MAX.CHAT ||
+    data.lobbySettings.voteTime < GAME_STATE_DURATIONS_MIN.VOTE ||
+    data.lobbySettings.voteTime > GAME_STATE_DURATIONS_MAX.VOTE
+  ) {
+    throw new functions.https.HttpsError("permission-denied", "Timer must be within the proper range!");
+  }
+
   await db.runTransaction(async (transaction) => {
     // get lobby doc
     const lobby = lobbyCollection.doc(data.code);
@@ -241,21 +257,6 @@ export const applyLobbySettings = functions.https.onCall(async (data: unknown, c
     const { uids } = lobbyInfo.data() as Lobby;
     if (auth.uid !== uids[0]) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
-    }
-
-    if (data.lobbySettings.catfishAmount < 1 || data.lobbySettings.catfishAmount > 3) {
-      throw new functions.https.HttpsError("permission-denied", "Cannot have less than 1 or more than 3 catfish!");
-    }
-
-    if (
-      data.lobbySettings.promptTime < GAME_STATE_DURATIONS_MIN.PROMPT ||
-      data.lobbySettings.promptTime > GAME_STATE_DURATIONS_MAX.PROMPT ||
-      data.lobbySettings.chatTime < GAME_STATE_DURATIONS_MIN.CHAT ||
-      data.lobbySettings.chatTime > GAME_STATE_DURATIONS_MAX.CHAT ||
-      data.lobbySettings.voteTime < GAME_STATE_DURATIONS_MIN.VOTE ||
-      data.lobbySettings.voteTime > GAME_STATE_DURATIONS_MAX.VOTE
-    ) {
-      throw new functions.https.HttpsError("permission-denied", "Timer must be within the proper range!");
     }
 
     transaction.update(lobby, {
