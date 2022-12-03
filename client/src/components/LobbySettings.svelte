@@ -4,7 +4,6 @@
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
   import Slider from "@smui/slider";
-  import FormField from "@smui/form-field";
   import {
     GAME_STATE_DURATIONS_MIN,
     GAME_STATE_DURATIONS_MAX,
@@ -52,63 +51,46 @@
     fullscreen
     aria-labelledby="settings-dialog-title"
     aria-describedby="settings-dialog-content"
+    surface$style="max-width: 700px;"
     ><Header>
       <Title id="settings-dialog-title">Lobby Settings</Title>
       <IconButton action="close" class="material-icons">close</IconButton>
     </Header>
     <Content id="settings-dialog-content">
       <div class="settings">
-        <FormField align="end" style={"width:100%"}>
-          <Slider
-            bind:value={catfishValue}
-            min={1}
-            max={3}
-            step={1}
-            id="Catfish Slider"
-            input$aria-label="Catfish Slider"
-            style={"width:80%;"}
-          />
-          <span slot="label">Catfish Amount: {catfishValue}</span>
-        </FormField>
+        <label for="catfish-slider">Catfish Amount</label>
+        <span class="slider-value">{catfishValue}</span>
+        <Slider bind:value={catfishValue} min={1} max={3} step={1} input$id="catfish-slider" />
 
-        <FormField align="end" style={"width:100%"}>
-          <Slider
-            bind:value={promptTimerValue}
-            min={GAME_STATE_DURATIONS_MIN.PROMPT}
-            max={GAME_STATE_DURATIONS_MAX.PROMPT}
-            step={5}
-            id="Prompt Slider"
-            input$aria-label="Prompt Slider"
-            style={"width:80%;"}
-          />
-          <span slot="label">{sliderLabels.PROMPT} {formatTimer(promptTimerValue)}</span>
-        </FormField>
+        <label for="prompt-slider">{sliderLabels.PROMPT}</label>
+        <span class="slider-value">{formatTimer(promptTimerValue)}</span>
+        <Slider
+          bind:value={promptTimerValue}
+          min={GAME_STATE_DURATIONS_MIN.PROMPT}
+          max={GAME_STATE_DURATIONS_MAX.PROMPT}
+          step={5}
+          input$id="prompt-slider"
+        />
 
-        <FormField align="end" style={"width:100%"}>
-          <Slider
-            bind:value={chatTimerValue}
-            min={GAME_STATE_DURATIONS_MIN.CHAT}
-            max={GAME_STATE_DURATIONS_MAX.CHAT}
-            step={5}
-            id="Chat Slider"
-            input$aria-label="Chat Slider"
-            style={"width:80%;"}
-          />
-          <span slot="label">{sliderLabels.CHAT} {formatTimer(chatTimerValue)}</span>
-        </FormField>
+        <label for="chat-slider">{sliderLabels.CHAT}</label>
+        <span class="slider-value">{formatTimer(chatTimerValue)}</span>
+        <Slider
+          bind:value={chatTimerValue}
+          min={GAME_STATE_DURATIONS_MIN.CHAT}
+          max={GAME_STATE_DURATIONS_MAX.CHAT}
+          step={5}
+          input$id="chat-slider"
+        />
 
-        <FormField align="end" style={"width:100%"}>
-          <Slider
-            bind:value={voteTimerValue}
-            min={GAME_STATE_DURATIONS_MIN.VOTE}
-            max={GAME_STATE_DURATIONS_MAX.VOTE}
-            step={5}
-            id="Vote Slider"
-            input$aria-label="Vote Slider"
-            style={"width:80%;"}
-          />
-          <span slot="label">{sliderLabels.VOTE} {formatTimer(voteTimerValue)}</span>
-        </FormField>
+        <label for="vote-slider">{sliderLabels.VOTE}</label>
+        <span class="slider-value">{formatTimer(voteTimerValue)}</span>
+        <Slider
+          bind:value={voteTimerValue}
+          min={GAME_STATE_DURATIONS_MIN.VOTE}
+          max={GAME_STATE_DURATIONS_MAX.VOTE}
+          step={5}
+          input$id="vote-slider"
+        />
       </div>
     </Content>
     <Actions class="settings">
@@ -120,8 +102,81 @@
 
 <style>
   .settings {
-    width: 100%;
     display: grid;
-    place-items: center;
+    align-items: center;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      "catfish-label catfish-slider catfish-value"
+      "prompt-label prompt-slider prompt-value"
+      "chat-label chat-slider chat-value"
+      "vote-label vote-slider vote-value";
+  }
+
+  .slider-value {
+    justify-self: end;
+    grid-column: -2 / -1;
+  }
+
+  @media (max-width: 550px) {
+    .settings {
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        "catfish-label catfish-value"
+        "catfish-slider catfish-slider"
+        "prompt-label prompt-value"
+        "prompt-slider prompt-slider"
+        "chat-label chat-value"
+        "chat-slider chat-slider"
+        "vote-label vote-value"
+        "vote-slider vote-slider";
+    }
+  }
+
+  label[for="catfish-slider"] {
+    grid-area: catfish-label;
+  }
+
+  label[for="catfish-slider"] + .slider-value {
+    grid-area: catfish-value;
+  }
+
+  label[for="catfish-slider"] + .slider-value + :global(.mdc-slider) {
+    grid-area: catfish-slider;
+  }
+
+  label[for="prompt-slider"] {
+    grid-area: prompt-label;
+  }
+
+  label[for="prompt-slider"] + .slider-value {
+    grid-area: prompt-value;
+  }
+
+  label[for="prompt-slider"] + .slider-value + :global(.mdc-slider) {
+    grid-area: prompt-slider;
+  }
+
+  label[for="chat-slider"] {
+    grid-area: chat-label;
+  }
+
+  label[for="chat-slider"] + .slider-value {
+    grid-area: chat-value;
+  }
+
+  label[for="chat-slider"] + .slider-value + :global(.mdc-slider) {
+    grid-area: chat-slider;
+  }
+
+  label[for="vote-slider"] {
+    grid-area: vote-label;
+  }
+
+  label[for="vote-slider"] + .slider-value {
+    grid-area: vote-value;
+  }
+
+  label[for="vote-slider"] + .slider-value + :global(.mdc-slider) {
+    grid-area: vote-slider;
   }
 </style>
