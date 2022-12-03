@@ -66,13 +66,18 @@
         </div>
         <div class="display-name mdc-typography--body2">{message.displayName}</div>
         {#if lobby.alivePlayers.includes(message.sender)}
-          <div class="text mdc-typography--body1" style="background-color: {avatarColors[message.avatar]}">
+          <div
+            class="text mdc-typography--body1"
+            style="background-color: {avatarColors[message.avatar]}; color: {onAvatarColors[message.avatar]}"
+          >
             {message.text}
           </div>
         {:else}
           <div
             class="text mdc-typography--body1"
-            style="background-color: {avatarColors[message.avatar]}; filter: grayscale(80%); opacity: 0.5;"
+            style="background-color: {avatarColors[message.avatar]}; color: {onAvatarColors[
+              message.avatar
+            ]}; filter: grayscale(80%); opacity: 0.5;"
           >
             {message.text}
           </div>

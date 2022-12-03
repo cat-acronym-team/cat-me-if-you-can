@@ -7,12 +7,23 @@ import {
   getLobbyChatCollection,
 } from "./firestore-collections";
 import { GAME_STATE_DURATIONS, Lobby } from "./firestore-types/lobby";
+import { db } from "./app";
 
-export async function deleteLobbyChatMessages(lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
-  const messages = await transaction.get(getLobbyChatCollection(lobbyDoc));
-  messages.forEach((messageDoc) => {
-    transaction.delete(messageDoc.ref);
-  });
+// export async function deleteLobbyChatMessages(lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
+//   const messages = await transaction.get(getLobbyChatCollection(lobbyDoc));
+//   messages.forEach((messageDoc) => {
+//     transaction.delete(messageDoc.ref);
+//   });
+// }
+export async function deleteLobbyChatMessages(lobbyDoc: DocumentReference<Lobby>) {
+  const messageDoc = await getLobbyChatCollection(lobbyDoc).get();
+
+  const batch = db.batch();
+  for (const message of messageDoc.docs) {
+    batch.delete(message.ref);
+  }
+
+  await batch.commit();
 }
 
 export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {

@@ -413,7 +413,6 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
       await startPrompt(lobbyDoc, transaction);
     }
     if (lobby.state === "PROMPT") {
-      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       await collectPromptAnswers(lobbyDoc, transaction);
     }
     if (lobby.state === "CHAT") {
@@ -424,13 +423,11 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
       await endGameProcess(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "VOTE") {
-      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       findVoteOff(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "RESULT") {
       await determineWinner(lobbyDoc, transaction);
     }
-
-    return;
   });
+  deleteLobbyChatMessages(lobbyDocRef);
 });
