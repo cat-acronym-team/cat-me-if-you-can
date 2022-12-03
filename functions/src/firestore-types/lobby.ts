@@ -40,7 +40,7 @@ export type LobbySettings = {
   /**
    * the number players that will be catfish
    */
-  catfishAmount: [1, 2, 3];
+  catfishAmount: 1 | 2 | 3;
 
   /**
    * duration in seconds for the PROMPT game state
