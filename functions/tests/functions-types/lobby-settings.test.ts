@@ -275,6 +275,38 @@ describe("isChangeAvatarData", () => {
     expect(returnedValue).to.be.false;
   });
 
+  it("should return false if lobbySettings is a number", () => {
+    const returnedValue = isLobbySettingsRequest({
+      lobbyCode: "123456",
+      lobbySettings: 5,
+    });
+    expect(returnedValue).to.be.false;
+  });
+
+  it("should return false if lobbySettings is a string", () => {
+    const returnedValue = isLobbySettingsRequest({
+      lobbyCode: "123456",
+      lobbySettings: "hello",
+    });
+    expect(returnedValue).to.be.false;
+  });
+
+  it("should return false if lobbySettings is null", () => {
+    const returnedValue = isLobbySettingsRequest({
+      lobbyCode: "123456",
+      lobbySettings: null,
+    });
+    expect(returnedValue).to.be.false;
+  });
+
+  it("should return false if lobbySettings is an empty object", () => {
+    const returnedValue = isLobbySettingsRequest({
+      lobbyCode: "123456",
+      lobbySettings: {},
+    });
+    expect(returnedValue).to.be.false;
+  });
+
   it("should return false if object has extra keys", () => {
     const returnedValue = isLobbySettingsRequest({
       lobbyCode: "123456",
