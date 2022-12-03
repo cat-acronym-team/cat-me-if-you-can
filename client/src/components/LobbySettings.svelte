@@ -7,6 +7,7 @@
   import FormField from "@smui/form-field";
   import { GAME_STATE_DURATIONS_MIN, GAME_STATE_DURATIONS_MAX, type Lobby } from "$lib/firebase/firestore-types/lobby";
   import { applyLobbySettings } from "$lib/firebase/firebase-functions";
+  import { formatTimer } from "$lib/time";
 
   export let lobby: Lobby;
   export let lobbyCode: string;
@@ -22,13 +23,6 @@
     ["CHAT", "Chat Timer"],
     ["VOTE", "Vote Timer"],
   ]);
-
-  function timeToMinutes(time: number) {
-    let minutes = Math.floor(time / 60);
-    let seconds = time - minutes * 60;
-
-    return ": " + minutes + ":" + seconds;
-  }
 
   async function apply(catfish: number, prompt: number, chat: number, vote: number) {
     try {
@@ -80,7 +74,7 @@
             input$aria-label="Discrete slider"
             style={"width:80%;"}
           />
-          <span slot="label">{sliderLabels.get("PROMPT")} {timeToMinutes(promptTimerValue)}</span>
+          <span slot="label">{sliderLabels.get("PROMPT")} {formatTimer(promptTimerValue)}</span>
         </FormField>
 
         <FormField align="end" style={"width:100%"}>
@@ -92,7 +86,7 @@
             input$aria-label="Discrete slider"
             style={"width:80%;"}
           />
-          <span slot="label">{sliderLabels.get("CHAT")} {timeToMinutes(chatTimerValue)}</span>
+          <span slot="label">{sliderLabels.get("CHAT")} {formatTimer(chatTimerValue)}</span>
         </FormField>
 
         <FormField align="end" style={"width:100%"}>
@@ -104,7 +98,7 @@
             input$aria-label="Discrete slider"
             style={"width:80%;"}
           />
-          <span slot="label">{sliderLabels.get("VOTE")} {timeToMinutes(voteTimerValue)}</span>
+          <span slot="label">{sliderLabels.get("VOTE")} {formatTimer(voteTimerValue)}</span>
         </FormField>
       </div>
     </Content>
