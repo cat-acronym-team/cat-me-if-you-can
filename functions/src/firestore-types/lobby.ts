@@ -38,22 +38,22 @@ export type Player = {
 
 export type LobbySettings = {
   /**
-   * the number of catfish that are in play
+   * the number players that will be catfish
    */
   catfishAmount: number;
 
   /**
-   * duration for the PROMPT game state
+   * duration in seconds for the PROMPT game state
    */
   promptTime: number;
 
   /**
-   * duration for the CHAT game state
+   * duration in seconds for the CHAT game state
    */
   chatTime: number;
 
   /**
-   * duration for the VOTE game state
+   * duration in seconds for the VOTE game state
    */
   voteTime: number;
 };
