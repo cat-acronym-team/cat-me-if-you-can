@@ -230,17 +230,19 @@ export const applyLobbySettings = functions.https.onCall(async (data: unknown, c
     throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
   }
 
-  if (data.lobbySettings.catfishAmount < 1 || data.lobbySettings.catfishAmount > 3) {
+  const settings = data.lobbySettings;
+
+  if (settings.catfishAmount < 1 || settings.catfishAmount > 3) {
     throw new functions.https.HttpsError("permission-denied", "Cannot have less than 1 or more than 3 catfish!");
   }
 
   if (
-    data.lobbySettings.promptTime < GAME_STATE_DURATIONS_MIN.PROMPT ||
-    data.lobbySettings.promptTime > GAME_STATE_DURATIONS_MAX.PROMPT ||
-    data.lobbySettings.chatTime < GAME_STATE_DURATIONS_MIN.CHAT ||
-    data.lobbySettings.chatTime > GAME_STATE_DURATIONS_MAX.CHAT ||
-    data.lobbySettings.voteTime < GAME_STATE_DURATIONS_MIN.VOTE ||
-    data.lobbySettings.voteTime > GAME_STATE_DURATIONS_MAX.VOTE
+    settings.promptTime < GAME_STATE_DURATIONS_MIN.PROMPT ||
+    settings.promptTime > GAME_STATE_DURATIONS_MAX.PROMPT ||
+    settings.chatTime < GAME_STATE_DURATIONS_MIN.CHAT ||
+    settings.chatTime > GAME_STATE_DURATIONS_MAX.CHAT ||
+    settings.voteTime < GAME_STATE_DURATIONS_MIN.VOTE ||
+    settings.voteTime > GAME_STATE_DURATIONS_MAX.VOTE
   ) {
     throw new functions.https.HttpsError("permission-denied", "Timer must be within the proper range!");
   }
