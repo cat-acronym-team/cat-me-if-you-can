@@ -68,7 +68,15 @@
       // will change lobby to the new doc data
       const newLobby = doc.data();
       if (lobby?.state != newLobby?.state && newLobby != undefined) {
-        countdown = GAME_STATE_DURATIONS_DEFAULT[newLobby.state];
+        if (newLobby.state == "PROMPT") {
+          countdown = newLobby.lobbySettings.promptTime;
+        } else if (newLobby.state == "CHAT") {
+          countdown = newLobby.lobbySettings.chatTime;
+        } else if (newLobby.state == "VOTE") {
+          countdown = newLobby.lobbySettings.voteTime;
+        } else {
+          countdown = GAME_STATE_DURATIONS_DEFAULT[newLobby.state];
+        }
 
         clearInterval(timer);
         timer = setInterval(() => {
