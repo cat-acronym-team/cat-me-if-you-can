@@ -28,6 +28,12 @@ export type Player = {
   /**
    * the role that the player played; used at the end of the game
    */
+
+  /**
+   * timestamp of when the the player joined the lobby
+   */
+  timeJoined: Timestamp;
+
   role?: Role;
 
   /**

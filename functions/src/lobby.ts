@@ -48,6 +48,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
         avatar: userData.avatar || AVATARS[Math.floor(Math.random() * AVATARS.length)],
         displayName: userData.displayName,
         votes: 0,
+        timeJoined: firestore.Timestamp.now(),
       },
     },
     state: "WAIT",
@@ -159,6 +160,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
       avatar: userInfo.avatar,
       displayName: userInfo.displayName,
       votes: 0,
+      timeJoined: firestore.Timestamp.now(),
     };
 
     transaction.update(lobby, {
@@ -191,15 +193,41 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
     }
 
     // get lobby data
-    const { players } = lobbyInfo.data() as Lobby;
+    const { players, host } = lobbyInfo.data() as Lobby;
+
+    const newPlayers: Lobby["players"] = {};
+    for (const uid in players) {
+      if (uid !== auth.uid) {
+        newPlayers[uid] = players[uid];
+      }
+    }
 
     // If the last player is leaving delete the document instead
     if (Object.keys(players).length === 1) {
       transaction.delete(lobby);
     } else {
+      // if he's the host do this check
+      let newHost: string | undefined;
+      let earliestJoinedPlayerTime = firestore.Timestamp.now();
+
+      if (auth.uid == host) {
+        for (const uid in players) {
+          if (players[uid].timeJoined.toMillis() < earliestJoinedPlayerTime.toMillis() && uid != auth.uid) {
+            earliestJoinedPlayerTime = players[uid].timeJoined;
+            newHost = uid;
+          }
+          functions.logger.info("In Loop: " + newHost + " | " + uid);
+        }
+      } else {
+        newHost = auth.uid;
+      }
+
+      functions.logger.info("After Loop: " + newHost);
+
       // Remove player from the lobby
       transaction.update(lobby, {
-        players: firestore.FieldValue.arrayRemove(auth.uid),
+        players: newPlayers,
+        host: newHost ?? host,
       });
     }
   });
