@@ -11,7 +11,7 @@
   export let lobby: Lobby;
   export let lobbyCode: string;
 
-  let votedFor: number | undefined; // index of the person that's been voted
+  let votedFor: string | undefined; // uid of the person that's been voted
   let unsubscribeVote: Unsubscribe | undefined;
 
   onMount(() => {
@@ -21,7 +21,7 @@
       if (!doc.exists() || !lobby.alivePlayers.includes($user?.uid ?? "")) {
         return;
       }
-      votedFor = lobby.uids.indexOf(doc.data().target);
+      votedFor = doc.data().target;
     });
   });
 
@@ -33,24 +33,24 @@
 <div class="voting">
   <p class="mdc-typography--headline4">Vote out the catfish</p>
   <div class="voting-grid">
-    {#each lobby.players as { avatar, displayName, votes, alive, promptAnswer }, i}
-      <div class="vote-container {!alive ? 'dead' : ''}">
+    {#each Object.entries(lobby.players) as [uid, player]}
+      <div class="vote-container {!player.alive ? 'dead' : ''}">
         <button
-          class="avatar {votedFor == i ? 'selected' : ''}"
-          disabled={!lobby.alivePlayers.includes($user?.uid ?? "") || !alive}
-          on:click={() => addVote(lobbyCode, $user?.uid ?? "", lobby.uids[i])}
+          class="avatar {votedFor == uid ? 'selected' : ''}"
+          disabled={!lobby.alivePlayers.includes($user?.uid ?? "") || !player.alive}
+          on:click={() => addVote(lobbyCode, $user?.uid ?? "", uid)}
         >
-          <img src="/avatars/{avatar}.webp" alt={avatarAltText[avatar]} />
-          <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
+          <img src="/avatars/{player.avatar}.webp" alt={avatarAltText[player.avatar]} />
+          <span class="mdc-typography--subtitle1">{player.displayName ?? ""}</span>
           <div class="mdc-typography--caption">
-            {#if alive}
-              Answer: {promptAnswer ?? "no answer"}
+            {#if player.alive}
+              Answer: {player.promptAnswer ?? "no answer"}
             {:else}
               Im dead
             {/if}
           </div>
         </button>
-        <span class="mdc-typography--heading6">{votes ?? 0}</span>
+        <span class="mdc-typography--heading6">{player.votes ?? 0}</span>
       </div>
     {/each}
   </div>
