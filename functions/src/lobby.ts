@@ -153,16 +153,16 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
       userInfo.avatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
     }
 
-    // add player
+    const existingPlayers = players;
+    existingPlayers[auth.uid] = {
+      alive: true,
+      avatar: userInfo.avatar,
+      displayName: userInfo.displayName,
+      votes: 0,
+    };
+
     transaction.update(lobby, {
-      players: {
-        [auth.uid]: {
-          alive: true,
-          avatar: userInfo.avatar,
-          displayName: userInfo.displayName,
-          votes: 0,
-        },
-      },
+      players: existingPlayers,
     });
   });
 });
@@ -392,7 +392,7 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
     // TODO: potential if checks for other states that require a timer
     // if the state is chat then delete chatrooms
     if (lobby.state === "ROLE") {
-      await deleteLobbyChatMessages(lobbyDocRef, transaction);
+      // await deleteLobbyChatMessages(lobbyDocRef, transaction);
       await startPrompt(lobbyDoc, transaction);
     }
     if (lobby.state === "PROMPT") {
