@@ -83,9 +83,12 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
   if (!isLobbyRequest(data)) {
     throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
   }
+
+  const lobbyDoc = lobbyCollection.doc(data.code);
+
   await db.runTransaction(async (transaction) => {
     // get lobby doc
-    const lobby = await transaction.get(lobbyCollection.doc(data.code));
+    const lobby = await transaction.get(lobbyDoc);
     if (lobby.exists === false) {
       throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
@@ -105,6 +108,8 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
 
     assignRole(lobby, transaction);
   });
+
+  await deleteLobbyChatMessages(lobbyDoc);
 });
 
 export const joinLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
@@ -364,7 +369,7 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
   });
 });
 
-export const verifyExpiration = functions.https.onCall((data, context): Promise<void> => {
+export const verifyExpiration = functions.https.onCall(async (data, context): Promise<void> => {
   // check auth
   if (context.auth == undefined) {
     throw new functions.https.HttpsError("permission-denied", "User is not Authenticated");
@@ -375,11 +380,12 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
   }
   // get lobby doc
   const lobbyDocRef = lobbyCollection.doc(data.code);
+  let lobby: Lobby | undefined;
 
   // start transaction
-  return db.runTransaction(async (transaction) => {
+  await db.runTransaction(async (transaction) => {
     const lobbyDoc = await transaction.get(lobbyDocRef);
-    const lobby = lobbyDoc.data();
+    lobby = lobbyDoc.data();
     if (lobby === undefined) {
       throw new functions.https.HttpsError("not-found", "Lobby does not exist.");
     }
@@ -398,7 +404,6 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
     // TODO: potential if checks for other states that require a timer
     // if the state is chat then delete chatrooms
     if (lobby.state === "ROLE") {
-      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       await startPrompt(lobbyDoc, transaction);
     }
     if (lobby.state === "PROMPT") {
@@ -415,10 +420,11 @@ export const verifyExpiration = functions.https.onCall((data, context): Promise<
       findVoteOff(lobby, lobbyDocRef, transaction);
     }
     if (lobby.state === "RESULT") {
-      await deleteLobbyChatMessages(lobbyDocRef, transaction);
       await determineWinner(lobbyDoc, transaction);
     }
-
-    return;
   });
+
+  if (lobby?.state == "VOTE") {
+    await deleteLobbyChatMessages(lobbyDocRef);
+  }
 });
