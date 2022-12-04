@@ -66,18 +66,16 @@
     aria-labelledby="lobby-dialog-title"
     aria-describedby="lobby-dialog-content"
     ><Header>
-      <Title id="lobby-chat-title">LobbyChat</Title>
+      <Title id="lobby-chat-title">Lobby Chat</Title>
       <IconButton action="close" class="material-icons">close</IconButton>
     </Header>
     <Content id="lobby-dialog-content">
       <div class="lobby-chat-message">
-        <ChatMessages {lobby} messages={chatMessages} on:send={(event) => submitMessage(event.detail.text)}>
-          <h2>Lobby Chat</h2>
-          {#if errorMessage !== ""}
-            <p class="error">{errorMessage}</p>
-          {/if}
-        </ChatMessages>
+        <ChatMessages {lobby} messages={chatMessages} on:send={(event) => submitMessage(event.detail.text)} />
       </div>
+      {#if errorMessage !== ""}
+        <p class="error">{errorMessage}</p>
+      {/if}
     </Content>
   </Dialog>
   <Button
