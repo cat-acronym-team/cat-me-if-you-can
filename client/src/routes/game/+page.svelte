@@ -30,6 +30,13 @@
   let countdown = GAME_STATE_DURATIONS.WAIT;
   let timer: ReturnType<typeof setInterval>;
 
+  function updateCountdown() {
+    if (lobby == undefined) {
+      throw new Error("attempted to update countdown when lobby is undefined");
+    }
+    countdown = Math.floor((lobby.expiration.toMillis() - Date.now()) / 1000);
+  }
+
   onMount(async () => {
     // gets code from url search
     // the svelte magic with searchparams wasnt working
@@ -63,22 +70,16 @@
     const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
     const privatePlayerDocRef = doc(privatePlayerCollection, $user.uid);
 
+    updateCountdown();
+
     // We want them to subscribe to the lobby on mount
     unsubscribeLobby = onSnapshot(lobbyDocRef, (doc) => {
       // will change lobby to the new doc data
-      const newLobby = doc.data();
-      if (lobby?.state != newLobby?.state && newLobby != undefined) {
-        countdown = GAME_STATE_DURATIONS[newLobby.state];
-
-        clearInterval(timer);
-        timer = setInterval(() => {
-          if (lobby?.expiration != undefined) {
-            const diff = Math.floor((lobby.expiration.toMillis() - Date.now()) / 1000);
-            countdown = diff;
-          }
-        }, 500);
+      lobby = doc.data();
+      clearInterval(timer);
+      if (lobby != undefined) {
+        timer = setInterval(updateCountdown, 500);
       }
-      lobby = newLobby;
     });
 
     // We want them to subscribe to the privatePlayer on mount
