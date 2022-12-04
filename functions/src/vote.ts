@@ -8,12 +8,13 @@ export function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lob
 
   // find the player with the most votes
   let most: Player | null = null;
-  const mostValue = 0;
+  let mostValue = 0;
 
   for (const uid in lobbyData.players) {
     if (players[uid].votes > mostValue) {
       most = players[uid];
-    } else {
+      mostValue = most.votes;
+    } else if (players[uid].votes == mostValue) {
       most = null;
     }
   }
@@ -35,6 +36,7 @@ export function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lob
       votedOff = mostUID;
     }
   }
+
   const expiration = firestore.Timestamp.fromMillis(
     firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.RESULT * 1000
   );
