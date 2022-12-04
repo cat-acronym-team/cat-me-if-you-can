@@ -90,10 +90,10 @@ export async function endGameProcess(
   );
 
   // reset the lobby
-  for (const uid in lobbyData.players) {
-    lobbyData.players[uid].alive = true;
-    lobbyData.players[uid].votes = 0;
-    delete lobbyData.players[uid].role;
+  for (const uid in players) {
+    players[uid].alive = true;
+    players[uid].votes = 0;
+    delete players[uid].role;
   }
 
   // create a WriteBatch

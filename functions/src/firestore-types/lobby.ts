@@ -26,14 +26,13 @@ export type Player = {
   votes: number;
 
   /**
-   * the role that the player played; used at the end of the game
-   */
-
-  /**
    * timestamp of when the the player joined the lobby
    */
   timeJoined: Timestamp;
 
+  /**
+   * the role that the player played; used at the end of the game
+   */
   role?: Role;
 
   /**

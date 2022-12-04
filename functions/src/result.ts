@@ -3,6 +3,7 @@ import type { DocumentSnapshot, Transaction } from "firebase-admin/firestore";
 import { getPrivatePlayerCollection, getVoteCollection } from "./firestore-collections";
 import { GAME_STATE_DURATIONS, Lobby, Role } from "./firestore-types/lobby";
 import { startPrompt } from "./lobby";
+import * as functions from "firebase-functions";
 
 export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transaction: Transaction) {
   const lobbyData = lobbyDoc.data();
@@ -13,7 +14,10 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
 
   const { players: currentPlayers } = lobbyData;
   let winner: Role | undefined;
-  const alteredPlayers: typeof currentPlayers = JSON.parse(JSON.stringify(currentPlayers));
+  const alteredPlayers = { ...currentPlayers };
+
+  functions.logger.info(`Current Players: ${currentPlayers["GIwUxe2z8dIkHD4lwWAkjRkVyRU4"].timeJoined}`);
+  functions.logger.info(`Altered Players: ${alteredPlayers["GIwUxe2z8dIkHD4lwWAkjRkVyRU4"].timeJoined}`);
 
   // check the alive cats vs alive catfishes
   let aliveCats = 0;

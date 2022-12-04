@@ -208,21 +208,21 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
     } else {
       // if he's the host do this check
       let newHost: string | undefined;
-      let earliestJoinedPlayerTime = firestore.Timestamp.now();
+      let earliestJoinedTime = firestore.Timestamp.now();
 
       if (auth.uid == host) {
         for (const uid in players) {
-          if (players[uid].timeJoined.toMillis() < earliestJoinedPlayerTime.toMillis() && uid != auth.uid) {
-            earliestJoinedPlayerTime = players[uid].timeJoined;
+          const currentPlayerTimeJoined = players[uid].timeJoined.seconds * 1000;
+          if (currentPlayerTimeJoined < earliestJoinedTime.toMillis() && uid != auth.uid) {
+            earliestJoinedTime = players[uid].timeJoined;
             newHost = uid;
           }
-          functions.logger.info("In Loop: " + newHost + " | " + uid);
+
+          functions.logger.info(uid + " | " + currentPlayerTimeJoined + " < " + earliestJoinedTime.toMillis());
         }
       } else {
         newHost = auth.uid;
       }
-
-      functions.logger.info("After Loop: " + newHost);
 
       // Remove player from the lobby
       transaction.update(lobby, {
