@@ -244,24 +244,22 @@ export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, t
     throw new Error("Lobby not found");
   }
 
-  await Promise.all(
-    lobbyData.uids.map(async (uid) => {
-      const privatePlayerDocRef = privatePlayerCollection.doc(uid);
-
-      const privatePlayerDoc = await transaction.get(privatePlayerDocRef);
-
-      const privatePlayerData = privatePlayerDoc.data();
-
-      if (!privatePlayerData) {
-        throw new Error(`Private player not found for uid ${uid}`);
-      }
-
-      transaction.update(privatePlayerDocRef, {
-        prompt: privatePlayerData.role == "CAT" ? catPrompt : catfishPrompt,
-      });
-    })
+  const privatePlayerDocs = await Promise.all(
+    lobbyData.uids.map((uid) => transaction.get(privatePlayerCollection.doc(uid)))
   );
-  // expiration
+
+  for (const privatePlayerDoc of privatePlayerDocs) {
+    const privatePlayerData = privatePlayerDoc.data();
+
+    if (!privatePlayerData) {
+      throw new Error(`Private player not found for uid ${privatePlayerDoc.id}`);
+    }
+
+    transaction.update(privatePlayerDoc.ref, {
+      prompt: privatePlayerData.role == "CAT" ? catPrompt : catfishPrompt,
+    });
+  }
+
   const expiration = firestore.Timestamp.fromMillis(
     firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.PROMPT * 1000
   );
