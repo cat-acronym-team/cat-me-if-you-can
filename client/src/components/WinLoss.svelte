@@ -57,7 +57,7 @@
       <h2>You have sniffed out the cat fish!</h2>
     </div>
     <div class="image">
-      <img src="/images/winloss/HappyCat.png" alt="happy cat" />
+      <img src="/images/winloss/cat-win.webp" alt="" />
     </div>
     <div class="displayname">
       <!-- Check the number of catfish for grammar purposes -->
@@ -78,7 +78,7 @@
       {/if}
     </div>
     <div class="image">
-      <img src="/images/winloss/SadCat.png" alt="sad cat" />
+      <img src="/images/winloss/cat-loss.webp" alt="" />
     </div>
     <div class="displayname">
       <!-- Check the number of catfish for grammar purposes -->
@@ -96,7 +96,7 @@
     </div>
 
     <div class="image">
-      <img src="/images/winloss/Catfish.png" alt="cat fish" />
+      <img src="/images/winloss/catfish-win.webp" alt="" />
     </div>
 
     <div class="displayname">
@@ -109,7 +109,7 @@
       <h2>Might as well have been a <b>clown</b> fish...</h2>
     </div>
     <div class="image">
-      <img src="/images/winloss/Clownfish.png" alt="clown fish" />
+      <img src="/images/winloss/catfish-loss.webp" alt="" />
     </div>
     <div class="displayname">
       <h2>You should go back to your sea ani-anim-aneme... home</h2>
