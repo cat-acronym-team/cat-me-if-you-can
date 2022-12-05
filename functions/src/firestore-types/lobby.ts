@@ -38,7 +38,7 @@ export type Player = {
 
 export type LobbySettings = {
   /**
-   * the number players that will be catfish
+   * the number of players that will be catfish
    */
   catfishAmount: 1 | 2 | 3;
 

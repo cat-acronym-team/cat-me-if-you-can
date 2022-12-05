@@ -55,8 +55,6 @@ export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentRefere
     transaction.update(stalker.ref, { stalker: false });
   }
 
-  transaction.update(lobbyDoc, { state: "VOTE", players });
-
   const expiration = firestore.Timestamp.fromMillis(
     firestore.Timestamp.now().toMillis() + lobbyData.lobbySettings.voteTime * 1000
   );
