@@ -1,6 +1,7 @@
 <script lang="ts">
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
+  import CharacterCounter from "@smui/textfield/character-counter";
   import IconButton from "@smui/icon-button";
   import {
     chatMessageValidator,
@@ -86,6 +87,7 @@
         invalid={messageInvalid}
         input$autofocus
         input$enterkeyhint="send"
+        input$maxlength={100}
       >
         <IconButton
           type="submit"
@@ -96,7 +98,10 @@
         >
           send
         </IconButton>
-        <HelperText validationMsg slot="helper">{messageValidation.valid ? "" : messageValidation.reason}</HelperText>
+        <svelte:fragment slot="helper">
+          <HelperText validationMsg>{messageValidation.valid ? "" : messageValidation.reason}</HelperText>
+          <CharacterCounter>0 / 100</CharacterCounter>
+        </svelte:fragment>
       </Textfield>
     </form>
   {/if}
@@ -188,6 +193,6 @@
   }
 
   form :global(.mdc-text-field-helper-line) {
-    padding-inline-start: var(--mdc-shape-small);
+    padding-inline: var(--mdc-shape-small);
   }
 </style>
