@@ -245,7 +245,7 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
   });
 });
 
-export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate((change) => {
+export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate(async (change, context) => {
   const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
   const lobby = change.after.data() as Lobby;
   const lobbyBefore = change.before.data() as Lobby;
@@ -261,7 +261,7 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
     }
   }
   if (hasChanged) {
-    lobbyDocRef.update({ alivePlayers: alivePlayers });
+    await lobbyDocRef.update({ alivePlayers: alivePlayers });
   }
 });
 
