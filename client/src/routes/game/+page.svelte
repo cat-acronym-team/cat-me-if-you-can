@@ -182,6 +182,10 @@
     height: 100%;
     display: grid;
     grid-template-areas: "header" "scroll-container";
+    grid-template-rows: 64px 1fr;
+  }
+
+  main:has(.countdown) {
     grid-template-rows: 96px 1fr;
     gap: 24px;
   }
