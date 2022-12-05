@@ -140,7 +140,7 @@
 <main class:has-countdown={countdownVisible}>
   {#if countdownVisible}
     <p class="countdown mdc-typography--headline2 {countdown <= 10 ? 'error' : ''}">
-      {formatTimer(countdown)}
+      {formatTimer(Math.max(countdown, 0))}
     </p>
   {/if}
 
