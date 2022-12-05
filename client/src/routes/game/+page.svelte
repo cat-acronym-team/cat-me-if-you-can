@@ -108,6 +108,12 @@
   }
 
   // Reactive Calls
+  $: if (lobby !== undefined && $user !== null && !lobby.uids.includes($user.uid)) {
+    // then return to join
+    goto(`/join?code=${lobbyCode}`, {
+      replaceState: true,
+    });
+  }
   $: if (
     countdown <= 0 &&
     lobby != null &&
