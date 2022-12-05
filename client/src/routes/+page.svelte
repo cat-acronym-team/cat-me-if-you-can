@@ -82,15 +82,14 @@
   <SigninButton {userData} />
 </header>
 
-<main class="cat-main-container">
-  <div class="cat-main">
-    <div class="logo-container">
-      <img src="/images/banner.webp" alt="" />
-    </div>
-    <div class="cat-main-buttons">
-      {#if errorMessage !== ""}
-        <p class="error">{errorMessage}</p>
-      {/if}
+<main>
+  <img class="banner" src="/images/banner.webp" alt="" />
+  <h1 class="mdc-typography--headline1">Cat Me If You Can</h1>
+  <div class="form">
+    {#if errorMessage !== ""}
+      <p class="error">{errorMessage}</p>
+    {/if}
+    <div class="textbox">
       <Textfield
         type="text"
         label="Display name"
@@ -101,10 +100,12 @@
       >
         <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
       </Textfield>
-      <Button on:click={createLobbyHandler} disabled={!nameValidation.valid || waiting}>
+    </div>
+    <div class="buttons">
+      <Button on:click={createLobbyHandler} disabled={!nameValidation.valid || waiting} variant="raised">
         <Label>Create Lobby</Label>
       </Button>
-      <Button on:click={joinLobbyHandler} disabled={!nameValidation.valid || waiting}>
+      <Button on:click={joinLobbyHandler} disabled={!nameValidation.valid || waiting} variant="raised">
         <Label>Join Lobby</Label>
       </Button>
     </div>
@@ -121,50 +122,45 @@
     padding-right: 16px;
   }
 
-  .logo-container {
-    width: 50%;
-    margin: auto;
-  }
-  .logo-container img {
-    width: 100%;
-  }
-  .cat-main-container {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 70%;
-  }
-  .cat-main {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    margin-top: auto;
-    margin-bottom: auto;
-  }
-  .cat-main-buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 70%;
-    margin: auto;
+  :global(body) {
+    display: grid;
+    grid-template-rows: auto 1fr;
   }
 
-  /* Tablet Styles */
-  @media only screen and (min-width: 700px) {
-    .logo-container {
-      width: 40%;
-    }
+  main {
+    display: grid;
+    justify-items: center;
+    grid-template-rows: auto auto 1fr;
+    gap: 12px;
+    padding: 16px;
+    --scale: min(calc(5vw + 12px), max(8vh, 16px));
   }
-  /* Desktop Styles */
-  @media only screen and (min-width: 1000px) {
-    .logo-container {
-      width: 20%;
-    }
-    .cat-main-buttons {
-      width: 35%;
-    }
+
+  .banner {
+    width: min(100%, calc(var(--scale) * 10));
+  }
+
+  h1 {
+    margin: 0;
+    padding: 0;
+    font-size: var(--scale);
+    line-height: var(--scale);
+  }
+
+  .form {
+    display: grid;
+    gap: 16px;
+    justify-items: center;
+    align-content: center;
+  }
+
+  .textbox {
+    width: 200px;
+    display: grid;
+  }
+
+  .buttons {
+    display: grid;
+    gap: inherit;
   }
 </style>
