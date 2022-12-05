@@ -126,7 +126,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     const lobbyData = lobbyInfo.data();
     const privatePlayerCollection = getPrivatePlayerCollection(lobby);
     // extra validation to make sure it exist
-    if (lobbyInfo.exists === false) {
+    if (lobbyInfo.exists === false || lobbyData == undefined) {
       throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
     // user doc
@@ -162,7 +162,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     }
 
     // add spectator
-    if (lobbyData?.state != "WAIT") {
+    if (lobbyData.state != "WAIT") {
       const privatePlayerDocRef = privatePlayerCollection.doc(user.id);
       transaction.create(privatePlayerDocRef, { role: "SPECTATOR", stalker: false });
       transaction.update(lobby, {
@@ -437,7 +437,7 @@ export const verifyExpiration = functions.https.onCall(async (data, context): Pr
     }
   });
   const lobby = (await lobbyDocRef.get()).data();
-  if (lobby?.state == ("PROMPT" || "VOTE")) {
+  if (lobby?.state == "PROMPT" || lobby?.state == "VOTE") {
     deleteLobbyChatMessages(lobbyDocRef);
   }
 });

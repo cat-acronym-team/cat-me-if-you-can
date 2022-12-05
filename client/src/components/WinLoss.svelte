@@ -51,7 +51,15 @@
 <!-- Scenario 1 -->
 <div class="container">
   <!-- Check the user's role and display the correct win or loss page accordingly -->
-  {#if end == "Cat Win"}
+  {#if privatePlayer.role == "SPECTATOR"}
+    {#if end == "Cat Win" || "Catfish Lose"}
+      <h2 class="banner">The cats have sniffed out the cat fish!</h2>
+      <h2 class="banner">You will be able to join the next game!</h2>
+    {:else if end == "Cat Lose" || end == "Catfish Win"}
+      <h2 class="banner">The impawsters were not caught!</h2>
+      <h2 class="banner">You will be able to join the next game!</h2>
+    {/if}
+  {:else if end == "Cat Win"}
     <div class="banner">
       <h2>Hooray!</h2>
       <h2>You have sniffed out the cat fish!</h2>
