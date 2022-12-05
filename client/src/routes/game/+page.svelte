@@ -137,7 +137,7 @@
 <!-- I do this check because the html was rendering the Lobby component before the onmount happened due to lobby having default values -->
 <!-- So the code was displaying undefined in the Lobby Component -->
 <!-- We could have a loading animation until the lobby is not undefined -->
-<main>
+<main class:has-countdown={countdownVisible}>
   {#if countdownVisible}
     <p class="countdown mdc-typography--headline2 {countdown <= 10 ? 'error' : ''}">
       {formatTimer(countdown)}
@@ -185,7 +185,7 @@
     grid-template-rows: 64px 1fr;
   }
 
-  main:has(.countdown) {
+  main.has-countdown {
     grid-template-rows: 96px 1fr;
     gap: 24px;
   }
