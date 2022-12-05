@@ -15,7 +15,6 @@
 
   export let lobby: Lobby;
   export let lobbyCode: string;
-  let errorMessage: string = "";
   let showLobbySettings = false;
   let catfishValue: 1 | 2 | 3 = 1;
   let promptTimerValue = lobby.lobbySettings.promptTime;
@@ -29,19 +28,15 @@
   };
 
   async function apply() {
-    try {
-      await applyLobbySettings({
-        code: lobbyCode,
-        lobbySettings: {
-          catfishAmount: catfishValue,
-          promptTime: promptTimerValue,
-          chatTime: chatTimerValue,
-          voteTime: voteTimerValue,
-        },
-      });
-    } catch (err) {
-      errorMessage = err instanceof Error ? err.message : String(err);
-    }
+    await applyLobbySettings({
+      code: lobbyCode,
+      lobbySettings: {
+        catfishAmount: catfishValue,
+        promptTime: promptTimerValue,
+        chatTime: chatTimerValue,
+        voteTime: voteTimerValue,
+      },
+    });
   }
 </script>
 
