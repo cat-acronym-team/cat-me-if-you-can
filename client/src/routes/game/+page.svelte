@@ -171,7 +171,7 @@
   {:else if lobby.state === "END"}
     <WinLoss {lobbyCode} {lobby} {privatePlayer} />
   {:else}
-    unknown lobby state: {lobby.state}
+    <p class="error">unknown lobby state: {lobby.state}</p>
   {/if}
 </main>
 
