@@ -28,6 +28,7 @@
   let unsubscribePrivatePlayer: Unsubscribe | undefined = undefined;
 
   let countdown = GAME_STATE_DURATIONS.WAIT;
+  $: countdownVisible = lobby != undefined && DISPLAY_TIMERS[lobby.state] == true;
   let timer: ReturnType<typeof setInterval>;
 
   function updateCountdown() {
@@ -116,19 +117,18 @@
       replaceState: true,
     });
   }
-  $: if (
-    countdown <= 0 &&
-    lobby != null &&
-    lobby.uids[0] === $user?.uid &&
-    lobbyCode != null &&
-    DISPLAY_TIMERS[lobby.state] != null
-  ) {
-    clearInterval(timer);
-    verifyExpiration({ code: lobbyCode });
-  }
-  $: if (countdown <= -5 && lobby != null && lobbyCode != null && DISPLAY_TIMERS[lobby.state] != null) {
-    clearInterval(timer);
-    verifyExpiration({ code: lobbyCode });
+
+  $: countdown, checkTimerExpiration();
+  function checkTimerExpiration() {
+    if (
+      lobby != null &&
+      lobbyCode != null &&
+      DISPLAY_TIMERS[lobby.state] != null &&
+      ((lobby.uids[0] === $user?.uid && countdown < 0) || countdown < -5)
+    ) {
+      clearInterval(timer);
+      verifyExpiration({ code: lobbyCode });
+    }
   }
 </script>
 
@@ -138,13 +138,13 @@
 <!-- So the code was displaying undefined in the Lobby Component -->
 <!-- We could have a loading animation until the lobby is not undefined -->
 <main>
-  {#if lobby != null && DISPLAY_TIMERS[lobby.state] == true}
-    <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
-      {formatTimer(Math.max(countdown, 0))}
+  {#if countdownVisible}
+    <p class="countdown mdc-typography--headline2 {countdown <= 10 ? 'error' : ''}">
+      {formatTimer(countdown)}
     </p>
   {/if}
 
-  {#if $user == null || lobby == undefined || lobbyCode == null}
+  {#if $user == null || lobby == undefined || lobbyCode == null || (countdown < 0 && countdownVisible)}
     <div class="spinner-wraper">
       <CircularProgress indeterminate />
     </div>
@@ -176,16 +176,20 @@
 </main>
 
 <style>
-  .countdown {
-    margin: 0;
-    text-align: center;
-  }
-
   main {
     box-sizing: border-box;
     height: 100%;
     overflow: auto;
     padding-top: 64px;
+  }
+
+  .countdown {
+    margin: 0;
+    text-align: center;
+  }
+
+  main:has(.spinner-wraper) .countdown {
+    display: none;
   }
 
   main:has(.spinner-wraper) {
