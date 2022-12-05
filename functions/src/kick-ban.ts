@@ -22,7 +22,7 @@ export const kick = functions.https.onCall((data: unknown, context): Promise<voi
     if (lobbyData == undefined) {
       throw new functions.https.HttpsError("not-found", "Lobby not found.");
     }
-    if (auth.uid == lobbyData.host) {
+    if (auth.uid != lobbyData.host) {
       throw new functions.https.HttpsError("permission-denied", "User making request is not the host.");
     }
 
@@ -30,7 +30,7 @@ export const kick = functions.https.onCall((data: unknown, context): Promise<voi
     const newPlayers: Lobby["players"] = {};
 
     for (const uid in players) {
-      if (uid !== auth.uid) {
+      if (uid !== data.uid) {
         newPlayers[uid] = players[uid];
       }
     }
@@ -42,10 +42,10 @@ export const kick = functions.https.onCall((data: unknown, context): Promise<voi
       let newHost: string | undefined;
       let earliestJoinedTime = firestore.Timestamp.now();
 
-      if (auth.uid == host) {
+      if (data.uid == host) {
         for (const uid in players) {
           const currentPlayerTimeJoined = players[uid].timeJoined.seconds * 1000;
-          if (currentPlayerTimeJoined < earliestJoinedTime.toMillis() && uid != auth.uid) {
+          if (currentPlayerTimeJoined < earliestJoinedTime.toMillis() && uid != data.uid) {
             earliestJoinedTime = players[uid].timeJoined;
             newHost = uid;
           }
@@ -81,7 +81,7 @@ export const ban = functions.https.onCall((data: unknown, context): Promise<void
     if (lobbyData == undefined) {
       throw new functions.https.HttpsError("not-found", "Lobby not found.");
     }
-    if (auth.uid == lobbyData.host) {
+    if (auth.uid != lobbyData.host) {
       throw new functions.https.HttpsError("permission-denied", "User making request is not the host.");
     }
 
@@ -89,7 +89,7 @@ export const ban = functions.https.onCall((data: unknown, context): Promise<void
     const newPlayers: Lobby["players"] = {};
 
     for (const uid in players) {
-      if (uid !== auth.uid) {
+      if (uid !== data.uid) {
         newPlayers[uid] = players[uid];
       }
     }
@@ -101,10 +101,10 @@ export const ban = functions.https.onCall((data: unknown, context): Promise<void
       let newHost: string | undefined;
       let earliestJoinedTime = firestore.Timestamp.now();
 
-      if (auth.uid == host) {
+      if (data.uid == host) {
         for (const uid in players) {
           const currentPlayerTimeJoined = players[uid].timeJoined.seconds * 1000;
-          if (currentPlayerTimeJoined < earliestJoinedTime.toMillis() && uid != auth.uid) {
+          if (currentPlayerTimeJoined < earliestJoinedTime.toMillis() && uid != data.uid) {
             earliestJoinedTime = players[uid].timeJoined;
             newHost = uid;
           }
