@@ -144,48 +144,53 @@
     </p>
   {/if}
 
-  {#if $user == null || lobby == undefined || lobbyCode == null || (countdown < 0 && countdownVisible)}
-    <div class="spinner-wraper">
-      <CircularProgress indeterminate />
-    </div>
-  {:else if !lobby.alivePlayers.includes($user.uid)}
-    <LobbyChat {lobby} {lobbyCode} />
-  {:else if lobby.state === "WAIT"}
-    <LobbyChat {lobby} {lobbyCode} />
-    <LobbyComponent {lobbyCode} {lobby} />
-  {:else if privatePlayer == undefined}
-    <div class="spinner-wraper">
-      <CircularProgress indeterminate />
-    </div>
-  {:else if lobby.state === "ROLE"}
-    <Role {privatePlayer} />
-  {:else if lobby.state === "PROMPT"}
-    <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
-  {:else if lobby.state === "CHAT"}
-    <ChatRoom {lobby} {lobbyCode} isStalker={privatePlayer.stalker} />
-  {:else if lobby.state === "VOTE"}
-    <LobbyChat {lobby} {lobbyCode} />
-    <Vote {lobby} {lobbyCode} />
-  {:else if lobby.state === "RESULT"}
-    <Result {lobby} />
-  {:else if lobby.state === "END"}
-    <WinLoss {lobbyCode} {lobby} {privatePlayer} />
-  {:else}
-    <p class="error">unknown lobby state: {lobby.state}</p>
-  {/if}
+  <div class="scroll-container">
+    {#if $user == null || lobby == undefined || lobbyCode == null || (countdown < 0 && countdownVisible)}
+      <div class="spinner-wraper">
+        <CircularProgress indeterminate />
+      </div>
+    {:else if !lobby.alivePlayers.includes($user.uid)}
+      <LobbyChat {lobby} {lobbyCode} />
+    {:else if lobby.state === "WAIT"}
+      <LobbyChat {lobby} {lobbyCode} />
+      <LobbyComponent {lobbyCode} {lobby} />
+    {:else if privatePlayer == undefined}
+      <div class="spinner-wraper">
+        <CircularProgress indeterminate />
+      </div>
+    {:else if lobby.state === "ROLE"}
+      <Role {privatePlayer} />
+    {:else if lobby.state === "PROMPT"}
+      <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
+    {:else if lobby.state === "CHAT"}
+      <ChatRoom {lobby} {lobbyCode} isStalker={privatePlayer.stalker} />
+    {:else if lobby.state === "VOTE"}
+      <LobbyChat {lobby} {lobbyCode} />
+      <Vote {lobby} {lobbyCode} />
+    {:else if lobby.state === "RESULT"}
+      <Result {lobby} />
+    {:else if lobby.state === "END"}
+      <WinLoss {lobbyCode} {lobby} {privatePlayer} />
+    {:else}
+      <p class="error">unknown lobby state: {lobby.state}</p>
+    {/if}
+  </div>
 </main>
 
 <style>
   main {
-    box-sizing: border-box;
     height: 100%;
-    overflow: auto;
-    padding-top: 64px;
+    display: grid;
+    grid-template-areas: "header" "scroll-container";
+    grid-template-rows: 96px 1fr;
+    gap: 24px;
   }
 
   .countdown {
+    grid-area: header;
     margin: 0;
     text-align: center;
+    align-self: end;
   }
 
   main:has(.spinner-wraper) .countdown {
@@ -194,6 +199,11 @@
 
   main:has(.spinner-wraper) {
     padding: 0;
+  }
+
+  .scroll-container {
+    grid-area: scroll-container;
+    overflow-y: auto;
   }
 
   .spinner-wraper {
