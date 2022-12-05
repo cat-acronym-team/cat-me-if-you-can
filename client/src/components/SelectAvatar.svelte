@@ -66,8 +66,8 @@
 <div class="grid {lobby != undefined ? 'lobby' : ''}">
   {#each avatarChoices as { avatar, altText, displayName, uid, available, selected }}
     <div class="parent">
-      {#if uid != undefined && lobbyCode != undefined && $user !== null && lobby?.uids[0] == $user.uid}
-        <PlayerMenu {lobbyCode} {uid} />
+      {#if uid != undefined && lobbyCode != undefined && $user !== null && lobby !== undefined}
+        <PlayerMenu {lobbyCode} {uid} {lobby} />
       {/if}
       <button class="avatar" on:click={() => selectAvatar(avatar)} disabled={!available} aria-selected={selected}>
         <img src="/avatars/{avatar}.webp" alt={altText} />
