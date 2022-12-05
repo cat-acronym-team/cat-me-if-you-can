@@ -13,7 +13,7 @@
 
   let name: string = "";
   let nameDirty: boolean = false;
-  $: nameValidation = displayNameValidator(name);
+  $: nameValidation = displayNameValidator(name.trim());
 
   let errorMessage: string = "";
 
