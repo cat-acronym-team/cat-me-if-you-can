@@ -14,7 +14,7 @@
       </div>
       <p class="description">Use your inner Purrlock Holmes and find the catfish!</p>
       <div class="imgContainer">
-        <img src="/images/role/Cat.png" alt="cat" />
+        <img src="/images/role/cat.webp" alt="" />
       </div>
     {:else}
       <div class="role">
@@ -22,7 +22,7 @@
       </div>
       <p class="description">Try to cat-mo-flauge with the rest of the cats!</p>
       <div class="imgContainer">
-        <img src="/images/role/Catfish.png" alt="catfish" />
+        <img src="/images/role/catfish.webp" alt="" />
       </div>
     {/if}
   </div>
