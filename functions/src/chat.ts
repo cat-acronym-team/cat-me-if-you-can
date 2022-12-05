@@ -1,5 +1,6 @@
 import { firestore } from "firebase-admin";
 import type { DocumentReference, Transaction } from "firebase-admin/firestore";
+import { db } from "./app";
 import {
   getChatRoomCollection,
   getChatRoomMessagesCollection,
@@ -7,16 +8,14 @@ import {
   getLobbyChatCollection,
 } from "./firestore-collections";
 import { GAME_STATE_DURATIONS, Lobby } from "./firestore-types/lobby";
-import { db } from "./app";
 
 export async function deleteLobbyChatMessages(lobbyDoc: DocumentReference<Lobby>) {
-  const messageDoc = await getLobbyChatCollection(lobbyDoc).get();
+  const messages = await getLobbyChatCollection(lobbyDoc).get();
 
   const batch = db.batch();
-  for (const message of messageDoc.docs) {
-    batch.delete(message.ref);
+  for (const messageDoc of messages.docs) {
+    batch.delete(messageDoc.ref);
   }
-
   await batch.commit();
 }
 

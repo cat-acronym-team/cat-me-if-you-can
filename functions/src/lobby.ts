@@ -83,9 +83,12 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
   if (!isLobbyRequest(data)) {
     throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
   }
+
+  const lobbyDoc = lobbyCollection.doc(data.code);
+
   await db.runTransaction(async (transaction) => {
     // get lobby doc
-    const lobby = await transaction.get(lobbyCollection.doc(data.code));
+    const lobby = await transaction.get(lobbyDoc);
     if (lobby.exists === false) {
       throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
@@ -105,6 +108,8 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
 
     assignRole(lobby, transaction);
   });
+
+  await deleteLobbyChatMessages(lobbyDoc);
 });
 
 export const joinLobby = functions.https.onCall((data: unknown, context): Promise<void> => {
@@ -261,24 +266,22 @@ export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, t
     throw new Error("Lobby not found");
   }
 
-  await Promise.all(
-    lobbyData.uids.map(async (uid) => {
-      const privatePlayerDocRef = privatePlayerCollection.doc(uid);
-
-      const privatePlayerDoc = await transaction.get(privatePlayerDocRef);
-
-      const privatePlayerData = privatePlayerDoc.data();
-
-      if (!privatePlayerData) {
-        throw new Error(`Private player not found for uid ${uid}`);
-      }
-
-      transaction.update(privatePlayerDocRef, {
-        prompt: privatePlayerData.role == "CAT" ? catPrompt : catfishPrompt,
-      });
-    })
+  const privatePlayerDocs = await Promise.all(
+    lobbyData.uids.map((uid) => transaction.get(privatePlayerCollection.doc(uid)))
   );
-  // expiration
+
+  for (const privatePlayerDoc of privatePlayerDocs) {
+    const privatePlayerData = privatePlayerDoc.data();
+
+    if (!privatePlayerData) {
+      throw new Error(`Private player not found for uid ${privatePlayerDoc.id}`);
+    }
+
+    transaction.update(privatePlayerDoc.ref, {
+      prompt: privatePlayerData.role == "CAT" ? catPrompt : catfishPrompt,
+    });
+  }
+
   const expiration = firestore.Timestamp.fromMillis(
     firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.PROMPT * 1000
   );
@@ -394,11 +397,12 @@ export const verifyExpiration = functions.https.onCall(async (data, context): Pr
   }
   // get lobby doc
   const lobbyDocRef = lobbyCollection.doc(data.code);
+  let lobby: Lobby | undefined;
 
   // start transaction
   await db.runTransaction(async (transaction) => {
     const lobbyDoc = await transaction.get(lobbyDocRef);
-    const lobby = lobbyDoc.data();
+    lobby = lobbyDoc.data();
     if (lobby === undefined) {
       throw new functions.https.HttpsError("not-found", "Lobby does not exist.");
     }
@@ -436,8 +440,7 @@ export const verifyExpiration = functions.https.onCall(async (data, context): Pr
       await determineWinner(lobbyDoc, transaction);
     }
   });
-  const lobby = (await lobbyDocRef.get()).data();
-  if (lobby?.state == "PROMPT" || lobby?.state == "VOTE") {
-    deleteLobbyChatMessages(lobbyDocRef);
+  if (lobby?.state == "VOTE") {
+    await deleteLobbyChatMessages(lobbyDocRef);
   }
 });
