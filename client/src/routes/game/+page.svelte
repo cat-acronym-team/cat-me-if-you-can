@@ -165,7 +165,12 @@
     {#if !lobby.alivePlayers.includes($user.uid)}
       <LobbyChat {lobby} {lobbyCode} />
     {/if}
-    <ChatRoom {lobby} {lobbyCode} isStalker={privatePlayer.stalker} />
+    <ChatRoom
+      {lobby}
+      {lobbyCode}
+      isStalker={privatePlayer.stalker}
+      isSpectator={!lobby.alivePlayers.includes($user.uid)}
+    />
   {:else if lobby.state === "VOTE"}
     <LobbyChat {lobby} {lobbyCode} />
     <Vote {lobby} {lobbyCode} />

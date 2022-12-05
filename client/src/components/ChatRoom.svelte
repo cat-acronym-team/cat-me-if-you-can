@@ -13,8 +13,8 @@
   export let lobby: Lobby;
   export let lobbyCode: string;
   export let isStalker: boolean;
+  export let isSpectator: boolean;
   // variables
-  let isSpectator: boolean;
   let user = $authStore as User;
   let partnerInfo: Player | undefined;
   let pairInfo: [Player, Player] | undefined;
@@ -89,9 +89,6 @@
       // catch and display erro
       errorMessage = err instanceof Error ? err.message : String(err);
     }
-  }
-  $: if (!lobby.alivePlayers.includes(user.uid)) {
-    isSpectator = true;
   }
 </script>
 
