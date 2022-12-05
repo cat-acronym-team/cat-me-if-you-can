@@ -85,7 +85,7 @@
 <main class="cat-main-container">
   <div class="cat-main">
     <div class="logo-container">
-      <img src="https://picsum.photos/500/300" alt="our logo" />
+      <img src="/images/banner.webp" alt="" />
     </div>
     <div class="cat-main-buttons">
       {#if errorMessage !== ""}
