@@ -202,7 +202,7 @@
   }
 
   main:has(.spinner-wraper) {
-    padding: 0;
+    grid-template-rows: 0 1fr;
   }
 
   .scroll-container {
