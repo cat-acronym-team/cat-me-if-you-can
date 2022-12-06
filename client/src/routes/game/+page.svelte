@@ -12,7 +12,7 @@
   import { onSnapshot, doc, getDoc, type Unsubscribe } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
   import { getPrivatePlayerCollection, lobbyCollection } from "$lib/firebase/firestore-collections";
-  import { GAME_STATE_DURATIONS, type Lobby, type PrivatePlayer } from "$lib/firebase/firestore-types/lobby";
+  import { GAME_STATE_DURATIONS_DEFAULT, type Lobby, type PrivatePlayer } from "$lib/firebase/firestore-types/lobby";
   import { page } from "$app/stores";
   import { authStore as user } from "$stores/auth";
   import { goto } from "$app/navigation";
@@ -27,7 +27,7 @@
   let privatePlayer: PrivatePlayer | undefined = undefined;
   let unsubscribePrivatePlayer: Unsubscribe | undefined = undefined;
 
-  let countdown = GAME_STATE_DURATIONS.WAIT;
+  let countdown = GAME_STATE_DURATIONS_DEFAULT.WAIT;
   $: countdownVisible = lobby != undefined && DISPLAY_TIMERS[lobby.state] == true;
   let timer: ReturnType<typeof setInterval>;
 

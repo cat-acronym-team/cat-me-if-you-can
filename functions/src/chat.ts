@@ -7,7 +7,7 @@ import {
   getPrivatePlayerCollection,
   getLobbyChatCollection,
 } from "./firestore-collections";
-import { GAME_STATE_DURATIONS, Lobby } from "./firestore-types/lobby";
+import { Lobby } from "./firestore-types/lobby";
 
 export async function deleteLobbyChatMessages(lobbyDoc: DocumentReference<Lobby>) {
   const messages = await getLobbyChatCollection(lobbyDoc).get();
@@ -55,10 +55,8 @@ export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentRefere
     transaction.update(stalker.ref, { stalker: false });
   }
 
-  transaction.update(lobbyDoc, { state: "VOTE", players });
-
   const expiration = firestore.Timestamp.fromMillis(
-    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.VOTE * 1000
+    firestore.Timestamp.now().toMillis() + lobbyData.lobbySettings.voteTime * 1000
   );
   transaction.update(lobbyDoc, { state: "VOTE", expiration, players });
 }

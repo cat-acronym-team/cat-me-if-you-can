@@ -8,8 +8,15 @@ import {
   lobbyCollection,
   userCollection,
 } from "./firestore-collections";
-import { isLobbyRequest, LobbyCreationResponse } from "./firebase-functions-types";
-import { AVATARS, GAME_STATE_DURATIONS, Lobby, Vote } from "./firestore-types/lobby";
+import { isLobbyRequest, isLobbySettingsRequest, LobbyCreationResponse } from "./firebase-functions-types";
+import {
+  AVATARS,
+  GAME_STATE_DURATIONS_DEFAULT,
+  GAME_STATE_DURATIONS_MAX,
+  GAME_STATE_DURATIONS_MIN,
+  Lobby,
+  Vote,
+} from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
@@ -54,7 +61,12 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
     bannedPlayers: [],
     state: "WAIT",
     alivePlayers: [context.auth.uid],
-    catfishAmount: 1,
+    lobbySettings: {
+      catfishAmount: 1,
+      promptTime: GAME_STATE_DURATIONS_DEFAULT.PROMPT,
+      chatTime: GAME_STATE_DURATIONS_DEFAULT.CHAT,
+      voteTime: GAME_STATE_DURATIONS_DEFAULT.VOTE,
+    },
     expiration: firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 3_600_000 * 3),
   };
 
@@ -93,9 +105,9 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
       throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
     // check if the request is coming from the host of the game
-    const { uids, catfishAmount } = lobby.data() as Lobby;
+    const { uids, lobbySettings } = lobby.data() as Lobby;
 
-    const minPlayers = catfishAmount * 2 + 2;
+    const minPlayers = lobbySettings.catfishAmount * 2 + 2;
 
     if (auth.uid !== uids[0]) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
@@ -236,6 +248,54 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
   });
 });
 
+export const applyLobbySettings = functions.https.onCall(async (data: unknown, context): Promise<void> => {
+  const auth = context.auth;
+  // no auth then you shouldn't be here
+  if (auth === undefined) {
+    throw new functions.https.HttpsError("permission-denied", "Not Signed In");
+  }
+  // validate code
+  if (!isLobbySettingsRequest(data)) {
+    throw new functions.https.HttpsError("invalid-argument", "Invalid lobby code!");
+  }
+
+  const settings = data.lobbySettings;
+
+  if (settings.catfishAmount < 1 || settings.catfishAmount > 3) {
+    throw new functions.https.HttpsError("permission-denied", "Cannot have less than 1 or more than 3 catfish!");
+  }
+
+  if (
+    settings.promptTime < GAME_STATE_DURATIONS_MIN.PROMPT ||
+    settings.promptTime > GAME_STATE_DURATIONS_MAX.PROMPT ||
+    settings.chatTime < GAME_STATE_DURATIONS_MIN.CHAT ||
+    settings.chatTime > GAME_STATE_DURATIONS_MAX.CHAT ||
+    settings.voteTime < GAME_STATE_DURATIONS_MIN.VOTE ||
+    settings.voteTime > GAME_STATE_DURATIONS_MAX.VOTE
+  ) {
+    throw new functions.https.HttpsError("permission-denied", "Timer must be within the proper range!");
+  }
+
+  await db.runTransaction(async (transaction) => {
+    // get lobby doc
+    const lobby = lobbyCollection.doc(data.code);
+    const lobbyInfo = await transaction.get(lobby);
+
+    if (lobbyInfo.exists === false) {
+      throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
+    }
+    // check if the request is coming from the host of the game
+    const { uids } = lobbyInfo.data() as Lobby;
+    if (auth.uid !== uids[0]) {
+      throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
+    }
+
+    transaction.update(lobby, {
+      lobbySettings: settings,
+    });
+  });
+});
+
 export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate(async (change, context) => {
   const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
   const lobby = change.after.data() as Lobby;
@@ -283,7 +343,7 @@ export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, t
   }
 
   const expiration = firestore.Timestamp.fromMillis(
-    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.PROMPT * 1000
+    firestore.Timestamp.now().toMillis() + lobbyData.lobbySettings.promptTime * 1000
   );
 
   transaction.update(lobbyDoc.ref, { state: "PROMPT", expiration });
@@ -312,7 +372,7 @@ export async function collectPromptAnswers(
 
   // expiration set
   const expiration = firestore.Timestamp.fromMillis(
-    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.CHAT * 1000
+    firestore.Timestamp.now().toMillis() + lobbyData.lobbySettings.chatTime * 1000
   );
   transaction.update(lobbyDoc.ref, { state: "CHAT", expiration });
 
