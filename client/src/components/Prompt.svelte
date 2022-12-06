@@ -2,10 +2,9 @@
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
+  import CharacterCounter from "@smui/textfield/character-counter";
   import { getPromptAnswerCollection } from "$lib/firebase/firestore-collections";
   import { doc, setDoc } from "firebase/firestore";
-  import { authStore as user } from "$stores/auth";
-  import type { Lobby } from "$lib/firebase/firestore-types/lobby";
 
   export let prompt: string | undefined;
 
@@ -13,12 +12,8 @@
 
   export let lobbyCode: string;
 
-  export let lobbyData: Lobby;
-
   let answer = "";
   let dirty = false;
-
-  $: userInfo = lobbyData.players[lobbyData.uids.indexOf($user?.uid ?? "")];
 
   $: answerDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
 
@@ -47,24 +42,45 @@
 
 <form class="wraper" on:submit|preventDefault={submitAnswer}>
   <label class="mdc-typography--headline5" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
-  {#if userInfo.alive}
-    <div class="input">
-      <Textfield input$id="prompt-answer" bind:value={answer} bind:dirty invalid={dirty && error != undefined} required>
-        <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
-      </Textfield>
+
+  <div class="input">
+    <Textfield
+      textarea
+      input$id="prompt-answer"
+      input$maxlength={50}
+      bind:value={answer}
+      bind:dirty
+      invalid={dirty && error != undefined}
+      required
+    >
+      <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
+      <CharacterCounter slot="internalCounter">0 / 100</CharacterCounter>
+    </Textfield>
+
+    <div class="button-wraper">
       <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
     </div>
-    {#if displayAnswer != ""}
-      <p>Your Answer: {displayAnswer}</p>
-    {/if}
+  </div>
+  {#if displayAnswer != ""}
+    <p>Your Answer: {displayAnswer}</p>
   {/if}
 </form>
 
 <style>
   .wraper {
     height: 100%;
+    padding-inline: 36px;
     display: grid;
     grid-template-rows: 1fr 1fr 1fr;
     place-items: center;
+  }
+
+  .input :global(.mdc-text-field) {
+    width: min(calc(100vw - 96px), 600px);
+  }
+
+  .button-wraper {
+    display: grid;
+    justify-content: end;
   }
 </style>
