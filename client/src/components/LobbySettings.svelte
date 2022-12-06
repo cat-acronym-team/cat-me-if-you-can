@@ -15,6 +15,7 @@
 
   export let lobby: Lobby;
   export let lobbyCode: string;
+  let errorMessage: string = "";
   let showLobbySettings = false;
   let catfishValue: 1 | 2 | 3 = 1;
   let promptTimerValue = lobby.lobbySettings.promptTime;
@@ -28,15 +29,20 @@
   };
 
   async function apply() {
-    await applyLobbySettings({
-      code: lobbyCode,
-      lobbySettings: {
-        catfishAmount: catfishValue,
-        promptTime: promptTimerValue,
-        chatTime: chatTimerValue,
-        voteTime: voteTimerValue,
-      },
-    });
+    try {
+      await applyLobbySettings({
+        code: lobbyCode,
+        lobbySettings: {
+          catfishAmount: catfishValue,
+          promptTime: promptTimerValue,
+          chatTime: chatTimerValue,
+          voteTime: voteTimerValue,
+        },
+      });
+      showLobbySettings = false;
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+    }
   }
 </script>
 
@@ -87,9 +93,12 @@
           input$id="vote-slider"
         />
       </div>
+      {#if errorMessage !== ""}
+        <p class="error">{errorMessage}</p>
+      {/if}
     </Content>
     <Actions class="settings">
-      <Button on:click={() => apply()}><Label>Apply Settings</Label></Button>
+      <Button on:click={() => apply()} action=""><Label>Apply Settings</Label></Button>
     </Actions>
   </Dialog>
   <Button on:click={() => (showLobbySettings = true)} class="Lobby Settings"><Label>Lobby Settings</Label></Button>
