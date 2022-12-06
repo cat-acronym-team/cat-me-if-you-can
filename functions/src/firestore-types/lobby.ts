@@ -165,7 +165,7 @@ export type Vote = {
   /**
    * the UID of the player or skip that the player owning this document has voted for
    */
-  target: string | "SKIP";
+  target: string | null;
 };
 
 /**

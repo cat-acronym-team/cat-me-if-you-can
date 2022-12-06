@@ -357,9 +357,9 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
     let skipVote = oldSkipVote;
 
     // decrement old target
-    if (oldVoteDoc != undefined && oldVoteDoc.target == "SKIP") {
+    if (oldVoteDoc != undefined && oldVoteDoc.target == null) {
       skipVote -= 1;
-    } else if (oldVoteDoc != undefined) {
+    } else if (oldVoteDoc != undefined && oldVoteDoc.target != null) {
       const oldTarget = players[uids.indexOf(oldVoteDoc.target)];
       if (oldTarget.votes != 0) {
         oldTarget.votes -= 1;
@@ -367,7 +367,7 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
     }
 
     // increment new target
-    if (latestVoteDoc.target == "SKIP") {
+    if (latestVoteDoc.target == null) {
       skipVote += 1;
     } else {
       players[uids.indexOf(latestVoteDoc.target)].votes += 1;
