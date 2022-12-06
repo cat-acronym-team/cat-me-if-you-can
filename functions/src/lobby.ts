@@ -291,12 +291,7 @@ export const applyLobbySettings = functions.https.onCall(async (data: unknown, c
     }
 
     transaction.update(lobby, {
-      lobbySettings: {
-        catfishAmount: settings.catfishAmount,
-        promptTime: settings.promptTime,
-        chatTime: settings.chatTime,
-        voteTime: settings.voteTime,
-      },
+      lobbySettings: settings,
     });
   });
 });
