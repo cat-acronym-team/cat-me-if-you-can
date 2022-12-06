@@ -2,12 +2,9 @@
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
+  import CharacterCounter from "@smui/textfield/character-counter";
   import { getPromptAnswerCollection } from "$lib/firebase/firestore-collections";
   import { doc, setDoc } from "firebase/firestore";
-  import { GAME_STATE_DURATIONS, type Lobby } from "$lib/firebase/firestore-types/lobby";
-  import { authStore as user } from "$stores/auth";
-  import { verifyExpiration } from "$lib/firebase/firebase-functions";
-  import { formatTimer } from "$lib/time";
 
   export let prompt: string | undefined;
 
@@ -15,35 +12,12 @@
 
   export let lobbyCode: string;
 
-  export let lobbyData: Lobby;
-
   let answer = "";
   let dirty = false;
-  let countdown: number = GAME_STATE_DURATIONS.PROMPT;
-  let timer: ReturnType<typeof setInterval>;
 
   $: answerDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
 
   $: error = getErrorMessage(answer);
-
-  $: if (countdown <= 0 && lobbyData.uids[0] == $user?.uid) {
-    clearInterval(timer);
-    // call this function so it can continue onto the next state
-    verifyExpiration({ code: lobbyCode });
-  }
-
-  $: if (countdown <= -5) {
-    clearInterval(timer);
-    // call this function so it can continue onto the next state
-    verifyExpiration({ code: lobbyCode });
-  }
-
-  timer = setInterval(() => {
-    if (lobbyData.expiration != undefined) {
-      const diff = Math.floor((lobbyData.expiration.toMillis() - Date.now()) / 1000);
-      countdown = diff;
-    }
-  }, 500);
 
   function getErrorMessage(answer: string): string | undefined {
     const trimmed = answer.trim();
@@ -56,40 +30,57 @@
       return "Answer must be less than 50 characters";
     }
   }
-
+  let displayAnswer = "";
   function submitAnswer() {
     if (error != undefined) {
       return;
     }
-
+    displayAnswer = answer;
     setDoc(answerDoc, { answer });
   }
 </script>
 
-<p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
-  {formatTimer(Math.max(countdown, 0))}
-</p>
 <form class="wraper" on:submit|preventDefault={submitAnswer}>
   <label class="mdc-typography--headline5" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
 
   <div class="input">
-    <Textfield input$id="prompt-answer" bind:value={answer} bind:dirty invalid={dirty && error != undefined} required>
+    <Textfield
+      textarea
+      input$id="prompt-answer"
+      input$maxlength={50}
+      bind:value={answer}
+      bind:dirty
+      invalid={dirty && error != undefined}
+      required
+    >
       <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
+      <CharacterCounter slot="internalCounter">0 / 100</CharacterCounter>
     </Textfield>
-    <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
+
+    <div class="button-wraper">
+      <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
+    </div>
   </div>
+  {#if displayAnswer != ""}
+    <p>Your Answer: {displayAnswer}</p>
+  {/if}
 </form>
 
 <style>
-  .countdown {
-    margin: 0;
-    text-align: center;
-  }
-
   .wraper {
     height: 100%;
+    padding-inline: 36px;
     display: grid;
     grid-template-rows: 1fr 1fr 1fr;
     place-items: center;
+  }
+
+  .input :global(.mdc-text-field) {
+    width: min(calc(100vw - 96px), 600px);
+  }
+
+  .button-wraper {
+    display: grid;
+    justify-content: end;
   }
 </style>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import LobbySettings from "./LobbySettings.svelte";
   import SelectAvatar from "./SelectAvatar.svelte";
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
@@ -7,12 +8,19 @@
   import { onMount } from "svelte";
   import { changeAvatar, startGame, leaveLobby } from "$lib/firebase/firebase-functions";
   import { goto } from "$app/navigation";
-  import { auth } from "$lib/firebase/app";
+  import { authStore as user } from "../store/auth";
 
   // Props
   export let lobbyCode: string;
   export let lobby: Lobby;
   let errorMessage: string = "";
+  $: minPlayers = lobby.lobbySettings.catfishAmount * 2 + 2;
+
+  /**
+   * variable that will be set true if the corresponding function has no errors thrown
+   * this will then allow the button to be pressed again if there is an error thrown
+   */
+  let waiting: boolean = false;
 
   // better link to share since it's redirecting to this page anyways
   // Josh's suggestion that I agreed on
@@ -42,64 +50,91 @@
   async function onAvatarSelect(avatar: Avatar) {
     try {
       await changeAvatar({ lobbyCode, avatar });
+      errorMessage = "";
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
 
   async function start() {
+    waiting = true;
     try {
       await startGame({ code: lobbyCode });
     } catch (err) {
+      waiting = false;
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
 
   async function leave() {
+    waiting = true;
     try {
       await leaveLobby({ code: lobbyCode });
     } catch (err) {
+      waiting = false;
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
 </script>
 
-<main>
-  <div class="container">
-    <div class="lobby-info">
-      <h3>Code: {lobbyCode}</h3>
-      <h3>Players: {lobby.players.length}</h3>
-    </div>
-    <SelectAvatar {lobby} on:change={(event) => onAvatarSelect(event.detail.value)} />
-    {#if auth.currentUser?.uid === lobby.uids[0]}
-      <div class="actions">
-        <Button on:click|once={() => start()}><Label>Start Game</Label></Button>
+<div class="container">
+  <div class="lobby-info">
+    <h3>Code: {lobbyCode}</h3>
+    <h3>Players: {lobby.players.length} / 8</h3>
+    {#if $user?.uid === lobby.uids[0]}
+      <div class="settings">
+        <LobbySettings {lobby} {lobbyCode} />
       </div>
     {/if}
-    <div class="actions">
-      <Button
-        on:click|once={async () => {
-          await leave();
-          goto("/");
-        }}><Label>Leave Lobby</Label></Button
-      >
-    </div>
-    <div class="actions">
-      {#if errorMessage !== ""}
-        <p>{errorMessage}</p>
+    {#if lobby.players.length < minPlayers}
+      <!-- Display the number of players needed to start the current game session -->
+      {#if minPlayers - lobby.players.length !== 1}
+        <!-- Grammar check -->
+        <h3 class="error">{minPlayers - lobby.players.length} more players required to start game...</h3>
+      {:else}
+        <h3 class="error">1 more player required to start game...</h3>
       {/if}
-    </div>
-    <div class="buttons">
-      <h3 class="invite-link">Invite Link: {url}</h3>
-      <IconButton class="material-icons" on:click={copyLink}>content_copy</IconButton>
-      {#if canShare}<IconButton class="material-icons" on:click={share}>share</IconButton>{/if}
-    </div>
+    {:else}
+      <h3 class="error">Waiting for host to start game...</h3>
+    {/if}
   </div>
-</main>
+  <SelectAvatar {lobby} {lobbyCode} on:change={(event) => onAvatarSelect(event.detail.value)} />
+  {#if $user?.uid === lobby.uids[0]}
+    <div class="actions">
+      <Button on:click={start} disabled={lobby.players.length < minPlayers || waiting}>
+        <Label>Start Game</Label>
+      </Button>
+    </div>
+  {/if}
+  <div class="actions">
+    <Button
+      on:click={async () => {
+        await leave();
+        goto("/");
+      }}
+      disabled={waiting}
+    >
+      <Label>Leave Lobby</Label>
+    </Button>
+  </div>
+  <div class="actions">
+    {#if errorMessage !== ""}
+      <p class="error">{errorMessage}</p>
+    {/if}
+  </div>
+  <div class="buttons">
+    <h3 class="invite-link">Invite Link: {url}</h3>
+    <IconButton class="material-icons" on:click={copyLink}>content_copy</IconButton>
+    {#if canShare}<IconButton class="material-icons" on:click={share}>share</IconButton>{/if}
+  </div>
+</div>
 
 <style>
-  main {
-    justify-content: center;
+  .settings {
+    width: 100%;
+    display: flex;
+    justify-content: left;
+    align-items: center;
   }
 
   .actions {
@@ -110,6 +145,12 @@
   .buttons {
     display: grid;
     grid-template-columns: 1fr auto auto;
+  }
+
+  .error {
+    text-align: center;
+    margin: auto 0;
+    padding: 20px;
   }
 
   .invite-link {

@@ -58,6 +58,8 @@ export async function endGameProcess(
       if (players[index].role == undefined) {
         functions.logger.error("This player's role doesn't exist!");
         return;
+      } else if (players[index].role == "SPECTATOR") {
+        return;
       }
 
       const newStats: {
@@ -111,5 +113,6 @@ export async function endGameProcess(
     players,
     winner: firestore.FieldValue.delete(),
     votedOff: firestore.FieldValue.delete(),
+    expiration: firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 3_600_000 * 3),
   });
 }

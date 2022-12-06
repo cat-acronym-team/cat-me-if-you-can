@@ -1,6 +1,7 @@
 <script lang="ts">
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
+  import CharacterCounter from "@smui/textfield/character-counter";
   import IconButton from "@smui/icon-button";
   import {
     chatMessageValidator,
@@ -9,7 +10,7 @@
     type LobbyChatMessage,
     type Player,
   } from "$lib/firebase/firestore-types/lobby";
-  import { avatarAltText, avatarColors } from "$lib/avatar";
+  import { avatarAltText, avatarColors, onAvatarColors } from "$lib/avatar";
   import { authStore as user } from "$stores/auth";
   import { createEventDispatcher, tick } from "svelte";
 
@@ -65,7 +66,10 @@
           <img src="/avatars/{message.avatar}.webp" alt={avatarAltText[message.avatar]} />
         </div>
         <div class="display-name mdc-typography--body2">{message.displayName}</div>
-        <div class="text mdc-typography--body1" style="background-color: {avatarColors[message.avatar]}">
+        <div
+          class="text mdc-typography--body1 {lobby.alivePlayers.includes(message.sender) ? '' : 'userDead'}"
+          style="background-color: {avatarColors[message.avatar]}; color: {onAvatarColors[message.avatar]};"
+        >
           {message.text}
         </div>
       </div>
@@ -83,6 +87,7 @@
         invalid={messageInvalid}
         input$autofocus
         input$enterkeyhint="send"
+        input$maxlength={100}
       >
         <IconButton
           type="submit"
@@ -93,7 +98,10 @@
         >
           send
         </IconButton>
-        <HelperText validationMsg slot="helper">{messageValidation.valid ? "" : messageValidation.reason}</HelperText>
+        <svelte:fragment slot="helper">
+          <HelperText validationMsg>{messageValidation.valid ? "" : messageValidation.reason}</HelperText>
+          <CharacterCounter>0 / 100</CharacterCounter>
+        </svelte:fragment>
       </Textfield>
     </form>
   {/if}
@@ -141,6 +149,11 @@
     justify-content: end;
   }
 
+  .userDead {
+    filter: grayscale(80%);
+    opacity: 0.5;
+  }
+
   .avatar {
     grid-area: avatar;
     align-self: end;
@@ -167,7 +180,6 @@
     padding: 12px;
     margin-bottom: 16px;
     border-radius: 24px 24px 24px 0;
-    color: black;
   }
 
   .current-user .text {
@@ -186,6 +198,6 @@
   }
 
   form :global(.mdc-text-field-helper-line) {
-    padding-inline-start: var(--mdc-shape-small);
+    padding-inline: var(--mdc-shape-small);
   }
 </style>

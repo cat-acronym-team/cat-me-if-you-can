@@ -1,33 +1,7 @@
 <script lang="ts">
-  import { GAME_STATE_DURATIONS, type Lobby, type PrivatePlayer } from "$lib/firebase/firestore-types/lobby";
-  import { onMount } from "svelte";
-  import { authStore as user } from "$stores/auth";
-  import { verifyExpiration } from "$lib/firebase/firebase-functions";
+  import type { PrivatePlayer } from "$lib/firebase/firestore-types/lobby";
 
-  export let lobby: Lobby;
-  export let lobbyCode: string;
   export let privatePlayer: PrivatePlayer;
-
-  let countdown = GAME_STATE_DURATIONS.VOTE;
-  let timer: ReturnType<typeof setInterval>;
-
-  onMount(() => {
-    timer = setInterval(() => {
-      if (lobby.expiration != undefined) {
-        const diff = Math.floor((lobby.expiration.toMillis() - Date.now()) / 1000);
-        countdown = diff;
-      }
-    }, 500);
-  });
-
-  $: if (countdown <= 0 && lobby.uids[0] == $user?.uid) {
-    clearInterval(timer);
-    verifyExpiration({ code: lobbyCode });
-  }
-  $: if (countdown <= -5) {
-    clearInterval(timer);
-    verifyExpiration({ code: lobbyCode });
-  }
 </script>
 
 {#if privatePlayer !== undefined}
@@ -40,16 +14,21 @@
       </div>
       <p class="description">Use your inner Purrlock Holmes and find the catfish!</p>
       <div class="imgContainer">
-        <img src="/images/role/Cat.png" alt="cat" />
+        <img src="/images/role/cat.webp" alt="" />
       </div>
-    {:else}
+    {:else if privatePlayer.role == "CATFISH"}
       <div class="role">
         You are a <span class="red">{privatePlayer.role}</span>
       </div>
       <p class="description">Try to cat-mo-flauge with the rest of the cats!</p>
       <div class="imgContainer">
-        <img src="/images/role/Catfish.png" alt="catfish" />
+        <img src="/images/role/catfish.webp" alt="" />
       </div>
+    {:else}
+      <div class="role">
+        You are a <span class="red">{privatePlayer.role}</span>
+      </div>
+      <p class="description">Please wait till the game finishes to play.</p>
     {/if}
   </div>
 {/if}
@@ -57,7 +36,7 @@
 <style>
   .container {
     position: relative;
-    height: 100vh;
+    height: 100%;
   }
 
   .header {
