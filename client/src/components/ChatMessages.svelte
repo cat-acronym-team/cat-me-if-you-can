@@ -67,8 +67,8 @@
         </div>
         <div class="display-name mdc-typography--body2">{message.displayName}</div>
         <div
-          class="text mdc-typography--body1"
-          style="background-color: {avatarColors[message.avatar]}; color: {onAvatarColors[message.avatar]}"
+          class="text mdc-typography--body1 {lobby.alivePlayers.includes(message.sender) ? '' : 'userDead'}"
+          style="background-color: {avatarColors[message.avatar]}; color: {onAvatarColors[message.avatar]};"
         >
           {message.text}
         </div>
@@ -147,6 +147,11 @@
       "empty text avatar";
     justify-items: end;
     justify-content: end;
+  }
+
+  .userDead {
+    filter: grayscale(80%);
+    opacity: 0.5;
   }
 
   .avatar {

@@ -128,8 +128,10 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     // lobby doc
     const lobby = lobbyCollection.doc(data.code);
     const lobbyInfo = await transaction.get(lobby);
+    const lobbyData = lobbyInfo.data();
+    const privatePlayerCollection = getPrivatePlayerCollection(lobby);
     // extra validation to make sure it exist
-    if (lobbyInfo.exists === false) {
+    if (lobbyInfo.exists === false || lobbyData == undefined) {
       throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
     // user doc
@@ -164,16 +166,31 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
       userInfo.avatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
     }
 
-    // add player
-    transaction.update(lobby, {
-      players: firestore.FieldValue.arrayUnion({
-        displayName: userInfo.displayName,
-        avatar: userInfo.avatar,
-        alive: true,
-        votes: 0,
-      }),
-      uids: firestore.FieldValue.arrayUnion(auth.uid),
-    });
+    // add spectator
+    if (lobbyData.state != "WAIT") {
+      const privatePlayerDocRef = privatePlayerCollection.doc(user.id);
+      transaction.create(privatePlayerDocRef, { role: "SPECTATOR", stalker: false });
+      transaction.update(lobby, {
+        players: firestore.FieldValue.arrayUnion({
+          displayName: userInfo.displayName,
+          avatar: userInfo.avatar,
+          alive: false,
+          votes: 0,
+        }),
+        uids: firestore.FieldValue.arrayUnion(auth.uid),
+      });
+    } else {
+      // add player
+      transaction.update(lobby, {
+        players: firestore.FieldValue.arrayUnion({
+          displayName: userInfo.displayName,
+          avatar: userInfo.avatar,
+          alive: true,
+          votes: 0,
+        }),
+        uids: firestore.FieldValue.arrayUnion(auth.uid),
+      });
+    }
   });
 });
 
@@ -423,7 +440,6 @@ export const verifyExpiration = functions.https.onCall(async (data, context): Pr
       await determineWinner(lobbyDoc, transaction);
     }
   });
-
   if (lobby?.state == "VOTE") {
     await deleteLobbyChatMessages(lobbyDocRef);
   }
