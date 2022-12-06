@@ -13,6 +13,7 @@
   export let lobby: Lobby;
   export let lobbyCode: string;
   export let isStalker: boolean;
+  export let isSpectator: boolean;
   // variables
   let user = $authStore as User;
   let partnerInfo: Player | undefined;
@@ -26,7 +27,7 @@
   onMount(() => {
     const chatRoomCollection = getChatRoomCollection(lobbyCode);
     let roomQuerry: Query<ChatRoom>;
-    if (isStalker) {
+    if (isStalker || isSpectator) {
       roomQuerry = query(chatRoomCollection, where("viewers", "array-contains", user.uid));
     } else {
       roomQuerry = query(chatRoomCollection, where("pair", "array-contains", user.uid));
@@ -43,7 +44,7 @@
 
       // process chatroom data
       const chatRoom = roomsSnapshot.docs[0].data();
-      if (isStalker) {
+      if (isStalker || isSpectator) {
         // get pairInfo
         pairInfo = chatRoom.pair.map((uid) => lobby.players[lobby.uids.indexOf(uid)]) as [Player, Player];
       } else {
@@ -92,14 +93,14 @@
 </script>
 
 <div class="chatroom">
-  {#if isStalker && chatRoomId == undefined}
-    <Stalker {lobby} {lobbyCode} />
+  {#if (isStalker || isSpectator) && chatRoomId == undefined}
+    <Stalker {lobby} {lobbyCode} {isSpectator} />
   {:else}
     <ChatMessages
       {lobby}
       messages={chatMessages}
       on:send={(event) => submitMessage(event.detail.text)}
-      readOnly={isStalker}
+      readOnly={isStalker || isSpectator}
     >
       <div slot="before-messages" class="matched-with mdc-typography--headline5">
         {#if partnerInfo !== undefined}
@@ -117,7 +118,7 @@
 
 <style>
   .chatroom {
-    height: 88%;
+    height: 100%;
     display: grid;
     grid-template-rows: minmax(0, 1fr);
     justify-items: center;

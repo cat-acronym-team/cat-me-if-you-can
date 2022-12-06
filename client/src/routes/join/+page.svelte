@@ -18,7 +18,7 @@
 
   let name: string = "";
   let nameDirty: boolean = false;
-  $: nameValidation = displayNameValidator(name);
+  $: nameValidation = displayNameValidator(name.trim());
 
   let code: string = "";
   let codeDirty: boolean = false;

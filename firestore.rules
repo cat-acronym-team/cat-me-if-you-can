@@ -50,7 +50,7 @@ service cloud.firestore {
 
         // firestore didn't like me using the above function for chatroom
         // I think its because the info is in the resource object
-        allow read: if request.auth.uid in resource.data.pair || request.auth.uid in resource.data.viewers || isStalker() ;
+        allow read: if request.auth.uid in resource.data.pair || request.auth.uid in resource.data.viewers || isStalker() || !isAlive();
         match /chatMessages/{messageId}{
 
           function validateChatMessage() {
