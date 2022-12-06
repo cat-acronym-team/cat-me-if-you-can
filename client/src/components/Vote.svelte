@@ -11,7 +11,7 @@
   export let lobby: Lobby;
   export let lobbyCode: string;
 
-  let votedFor: number | undefined; // index of the person that's been voted
+  let votedFor: string | null | undefined; // uid of player that is voted out or skip (null)
   let unsubscribeVote: Unsubscribe | undefined;
 
   onMount(() => {
@@ -21,7 +21,7 @@
       if (!doc.exists() || !lobby.alivePlayers.includes($user?.uid ?? "")) {
         return;
       }
-      votedFor = lobby.uids.indexOf(doc.data().target);
+      votedFor = doc.data().target;
     });
   });
 
@@ -36,7 +36,7 @@
     {#each lobby.players as { avatar, displayName, votes, alive, promptAnswer }, i}
       <div class="vote-container {!alive ? 'dead' : ''}">
         <button
-          class="avatar {votedFor == i ? 'selected' : ''}"
+          class="avatar {votedFor == lobby.uids[i] ? 'selected' : ''}"
           disabled={!lobby.alivePlayers.includes($user?.uid ?? "") || !alive}
           on:click={() => addVote(lobbyCode, $user?.uid ?? "", lobby.uids[i])}
         >
@@ -55,11 +55,12 @@
     {/each}
     <div class="vote-container">
       <button
-        class="avatar {votedFor == -1 ? 'selected' : ''}"
+        class="avatar {votedFor === null ? 'selected' : ''}"
         on:click={() => addVote(lobbyCode, $user?.uid ?? "", null)}
       >
         <img src="/avatars/0.webp" alt={avatarAltText[0]} />
-        <span class="mdc-typography--subtitle1">Skip Vote</span>
+        <span class="mdc-typography--subtitle1">Skip</span>
+        <div class="mdc-typography--caption">Vote for no cat</div>
       </button>
       <span class="mdc-typography--heading6">{lobby.skipVote}</span>
     </div>

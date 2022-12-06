@@ -373,7 +373,21 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
       players[uids.indexOf(latestVoteDoc.target)].votes += 1;
     }
 
-    transaction.update(lobbyDocRef, { players, skipVote });
+    let totalVotes = 0;
+    for (const player of players) {
+      totalVotes += player.votes;
+    }
+    totalVotes += skipVote;
+
+    if (
+      totalVotes == lobbyData.alivePlayers.length &&
+      lobbyData.expiration.toMillis() > firestore.Timestamp.now().toMillis() + 10 * 1000
+    ) {
+      const expiration = firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 10 * 1000);
+      transaction.update(lobbyDocRef, { players, skipVote, expiration });
+    } else {
+      transaction.update(lobbyDocRef, { players, skipVote });
+    }
   });
 });
 
