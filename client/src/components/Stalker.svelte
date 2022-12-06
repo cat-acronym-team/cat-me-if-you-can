@@ -10,6 +10,7 @@
 
   export let lobby: Lobby;
   export let lobbyCode: string;
+  export let isSpectator: boolean;
 
   let chatrooms: { players: [Player, Player]; id: string }[] = [];
 
@@ -35,7 +36,11 @@
 </script>
 
 <div class="container">
-  <h1 class="mdc-typography--headline4">Select a chat to stalk</h1>
+  {#if isSpectator}
+    <h1 class="mdc-typography--headline4">Select a chat to spectate</h1>
+  {:else}
+    <h1 class="mdc-typography--headline4">Select a chat to stalk</h1>
+  {/if}
   {#if errorMessage != undefined}
     <p class="error">{errorMessage}</p>
   {/if}
