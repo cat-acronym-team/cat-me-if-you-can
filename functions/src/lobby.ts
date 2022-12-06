@@ -51,6 +51,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
         votes: 0,
       },
     ],
+    skipVote: 0,
     bannedPlayers: [],
     state: "WAIT",
     alivePlayers: [context.auth.uid],
@@ -352,10 +353,13 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
       return;
     }
 
-    const { players, uids } = lobbyData;
+    const { players, uids, skipVote: oldSkipVote } = lobbyData;
+    let skipVote = oldSkipVote;
 
     // decrement old target
-    if (oldVoteDoc != undefined) {
+    if (oldVoteDoc != undefined && oldVoteDoc.target == "SKIP") {
+      skipVote -= 1;
+    } else if (oldVoteDoc != undefined) {
       const oldTarget = players[uids.indexOf(oldVoteDoc.target)];
       if (oldTarget.votes != 0) {
         oldTarget.votes -= 1;
@@ -363,9 +367,13 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
     }
 
     // increment new target
-    players[uids.indexOf(latestVoteDoc.target)].votes += 1;
+    if (latestVoteDoc.target == "SKIP") {
+      skipVote += 1;
+    } else {
+      players[uids.indexOf(latestVoteDoc.target)].votes += 1;
+    }
 
-    transaction.update(lobbyDocRef, { players });
+    transaction.update(lobbyDocRef, { players, skipVote });
   });
 });
 

@@ -50,9 +50,19 @@
             {/if}
           </div>
         </button>
-        <span class="mdc-typography--heading6">{votes ?? 0}</span>
+        <span class="mdc-typography--heading6">{votes}</span>
       </div>
     {/each}
+    <div class="vote-container">
+      <button
+        class="avatar {votedFor == -1 ? 'selected' : ''}"
+        on:click={() => addVote(lobbyCode, $user?.uid ?? "", "SKIP")}
+      >
+        <img src="/avatars/0.webp" alt={avatarAltText[0]} />
+        <span class="mdc-typography--subtitle1">{"Skip Vote"}</span>
+      </button>
+      <span class="mdc-typography--heading6">{lobby.skipVote}</span>
+    </div>
   </div>
 </div>
 

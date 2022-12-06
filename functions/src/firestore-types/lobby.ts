@@ -94,6 +94,12 @@ export type Lobby = {
   votedOff?: string | "NONE";
 
   /**
+   *
+   * number of people who skipped voting
+   */
+  skipVote: number;
+
+  /**
    * array of uids of banned players
    */
   bannedPlayers: string[];
@@ -157,9 +163,9 @@ export function promptAnswerValidator(displayName: string): { valid: true } | { 
  */
 export type Vote = {
   /**
-   * the UID of the player that the player owning this document has voted for
+   * the UID of the player or skip that the player owning this document has voted for
    */
-  target: string;
+  target: string | "SKIP";
 };
 
 /**
