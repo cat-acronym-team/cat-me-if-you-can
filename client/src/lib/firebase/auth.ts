@@ -48,38 +48,30 @@ export async function deleteAccount() {
 }
 
 export function linkWithGoogle(user: User | null) {
-  if (user === undefined) {
+  if (user === undefined || user == null) {
     throw new Error("Not signed in");
   }
 
-  if (user != null) {
-    const google = new GoogleAuthProvider();
-    return linkWithPopup(user, google);
-  }
+  const google = new GoogleAuthProvider();
+  return linkWithPopup(user, google);
 }
 
 export function linkWithMicrosoft(user: User | null) {
-  if (user === undefined) {
+  if (user === undefined || user == null) {
     throw new Error("Not signed in");
   }
 
-  if (user != null) {
-    const microsoft = new OAuthProvider("microsoft.com");
-    return linkWithPopup(user, microsoft);
-  }
+  const microsoft = new OAuthProvider("microsoft.com");
+  return linkWithPopup(user, microsoft);
 }
 
 export function linkWithPassword(password: string) {
   const user = auth.currentUser;
-  if (user === undefined) {
+  if (user === undefined || user == null) {
     throw new Error("Not Signed In");
   }
 
-  if (user != null) {
-    return updatePassword(user, password);
-  } else {
-    return user;
-  }
+  return updatePassword(user, password);
 }
 
 export function hasGoogleProvider(user: User | null) {
