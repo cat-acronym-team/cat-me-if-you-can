@@ -1,10 +1,8 @@
-import { GAME_STATE_DURATIONS, Lobby } from "./firestore-types/lobby";
+import { GAME_STATE_DURATIONS_DEFAULT, Lobby } from "./firestore-types/lobby";
 import { getPrivatePlayerCollection } from "./firestore-collections";
 import { firestore } from "firebase-admin";
 
 export function assignRole(lobbySnap: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
-  // Number of catfish below, will later be made to be changeable by users.
-  const numCatFish = 1;
   const lobbyData = lobbySnap.data();
   // lobby reference used for getPrivatePlayerCollection and transaction
   const lobby = lobbySnap.ref;
@@ -23,7 +21,7 @@ export function assignRole(lobbySnap: firestore.DocumentSnapshot<Lobby>, transac
   // Adds catfish to catfishUids until there are numCatFish catfish.
   const uidArray = Object.keys(players);
 
-  while (catfishUids.size < numCatFish) {
+  while (catfishUids.size < lobbyData.lobbySettings.catfishAmount) {
     catfishUids.add(uidArray[Math.floor(Math.random() * uidArray.length)]);
   }
   const privatePlayerCollection = getPrivatePlayerCollection(lobby);
@@ -41,7 +39,7 @@ export function assignRole(lobbySnap: firestore.DocumentSnapshot<Lobby>, transac
 
   // expiration
   const expiration = firestore.Timestamp.fromMillis(
-    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.ROLE * 1000
+    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS_DEFAULT.ROLE * 1000
   );
   transaction.update(lobby, { state: "ROLE", expiration });
 }

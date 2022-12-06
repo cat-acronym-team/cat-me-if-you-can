@@ -51,13 +51,27 @@
 <!-- Scenario 1 -->
 <div class="container">
   <!-- Check the user's role and display the correct win or loss page accordingly -->
-  {#if end == "Cat Win"}
+  {#if privatePlayer.role == "SPECTATOR"}
+    <div class="banner">
+      {#if end == "Cat Win" || end == "Catfish Lose"}
+        <h2>The cats have sniffed out the cat fish!</h2>
+        <h2>You will be able to join the next game!</h2>
+      {:else if end == "Cat Lose" || end == "Catfish Win"}
+        {#if catfishes.length > 1}
+          <h2>The impawsters were not caught!</h2>
+        {:else}
+          <h2>The impawster was not caught!</h2>
+        {/if}
+        <h2>You will be able to join the next game!</h2>
+      {/if}
+    </div>
+  {:else if end == "Cat Win"}
     <div class="banner">
       <h2>Hooray!</h2>
       <h2>You have sniffed out the cat fish!</h2>
     </div>
     <div class="image">
-      <img src="/images/winloss/HappyCat.png" alt="happy cat" />
+      <img src="/images/winloss/cat-win.webp" alt="" />
     </div>
     <div class="displayname">
       <!-- Check the number of catfish for grammar purposes -->
@@ -78,7 +92,7 @@
       {/if}
     </div>
     <div class="image">
-      <img src="/images/winloss/SadCat.png" alt="sad cat" />
+      <img src="/images/winloss/cat-loss.webp" alt="" />
     </div>
     <div class="displayname">
       <!-- Check the number of catfish for grammar purposes -->
@@ -96,7 +110,7 @@
     </div>
 
     <div class="image">
-      <img src="/images/winloss/Catfish.png" alt="cat fish" />
+      <img src="/images/winloss/catfish-win.webp" alt="" />
     </div>
 
     <div class="displayname">
@@ -109,7 +123,7 @@
       <h2>Might as well have been a <b>clown</b> fish...</h2>
     </div>
     <div class="image">
-      <img src="/images/winloss/Clownfish.png" alt="clown fish" />
+      <img src="/images/winloss/catfish-loss.webp" alt="" />
     </div>
     <div class="displayname">
       <h2>You should go back to your sea ani-anim-aneme... home</h2>
@@ -134,7 +148,7 @@
 <style>
   .container {
     position: relative;
-    height: 90vh;
+    height: 100%;
   }
 
   .banner {

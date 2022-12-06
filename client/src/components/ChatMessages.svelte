@@ -1,6 +1,7 @@
 <script lang="ts">
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
+  import CharacterCounter from "@smui/textfield/character-counter";
   import IconButton from "@smui/icon-button";
   import {
     chatMessageValidator,
@@ -55,8 +56,8 @@
         </div>
         <div class="display-name mdc-typography--body2">{message.displayName}</div>
         <div
-          class="text mdc-typography--body1"
-          style="background-color: {avatarColors[message.avatar]}; color: {onAvatarColors[message.avatar]}"
+          class="text mdc-typography--body1 {lobby.alivePlayers.includes(message.sender) ? '' : 'userDead'}"
+          style="background-color: {avatarColors[message.avatar]}; color: {onAvatarColors[message.avatar]};"
         >
           {message.text}
         </div>
@@ -75,6 +76,7 @@
         invalid={messageInvalid}
         input$autofocus
         input$enterkeyhint="send"
+        input$maxlength={100}
       >
         <IconButton
           type="submit"
@@ -85,7 +87,10 @@
         >
           send
         </IconButton>
-        <HelperText validationMsg slot="helper">{messageValidation.valid ? "" : messageValidation.reason}</HelperText>
+        <svelte:fragment slot="helper">
+          <HelperText validationMsg>{messageValidation.valid ? "" : messageValidation.reason}</HelperText>
+          <CharacterCounter>0 / 100</CharacterCounter>
+        </svelte:fragment>
       </Textfield>
     </form>
   {/if}
@@ -133,6 +138,11 @@
     justify-content: end;
   }
 
+  .userDead {
+    filter: grayscale(80%);
+    opacity: 0.5;
+  }
+
   .avatar {
     grid-area: avatar;
     align-self: end;
@@ -177,6 +187,6 @@
   }
 
   form :global(.mdc-text-field-helper-line) {
-    padding-inline-start: var(--mdc-shape-small);
+    padding-inline: var(--mdc-shape-small);
   }
 </style>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import LobbySettings from "./LobbySettings.svelte";
   import SelectAvatar from "./SelectAvatar.svelte";
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
@@ -14,7 +15,7 @@
   export let lobby: Lobby;
   $: playersLength = Object.keys(lobby.players).length;
   let errorMessage: string = "";
-  $: minPlayers = lobby.catfishAmount * 2 + 2;
+  $: minPlayers = lobby.lobbySettings.catfishAmount * 2 + 2;
 
   /**
    * variable that will be set true if the corresponding function has no errors thrown
@@ -80,8 +81,13 @@
 <div class="container">
   <div class="lobby-info">
     <h3>Code: {lobbyCode}</h3>
-    <h3>Players: {playersLength} / 8</h3>
-    {#if playersLength < minPlayers}
+    <h3>Players: {lobby.players.length} / 8</h3>
+    {#if $user?.uid === lobby.host}
+      <div class="settings">
+        <LobbySettings {lobby} {lobbyCode} />
+      </div>
+    {/if}
+    {#if Object.keys(lobby.players).length < minPlayers}
       <!-- Display the number of players needed to start the current game session -->
       {#if minPlayers - playersLength !== 1}
         <!-- Grammar check -->
@@ -123,6 +129,13 @@
 </div>
 
 <style>
+  .settings {
+    width: 100%;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+  }
+
   .actions {
     display: grid;
     place-items: center;
