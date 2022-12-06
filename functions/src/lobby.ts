@@ -172,6 +172,16 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
       throw new functions.https.HttpsError("failed-precondition", "Lobby is full!");
     }
 
+    // throws an error if current display name is already taken
+    for (const player in players) {
+      if (players[player].displayName == userInfo.displayName) {
+        throw new functions.https.HttpsError(
+          "already-exists",
+          userInfo.displayName + " is already taken in this lobby!"
+        );
+      }
+    }
+
     // change avatar randomly if it is already taken
     const takenAvatars = players.map((player) => player.avatar);
     while (userInfo.avatar == 0 || takenAvatars.includes(userInfo.avatar)) {
