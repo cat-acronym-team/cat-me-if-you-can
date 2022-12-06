@@ -78,53 +78,55 @@
   }
 </script>
 
-<header>
-  <SigninButton {userData} />
-</header>
+<div class="lobby-wrapper">
+  <header>
+    <SigninButton {userData} />
+  </header>
 
-<main>
-  <img class="banner" src="/images/banner.webp" alt="" />
-  <h1 class="mdc-typography--headline1">Cat Me If You Can</h1>
-  <div class="form">
-    {#if errorMessage !== ""}
-      <p class="error">{errorMessage}</p>
-    {/if}
-    <div class="textbox">
-      <Textfield
-        type="text"
-        label="Display name"
-        bind:value={name}
-        bind:dirty={nameDirty}
-        invalid={nameDirty && !nameValidation.valid}
-        required
-      >
-        <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
-      </Textfield>
+  <main>
+    <img class="banner" src="/images/banner.webp" alt="" />
+    <h1 class="mdc-typography--headline1">Cat Me If You Can</h1>
+    <div class="form">
+      {#if errorMessage !== ""}
+        <p class="error">{errorMessage}</p>
+      {/if}
+      <div class="textbox">
+        <Textfield
+          type="text"
+          label="Display name"
+          bind:value={name}
+          bind:dirty={nameDirty}
+          invalid={nameDirty && !nameValidation.valid}
+          required
+        >
+          <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
+        </Textfield>
+      </div>
+      <div class="buttons">
+        <Button on:click={createLobbyHandler} disabled={!nameValidation.valid || waiting} variant="raised">
+          <Label>Create Lobby</Label>
+        </Button>
+        <Button on:click={joinLobbyHandler} disabled={!nameValidation.valid || waiting} variant="raised">
+          <Label>Join Lobby</Label>
+        </Button>
+      </div>
     </div>
-    <div class="buttons">
-      <Button on:click={createLobbyHandler} disabled={!nameValidation.valid || waiting} variant="raised">
-        <Label>Create Lobby</Label>
-      </Button>
-      <Button on:click={joinLobbyHandler} disabled={!nameValidation.valid || waiting} variant="raised">
-        <Label>Join Lobby</Label>
-      </Button>
-    </div>
-  </div>
-</main>
+  </main>
+</div>
 
 <style>
-  /* Phone Styles */
+  .lobby-wrapper {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
   header {
     height: 64px;
     display: flex;
     justify-content: right;
     align-items: center;
     padding-right: 16px;
-  }
-
-  :global(body) {
-    display: grid;
-    grid-template-rows: auto 1fr;
   }
 
   main {
