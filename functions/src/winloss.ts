@@ -58,7 +58,7 @@ export async function endGameProcess(
       if (lobbyData.players[uid].role == undefined) {
         functions.logger.error("This player's role doesn't exist!");
         return;
-      } else if (players[index].role == "SPECTATOR") {
+      } else if (players[uid].role == "SPECTATOR") {
         return;
       }
 
