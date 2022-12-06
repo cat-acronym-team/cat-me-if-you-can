@@ -7,10 +7,10 @@
   import { onMount } from "svelte";
   import { avatarAltText, avatarColors } from "$lib/avatar";
   import { generateHclGradient } from "$lib/color";
-  import { authStore as user } from "$stores/auth";
 
   export let lobby: Lobby;
   export let lobbyCode: string;
+  export let isSpectator: boolean;
 
   let chatrooms: { players: [Player, Player]; id: string }[] = [];
 
@@ -36,7 +36,7 @@
 </script>
 
 <div class="container">
-  {#if !lobby.alivePlayers.includes($user?.uid ?? "")}
+  {#if isSpectator}
     <h1 class="mdc-typography--headline4">Select a chat to spectate</h1>
   {:else}
     <h1 class="mdc-typography--headline4">Select a chat to stalk</h1>

@@ -94,7 +94,7 @@
 
 <div class="chatroom">
   {#if (isStalker || isSpectator) && chatRoomId == undefined}
-    <Stalker {lobby} {lobbyCode} />
+    <Stalker {lobby} {lobbyCode} {isSpectator} />
   {:else}
     <ChatMessages
       {lobby}
