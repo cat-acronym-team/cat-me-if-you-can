@@ -28,7 +28,15 @@
   let unsubscribePrivatePlayer: Unsubscribe | undefined = undefined;
 
   let countdown = GAME_STATE_DURATIONS.WAIT;
+  $: countdownVisible = lobby != undefined && DISPLAY_TIMERS[lobby.state] == true;
   let timer: ReturnType<typeof setInterval>;
+
+  function updateCountdown() {
+    if (lobby == undefined) {
+      throw new Error("attempted to update countdown when lobby is undefined");
+    }
+    countdown = Math.floor((lobby.expiration.toMillis() - Date.now()) / 1000);
+  }
 
   onMount(async () => {
     // gets code from url search
@@ -63,22 +71,16 @@
     const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
     const privatePlayerDocRef = doc(privatePlayerCollection, $user.uid);
 
+    updateCountdown();
+
     // We want them to subscribe to the lobby on mount
     unsubscribeLobby = onSnapshot(lobbyDocRef, (doc) => {
       // will change lobby to the new doc data
-      const newLobby = doc.data();
-      if (lobby?.state != newLobby?.state && newLobby != undefined) {
-        countdown = GAME_STATE_DURATIONS[newLobby.state];
-
-        clearInterval(timer);
-        timer = setInterval(() => {
-          if (lobby?.expiration != undefined) {
-            const diff = Math.floor((lobby.expiration.toMillis() - Date.now()) / 1000);
-            countdown = diff;
-          }
-        }, 500);
+      lobby = doc.data();
+      clearInterval(timer);
+      if (lobby != undefined) {
+        timer = setInterval(updateCountdown, 500);
       }
-      lobby = newLobby;
     });
 
     // We want them to subscribe to the privatePlayer on mount
@@ -115,19 +117,18 @@
       replaceState: true,
     });
   }
-  $: if (
-    countdown <= 0 &&
-    lobby != null &&
-    lobby.uids[0] === $user?.uid &&
-    lobbyCode != null &&
-    DISPLAY_TIMERS[lobby.state] != null
-  ) {
-    clearInterval(timer);
-    verifyExpiration({ code: lobbyCode });
-  }
-  $: if (countdown <= -5 && lobby != null && lobbyCode != null && DISPLAY_TIMERS[lobby.state] != null) {
-    clearInterval(timer);
-    verifyExpiration({ code: lobbyCode });
+
+  $: countdown, checkTimerExpiration();
+  function checkTimerExpiration() {
+    if (
+      lobby != null &&
+      lobbyCode != null &&
+      DISPLAY_TIMERS[lobby.state] != null &&
+      ((lobby.uids[0] === $user?.uid && countdown < 0) || countdown < -5)
+    ) {
+      clearInterval(timer);
+      verifyExpiration({ code: lobbyCode });
+    }
   }
 </script>
 
@@ -136,68 +137,87 @@
 <!-- I do this check because the html was rendering the Lobby component before the onmount happened due to lobby having default values -->
 <!-- So the code was displaying undefined in the Lobby Component -->
 <!-- We could have a loading animation until the lobby is not undefined -->
-<main>
-  {#if lobby != null && DISPLAY_TIMERS[lobby.state] == true}
-    <p class="countdown mdc-typography--headline2 {countdown < 10 ? 'error' : ''}">
+<main class:has-countdown={countdownVisible}>
+  {#if countdownVisible}
+    <p class="countdown mdc-typography--headline2 {countdown <= 10 ? 'error' : ''}">
       {formatTimer(Math.max(countdown, 0))}
     </p>
   {/if}
 
-  {#if $user == null || lobby == undefined || lobbyCode == null}
-    <div class="spinner-wraper">
-      <CircularProgress indeterminate />
-    </div>
-  {:else if lobby.state === "WAIT"}
-    <LobbyChat {lobby} {lobbyCode} />
-    <LobbyComponent {lobbyCode} {lobby} />
-  {:else if privatePlayer == undefined}
-    <div class="spinner-wraper">
-      <CircularProgress indeterminate />
-    </div>
-  {:else if lobby.state === "ROLE"}
-    <Role {privatePlayer} />
-  {:else if lobby.state === "PROMPT"}
-    {#if !lobby.alivePlayers.includes($user.uid)}
+  <div class="scroll-container">
+    {#if $user == null || lobby == undefined || lobbyCode == null || (countdown < 0 && countdownVisible)}
+      <div class="spinner-wraper">
+        <CircularProgress indeterminate />
+      </div>
+    {:else if lobby.state === "WAIT"}
       <LobbyChat {lobby} {lobbyCode} />
-    {/if}
-    <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} lobbyData={lobby} />
-  {:else if lobby.state === "CHAT"}
-    {#if !lobby.alivePlayers.includes($user.uid)}
+      <LobbyComponent {lobbyCode} {lobby} />
+    {:else if privatePlayer == undefined}
+      <div class="spinner-wraper">
+        <CircularProgress indeterminate />
+      </div>
+    {:else if lobby.state === "ROLE"}
+      <Role {privatePlayer} />
+    {:else if lobby.state === "PROMPT"}
+      {#if !lobby.alivePlayers.includes($user.uid)}
+        <LobbyChat {lobby} {lobbyCode} />
+      {:else}
+        <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
+      {/if}
+    {:else if lobby.state === "CHAT"}
+      {#if !lobby.alivePlayers.includes($user.uid)}
+        <LobbyChat {lobby} {lobbyCode} />
+      {/if}
+      <ChatRoom
+        {lobby}
+        {lobbyCode}
+        isStalker={privatePlayer.stalker}
+        isSpectator={!lobby.alivePlayers.includes($user.uid)}
+      />
+    {:else if lobby.state === "VOTE"}
       <LobbyChat {lobby} {lobbyCode} />
+      <Vote {lobby} {lobbyCode} />
+    {:else if lobby.state === "RESULT"}
+      <Result {lobby} />
+    {:else if lobby.state === "END"}
+      <WinLoss {lobbyCode} {lobby} {privatePlayer} />
+    {:else}
+      <p class="error">unknown lobby state: {lobby.state}</p>
     {/if}
-    <ChatRoom
-      {lobby}
-      {lobbyCode}
-      isStalker={privatePlayer.stalker}
-      isSpectator={!lobby.alivePlayers.includes($user.uid)}
-    />
-  {:else if lobby.state === "VOTE"}
-    <LobbyChat {lobby} {lobbyCode} />
-    <Vote {lobby} {lobbyCode} />
-  {:else if lobby.state === "RESULT"}
-    <Result {lobby} />
-  {:else if lobby.state === "END"}
-    <WinLoss {lobbyCode} {lobby} {privatePlayer} />
-  {:else}
-    unknown lobby state: {lobby.state}
-  {/if}
+  </div>
 </main>
 
 <style>
-  .countdown {
-    margin: 0;
-    text-align: center;
+  main {
+    height: 100%;
+    display: grid;
+    grid-template-areas: "header" "scroll-container";
+    grid-template-rows: 64px 1fr;
   }
 
-  main {
-    box-sizing: border-box;
-    height: 100%;
-    overflow: auto;
-    padding-top: 64px;
+  main.has-countdown {
+    grid-template-rows: 96px 1fr;
+    gap: 24px;
+  }
+
+  .countdown {
+    grid-area: header;
+    margin: 0;
+    text-align: center;
+    align-self: end;
+  }
+
+  main:has(.spinner-wraper) .countdown {
+    display: none;
   }
 
   main:has(.spinner-wraper) {
-    padding: 0;
+    grid-template-rows: 0 1fr;
+  }
+
+  .scroll-container {
+    grid-area: scroll-container;
+    overflow-y: auto;
   }
 
   .spinner-wraper {
