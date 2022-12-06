@@ -82,7 +82,7 @@
     <h3>Code: {lobbyCode}</h3>
     <h3>Players: {lobby.players.length} / 8</h3>
     {#if $user?.uid === lobby.uids[0]}
-      <div class="lobby-info-level">
+      <div class="settings">
         <LobbySettings {lobby} {lobbyCode} />
       </div>
     {/if}
@@ -130,7 +130,7 @@
 </div>
 
 <style>
-  .lobby-info-level {
+  .settings {
     width: 100%;
     display: flex;
     justify-content: left;
