@@ -162,7 +162,12 @@
       {#if !lobby.alivePlayers.includes($user.uid)}
         <LobbyChat {lobby} {lobbyCode} />
       {:else}
-        <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
+        <Prompt
+          prompt={privatePlayer.prompt}
+          uid={$user.uid}
+          isSpectator={!lobby.alivePlayers.includes($user.uid)}
+          {lobbyCode}
+        />
       {/if}
     {:else if lobby.state === "CHAT"}
       {#if !lobby.alivePlayers.includes($user.uid)}

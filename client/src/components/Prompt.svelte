@@ -12,6 +12,8 @@
 
   export let lobbyCode: string;
 
+  export let isSpectator: boolean;
+
   let answer = "";
   let dirty = false;
 
@@ -42,27 +44,28 @@
 
 <form class="wraper" on:submit|preventDefault={submitAnswer}>
   <label class="mdc-typography--headline5" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
+  {#if !isSpectator}
+    <div class="input">
+      <Textfield
+        textarea
+        input$id="prompt-answer"
+        input$maxlength={50}
+        bind:value={answer}
+        bind:dirty
+        invalid={dirty && error != undefined}
+        required
+      >
+        <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
+        <CharacterCounter slot="internalCounter">0 / 100</CharacterCounter>
+      </Textfield>
 
-  <div class="input">
-    <Textfield
-      textarea
-      input$id="prompt-answer"
-      input$maxlength={50}
-      bind:value={answer}
-      bind:dirty
-      invalid={dirty && error != undefined}
-      required
-    >
-      <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
-      <CharacterCounter slot="internalCounter">0 / 100</CharacterCounter>
-    </Textfield>
-
-    <div class="button-wraper">
-      <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
+      <div class="button-wraper">
+        <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
+      </div>
     </div>
-  </div>
-  {#if displayAnswer != ""}
-    <p>Your Answer: {displayAnswer}</p>
+    {#if displayAnswer != ""}
+      <p>Your Answer: {displayAnswer}</p>
+    {/if}
   {/if}
 </form>
 
