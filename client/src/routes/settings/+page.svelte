@@ -16,7 +16,6 @@
     hasGoogleProvider,
     hasMicrosoftProvider,
   } from "$lib/firebase/auth";
-  import { goto } from "$app/navigation";
   import { Icon } from "@smui/common";
   import { displayNameValidator, type UserData } from "$lib/firebase/firestore-types/users";
   import { doc, DocumentReference, onSnapshot, setDoc, updateDoc, type Unsubscribe } from "firebase/firestore";
