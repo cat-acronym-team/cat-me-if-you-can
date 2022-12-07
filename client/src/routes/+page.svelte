@@ -13,9 +13,15 @@
 
   let name: string = "";
   let nameDirty: boolean = false;
-  $: nameValidation = displayNameValidator(name);
+  $: nameValidation = displayNameValidator(name.trim());
 
   let errorMessage: string = "";
+
+  /**
+   * variable that will be set true if the corresponding function has no errors thrown
+   * this will then allow the button to be pressed again if there is an error thrown
+   */
+  let waiting: boolean = false;
 
   // update user once auth store changes
   $: user = $authStore;
@@ -45,6 +51,7 @@
   }
 
   async function createLobbyHandler() {
+    waiting = true;
     try {
       // Create User
       await saveOrCreate(user, userData, name.trim());
@@ -53,52 +60,70 @@
       // go to game page
       goto("/game?code=" + response.data.code);
     } catch (err) {
+      waiting = false;
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
   async function joinLobbyHandler() {
+    waiting = true;
     try {
       // Create User
       await saveOrCreate(user, userData, name.trim());
       // go to join page
       goto("/join");
     } catch (err) {
+      waiting = false;
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
 </script>
 
-<header>
-  <AccountButton {userData} />
-</header>
+<div class="lobby-wrapper">
+  <header>
+    <AccountButton {userData} />
+  </header>
 
-<main class="cat-main-container">
-  <div class="cat-main">
-    <div class="logo-container">
-      <img src="https://picsum.photos/500/300" alt="our logo" />
+  <main class="cat-main-container">
+    <div class="cat-main">
+      <div class="logo-container">
+        <img src="https://picsum.photos/500/300" alt="our logo" />
+      </div>
+      <div class="cat-main-buttons">
+        {#if errorMessage !== ""}
+          <p class="error">{errorMessage}</p>
+        {/if}
+        <div class="textbox">
+          <Textfield
+            type="text"
+            label="Display name"
+            bind:value={name}
+            bind:dirty={nameDirty}
+            invalid={nameDirty && !nameValidation.valid}
+            required
+          >
+            <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
+          </Textfield>
+        </div>
+        <div class="buttons">
+          <Button on:click={createLobbyHandler} disabled={!nameValidation.valid || waiting} variant="raised">
+            <Label>Create Lobby</Label>
+          </Button>
+          <Button on:click={joinLobbyHandler} disabled={!nameValidation.valid || waiting} variant="raised">
+            <Label>Join Lobby</Label>
+          </Button>
+        </div>
+      </div>
     </div>
-    <div class="cat-main-buttons">
-      {#if errorMessage !== ""}
-        <p class="error">{errorMessage}</p>
-      {/if}
-      <Textfield
-        type="text"
-        label="Display name"
-        bind:value={name}
-        bind:dirty={nameDirty}
-        invalid={nameDirty && !nameValidation.valid}
-        required
-      >
-        <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
-      </Textfield>
-      <Button on:click|once={createLobbyHandler} disabled={!nameValidation.valid}><Label>Create Lobby</Label></Button>
-      <Button on:click|once={joinLobbyHandler} disabled={!nameValidation.valid}><Label>Join Lobby</Label></Button>
-    </div>
-  </div>
-</main>
+  </main>
+</div>
 
 <style>
-  /* Phone Styles */
+  .lobby-wrapper {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
   header {
     height: 64px;
     display: flex;
@@ -107,50 +132,40 @@
     padding-right: 16px;
   }
 
-  .logo-container {
-    width: 50%;
-    margin: auto;
-  }
-  .logo-container img {
-    width: 100%;
-  }
-  .cat-main-container {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 70%;
-  }
-  .cat-main {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    margin-top: auto;
-    margin-bottom: auto;
-  }
-  .cat-main-buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 70%;
-    margin: auto;
+  main {
+    display: grid;
+    justify-items: center;
+    grid-template-rows: auto auto 1fr;
+    gap: 12px;
+    padding: 16px;
+    --scale: min(calc(5vw + 12px), max(8vh, 16px));
   }
 
-  /* Tablet Styles */
-  @media only screen and (min-width: 700px) {
-    .logo-container {
-      width: 40%;
-    }
+  .banner {
+    width: min(100%, calc(var(--scale) * 10));
   }
-  /* Desktop Styles */
-  @media only screen and (min-width: 1000px) {
-    .logo-container {
-      width: 20%;
-    }
-    .cat-main-buttons {
-      width: 35%;
-    }
+
+  h1 {
+    margin: 0;
+    padding: 0;
+    font-size: var(--scale);
+    line-height: var(--scale);
+  }
+
+  .form {
+    display: grid;
+    gap: 16px;
+    justify-items: center;
+    align-content: center;
+  }
+
+  .textbox {
+    width: 200px;
+    display: grid;
+  }
+
+  .buttons {
+    display: grid;
+    gap: inherit;
   }
 </style>
