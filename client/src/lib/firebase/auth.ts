@@ -48,7 +48,7 @@ export async function deleteAccount() {
 }
 
 export function linkWithGoogle(user: User | null) {
-  if (user === undefined || user == null) {
+  if (user == null) {
     throw new Error("Not signed in");
   }
 
@@ -57,7 +57,7 @@ export function linkWithGoogle(user: User | null) {
 }
 
 export function linkWithMicrosoft(user: User | null) {
-  if (user === undefined || user == null) {
+  if (user == null) {
     throw new Error("Not signed in");
   }
 
@@ -67,7 +67,7 @@ export function linkWithMicrosoft(user: User | null) {
 
 export function linkWithPassword(password: string) {
   const user = auth.currentUser;
-  if (user === undefined || user == null) {
+  if (user == null) {
     throw new Error("Not Signed In");
   }
 
