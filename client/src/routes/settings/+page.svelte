@@ -99,7 +99,6 @@
   let linkPass = false;
 
   let password = "";
-  let errorMsg = "";
   let googleErr = "";
   let microsoftErr = "";
   let passErr = "";
@@ -239,23 +238,21 @@
     </Actions>
   </Dialog>
   <!--If user signed in too long ago, redirect them to sign in-->
-  {#if deleteErr !== ""}
-    <Dialog bind:open={errPrompt} aria-labelledby="reauth-title" aria-describedby="err-msg-content">
-      <Title id="reauth-title">NOTICE!</Title>
-      <Content id="err-msg-content"
-        >Last Sign In too long ago.
-        <br />Please Sign In and Try Again</Content
-      >
-      <Actions>
-        <Button
-          on:click={() => {
-            logOut();
-          }}
-          ><Label>Ok</Label>
-        </Button>
-      </Actions>
-    </Dialog>
-  {/if}
+  <Dialog bind:open={errPrompt} aria-labelledby="reauth-title" aria-describedby="err-msg-content">
+    <Title id="reauth-title">NOTICE!</Title>
+    <Content id="err-msg-content"
+      >Last Sign In too long ago.
+      <br />Please Sign In and Try Again</Content
+    >
+    <Actions>
+      <Button
+        on:click={() => {
+          logOut();
+        }}
+        ><Label>Ok</Label>
+      </Button>
+    </Actions>
+  </Dialog>
 
   <p id="email">Email: {$user?.email ?? "Anonymous User"}</p>
   <h3>Link Provider Options</h3>
@@ -323,48 +320,12 @@
       <Label>Sign Out</Label>
     </Button>
   </div>
-  <!--Delete Account Button and Prompt-->
-  <Dialog
-    bind:open={showDeletionPrompt}
-    aria-labelledby="confirm-account-deletion-title"
-    aria-describedby="deletion-confirmation-content"
-  >
-    <Title id="confirm-account-deletion-title">Delete Account</Title>
-    <Content id="deletion-confirmation-content">Are you sure?</Content>
-    <Actions>
-      <Button>
-        <Label>Cancel</Label>
-      </Button>
-      <Button on:click={verifyDelete}>
-        <Label>Delete Account</Label>
-      </Button>
-    </Actions>
-  </Dialog>
-  <!--If user signed in too long ago, redirect them to sign in-->
-  {#if errorMsg !== ""}
-    <Dialog bind:open={errPrompt} aria-labelledby="reauth-title" aria-describedby="err-msg-content">
-      <Title id="reauth-title">NOTICE!</Title>
-      <Content id="err-msg-content"
-        >Last sign in too long ago. <br />
-        Please Signin and Try Again</Content
-      >
-      <Actions>
-        <Button
-          on:click={() => {
-            logOut();
-            goto("/");
-          }}
-          ><Label>Ok</Label>
-        </Button>
-      </Actions>
-    </Dialog>
-  {/if}
+
   <div>
     <Button on:click={() => (showDeletionPrompt = true)}>
       <Label>Delete Account</Label>
     </Button>
   </div>
-  <!--End delete account button and prompt-->
 </main>
 
 <style>
