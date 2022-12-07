@@ -115,6 +115,8 @@
         return "canceled by user";
       case "Firebase: Error (auth/email-already-in-use).":
         return "Email already linked to an account";
+      case "User is not defined":
+        return "Last Sign In too long ago.";
       default:
         return errorMsg;
     }
@@ -241,7 +243,7 @@
   <Dialog bind:open={errPrompt} aria-labelledby="reauth-title" aria-describedby="err-msg-content">
     <Title id="reauth-title">NOTICE!</Title>
     <Content id="err-msg-content"
-      >Last Sign In too long ago.
+      >{deleteErr}
       <br />Please Sign In and Try Again</Content
     >
     <Actions>
