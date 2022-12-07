@@ -102,7 +102,9 @@
   <SelectAvatar {lobby} {lobbyCode} on:change={(event) => onAvatarSelect(event.detail.value)} />
   {#if $user?.uid === lobby.host}
     <div class="actions">
-      <Button on:click|once={() => start()} disabled={playersLength < minPlayers}><Label>Start Game</Label></Button>
+      <Button on:click={() => start()} disabled={playersLength < minPlayers || waiting}
+        ><Label>Start Game</Label></Button
+      >
     </div>
   {/if}
   <div class="actions">
