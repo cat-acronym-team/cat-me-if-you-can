@@ -119,7 +119,7 @@
   }
 
   $: countdown, checkTimerExpiration();
-  function checkTimerExpiration() {
+  async function checkTimerExpiration() {
     if (
       lobby != null &&
       lobbyCode != null &&
@@ -127,7 +127,15 @@
       ((lobby.uids[0] === $user?.uid && countdown < 0) || countdown < -5)
     ) {
       clearInterval(timer);
-      verifyExpiration({ code: lobbyCode });
+      try {
+        await verifyExpiration({ code: lobbyCode });
+      } catch (error) {
+        if (error instanceof Error && error.message.includes("early")) {
+          console.info(error);
+        } else {
+          console.error(error);
+        }
+      }
     }
   }
 </script>
