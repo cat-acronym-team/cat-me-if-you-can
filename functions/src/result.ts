@@ -3,7 +3,6 @@ import type { DocumentSnapshot, Transaction } from "firebase-admin/firestore";
 import { getPrivatePlayerCollection, getVoteCollection } from "./firestore-collections";
 import { GAME_STATE_DURATIONS_DEFAULT, Lobby, Role } from "./firestore-types/lobby";
 import { startPrompt } from "./lobby";
-import * as functions from "firebase-functions";
 
 export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transaction: Transaction) {
   const lobbyData = lobbyDoc.data();

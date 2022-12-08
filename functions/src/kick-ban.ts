@@ -49,8 +49,6 @@ export const kick = functions.https.onCall((data: unknown, context): Promise<voi
             earliestJoinedTime = players[uid].timeJoined;
             newHost = uid;
           }
-
-          functions.logger.info(uid + " | " + currentPlayerTimeJoined + " < " + earliestJoinedTime.toMillis());
         }
       } else {
         newHost = auth.uid;
@@ -108,8 +106,6 @@ export const ban = functions.https.onCall((data: unknown, context): Promise<void
             earliestJoinedTime = players[uid].timeJoined;
             newHost = uid;
           }
-
-          functions.logger.info(uid + " | " + currentPlayerTimeJoined + " < " + earliestJoinedTime.toMillis());
         }
       } else {
         newHost = auth.uid;

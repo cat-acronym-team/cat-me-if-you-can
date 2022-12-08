@@ -55,7 +55,6 @@ export async function endGameProcess(
       const userDoc = await transaction.get(userDocRef);
 
       if (lobbyData.players[uid].role == undefined) {
-        functions.logger.error("This player's role doesn't exist!");
         return;
       } else if (players[uid].role == "SPECTATOR") {
         return;
