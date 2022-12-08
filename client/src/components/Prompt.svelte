@@ -39,6 +39,7 @@
     }
     errorMessage = undefined;
     try {
+      answer = answer.trim();
       await setDoc(answerDoc, { answer });
       displayAnswer = answer;
     } catch (error) {
