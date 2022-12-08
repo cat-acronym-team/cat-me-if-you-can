@@ -33,24 +33,24 @@
 <div class="voting">
   <p class="mdc-typography--headline4">Vote out the catfish</p>
   <div class="voting-grid">
-    {#each Object.entries(lobby.players) as [uid, player]}
-      <div class="vote-container {!player.alive ? 'dead' : ''}">
+    {#each Object.entries(lobby.players) as [uid, { avatar, displayName, votes, alive, promptAnswer }]}
+      <div class="vote-container {!alive ? 'dead' : ''}">
         <button
           class="avatar {votedFor == uid ? 'selected' : ''}"
-          disabled={!lobby.alivePlayers.includes($user?.uid ?? "") || !player.alive}
+          disabled={!lobby.alivePlayers.includes($user?.uid ?? "") || !alive}
           on:click={() => addVote(lobbyCode, $user?.uid ?? "", uid)}
         >
-          <img src="/avatars/{player.avatar}.webp" alt={avatarAltText[player.avatar]} />
-          <span class="mdc-typography--subtitle1">{player.displayName ?? ""}</span>
+          <img src="/avatars/{avatar}.webp" alt={avatarAltText[avatar]} />
+          <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
           <div class="mdc-typography--caption">
-            {#if player.alive}
-              Answer: {player.promptAnswer ?? "no answer"}
+            {#if alive}
+              Answer: {promptAnswer ?? "no answer"}
             {:else}
               Im dead
             {/if}
           </div>
         </button>
-        <span class="mdc-typography--heading6">{player.votes ?? 0}</span>
+        <span class="mdc-typography--heading6">{votes ?? 0}</span>
       </div>
     {/each}
   </div>
