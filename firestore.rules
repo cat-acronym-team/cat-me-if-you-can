@@ -14,7 +14,7 @@ service cloud.firestore {
       }
 
       function isAlive(){
-        return request.auth.uid in lobbyData().alivePlayers; 
+        return request.auth.uid in lobbyData().alivePlayers;
       }
 
       match /privatePlayers/{uid} {
