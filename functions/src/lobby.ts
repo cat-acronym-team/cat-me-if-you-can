@@ -159,7 +159,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
 
     // get lobby data
     const { players, bannedPlayers } = lobbyInfo.data() as Lobby;
-    if (Object.keys(players).includes(auth.uid)) {
+    if (auth.uid in players) {
       throw new functions.https.HttpsError("already-exists", "You are already in the lobby!");
     }
 
