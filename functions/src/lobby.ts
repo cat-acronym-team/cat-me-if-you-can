@@ -195,8 +195,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
       });
     } else {
       // add player
-      const existingPlayers = players;
-      existingPlayers[auth.uid] = {
+      players[auth.uid] = {
         alive: true,
         avatar: userInfo.avatar,
         displayName: userInfo.displayName,
@@ -204,9 +203,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
         timeJoined: firestore.Timestamp.now(),
       };
 
-      transaction.update(lobby, {
-        players: existingPlayers,
-      });
+      transaction.update(lobby, { players });
     }
   });
 });
@@ -237,15 +234,10 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
     // get lobby data
     const { players, host } = lobbyInfo.data() as Lobby;
 
-    const newPlayers: Lobby["players"] = {};
-    for (const uid in players) {
-      if (uid !== auth.uid) {
-        newPlayers[uid] = players[uid];
-      }
-    }
+    delete players[auth.uid];
 
     // If the last player is leaving delete the document instead
-    if (Object.keys(players).length === 1) {
+    if (Object.keys(players).length === 0) {
       transaction.delete(lobby);
     } else {
       // if he's the host do this check
@@ -254,21 +246,17 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
 
       if (auth.uid == host) {
         for (const uid in players) {
-          const currentPlayerTimeJoined = players[uid].timeJoined.seconds * 1000;
-          if (currentPlayerTimeJoined < earliestJoinedTime.toMillis() && uid != auth.uid) {
-            earliestJoinedTime = players[uid].timeJoined;
+          const currentPlayerTimeJoined = players[uid].timeJoined;
+          if (currentPlayerTimeJoined.toMillis() < earliestJoinedTime.toMillis()) {
+            earliestJoinedTime = currentPlayerTimeJoined;
             newHost = uid;
           }
-
-          functions.logger.info(uid + " | " + currentPlayerTimeJoined + " < " + earliestJoinedTime.toMillis());
         }
-      } else {
-        newHost = auth.uid;
       }
 
       // Remove player from the lobby
       transaction.update(lobby, {
-        players: newPlayers,
+        players,
         host: newHost ?? host,
       });
     }
