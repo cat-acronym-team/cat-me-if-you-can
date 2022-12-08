@@ -46,8 +46,7 @@ export async function endGameProcess(
   transaction: firestore.Transaction
 ) {
   // apply the stats
-  const { players } = lobbyData;
-  const { winner } = lobbyData;
+  const { players, winner } = lobbyData;
 
   // update each players doc
   await Promise.all(

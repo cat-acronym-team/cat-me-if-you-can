@@ -159,7 +159,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
 
     // get lobby data
     const { players, bannedPlayers } = lobbyInfo.data() as Lobby;
-    if (Object.keys(players).includes(auth.uid)) {
+    if (auth.uid in players) {
       throw new functions.https.HttpsError("already-exists", "You are already in the lobby!");
     }
 
@@ -172,6 +172,16 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     // throw an error if the lobby is already full
     if (Object.keys(players).length >= maxPlayers) {
       throw new functions.https.HttpsError("failed-precondition", "Lobby is full!");
+    }
+
+    // throws an error if current display name is already taken
+    for (const player in players) {
+      if (players[player].displayName == userInfo.displayName) {
+        throw new functions.https.HttpsError(
+          "already-exists",
+          userInfo.displayName + " is already taken in this lobby!"
+        );
+      }
     }
 
     // change avatar randomly if it is already taken

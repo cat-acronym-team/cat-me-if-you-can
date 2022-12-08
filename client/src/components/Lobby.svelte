@@ -81,13 +81,13 @@
 <div class="container">
   <div class="lobby-info">
     <h3>Code: {lobbyCode}</h3>
-    <h3>Players: {lobby.players.length} / 8</h3>
+    <h3>Players: {playersLength} / 8</h3>
     {#if $user?.uid === lobby.host}
       <div class="settings">
         <LobbySettings {lobby} {lobbyCode} />
       </div>
     {/if}
-    {#if Object.keys(lobby.players).length < minPlayers}
+    {#if playersLength < minPlayers}
       <!-- Display the number of players needed to start the current game session -->
       {#if minPlayers - playersLength !== 1}
         <!-- Grammar check -->
@@ -102,7 +102,9 @@
   <SelectAvatar {lobby} {lobbyCode} on:change={(event) => onAvatarSelect(event.detail.value)} />
   {#if $user?.uid === lobby.host}
     <div class="actions">
-      <Button on:click|once={() => start()} disabled={playersLength < minPlayers}><Label>Start Game</Label></Button>
+      <Button on:click={() => start()} disabled={playersLength < minPlayers || waiting}
+        ><Label>Start Game</Label></Button
+      >
     </div>
   {/if}
   <div class="actions">

@@ -32,9 +32,10 @@
 
     if (lobby != undefined) {
       for (const uid in lobby.players) {
-        newAvatarChoices[lobby.players[uid].avatar - 1].displayName = lobby.players[uid].displayName;
-        newAvatarChoices[lobby.players[uid].avatar - 1].available = false;
-        newAvatarChoices[lobby.players[uid].avatar - 1].uid = uid;
+        const player = lobby.players[uid];
+        newAvatarChoices[player.avatar - 1].displayName = player.displayName;
+        newAvatarChoices[player.avatar - 1].available = false;
+        newAvatarChoices[player.avatar - 1].uid = uid;
       }
 
       if ($user !== null && $user.uid in lobby.players) {
