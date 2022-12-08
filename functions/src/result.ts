@@ -16,9 +16,6 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
   let winner: Role | undefined;
   const alteredPlayers = { ...currentPlayers };
 
-  functions.logger.info(`Current Players: ${currentPlayers["GIwUxe2z8dIkHD4lwWAkjRkVyRU4"].timeJoined}`);
-  functions.logger.info(`Altered Players: ${alteredPlayers["GIwUxe2z8dIkHD4lwWAkjRkVyRU4"].timeJoined}`);
-
   // check the alive cats vs alive catfishes
   let aliveCats = 0;
   let aliveCatfishes = 0;
