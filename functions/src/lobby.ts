@@ -389,7 +389,25 @@ export async function collectPromptAnswers(
   const { pairs, stalker } = generatePairs(lobbyData);
 
   if (stalker != undefined) {
-    getPrivatePlayerCollection(lobbyDoc.ref).doc(stalker).update({ stalker: true });
+    const stalkerPrivatePlayer = getPrivatePlayerCollection(lobbyDoc.ref).doc(stalker);
+    let stalkerPromptAnswer = promptAnswers.get(stalker);
+
+    if (stalkerPromptAnswer == "") {
+      stalkerPromptAnswer = "no answer";
+    }
+
+    // update stalker player object
+    const stalkerPlayer = lobbyData.players[lobbyData.uids.indexOf(stalker)];
+    stalkerPlayer.promptAnswer = stalkerPromptAnswer;
+    
+    // update on the players array
+    transaction.update(lobbyDoc.ref, {
+      players: lobbyData.players,
+    });
+
+    // make player the stalker
+    transaction.update(stalkerPrivatePlayer, { stalker: true });
+
   }
 
   // create a chatroom for each pair
