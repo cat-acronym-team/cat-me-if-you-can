@@ -8,16 +8,21 @@
   import { displayNameValidator, type UserData } from "$lib/firebase/firestore-types/users";
   import { goto } from "$app/navigation";
   import { authStore } from "$stores/auth";
+
   let userData: UserData | undefined;
+
   let name: string = "";
   let nameDirty: boolean = false;
   $: nameValidation = displayNameValidator(name.trim());
+
   let errorMessage: string = "";
+
   /**
    * variable that will be set true if the corresponding function has no errors thrown
    * this will then allow the button to be pressed again if there is an error thrown
    */
   let waiting: boolean = false;
+
   // update user once auth store changes
   $: user = $authStore;
   // this function will find user if the auth isnt null
@@ -44,6 +49,7 @@
   $: if (user !== null) {
     findUser();
   }
+
   async function createLobbyHandler() {
     waiting = true;
     try {
@@ -114,6 +120,7 @@
     display: grid;
     grid-template-rows: auto 1fr;
   }
+
   header {
     height: 64px;
     display: flex;
@@ -121,6 +128,7 @@
     align-items: center;
     padding-right: 16px;
   }
+
   main {
     display: grid;
     justify-items: center;
@@ -129,25 +137,30 @@
     padding: 16px;
     --scale: min(calc(5vw + 12px), max(8vh, 16px));
   }
+
   .banner {
     width: min(100%, calc(var(--scale) * 10));
   }
+
   h1 {
     margin: 0;
     padding: 0;
     font-size: var(--scale);
     line-height: var(--scale);
   }
+
   .form {
     display: grid;
     gap: 16px;
     justify-items: center;
     align-content: center;
   }
+
   .textbox {
     width: 200px;
     display: grid;
   }
+
   .buttons {
     display: grid;
     gap: inherit;
