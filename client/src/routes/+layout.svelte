@@ -13,7 +13,7 @@
   aria-describedby="rules-dialog-content"
 >
   <Header>
-    <Title id="rules-dialog-title">How to Play</Title>
+    <Title id="rules-dialog-title">Help</Title>
     <IconButton action="close" class="material-icons">close</IconButton>
   </Header>
   <Content id="rules-dialog-content">
@@ -155,6 +155,21 @@
       <li>Scenario 1 will result in the cats winning. The app is now fish-free!</li>
       <li>Scenario 2 will result in the catfish winning and cats dropping lower in the food chain…</li>
     </ul>
+
+    <h3 class="mdc-typography--headline5">Credits</h3>
+    <a href="https://github.com/nstringham" target="_blank">Nate Stringham - Team Lead</a> <br />
+    <a href="https://github.com/njumaah" target="_blank">Nathan Jumaah - Deputy Team Lead</a> <br />
+    <a href="https://github.com/Muaad2001" target="_blank">Muaad Abdulaziz - Team Member</a> <br />
+    <a href="https://github.com/SBAsai" target="_blank">Shunsuke Asai - Team Member</a> <br />
+    <a href="https://github.com/zaverbac" target="_blank">Zac Averbach - Team Member</a> <br />
+    <a href="https://github.com/gchamb" target="_blank">Giantte Chambers - Team Member</a> <br />
+    <a href="https://github.com/cmcclusky" target="_blank">Cameron McClusky - Team Member</a> <br />
+    <a href="https://github.com/mrjoshua520" target="_blank">Josh Salkeld - Team Member</a> <br />
+    <a href="https://twitter.com/00_yupia" target="_blank">yokaih - Artist</a> <br />
+
+    <h3 class="mdc-typography--headline5">Links</h3>
+    <a href="https://github.com/cat-acronym-team/cat-me-if-you-can" target="_blank">Github</a> <br />
+    <a href="https://github.com/cat-acronym-team/cat-me-if-you-can/issues/new" target="_blank">Have an issue?</a>
   </Content>
 </Dialog>
 
@@ -175,6 +190,11 @@
     position: absolute;
     top: 8px;
     left: 8px;
+  }
+
+  h3 {
+    margin-top: 10px;
+    margin-bottom: 10px;
   }
 
   ul {
