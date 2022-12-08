@@ -399,7 +399,7 @@ export async function collectPromptAnswers(
     // update stalker player object
     const stalkerPlayer = lobbyData.players[lobbyData.uids.indexOf(stalker)];
     stalkerPlayer.promptAnswer = stalkerPromptAnswer;
-    
+
     // update on the players array
     transaction.update(lobbyDoc.ref, {
       players: lobbyData.players,
@@ -407,7 +407,6 @@ export async function collectPromptAnswers(
 
     // make player the stalker
     transaction.update(stalkerPrivatePlayer, { stalker: true });
-
   }
 
   // create a chatroom for each pair
