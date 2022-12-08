@@ -190,31 +190,24 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
       userInfo.avatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
     }
 
-    // add spectator
+    // Check if the lobby state is not wait
+    let alive = true;
     if (lobbyData.state != "WAIT") {
       const privatePlayerDocRef = privatePlayerCollection.doc(user.id);
       transaction.create(privatePlayerDocRef, { role: "SPECTATOR", stalker: false });
-      transaction.update(lobby, {
-        players: firestore.FieldValue.arrayUnion({
-          displayName: userInfo.displayName,
-          avatar: userInfo.avatar,
-          alive: false,
-          votes: 0,
-        }),
-        uids: firestore.FieldValue.arrayUnion(auth.uid),
-      });
-    } else {
-      // add player
-      players[auth.uid] = {
-        alive: true,
-        avatar: userInfo.avatar,
-        displayName: userInfo.displayName,
-        votes: 0,
-        timeJoined: firestore.Timestamp.now(),
-      };
-
-      transaction.update(lobby, { players });
+      alive = false;
     }
+
+    // add player
+    players[auth.uid] = {
+      alive,
+      avatar: userInfo.avatar,
+      displayName: userInfo.displayName,
+      votes: 0,
+      timeJoined: firestore.Timestamp.now(),
+    };
+
+    transaction.update(lobby, { players });
   });
 });
 
