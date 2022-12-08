@@ -36,6 +36,6 @@ Hello my name is Cameron, I'm currently a Junior and am probably the least prepa
 
 I'll be graduating EMU in december if all goes well. I am most familar with c# and java however have used many other langauges in the past. In my free time I like to play D&D and also mentor a robotics team.
 
-## Artist
-
 ### [yokaih](https://twitter.com/00_yupia) - Artist
+
+I am a 20 year old digital artist from California. I normally draw anime-styled artwork, but I'd say I'm well adaptive when it comes to drawing in different styles. Aside from art, I am a writer who enjoys reading and writing both fantasy and cyberpunk stories.
