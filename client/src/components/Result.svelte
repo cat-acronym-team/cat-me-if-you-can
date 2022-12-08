@@ -1,28 +1,25 @@
 <script lang="ts">
   import type { Lobby, Player } from "$lib/firebase/firestore-types/lobby";
-  import { onMount } from "svelte";
   import { avatarAltText } from "$lib/avatar";
 
   export let lobby: Lobby;
 
   let votedOffUser: Player | undefined;
 
-  onMount(() => {
-    if (lobby.votedOff != undefined && lobby.votedOff != "NONE") {
-      votedOffUser = lobby.players[lobby.votedOff];
-    }
-  });
+  $: if (lobby.votedOff != undefined && lobby.votedOff != "NONE") {
+    votedOffUser = lobby.players[lobby.votedOff];
+  } else {
+    votedOffUser = undefined;
+  }
 </script>
 
 <div class="result">
-  {#if lobby.votedOff == undefined}
-    <h1>Somehow undefined</h1>
-  {:else if lobby.votedOff == "NONE"}
+  {#if votedOffUser == undefined}
     <h1>No one was voted off</h1>
   {:else}
     <div class="avatar">
-      <img src="/avatars/{votedOffUser?.avatar}.webp" alt={avatarAltText[votedOffUser?.avatar ?? 0]} />
-      <h1>{votedOffUser?.displayName} was voted off</h1>
+      <img src="/avatars/{votedOffUser.avatar}.webp" alt={avatarAltText[votedOffUser.avatar]} />
+      <h1>{votedOffUser.displayName} was voted off</h1>
     </div>
   {/if}
 </div>
