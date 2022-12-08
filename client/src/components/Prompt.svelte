@@ -53,7 +53,7 @@
 
   <div class="input">
     <Textfield
-      textarea
+      variant="outlined"
       input$id="prompt-answer"
       input$maxlength={50}
       bind:value={answer}
@@ -61,12 +61,14 @@
       invalid={dirty && validationError != undefined}
       required
     >
-      <HelperText validationMsg slot="helper">{validationError ?? ""}</HelperText>
-      <CharacterCounter slot="internalCounter">0 / 100</CharacterCounter>
+      <svelte:fragment slot="helper">
+        <HelperText validationMsg>{validationError ?? ""}</HelperText>
+        <CharacterCounter slot="internalCounter">0 / 50</CharacterCounter>
+      </svelte:fragment>
     </Textfield>
 
     <div class="button-wraper">
-      <Button type="submit" disabled={validationError != undefined}><Label>Done</Label></Button>
+      <Button variant="raised" type="submit" disabled={validationError != undefined}><Label>Done</Label></Button>
     </div>
     {#if errorMessage != undefined}
       <p class="error">{errorMessage}</p>
@@ -91,6 +93,7 @@
   }
 
   .button-wraper {
+    margin-top: 16px;
     display: grid;
     justify-content: end;
   }
