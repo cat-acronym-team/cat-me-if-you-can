@@ -57,10 +57,6 @@ export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentRefere
     transaction.update(stalker.ref, { stalker: false });
   }
 
-  const expiration = firestore.Timestamp.fromMillis(
-    firestore.Timestamp.now().toMillis() + lobbyData.lobbySettings.voteTime * 1000
-  );
-
   // iterate through promptAnswer docs and place the answer on their player object
   for (const promptAnswerDoc of promptAnswersSnaphot.docs) {
     const promptData = promptAnswerDoc.data();
@@ -69,10 +65,14 @@ export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentRefere
     if (promptAns === "" || !promptAnswerDoc.exists) {
       promptAns = "no answer";
     }
-    
+
     const playerIndex = uids.indexOf(promptAnswerDoc.id);
     players[playerIndex].promptAnswer = promptAns;
   }
+
+  const expiration = firestore.Timestamp.fromMillis(
+    firestore.Timestamp.now().toMillis() + lobbyData.lobbySettings.voteTime * 1000
+  );
 
   transaction.update(lobbyDoc, { state: "VOTE", expiration, players });
 }
