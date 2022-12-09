@@ -377,7 +377,6 @@ export async function collectPromptAnswers(
 
   for (const promptAnswerDoc of promptAnswerDocs.docs) {
     promptAnswers.set(promptAnswerDoc.id, promptAnswerDoc.data().answer);
-    transaction.delete(promptAnswerDoc.ref);
   }
 
   // expiration set
@@ -390,20 +389,6 @@ export async function collectPromptAnswers(
 
   if (stalker != undefined) {
     const stalkerPrivatePlayer = getPrivatePlayerCollection(lobbyDoc.ref).doc(stalker);
-    let stalkerPromptAnswer = promptAnswers.get(stalker);
-
-    if (stalkerPromptAnswer == "") {
-      stalkerPromptAnswer = "no answer";
-    }
-
-    // update stalker player object
-    const stalkerPlayer = lobbyData.players[lobbyData.uids.indexOf(stalker)];
-    stalkerPlayer.promptAnswer = stalkerPromptAnswer;
-
-    // update on the players array
-    transaction.update(lobbyDoc.ref, {
-      players: lobbyData.players,
-    });
 
     // make player the stalker
     transaction.update(stalkerPrivatePlayer, { stalker: true });
@@ -473,6 +458,17 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
   });
 });
 
+async function deletePromptAnswers(lobbyDocRef: firestore.DocumentReference<Lobby>) {
+  const batch = db.batch();
+  const promptAnswersSnapshot = await getPromptAnswerCollection(lobbyDocRef).get();
+
+  for (const promptAnswer of promptAnswersSnapshot.docs) {
+    batch.delete(promptAnswer.ref);
+  }
+
+  await batch.commit();
+}
+
 export const verifyExpiration = functions.https.onCall(async (data, context): Promise<void> => {
   // check auth
   if (context.auth == undefined) {
@@ -527,7 +523,9 @@ export const verifyExpiration = functions.https.onCall(async (data, context): Pr
       await determineWinner(lobbyDoc, transaction);
     }
   });
+
   if (lobby?.state == "VOTE") {
+    await deletePromptAnswers(lobbyDocRef);
     await deleteLobbyChatMessages(lobbyDocRef);
   }
 });

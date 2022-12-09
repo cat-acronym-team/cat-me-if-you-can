@@ -6,6 +6,7 @@ import {
   getChatRoomMessagesCollection,
   getPrivatePlayerCollection,
   getLobbyChatCollection,
+  getPromptAnswerCollection,
 } from "./firestore-collections";
 import { Lobby } from "./firestore-types/lobby";
 
@@ -23,6 +24,7 @@ export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentRefere
   const { players, uids } = lobbyData;
   const chatRoomsSnapshot = await transaction.get(getChatRoomCollection(lobbyDoc));
   const chatRooms = chatRoomsSnapshot.docs.map((room) => room.ref);
+  const promptAnswersSnaphot = await transaction.get(getPromptAnswerCollection(lobbyDoc));
 
   const chatMessages = await Promise.all(
     chatRooms.map(async (room) => {
@@ -58,5 +60,19 @@ export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentRefere
   const expiration = firestore.Timestamp.fromMillis(
     firestore.Timestamp.now().toMillis() + lobbyData.lobbySettings.voteTime * 1000
   );
+
+  // iterate through promptAnswer docs and place the answer on their player object
+  for (const promptAnswerDoc of promptAnswersSnaphot.docs) {
+    const promptData = promptAnswerDoc.data();
+    let promptAns = promptData.answer;
+
+    if (promptAns === "" || !promptAnswerDoc.exists) {
+      promptAns = "no answer";
+    }
+    
+    const playerIndex = uids.indexOf(promptAnswerDoc.id);
+    players[playerIndex].promptAnswer = promptAns;
+  }
+
   transaction.update(lobbyDoc, { state: "VOTE", expiration, players });
 }
