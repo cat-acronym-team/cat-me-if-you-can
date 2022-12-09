@@ -7,13 +7,22 @@
   import HelperText from "@smui/textfield/helper-text";
   import { avatarAltText } from "$lib/avatar";
   import type { Avatar } from "$lib/firebase/firestore-types/lobby";
-  import { deleteAccount, logOut } from "$lib/firebase/auth";
-  import { goto } from "$app/navigation";
+  import {
+    deleteAccount,
+    logOut,
+    linkWithGoogle,
+    linkWithMicrosoft,
+    linkWithPassword,
+    hasGoogleProvider,
+    hasMicrosoftProvider,
+  } from "$lib/firebase/auth";
+  import { Icon } from "@smui/common";
   import { displayNameValidator, type UserData } from "$lib/firebase/firestore-types/users";
   import { doc, DocumentReference, onSnapshot, setDoc, updateDoc, type Unsubscribe } from "firebase/firestore";
   import { userCollection } from "$lib/firebase/firestore-collections";
   import { authStore as user } from "$stores/auth";
   import { onDestroy } from "svelte";
+  import ProviderButtons from "$components/ProviderButtons.svelte";
 
   let userData: UserData | undefined = undefined;
   let userDataDocRef: DocumentReference<UserData> | undefined = undefined;
@@ -83,25 +92,80 @@
   }
 
   let showDeletionPrompt = false;
-  let errorMsg = "";
+  let showOptions = false;
+  let showPassword = false;
   let errPrompt = false;
+  let linkPass = false;
 
-  function verifyDelete() {
+  let password = "";
+  let googleErr = "";
+  let microsoftErr = "";
+  let passErr = "";
+  let deleteErr = "";
+
+  function getErrorMsg(error: unknown): string {
+    let errorMsg = error instanceof Error ? error.message : String(error);
+    switch (errorMsg) {
+      case "Firebase: Password should be at least 6 characters (auth/weak-password).":
+        return "Password should be at least 6 characters";
+      case "Not Signed in":
+        return errorMsg;
+      case "Firebase: Error (auth/popup-closed-by-user).":
+        return "canceled by user";
+      case "Firebase: Error (auth/email-already-in-use).":
+        return "Email already linked to an account";
+      case "User is not defined":
+        return "Last Sign In too long ago.";
+      default:
+        return errorMsg;
+    }
+  }
+  async function verifyDelete() {
     try {
-      deleteAccount();
+      await deleteAccount();
       // If no error
-      errorMsg = "";
-
-      goto("/");
-      return;
+      window.location.href = "/";
     } catch (err) {
       errPrompt = true;
-      errorMsg = err instanceof Error ? err.message : String(err);
+      deleteErr = getErrorMsg(err);
     }
+  }
+
+  async function linkGoogleAccount() {
+    try {
+      await linkWithGoogle($user);
+      window.location.reload();
+    } catch (err) {
+      googleErr = getErrorMsg(err);
+    }
+  }
+
+  async function linkMicrosoftAccount() {
+    try {
+      await linkWithMicrosoft($user);
+      window.location.reload();
+    } catch (err) {
+      microsoftErr = getErrorMsg(err);
+    }
+  }
+
+  async function linkPassword() {
+    try {
+      await linkWithPassword(password);
+      linkPass = true;
+      showOptions = false;
+      clearFields();
+    } catch (err) {
+      passErr = getErrorMsg(err);
+    }
+  }
+
+  function clearFields() {
+    password = "";
   }
 </script>
 
-<main>
+<main class="settings-wrapper">
   <h2 class="mdc-typography--headline2">Account Settings</h2>
 
   <div class="preferences">
@@ -175,28 +239,94 @@
     </Actions>
   </Dialog>
   <!--If user signed in too long ago, redirect them to sign in-->
-  {#if errorMsg !== ""}
-    <Dialog bind:open={errPrompt} aria-labelledby="reauth-title" aria-describedby="err-msg-content">
-      <Title id="reauth-title">NOTICE!</Title>
-      <Content id="err-msg-content"
-        >Last sign in too long ago.
-        <br />Please Signin and Try Again</Content
+  <Dialog bind:open={errPrompt} aria-labelledby="reauth-title" aria-describedby="err-msg-content">
+    <Title id="reauth-title">NOTICE!</Title>
+    <Content id="err-msg-content"
+      >{deleteErr}
+      <br />Please Sign In and Try Again</Content
+    >
+    <Actions>
+      <Button
+        on:click={() => {
+          logOut();
+        }}
+        ><Label>Ok</Label>
+      </Button>
+    </Actions>
+  </Dialog>
+
+  <p id="email">Email: {$user?.email ?? "Anonymous User"}</p>
+  <h3>Link Provider Options</h3>
+
+  <div class="signin-buttons">
+    <ProviderButtons
+      on:google-clicked={linkGoogleAccount}
+      on:microsoft-clicked={linkMicrosoftAccount}
+      hideGoogle={hasGoogleProvider($user)}
+      hideMicrosoft={hasMicrosoftProvider($user)}
+    >
+      <p class="error" slot="google-error">{googleErr}</p>
+      <p class="error" slot="microsoft-error">{microsoftErr}</p>
+    </ProviderButtons>
+  </div>
+  <div>
+    <Button on:click={() => (showOptions = true)}>
+      <Label>Set Password</Label>
+    </Button>
+  </div>
+  <Dialog bind:open={showOptions} aria-labelledby="set-password-title" aria-describedby="link-options-content">
+    <Title id="set-password-title">Set Password</Title>
+    <Content id="set-password-content">
+      <Textfield
+        name="password"
+        label="Password"
+        type={showPassword ? "text" : "password"}
+        bind:value={password}
+        required
       >
-      <Actions>
-        <Button
-          on:click={() => {
-            logOut();
-            goto("/");
-          }}
-          ><Label>Ok</Label>
+        <IconButton
+          type="button"
+          on:click={(event) => event.preventDefault()}
+          slot="trailingIcon"
+          toggle
+          bind:pressed={showPassword}
+        >
+          <Icon class="material-icons" on>visibility</Icon>
+          <Icon class="material-icons">visibility_off</Icon>
+        </IconButton>
+      </Textfield>
+    </Content>
+
+    <Actions>
+      <div>
+        <Button on:click={linkPassword}>
+          <Label>Set Password</Label>
         </Button>
-      </Actions>
-    </Dialog>
+      </div>
+    </Actions>
+  </Dialog>
+
+  {#if linkPass}
+    <p class="set-pass">Password Successfully Set</p>
+  {:else if passErr !== ""}
+    <p class="error">{passErr}</p>
   {/if}
 
-  <Button on:click={() => (showDeletionPrompt = true)}>
-    <Label>Delete Account</Label>
-  </Button>
+  <div>
+    <Button
+      on:click={() => {
+        logOut();
+      }}
+    >
+      <Label>Sign Out</Label>
+    </Button>
+  </div>
+
+  <div>
+    <Button on:click={() => (showDeletionPrompt = true)}>
+      <Label>Delete Account</Label>
+    </Button>
+  </div>
 </main>
 
 <style>
@@ -221,5 +351,42 @@
     position: absolute;
     top: -8px;
     right: -8px;
+  }
+
+  .settings-wrapper {
+    display: grid;
+    margin-top: 50px;
+    margin-left: 20px;
+  }
+
+  .signin-buttons {
+    display: grid;
+    justify-content: center;
+    gap: 4px;
+    max-width: 230px;
+  }
+
+  .set-pass {
+    color: rgb(15, 148, 15);
+  }
+
+  :global(#sign-in-with-google),
+  :global(#sign-in-with-microsoft) {
+    --mdc-typography-button-text-transform: none;
+    justify-content: start;
+    gap: 4px;
+  }
+
+  :global(#sign-in-with-google),
+  :global(#sign-in-with-microsoft) {
+    --mdc-theme-primary: #ffffff;
+    --mdc-theme-on-primary: #3c4043;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(#sign-in-with-microsoft) {
+      --mdc-theme-primary: #2f2f2f;
+      --mdc-theme-on-primary: #ffffff;
+    }
   }
 </style>
