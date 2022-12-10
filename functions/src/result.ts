@@ -56,6 +56,7 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
     // set their votes to zero
     for (const player of currentPlayers) {
       player.votes = 0;
+      delete player.promptAnswer;
     }
   }
 
