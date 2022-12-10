@@ -180,6 +180,7 @@
     padding: 12px;
     margin-bottom: 16px;
     border-radius: 24px 24px 24px 0;
+    word-break: break-word;
   }
 
   .current-user .text {
