@@ -1,9 +1,10 @@
 <script lang="ts">
   import "@material/typography/mdc-typography.scss";
+  import Rules from "$components/Rules.svelte";
 </script>
 
 <header class="header">
-  <slot name="help" />
+  <Rules />
   <slot name="top-right" />
 </header>
 

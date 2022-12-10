@@ -9,7 +9,6 @@
   import CircularProgress from "@smui/circular-progress";
   import LobbyChat from "$components/LobbyChat.svelte";
   import Layout from "../+layout.svelte";
-  import Rules from "$components/Rules.svelte";
   import LobbySettings from "$components/LobbySettings.svelte";
 
   import { onSnapshot, doc, getDoc, type Unsubscribe } from "firebase/firestore";
@@ -146,8 +145,6 @@
 <svelte:window on:beforeunload={onbeforeunload} />
 
 <Layout>
-  <Rules slot="help" />
-
   <div class="buttons" slot="top-right">
     {#if lobbyCode !== null && lobby !== undefined && $user !== undefined && $user !== null}
       {#if lobby.state === "WAIT"}

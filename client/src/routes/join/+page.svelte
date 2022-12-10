@@ -1,7 +1,6 @@
 <script lang="ts">
   import AccountButton from "$components/AccountButton.svelte";
   import Layout from "../+layout.svelte";
-  import Rules from "$components/Rules.svelte";
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
@@ -109,7 +108,6 @@
 </script>
 
 <Layout>
-  <Rules slot="help" />
   <AccountButton slot="top-right" {userData} />
 </Layout>
 

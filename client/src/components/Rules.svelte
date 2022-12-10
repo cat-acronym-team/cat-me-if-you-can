@@ -163,12 +163,6 @@
 </div>
 
 <style>
-  :global(body) {
-    margin: 0;
-    height: 100vh;
-    height: 100dvh;
-  }
-
   ul {
     padding-left: 24px;
     margin: 0;

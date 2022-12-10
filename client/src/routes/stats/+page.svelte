@@ -1,7 +1,5 @@
 <script lang="ts">
   import CircularProgress from "@smui/circular-progress";
-  import Layout from "../+layout.svelte";
-  import Rules from "$components/Rules.svelte";
   import { authStore as user } from "$stores/auth";
   import type { UserData } from "$lib/firebase/firestore-types/users";
   import { doc, onSnapshot } from "firebase/firestore";
@@ -45,10 +43,6 @@
 </script>
 
 <main>
-  <Layout>
-    <Rules slot="help" />
-  </Layout>
-
   {#if $user == null}
     <div class="spinner-wraper">
       <CircularProgress indeterminate />
