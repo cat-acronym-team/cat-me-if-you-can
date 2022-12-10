@@ -4,7 +4,7 @@
 
 <header class="header">
   <slot name="help" />
-  <slot name="other" />
+  <slot name="top-right" />
 </header>
 
 <slot />
@@ -16,15 +16,13 @@
     height: 100dvh;
   }
 
-  .top-left {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-  }
-
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: absolute;
+    gap: 8px;
+    top: 8px;
+    left: 8px;
   }
 </style>

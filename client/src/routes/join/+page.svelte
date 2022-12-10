@@ -110,7 +110,7 @@
 
 <Layout>
   <Rules slot="help" />
-  <AccountButton slot="other" {userData} />
+  <AccountButton slot="top-right" {userData} />
 </Layout>
 
 <div class="cat-join-container">
