@@ -1,5 +1,4 @@
 <script lang="ts">
-  import LobbySettings from "./LobbySettings.svelte";
   import SelectAvatar from "./SelectAvatar.svelte";
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
@@ -81,11 +80,6 @@
   <div class="lobby-info">
     <h3>Code: {lobbyCode}</h3>
     <h3>Players: {lobby.players.length} / 8</h3>
-    {#if $user?.uid === lobby.uids[0]}
-      <div class="settings">
-        <LobbySettings {lobby} {lobbyCode} />
-      </div>
-    {/if}
     {#if lobby.players.length < minPlayers}
       <!-- Display the number of players needed to start the current game session -->
       {#if minPlayers - lobby.players.length !== 1}
@@ -130,13 +124,6 @@
 </div>
 
 <style>
-  .settings {
-    width: 100%;
-    display: flex;
-    justify-content: left;
-    align-items: center;
-  }
-
   .actions {
     display: grid;
     place-items: center;
