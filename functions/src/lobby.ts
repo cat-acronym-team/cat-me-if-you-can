@@ -21,7 +21,7 @@ import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
-import { deleteChatRooms, deleteLobbyChatMessages } from "./chat";
+import { deleteChatCollections, setAnswers, deleteLobbyChatMessages } from "./chat";
 import { assignRole } from "./role";
 import { endGameProcess } from "./winloss";
 import { findVoteOff } from "./vote";
@@ -510,7 +510,7 @@ export const verifyExpiration = functions.https.onCall(async (data, context): Pr
       await collectPromptAnswers(lobbyDoc, transaction);
     }
     if (lobby.state === "CHAT") {
-      await deleteChatRooms(lobby, lobbyDocRef, transaction);
+      await setAnswers(lobby, lobbyDocRef, transaction);
     }
     // Applies the stats once the timer on the end screen ends
     if (lobby.state === "END") {
@@ -523,6 +523,10 @@ export const verifyExpiration = functions.https.onCall(async (data, context): Pr
       await determineWinner(lobbyDoc, transaction);
     }
   });
+
+  if (lobby?.state == "CHAT") {
+    await deleteChatCollections(lobbyDocRef);
+  }
 
   if (lobby?.state == "VOTE") {
     await deletePromptAnswers(lobbyDocRef);

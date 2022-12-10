@@ -20,38 +20,29 @@ export async function deleteLobbyChatMessages(lobbyDoc: DocumentReference<Lobby>
   await batch.commit();
 }
 
-export async function deleteChatRooms(lobbyData: Lobby, lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
-  const { players, uids } = lobbyData;
-  const chatRoomsSnapshot = await transaction.get(getChatRoomCollection(lobbyDoc));
-  const chatRooms = chatRoomsSnapshot.docs.map((room) => room.ref);
-  const promptAnswersSnaphot = await transaction.get(getPromptAnswerCollection(lobbyDoc));
+export async function deleteChatCollections(lobbyDoc: firestore.DocumentReference<Lobby>) {
+  const batch = db.batch();
 
-  const chatMessages = await Promise.all(
-    chatRooms.map(async (room) => {
-      const chatMessagesSnapshot = await transaction.get(getChatRoomMessagesCollection(room));
-      return chatMessagesSnapshot.docs;
-    })
-  );
+  const chatRooms = await getChatRoomCollection(lobbyDoc).get();
+
+  for (const chatRoomDoc of chatRooms.docs) {
+    // place messages in batch
+    const chatMessages = await getChatRoomMessagesCollection(chatRoomDoc.ref).get();
+    chatMessages.docs.map((messageDoc) => batch.delete(messageDoc.ref));
+
+    // place room in batch
+    batch.delete(chatRoomDoc.ref);
+  }
+
+  await batch.commit();
+}
+
+export async function setAnswers(lobbyData: Lobby, lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
+  const { players, uids } = lobbyData;
+  const promptAnswersSnaphot = await transaction.get(getPromptAnswerCollection(lobbyDoc));
 
   // delete stalker
   const stalkers = await transaction.get(getPrivatePlayerCollection(lobbyDoc).where("stalker", "==", true));
-
-  for (const messageDoc of chatMessages.flat()) {
-    // get message info
-    const message = messageDoc.data();
-    // if the message is the prompt answer then add it to their player object
-    if (message.isPromptAnswer) {
-      // get index and add their prompt answer to their player object
-      const senderIndex = uids.indexOf(message.sender);
-      players[senderIndex].promptAnswer = message.text;
-    }
-    // delete all messages
-    transaction.delete(messageDoc.ref);
-  }
-
-  for (const room of chatRooms) {
-    transaction.delete(room);
-  }
 
   for (const stalker of stalkers.docs) {
     transaction.update(stalker.ref, { stalker: false });
