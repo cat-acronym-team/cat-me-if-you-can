@@ -50,11 +50,11 @@ export async function endGameProcess(
 
   // update each players doc
   await Promise.all(
-    Object.keys(lobbyData.players).map(async (uid) => {
+    Object.entries(lobbyData.players).map(async ([uid, player]) => {
       const userDocRef = userCollection.doc(uid);
       const userDoc = await transaction.get(userDocRef);
 
-      if (lobbyData.players[uid].role == undefined) {
+      if (player.role == undefined) {
         return;
       } else if (players[uid].role == "SPECTATOR") {
         return;
@@ -68,17 +68,17 @@ export async function endGameProcess(
       } = {};
 
       // increment played as role
-      if (lobbyData.players[uid].role == "CAT") {
+      if (player.role == "CAT") {
         newStats.playedAsCat = firestore.FieldValue.increment(1);
       } else {
         newStats.playedAsCatfish = firestore.FieldValue.increment(1);
       }
 
       // increment wins
-      if (winner == "CAT" && lobbyData.players[uid].role == "CAT") {
+      if (winner == "CAT" && player.role == "CAT") {
         newStats.catWins = firestore.FieldValue.increment(1);
       }
-      if (winner == "CATFISH" && lobbyData.players[uid].role == "CATFISH") {
+      if (winner == "CATFISH" && player.role == "CATFISH") {
         newStats.catfishWins = firestore.FieldValue.increment(1);
       }
       // update their user doc
