@@ -1,5 +1,7 @@
 <script lang="ts">
   import AccountButton from "$components/AccountButton.svelte";
+  import Layout from "./+layout.svelte";
+  import Rules from "$components/Rules.svelte";
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
@@ -79,9 +81,10 @@
 </script>
 
 <div class="lobby-wrapper">
-  <header>
-    <AccountButton {userData} />
-  </header>
+  <Layout>
+    <Rules slot="help" />
+    <AccountButton slot="other" {userData} />
+  </Layout>
 
   <main>
     <img class="banner" src="/images/banner.webp" alt="" />
@@ -119,14 +122,6 @@
     height: 100%;
     display: grid;
     grid-template-rows: auto 1fr;
-  }
-
-  header {
-    height: 64px;
-    display: flex;
-    justify-content: right;
-    align-items: center;
-    padding-right: 16px;
   }
 
   main {

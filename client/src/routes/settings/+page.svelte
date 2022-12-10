@@ -1,5 +1,7 @@
 <script lang="ts">
   import SelectAvatar from "$components/SelectAvatar.svelte";
+  import Layout from "../+layout.svelte";
+  import Rules from "$components/Rules.svelte";
   import Dialog, { Title, Content, Actions } from "@smui/dialog";
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
@@ -166,6 +168,10 @@
 </script>
 
 <main class="settings-wrapper">
+  <Layout>
+    <Rules slot="help" />
+  </Layout>
+
   <h2 class="mdc-typography--headline2">Account Settings</h2>
 
   <div class="preferences">
@@ -355,7 +361,7 @@
 
   .settings-wrapper {
     display: grid;
-    margin-top: 50px;
+    margin-top: 20px;
     margin-left: 20px;
   }
 

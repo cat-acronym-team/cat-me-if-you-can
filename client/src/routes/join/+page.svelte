@@ -1,5 +1,7 @@
 <script lang="ts">
   import AccountButton from "$components/AccountButton.svelte";
+  import Layout from "../+layout.svelte";
+  import Rules from "$components/Rules.svelte";
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
@@ -106,9 +108,10 @@
   }
 </script>
 
-<header>
-  <AccountButton {userData} />
-</header>
+<Layout>
+  <Rules slot="help" />
+  <AccountButton slot="other" {userData} />
+</Layout>
 
 <div class="cat-join-container">
   <h2 class="mdc-typography--headline2">Join Lobby!</h2>
@@ -149,14 +152,6 @@
 </div>
 
 <style>
-  header {
-    height: 64px;
-    display: flex;
-    justify-content: right;
-    align-items: center;
-    padding-right: 16px;
-  }
-
   .cat-join-container {
     width: 60%;
     margin: auto;
