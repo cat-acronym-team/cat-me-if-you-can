@@ -195,7 +195,7 @@
   }
 
   h3 {
-    margin-block: 10px;
+    margin-bottom: 10px;
   }
 
   ul {
