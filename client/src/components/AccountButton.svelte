@@ -145,10 +145,11 @@
 <div class="account-container">
   <!-- If you are not signed in show this  -->
   {#if $user == null}
-    <Button on:click={() => (showSignInDialog = true)}><Label>Sign in</Label></Button>
+    <IconButton class="material-icons" on:click={() => (showSignInDialog = true)}><Label>no_accounts</Label></IconButton
+    >
     <!-- If you show account and dropdown -->
   {:else}
-    <Button on:click={() => menu.setOpen(true)}><Label>Account</Label></Button>
+    <IconButton class="material-icons" on:click={() => menu.setOpen(true)}><Label>account_circle</Label></IconButton>
     <Menu bind:this={menu}>
       <List>
         <Item tag="a" href="/settings"><Text>Account Settings</Text></Item>
