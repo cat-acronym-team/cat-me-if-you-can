@@ -1,6 +1,6 @@
 import { firestore } from "firebase-admin";
 import type { DocumentReference, Transaction } from "firebase-admin/firestore";
-import { GAME_STATE_DURATIONS_DEFAULT, Lobby, Player } from "./firestore-types/lobby";
+import { GAME_STATE_DURATIONS_DEFAULT, Lobby } from "./firestore-types/lobby";
 
 export function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lobby>, transaction: Transaction) {
   const { players } = lobbyData;
