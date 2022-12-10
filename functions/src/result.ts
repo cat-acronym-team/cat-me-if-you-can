@@ -11,16 +11,15 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
     throw new Error("Lobby not found");
   }
 
-  const { players: currentPlayers } = lobbyData;
+  const { players } = lobbyData;
   let winner: Role | undefined;
-  const alteredPlayers = { ...currentPlayers };
 
   // check the alive cats vs alive catfishes
   let aliveCats = 0;
   let aliveCatfishes = 0;
   const privatePlayerCollection = getPrivatePlayerCollection(lobbyDoc.ref);
 
-  for (const uid in currentPlayers) {
+  for (const uid in players) {
     const privatePlayerRef = privatePlayerCollection.doc(uid);
 
     const privatePlayerDoc = await transaction.get(privatePlayerRef);
@@ -30,7 +29,7 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
     if (privatePlayer == undefined) {
       continue;
     } else {
-      const player = alteredPlayers[uid];
+      const player = players[uid];
 
       if (privatePlayer.role == "CAT" && player.alive) {
         aliveCats += 1;
@@ -53,8 +52,8 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
   // if there's no winner clear out the votes for the current player
   if (winner == undefined) {
     // set their votes to zero
-    for (const uid in currentPlayers) {
-      currentPlayers[uid].votes = 0;
+    for (const uid in players) {
+      players[uid].votes = 0;
     }
   }
 
@@ -68,11 +67,11 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
     const expiration = firestore.Timestamp.fromMillis(
       firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS_DEFAULT.END * 1000
     );
-    transaction.update(lobbyDoc.ref, { state: "END", players: alteredPlayers, winner, expiration });
+    transaction.update(lobbyDoc.ref, { state: "END", players, winner, expiration });
   } else {
     // PROMPT
     await startPrompt(lobbyDoc, transaction);
-    transaction.update(lobbyDoc.ref, { players: currentPlayers });
+    transaction.update(lobbyDoc.ref, { players });
   }
 
   for (const voteDoc of voteDocs.docs) {
