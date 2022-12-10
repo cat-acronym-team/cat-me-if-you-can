@@ -119,11 +119,6 @@ export type Lobby = {
   expiration: Timestamp;
 
   /**
-   * array of alive players
-   */
-  alivePlayers: string[];
-
-  /**
    * the role that won the game
    */
   winner?: Role;

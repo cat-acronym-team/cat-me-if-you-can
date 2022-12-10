@@ -60,7 +60,6 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
     },
     bannedPlayers: [],
     state: "WAIT",
-    alivePlayers: [context.auth.uid],
     lobbySettings: {
       catfishAmount: 1,
       promptTime: GAME_STATE_DURATIONS_DEFAULT.PROMPT,
@@ -312,26 +311,6 @@ export const applyLobbySettings = functions.https.onCall(async (data: unknown, c
       lobbySettings: settings,
     });
   });
-});
-
-export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate(async (change) => {
-  const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
-  const lobby = change.after.data() as Lobby;
-  const lobbyBefore = change.before.data() as Lobby;
-  let hasChanged = Object.keys(lobby.players).length != Object.keys(lobbyBefore.players).length;
-  const alivePlayers = [];
-
-  for (const uid in lobby.players) {
-    if (!hasChanged && lobby.players[uid].alive != lobbyBefore.players[uid].alive) {
-      hasChanged = true;
-    }
-    if (lobby.players[uid].alive) {
-      alivePlayers.push(uid);
-    }
-  }
-  if (hasChanged) {
-    await lobbyDocRef.update({ alivePlayers: alivePlayers });
-  }
 });
 
 export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
