@@ -18,7 +18,7 @@
     // get the document of the current user vote
     const voteDoc = doc(getVoteCollection(lobbyCode), $user?.uid);
     unsubscribeVote = onSnapshot(voteDoc, (doc) => {
-      if (!doc.exists() || !lobby.alivePlayers.includes($user?.uid ?? "")) {
+      if (!doc.exists() || !lobby.players[$user?.uid ?? ""].alive) {
         return;
       }
       votedFor = doc.data().target;
@@ -37,7 +37,7 @@
       <div class="vote-container {!alive ? 'dead' : ''}">
         <button
           class="avatar {votedFor == uid ? 'selected' : ''}"
-          disabled={!lobby.alivePlayers.includes($user?.uid ?? "") || !alive}
+          disabled={!alive}
           on:click={() => addVote(lobbyCode, $user?.uid ?? "", uid)}
         >
           <img src="/avatars/{avatar}.webp" alt={avatarAltText[avatar]} />

@@ -166,21 +166,16 @@
     {:else if lobby.state === "ROLE"}
       <Role {privatePlayer} />
     {:else if lobby.state === "PROMPT"}
-      {#if !lobby.alivePlayers.includes($user.uid)}
+      {#if !lobby.players[$user.uid].alive}
         <LobbyChat {lobby} {lobbyCode} />
       {:else}
         <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
       {/if}
     {:else if lobby.state === "CHAT"}
-      {#if !lobby.alivePlayers.includes($user.uid)}
+      {#if !lobby.players[$user.uid].alive}
         <LobbyChat {lobby} {lobbyCode} />
       {/if}
-      <ChatRoom
-        {lobby}
-        {lobbyCode}
-        isStalker={privatePlayer.stalker}
-        isSpectator={!lobby.alivePlayers.includes($user.uid)}
-      />
+      <ChatRoom {lobby} {lobbyCode} isStalker={privatePlayer.stalker} isSpectator={!lobby.players[$user.uid].alive} />
     {:else if lobby.state === "VOTE"}
       <LobbyChat {lobby} {lobbyCode} />
       <Vote {lobby} {lobbyCode} />

@@ -56,7 +56,7 @@
         </div>
         <div class="display-name mdc-typography--body2">{message.displayName}</div>
         <div
-          class="text mdc-typography--body1 {lobby.alivePlayers.includes(message.sender) ? '' : 'userDead'}"
+          class="text mdc-typography--body1 {lobby.players[message.sender].alive ? '' : 'userDead'}"
           style="background-color: {avatarColors[message.avatar]}; color: {onAvatarColors[message.avatar]};"
         >
           {message.text}
