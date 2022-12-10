@@ -7,13 +7,13 @@ export function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lob
   let votedOff: string | undefined = undefined;
 
   // find the player with the most votes
-  let most: Player | null = null;
+  let most: string | null = null;
   let mostValue = 0;
 
   for (const uid in lobbyData.players) {
     if (players[uid].votes > mostValue) {
-      most = players[uid];
-      mostValue = most.votes;
+      most = uid;
+      mostValue = players[uid].votes;
     } else if (players[uid].votes == mostValue) {
       most = null;
     }
@@ -21,19 +21,11 @@ export function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lob
 
   // if they're not equal then most is voted off
   if (most != null) {
-    // find index of most in the players array
-    let mostUID: string | undefined;
-    for (const uid in lobbyData.players) {
-      const player = players[uid];
-      if (player.votes == most.votes) {
-        mostUID = uid;
-      }
-    }
     // replace the shallow one copy object with the deep copy object changes
-    if (mostUID != undefined) {
-      players[mostUID].alive = false;
-      // save their name
-      votedOff = mostUID;
+    if (most != undefined) {
+      players[most].alive = false;
+      // save their uid
+      votedOff = most;
     }
   }
 
