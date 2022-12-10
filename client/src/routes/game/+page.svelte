@@ -146,7 +146,7 @@
 
 <Layout>
   <div class="buttons" slot="top-right">
-    {#if lobbyCode !== null && lobby !== undefined && $user !== undefined && $user !== null}
+    {#if lobbyCode !== null && lobby !== undefined && $user !== null}
       {#if lobby.state === "WAIT"}
         <LobbyChat {lobby} {lobbyCode} />
         {#if $user.uid === lobby.uids[0]}
