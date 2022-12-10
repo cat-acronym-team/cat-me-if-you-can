@@ -28,7 +28,9 @@ export async function deleteChatCollections(lobbyDoc: firestore.DocumentReferenc
   for (const chatRoomDoc of chatRooms.docs) {
     // place messages in batch
     const chatMessages = await getChatRoomMessagesCollection(chatRoomDoc.ref).get();
-    chatMessages.docs.map((messageDoc) => batch.delete(messageDoc.ref));
+    for (const messageDoc of chatMessages.docs) {
+      batch.delete(messageDoc.ref);
+    }
 
     // place room in batch
     batch.delete(chatRoomDoc.ref);
@@ -37,7 +39,7 @@ export async function deleteChatCollections(lobbyDoc: firestore.DocumentReferenc
   await batch.commit();
 }
 
-export async function setAnswers(lobbyData: Lobby, lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
+export async function setAndDeleteAnswers(lobbyData: Lobby, lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
   const { players, uids } = lobbyData;
   const promptAnswersSnaphot = await transaction.get(getPromptAnswerCollection(lobbyDoc));
 
@@ -48,17 +50,15 @@ export async function setAnswers(lobbyData: Lobby, lobbyDoc: DocumentReference<L
     transaction.update(stalker.ref, { stalker: false });
   }
 
-  // iterate through promptAnswer docs and place the answer on their player object
+  // iterate through promptAnswer docs and place the answer on their player object and delete the doc
   for (const promptAnswerDoc of promptAnswersSnaphot.docs) {
     const promptData = promptAnswerDoc.data();
-    let promptAns = promptData.answer;
-
-    if (promptAns === "" || !promptAnswerDoc.exists) {
-      promptAns = "no answer";
-    }
+    const promptAns = promptData.answer;
 
     const playerIndex = uids.indexOf(promptAnswerDoc.id);
     players[playerIndex].promptAnswer = promptAns;
+    
+    transaction.delete(promptAnswerDoc.ref);
   }
 
   const expiration = firestore.Timestamp.fromMillis(

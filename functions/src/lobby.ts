@@ -21,7 +21,7 @@ import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
-import { deleteChatCollections, setAnswers, deleteLobbyChatMessages } from "./chat";
+import { deleteChatCollections, setAndDeleteAnswers, deleteLobbyChatMessages } from "./chat";
 import { assignRole } from "./role";
 import { endGameProcess } from "./winloss";
 import { findVoteOff } from "./vote";
@@ -458,17 +458,6 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
   });
 });
 
-async function deletePromptAnswers(lobbyDocRef: firestore.DocumentReference<Lobby>) {
-  const batch = db.batch();
-  const promptAnswersSnapshot = await getPromptAnswerCollection(lobbyDocRef).get();
-
-  for (const promptAnswer of promptAnswersSnapshot.docs) {
-    batch.delete(promptAnswer.ref);
-  }
-
-  await batch.commit();
-}
-
 export const verifyExpiration = functions.https.onCall(async (data, context): Promise<void> => {
   // check auth
   if (context.auth == undefined) {
@@ -510,7 +499,7 @@ export const verifyExpiration = functions.https.onCall(async (data, context): Pr
       await collectPromptAnswers(lobbyDoc, transaction);
     }
     if (lobby.state === "CHAT") {
-      await setAnswers(lobby, lobbyDocRef, transaction);
+      await setAndDeleteAnswers(lobby, lobbyDocRef, transaction);
     }
     // Applies the stats once the timer on the end screen ends
     if (lobby.state === "END") {
@@ -529,7 +518,6 @@ export const verifyExpiration = functions.https.onCall(async (data, context): Pr
   }
 
   if (lobby?.state == "VOTE") {
-    await deletePromptAnswers(lobbyDocRef);
     await deleteLobbyChatMessages(lobbyDocRef);
   }
 });
