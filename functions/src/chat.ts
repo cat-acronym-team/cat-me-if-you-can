@@ -39,7 +39,11 @@ export async function deleteChatCollections(lobbyDoc: firestore.DocumentReferenc
   await batch.commit();
 }
 
-export async function setAndDeleteAnswers(lobbyData: Lobby, lobbyDoc: DocumentReference<Lobby>, transaction: Transaction) {
+export async function setAndDeleteAnswers(
+  lobbyData: Lobby,
+  lobbyDoc: DocumentReference<Lobby>,
+  transaction: Transaction
+) {
   const { players, uids } = lobbyData;
   const promptAnswersSnaphot = await transaction.get(getPromptAnswerCollection(lobbyDoc));
 
@@ -57,7 +61,7 @@ export async function setAndDeleteAnswers(lobbyData: Lobby, lobbyDoc: DocumentRe
 
     const playerIndex = uids.indexOf(promptAnswerDoc.id);
     players[playerIndex].promptAnswer = promptAns;
-    
+
     transaction.delete(promptAnswerDoc.ref);
   }
 
