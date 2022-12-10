@@ -24,5 +24,6 @@
     gap: 8px;
     top: 8px;
     left: 8px;
+    right: 8px;
   }
 </style>

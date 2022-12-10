@@ -220,6 +220,7 @@
 
   .buttons {
     display: grid;
+    gap: 8px;
     grid-template-columns: auto auto;
   }
 
