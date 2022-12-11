@@ -1,7 +1,6 @@
 <script lang="ts">
   import "@material/typography/mdc-typography.scss";
   import Dialog, { Header, Title, Content } from "@smui/dialog";
-  import Button, { Label } from "@smui/button";
   import ChatMessages from "./ChatMessages.svelte";
   import IconButton from "@smui/icon-button";
   import { onDestroy } from "svelte";
@@ -59,32 +58,26 @@
   }
 </script>
 
-<main>
-  <Dialog
-    bind:open={showLobbyChat}
-    fullscreen
-    aria-labelledby="lobby-dialog-title"
-    aria-describedby="lobby-dialog-content"
-    ><Header>
-      <Title id="lobby-chat-title">Lobby Chat</Title>
-      <IconButton action="close" class="material-icons">close</IconButton>
-    </Header>
-    <Content id="lobby-dialog-content">
-      <div class="lobby-chat-message">
-        <ChatMessages {lobby} messages={chatMessages} on:send={(event) => submitMessage(event.detail.text)} />
-      </div>
-      {#if errorMessage !== ""}
-        <p class="error">{errorMessage}</p>
-      {/if}
-    </Content>
-  </Dialog>
-  <Button
-    on:click={() => {
-      showLobbyChat = true;
-    }}
-    class="Lobby Chat"><Label>Lobby Chat</Label></Button
-  >
-</main>
+<Dialog
+  bind:open={showLobbyChat}
+  fullscreen
+  aria-labelledby="lobby-dialog-title"
+  aria-describedby="lobby-dialog-content"
+  ><Header>
+    <Title id="lobby-chat-title">Lobby Chat</Title>
+    <IconButton action="close" class="material-icons">close</IconButton>
+  </Header>
+  <Content id="lobby-dialog-content">
+    <div class="lobby-chat-message">
+      <ChatMessages {lobby} messages={chatMessages} on:send={(event) => submitMessage(event.detail.text)} />
+    </div>
+    {#if errorMessage !== ""}
+      <p class="error">{errorMessage}</p>
+    {/if}
+  </Content>
+</Dialog>
+
+<IconButton on:click={() => (showLobbyChat = true)} class="material-icons">chat</IconButton>
 
 <style>
   .lobby-chat-message {
