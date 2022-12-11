@@ -65,7 +65,7 @@
       <div
         class="message"
         class:current-user={message.sender == $user?.uid}
-        class:alive={lobby.alivePlayers.includes(message.sender)}
+        class:dead={"alive" in message && !message.alive}
       >
         <div class="avatar">
           <img src="/avatars/{message.avatar}.webp" alt={avatarAltText[message.avatar]} />
@@ -154,9 +154,8 @@
     justify-content: end;
   }
 
-  .message:not(.alive) .text {
-    filter: grayscale(80%);
-    opacity: 0.5;
+  .dead .text {
+    filter: grayscale(50%);
   }
 
   .avatar {
@@ -164,7 +163,7 @@
     align-self: end;
   }
 
-  .message:not(.alive) .avatar {
+  .dead .avatar {
     opacity: 0.5;
   }
 
