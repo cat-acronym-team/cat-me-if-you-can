@@ -45,7 +45,7 @@ export async function setAndDeleteAnswers(
   transaction: Transaction
 ) {
   const { players, uids } = lobbyData;
-  const promptAnswersSnaphot = await transaction.get(getPromptAnswerCollection(lobbyDoc));
+  const promptAnswersSnapshot = await transaction.get(getPromptAnswerCollection(lobbyDoc));
 
   // delete stalker
   const stalkers = await transaction.get(getPrivatePlayerCollection(lobbyDoc).where("stalker", "==", true));
@@ -55,7 +55,7 @@ export async function setAndDeleteAnswers(
   }
 
   // iterate through promptAnswer docs and place the answer on their player object and delete the doc
-  for (const promptAnswerDoc of promptAnswersSnaphot.docs) {
+  for (const promptAnswerDoc of promptAnswersSnapshot.docs) {
     const promptData = promptAnswerDoc.data();
     const promptAns = promptData.answer;
 
