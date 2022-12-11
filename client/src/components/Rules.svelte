@@ -158,9 +158,7 @@
   </Content>
 </Dialog>
 
-<div>
-  <IconButton class="material-icons" on:click={() => (showRulesDialog = true)}>help</IconButton>
-</div>
+<IconButton class="material-icons" on:click={() => (showRulesDialog = true)}>help</IconButton>
 
 <style>
   ul {

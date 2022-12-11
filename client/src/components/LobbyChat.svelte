@@ -77,9 +77,7 @@
   </Content>
 </Dialog>
 
-<div>
-  <IconButton on:click={() => (showLobbyChat = true)} class="Lobby Chat; material-icons">chat</IconButton>
-</div>
+<IconButton on:click={() => (showLobbyChat = true)} class="material-icons">chat</IconButton>
 
 <style>
   .lobby-chat-message {

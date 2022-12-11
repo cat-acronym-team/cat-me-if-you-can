@@ -101,9 +101,7 @@
   </Actions>
 </Dialog>
 
-<div>
-  <IconButton on:click={() => (showLobbySettings = true)} class="Lobby Settings; material-icons">settings</IconButton>
-</div>
+<IconButton on:click={() => (showLobbySettings = true)} class="material-icons">settings</IconButton>
 
 <style>
   .settings {
