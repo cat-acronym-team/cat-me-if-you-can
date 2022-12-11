@@ -11,23 +11,41 @@
   export let lobby: Lobby;
   export let lobbyCode: string;
 
+  let errorMessage: string = "";
+
   let votedFor: string | null | undefined; // uid of player that is voted out or skip (null)
   let unsubscribeVote: Unsubscribe | undefined;
 
   onMount(() => {
     // get the document of the current user vote
     const voteDoc = doc(getVoteCollection(lobbyCode), $user?.uid);
-    unsubscribeVote = onSnapshot(voteDoc, (doc) => {
-      if (!doc.exists() || !lobby.alivePlayers.includes($user?.uid ?? "")) {
-        return;
+    unsubscribeVote = onSnapshot(
+      voteDoc,
+      (doc) => {
+        if (!doc.exists() || !lobby.alivePlayers.includes($user?.uid ?? "")) {
+          return;
+        }
+        votedFor = doc.data().target;
+      },
+      (err) => {
+        console.error(err);
+        errorMessage = err instanceof Error ? err.message : String(err);
       }
-      votedFor = doc.data().target;
-    });
+    );
   });
 
   onDestroy(() => {
     unsubscribeVote?.();
   });
+
+  async function vote(target: string | null) {
+    try {
+      await addVote(lobbyCode, $user?.uid ?? "", target);
+      errorMessage = "";
+    } catch (error) {
+      errorMessage = error instanceof Error ? error.message : String(error);
+    }
+  }
 </script>
 
 <div class="voting">
@@ -38,7 +56,7 @@
         <button
           class="avatar {votedFor == lobby.uids[i] ? 'selected' : ''}"
           disabled={!lobby.alivePlayers.includes($user?.uid ?? "") || !alive}
-          on:click={() => addVote(lobbyCode, $user?.uid ?? "", lobby.uids[i])}
+          on:click={() => vote(lobby.uids[i])}
         >
           <img src="/avatars/{avatar}.webp" alt={avatarAltText[avatar]} />
           <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
@@ -54,10 +72,7 @@
       </div>
     {/each}
     <div class="vote-container">
-      <button
-        class="avatar {votedFor === null ? 'selected' : ''}"
-        on:click={() => addVote(lobbyCode, $user?.uid ?? "", null)}
-      >
+      <button class="avatar {votedFor === null ? 'selected' : ''}" on:click={() => vote(null)}>
         <img src="/avatars/0.webp" alt={avatarAltText[0]} />
         <span class="mdc-typography--subtitle1">Skip</span>
         <div class="mdc-typography--caption">Vote for no cat</div>
@@ -65,6 +80,9 @@
       <span class="mdc-typography--heading6">{lobby.skipVote}</span>
     </div>
   </div>
+  {#if errorMessage !== ""}
+    <p class="error">{errorMessage}</p>
+  {/if}
 </div>
 
 <style>

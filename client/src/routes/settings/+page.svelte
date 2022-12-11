@@ -38,9 +38,16 @@
     unsubscribeUserData?.();
 
     // subscribe to new user doc
-    unsubscribeUserData = onSnapshot(userDataDocRef, (doc) => {
-      userData = doc.data();
-    });
+    unsubscribeUserData = onSnapshot(
+      userDataDocRef,
+      (doc) => {
+        userData = doc.data();
+      },
+      (err) => {
+        console.error(err);
+        preferenceErrorMessage = err instanceof Error ? err.message : String(err);
+      }
+    );
   }
 
   onDestroy(() => {
