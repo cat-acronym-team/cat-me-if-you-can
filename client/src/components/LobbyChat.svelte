@@ -56,6 +56,8 @@
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
+
+  let scrollToBottom: () => Promise<void>;
 </script>
 
 <Dialog
@@ -70,7 +72,12 @@
   </Header>
   <Content id="lobby-dialog-content">
     <div class="lobby-chat-message">
-      <ChatMessages {lobby} messages={chatMessages} on:send={(event) => submitMessage(event.detail.text)} />
+      <ChatMessages
+        {lobby}
+        messages={chatMessages}
+        on:send={(event) => submitMessage(event.detail.text)}
+        bind:scrollToBottom
+      />
     </div>
     {#if errorMessage !== ""}
       <p class="error">{errorMessage}</p>
@@ -78,7 +85,15 @@
   </Content>
 </Dialog>
 
-<IconButton on:click={() => (showLobbyChat = true)} class="material-icons">chat</IconButton>
+<IconButton
+  on:click={() => {
+    showLobbyChat = true;
+    scrollToBottom();
+  }}
+  class="material-icons"
+>
+  chat
+</IconButton>
 
 <style>
   .lobby-chat-message {

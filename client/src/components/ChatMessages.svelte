@@ -36,12 +36,13 @@
   });
 
   let messagesElement: HTMLElement;
-  function scrollToBottom() {
+  export async function scrollToBottom() {
+    await tick();
     messagesElement?.scroll({ top: messagesElement.scrollHeight, behavior: "smooth" });
   }
 
   // when the messages change, scroll to the bottom after svelte is done updating the DOM
-  $: displayMessages, tick().then(scrollToBottom);
+  $: displayMessages, scrollToBottom();
 
   let message = "";
   $: messageValidation = chatMessageValidator(message.trim());
