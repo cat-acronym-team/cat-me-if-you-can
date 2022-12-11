@@ -75,6 +75,7 @@
     } catch (err) {
       waiting = false;
       // if the lobby doesn't exist then error is thrown
+      console.error(err);
       errorMessage = err instanceof Error ? err.message : String(err);
       if (errorMessage == "You are already in the lobby!") {
         waiting = true;

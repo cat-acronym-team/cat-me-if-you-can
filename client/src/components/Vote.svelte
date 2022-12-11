@@ -43,6 +43,7 @@
       await addVote(lobbyCode, $user?.uid ?? "", target);
       errorMessage = "";
     } catch (error) {
+      console.error(error);
       errorMessage = error instanceof Error ? error.message : String(error);
     }
   }

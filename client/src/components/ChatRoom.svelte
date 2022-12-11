@@ -97,7 +97,8 @@
       // if there's an error message then clear it
       errorMessage = "";
     } catch (err) {
-      // catch and display erro
+      // catch and display error
+      console.error(err);
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }

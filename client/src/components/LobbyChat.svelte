@@ -60,6 +60,7 @@
       errorMessage = "";
     } catch (err) {
       // catch and display error
+      console.error(err);
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }

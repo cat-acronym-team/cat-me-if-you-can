@@ -44,8 +44,7 @@
         userData = doc.data();
       },
       (err) => {
-        console.error(err);
-        preferenceErrorMessage = err instanceof Error ? err.message : String(err);
+        preferenceErrorMessage = getErrorMsg(err);
       }
     );
   }
@@ -78,7 +77,7 @@
         await updateDoc(userDataDocRef, newPreferences);
       }
     } catch (error) {
-      preferenceErrorMessage = error instanceof Error ? error.message : String(error);
+      preferenceErrorMessage = getErrorMsg(error);
     }
   }
 
@@ -112,6 +111,7 @@
   let deleteErr = "";
 
   function getErrorMsg(error: unknown): string {
+    console.error(error);
     let errorMsg = error instanceof Error ? error.message : String(error);
     switch (errorMsg) {
       case "Firebase: Password should be at least 6 characters (auth/weak-password).":

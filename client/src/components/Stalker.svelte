@@ -30,6 +30,7 @@
     try {
       await stalkChatroom({ code: lobbyCode, chatId });
     } catch (err) {
+      console.error(err);
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
