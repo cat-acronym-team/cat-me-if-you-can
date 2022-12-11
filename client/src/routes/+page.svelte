@@ -79,53 +79,47 @@
   }
 </script>
 
-<div class="lobby-wrapper">
-  <Header>
-    <AccountButton slot="top-right" {userData} />
-  </Header>
+<Header>
+  <AccountButton slot="top-right" {userData} />
+</Header>
 
-  <main>
-    <img class="banner" src="/images/banner.webp" alt="" />
-    <h1 class="mdc-typography--headline1">Cat Me If You Can</h1>
-    <div class="form">
-      {#if errorMessage !== ""}
-        <p class="error">{errorMessage}</p>
-      {/if}
-      <div class="textbox">
-        <Textfield
-          type="text"
-          label="Display name"
-          bind:value={name}
-          bind:dirty={nameDirty}
-          invalid={nameDirty && !nameValidation.valid}
-          required
-        >
-          <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
-        </Textfield>
-      </div>
-      <div class="buttons">
-        <Button on:click={createLobbyHandler} disabled={!nameValidation.valid || waiting} variant="raised">
-          <Label>Create Lobby</Label>
-        </Button>
-        <Button on:click={joinLobbyHandler} disabled={!nameValidation.valid || waiting} variant="raised">
-          <Label>Join Lobby</Label>
-        </Button>
-      </div>
+<main>
+  <img class="banner" src="/images/banner.webp" alt="" />
+  <h1 class="mdc-typography--headline1">Cat Me If You Can</h1>
+  <div class="form">
+    {#if errorMessage !== ""}
+      <p class="error">{errorMessage}</p>
+    {/if}
+    <div class="textbox">
+      <Textfield
+        type="text"
+        label="Display name"
+        bind:value={name}
+        bind:dirty={nameDirty}
+        invalid={nameDirty && !nameValidation.valid}
+        required
+      >
+        <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
+      </Textfield>
     </div>
-  </main>
-</div>
+    <div class="buttons">
+      <Button on:click={createLobbyHandler} disabled={!nameValidation.valid || waiting} variant="raised">
+        <Label>Create Lobby</Label>
+      </Button>
+      <Button on:click={joinLobbyHandler} disabled={!nameValidation.valid || waiting} variant="raised">
+        <Label>Join Lobby</Label>
+      </Button>
+    </div>
+  </div>
+</main>
 
 <style>
-  .lobby-wrapper {
-    height: 100%;
-    display: grid;
-    grid-template-rows: auto 1fr;
-  }
-
   main {
     display: grid;
     justify-items: center;
     grid-template-rows: auto auto 1fr;
+    height: 100%;
+    margin-top: 64px;
     gap: 12px;
     padding: 16px;
     --scale: min(calc(5vw + 12px), max(8vh, 16px));
