@@ -1,5 +1,4 @@
 <script lang="ts">
-  import "@material/typography/mdc-typography.scss";
   import Dialog, { Header, Title, Content } from "@smui/dialog";
   import ChatMessages from "./ChatMessages.svelte";
   import IconButton from "@smui/icon-button";
