@@ -1,0 +1,29 @@
+version: 2
+updates:
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "development"
+    commit-message:
+      prefix: "build"
+      include: "scope"
+      
+  - package-ecosystem: "npm"
+    directory: "/client"
+    schedule:
+      interval: "daily"
+    target-branch: "development"
+    commit-message:
+      prefix: "build(client)"
+      include: "scope"
+      
+  - package-ecosystem: "npm"
+    directory: "functions/"
+    schedule:
+      interval: "daily"
+    target-branch: "development"
+    commit-message:
+      prefix: "build(functions)"
+      include: "scope"
