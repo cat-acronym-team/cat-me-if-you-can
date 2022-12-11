@@ -60,9 +60,10 @@
 
 <Dialog
   bind:open={showLobbyChat}
-  fullscreen
+  sheet
   aria-labelledby="lobby-dialog-title"
   aria-describedby="lobby-dialog-content"
+  id="lobby-chat-dialog"
   ><Header>
     <Title id="lobby-chat-title">Lobby Chat</Title>
     <IconButton action="close" class="material-icons">close</IconButton>
@@ -81,6 +82,11 @@
 
 <style>
   .lobby-chat-message {
-    height: min(500px, calc(100vh - 88px));
+    height: max(256px, 100vh - 192px);
+    width: clamp(256px, 100vw - 128px, 1024px);
+  }
+
+  :global(#lobby-chat-dialog .mdc-dialog__surface) {
+    max-width: unset;
   }
 </style>
