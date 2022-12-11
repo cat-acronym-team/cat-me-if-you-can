@@ -21,7 +21,7 @@ import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
-import { deleteChatRooms, deleteLobbyChatMessages } from "./chat";
+import { deleteChatCollections, setAndDeleteAnswers, deleteLobbyChatMessages } from "./chat";
 import { assignRole } from "./role";
 import { endGameProcess } from "./winloss";
 import { findVoteOff } from "./vote";
@@ -378,7 +378,6 @@ export async function collectPromptAnswers(
 
   for (const promptAnswerDoc of promptAnswerDocs.docs) {
     promptAnswers.set(promptAnswerDoc.id, promptAnswerDoc.data().answer);
-    transaction.delete(promptAnswerDoc.ref);
   }
 
   // expiration set
@@ -390,7 +389,10 @@ export async function collectPromptAnswers(
   const { pairs, stalker } = generatePairs(lobbyData);
 
   if (stalker != undefined) {
-    getPrivatePlayerCollection(lobbyDoc.ref).doc(stalker).update({ stalker: true });
+    const stalkerPrivatePlayer = getPrivatePlayerCollection(lobbyDoc.ref).doc(stalker);
+
+    // make player the stalker
+    transaction.update(stalkerPrivatePlayer, { stalker: true });
   }
 
   // create a chatroom for each pair
@@ -519,7 +521,7 @@ export const verifyExpiration = functions.https.onCall(async (data, context): Pr
       await collectPromptAnswers(lobbyDoc, transaction);
     }
     if (lobby.state === "CHAT") {
-      await deleteChatRooms(lobby, lobbyDocRef, transaction);
+      await setAndDeleteAnswers(lobby, lobbyDocRef, transaction);
     }
     // Applies the stats once the timer on the end screen ends
     if (lobby.state === "END") {
@@ -532,6 +534,11 @@ export const verifyExpiration = functions.https.onCall(async (data, context): Pr
       await determineWinner(lobbyDoc, transaction);
     }
   });
+
+  if (lobby?.state == "CHAT") {
+    await deleteChatCollections(lobbyDocRef);
+  }
+
   if (lobby?.state == "VOTE") {
     await deleteLobbyChatMessages(lobbyDocRef);
   }
