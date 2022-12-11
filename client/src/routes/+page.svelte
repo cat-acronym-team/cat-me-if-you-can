@@ -1,6 +1,6 @@
 <script lang="ts">
   import AccountButton from "$components/AccountButton.svelte";
-  import Layout from "./+layout.svelte";
+  import Header from "$components/Header.svelte";
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
@@ -80,9 +80,9 @@
 </script>
 
 <div class="lobby-wrapper">
-  <Layout>
+  <Header>
     <AccountButton slot="top-right" {userData} />
-  </Layout>
+  </Header>
 
   <main>
     <img class="banner" src="/images/banner.webp" alt="" />

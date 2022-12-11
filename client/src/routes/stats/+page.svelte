@@ -1,5 +1,7 @@
 <script lang="ts">
   import CircularProgress from "@smui/circular-progress";
+  import Header from "$components/Header.svelte";
+
   import { authStore as user } from "$stores/auth";
   import type { UserData } from "$lib/firebase/firestore-types/users";
   import { doc, onSnapshot } from "firebase/firestore";
@@ -41,6 +43,8 @@
     unsubscribeUser?.();
   });
 </script>
+
+<Header />
 
 <main>
   {#if $user == null}

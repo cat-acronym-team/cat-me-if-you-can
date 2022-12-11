@@ -8,7 +8,7 @@
   import Result from "$components/Result.svelte";
   import CircularProgress from "@smui/circular-progress";
   import LobbyChat from "$components/LobbyChat.svelte";
-  import Layout from "../+layout.svelte";
+  import Header from "$components/Header.svelte";
   import LobbySettings from "$components/LobbySettings.svelte";
 
   import { onSnapshot, doc, getDoc, type Unsubscribe } from "firebase/firestore";
@@ -144,9 +144,9 @@
 
 <svelte:window on:beforeunload={onbeforeunload} />
 
-<Layout>
+<Header>
   <div class="buttons" slot="top-right">
-    {#if lobbyCode !== null && lobby !== undefined && $user !== null}
+    {#if lobbyCode !== null && lobby !== undefined && $user != null}
       {#if lobby.state === "WAIT"}
         <LobbyChat {lobby} {lobbyCode} />
         {#if $user.uid === lobby.uids[0]}
@@ -161,7 +161,7 @@
       {/if}
     {/if}
   </div>
-</Layout>
+</Header>
 
 <!-- I do this check because the html was rendering the Lobby component before the onmount happened due to lobby having default values -->
 <!-- So the code was displaying undefined in the Lobby Component -->
@@ -187,7 +187,9 @@
     {:else if lobby.state === "ROLE"}
       <Role {privatePlayer} />
     {:else if lobby.state === "PROMPT"}
-      <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
+      {#if lobby.alivePlayers.includes($user.uid)}
+        <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
+      {/if}
     {:else if lobby.state === "CHAT"}
       <ChatRoom
         {lobby}

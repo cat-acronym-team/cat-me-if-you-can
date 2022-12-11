@@ -1,6 +1,6 @@
 <script lang="ts">
   import AccountButton from "$components/AccountButton.svelte";
-  import Layout from "../+layout.svelte";
+  import Header from "$components/Header.svelte";
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
@@ -107,9 +107,9 @@
   }
 </script>
 
-<Layout>
+<Header>
   <AccountButton slot="top-right" {userData} />
-</Layout>
+</Header>
 
 <div class="cat-join-container">
   <h2 class="mdc-typography--headline2">Join Lobby!</h2>
