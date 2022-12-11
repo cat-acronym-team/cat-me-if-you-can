@@ -169,9 +169,9 @@
 
     <h3 class="mdc-typography--headline5">Links</h3>
     <a href="https://github.com/cat-acronym-team/cat-me-if-you-can" rel="noreferrer" target="_blank">Github</a> <br />
-    <a href="https://github.com/cat-acronym-team/cat-me-if-you-can/issues/new" rel="noreferrer" target="_blank"
-      >Have an issue?</a
-    >
+    <a href="https://github.com/cat-acronym-team/cat-me-if-you-can/issues/new" rel="noreferrer" target="_blank">
+      Have an issue?
+    </a>
   </Content>
 </Dialog>
 
