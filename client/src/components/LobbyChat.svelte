@@ -3,6 +3,7 @@
   import Dialog, { Header, Title, Content } from "@smui/dialog";
   import ChatMessages from "./ChatMessages.svelte";
   import IconButton from "@smui/icon-button";
+  import Badge from "@smui-extra/badge";
   import { onDestroy } from "svelte";
   import { onSnapshot, orderBy, query, where } from "firebase/firestore";
   import type { LobbyChatMessage, Lobby } from "$lib/firebase/firestore-types/lobby";
@@ -17,6 +18,7 @@
   let showLobbyChat = false;
   let errorMessage: string = "";
   let chatMessages: LobbyChatMessage[] = [];
+  let readMessages = 0;
   let unsubscribeChatMessages: Unsubscribe | undefined = undefined;
 
   $: userInfo = lobby.players[lobby.uids.indexOf($user?.uid ?? "")];
@@ -34,6 +36,9 @@
     unsubscribeChatMessages?.();
     unsubscribeChatMessages = onSnapshot(messageQuery, (collection) => {
       chatMessages = collection.docs.map((message) => message.data());
+      if (showLobbyChat || readMessages > chatMessages.length) {
+        readMessages = chatMessages.length;
+      }
     });
   }
 
@@ -89,10 +94,14 @@
   on:click={() => {
     showLobbyChat = true;
     scrollToBottom();
+    readMessages = chatMessages.length;
   }}
   class="material-icons"
 >
   chat
+  {#if readMessages < chatMessages.length}
+    <Badge position="inset" aria-label="unread messages count">{chatMessages.length - readMessages}</Badge>
+  {/if}
 </IconButton>
 
 <style>
