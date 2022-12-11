@@ -73,7 +73,8 @@
         <div class="display-name mdc-typography--body2">{message.displayName}</div>
         <div
           class="text mdc-typography--body1"
-          style="background-color: {avatarColors[message.avatar]}; color: {onAvatarColors[message.avatar]};"
+          style:background-color={avatarColors[message.avatar]}
+          style:color={onAvatarColors[message.avatar]}
         >
           {message.text}
         </div>
