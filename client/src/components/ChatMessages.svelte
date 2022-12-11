@@ -62,13 +62,17 @@
   <div class="messages" bind:this={messagesElement}>
     <slot name="before-messages" />
     {#each displayMessages as message}
-      <div class="message {message.sender == $user?.uid ? 'current-user' : ''}">
+      <div
+        class="message"
+        class:current-user={message.sender == $user?.uid}
+        class:alive={lobby.alivePlayers.includes(message.sender)}
+      >
         <div class="avatar">
           <img src="/avatars/{message.avatar}.webp" alt={avatarAltText[message.avatar]} />
         </div>
         <div class="display-name mdc-typography--body2">{message.displayName}</div>
         <div
-          class="text mdc-typography--body1 {lobby.alivePlayers.includes(message.sender) ? '' : 'userDead'}"
+          class="text mdc-typography--body1"
           style="background-color: {avatarColors[message.avatar]}; color: {onAvatarColors[message.avatar]};"
         >
           {message.text}
@@ -150,7 +154,7 @@
     justify-content: end;
   }
 
-  .userDead {
+  .message:not(.alive) .text {
     filter: grayscale(80%);
     opacity: 0.5;
   }
