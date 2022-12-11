@@ -164,6 +164,10 @@
     align-self: end;
   }
 
+  .message:not(.alive) .avatar {
+    opacity: 0.5;
+  }
+
   .avatar img {
     display: block;
     width: 64px;
