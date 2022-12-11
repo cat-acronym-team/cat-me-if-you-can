@@ -218,9 +218,10 @@
   }
 
   .buttons {
-    display: grid;
+    display: flex;
     gap: 8px;
-    grid-template-columns: auto auto;
+    justify-content: space-between;
+    align-items: center;
   }
 
   main.has-countdown {
