@@ -8,6 +8,8 @@
   import Result from "$components/Result.svelte";
   import CircularProgress from "@smui/circular-progress";
   import LobbyChat from "$components/LobbyChat.svelte";
+  import Header from "$components/Header.svelte";
+  import LobbySettings from "$components/LobbySettings.svelte";
 
   import { onSnapshot, doc, getDoc, type Unsubscribe } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
@@ -141,6 +143,25 @@
 
 <svelte:window on:beforeunload={onbeforeunload} />
 
+<Header>
+  <div class="buttons" slot="top-right">
+    {#if lobbyCode !== null && lobby !== undefined && $user != null}
+      {#if lobby.state === "WAIT"}
+        <LobbyChat {lobby} {lobbyCode} />
+        {#if $user.uid === lobby.host}
+          <LobbySettings {lobby} {lobbyCode} />
+        {/if}
+      {:else if lobby.state === "PROMPT" || lobby.state === "CHAT"}
+        {#if !lobby.players[$user.uid].alive}
+          <LobbyChat {lobby} {lobbyCode} />
+        {/if}
+      {:else if lobby.state === "VOTE"}
+        <LobbyChat {lobby} {lobbyCode} />
+      {/if}
+    {/if}
+  </div>
+</Header>
+
 <!-- I do this check because the html was rendering the Lobby component before the onmount happened due to lobby having default values -->
 <!-- So the code was displaying undefined in the Lobby Component -->
 <!-- We could have a loading animation until the lobby is not undefined -->
@@ -157,7 +178,6 @@
         <CircularProgress indeterminate />
       </div>
     {:else if lobby.state === "WAIT"}
-      <LobbyChat {lobby} {lobbyCode} />
       <LobbyComponent {lobbyCode} {lobby} />
     {:else if privatePlayer == undefined}
       <div class="spinner-wraper">
@@ -166,18 +186,12 @@
     {:else if lobby.state === "ROLE"}
       <Role {privatePlayer} />
     {:else if lobby.state === "PROMPT"}
-      {#if !lobby.players[$user.uid].alive}
-        <LobbyChat {lobby} {lobbyCode} />
-      {:else}
+      {#if lobby.players[$user.uid].alive}
         <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
       {/if}
     {:else if lobby.state === "CHAT"}
-      {#if !lobby.players[$user.uid].alive}
-        <LobbyChat {lobby} {lobbyCode} />
-      {/if}
       <ChatRoom {lobby} {lobbyCode} isStalker={privatePlayer.stalker} isSpectator={!lobby.players[$user.uid].alive} />
     {:else if lobby.state === "VOTE"}
-      <LobbyChat {lobby} {lobbyCode} />
       <Vote {lobby} {lobbyCode} />
     {:else if lobby.state === "RESULT"}
       <Result {lobby} />
@@ -195,6 +209,13 @@
     display: grid;
     grid-template-areas: "header" "scroll-container";
     grid-template-rows: 64px 1fr;
+  }
+
+  .buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    align-items: center;
   }
 
   main.has-countdown {

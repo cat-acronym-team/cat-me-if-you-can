@@ -46,63 +46,62 @@
   }
 </script>
 
-<main>
-  <Dialog
-    bind:open={showLobbySettings}
-    fullscreen
-    aria-labelledby="settings-dialog-title"
-    aria-describedby="settings-dialog-content"
-    surface$style="max-width: 700px;"
-    ><Header>
-      <Title id="settings-dialog-title">Lobby Settings</Title>
-      <IconButton action="close" class="material-icons">close</IconButton>
-    </Header>
-    <Content id="settings-dialog-content">
-      <div class="settings">
-        <label for="catfish-slider">Catfish Amount</label>
-        <span class="slider-value">{catfishValue}</span>
-        <Slider bind:value={catfishValue} min={1} max={3} step={1} input$id="catfish-slider" />
+<Dialog
+  bind:open={showLobbySettings}
+  fullscreen
+  aria-labelledby="settings-dialog-title"
+  aria-describedby="settings-dialog-content"
+  surface$style="max-width: 700px;"
+  ><Header>
+    <Title id="settings-dialog-title">Lobby Settings</Title>
+    <IconButton action="close" class="material-icons">close</IconButton>
+  </Header>
+  <Content id="settings-dialog-content">
+    <div class="settings">
+      <label for="catfish-slider">Catfish Amount</label>
+      <span class="slider-value">{catfishValue}</span>
+      <Slider bind:value={catfishValue} min={1} max={3} step={1} input$id="catfish-slider" />
 
-        <label for="prompt-slider">{sliderLabels.PROMPT}</label>
-        <span class="slider-value">{formatTimer(promptTimerValue)}</span>
-        <Slider
-          bind:value={promptTimerValue}
-          min={GAME_STATE_DURATIONS_MIN.PROMPT}
-          max={GAME_STATE_DURATIONS_MAX.PROMPT}
-          step={5}
-          input$id="prompt-slider"
-        />
+      <label for="prompt-slider">{sliderLabels.PROMPT}</label>
+      <span class="slider-value">{formatTimer(promptTimerValue)}</span>
+      <Slider
+        bind:value={promptTimerValue}
+        min={GAME_STATE_DURATIONS_MIN.PROMPT}
+        max={GAME_STATE_DURATIONS_MAX.PROMPT}
+        step={5}
+        input$id="prompt-slider"
+      />
 
-        <label for="chat-slider">{sliderLabels.CHAT}</label>
-        <span class="slider-value">{formatTimer(chatTimerValue)}</span>
-        <Slider
-          bind:value={chatTimerValue}
-          min={GAME_STATE_DURATIONS_MIN.CHAT}
-          max={GAME_STATE_DURATIONS_MAX.CHAT}
-          step={5}
-          input$id="chat-slider"
-        />
+      <label for="chat-slider">{sliderLabels.CHAT}</label>
+      <span class="slider-value">{formatTimer(chatTimerValue)}</span>
+      <Slider
+        bind:value={chatTimerValue}
+        min={GAME_STATE_DURATIONS_MIN.CHAT}
+        max={GAME_STATE_DURATIONS_MAX.CHAT}
+        step={5}
+        input$id="chat-slider"
+      />
 
-        <label for="vote-slider">{sliderLabels.VOTE}</label>
-        <span class="slider-value">{formatTimer(voteTimerValue)}</span>
-        <Slider
-          bind:value={voteTimerValue}
-          min={GAME_STATE_DURATIONS_MIN.VOTE}
-          max={GAME_STATE_DURATIONS_MAX.VOTE}
-          step={5}
-          input$id="vote-slider"
-        />
-      </div>
-      {#if errorMessage !== ""}
-        <p class="error">{errorMessage}</p>
-      {/if}
-    </Content>
-    <Actions class="settings">
-      <Button on:click={() => apply()} action=""><Label>Apply Settings</Label></Button>
-    </Actions>
-  </Dialog>
-  <Button on:click={() => (showLobbySettings = true)} class="Lobby Settings"><Label>Lobby Settings</Label></Button>
-</main>
+      <label for="vote-slider">{sliderLabels.VOTE}</label>
+      <span class="slider-value">{formatTimer(voteTimerValue)}</span>
+      <Slider
+        bind:value={voteTimerValue}
+        min={GAME_STATE_DURATIONS_MIN.VOTE}
+        max={GAME_STATE_DURATIONS_MAX.VOTE}
+        step={5}
+        input$id="vote-slider"
+      />
+    </div>
+    {#if errorMessage !== ""}
+      <p class="error">{errorMessage}</p>
+    {/if}
+  </Content>
+  <Actions class="settings">
+    <Button on:click={() => apply()} action=""><Label>Apply Settings</Label></Button>
+  </Actions>
+</Dialog>
+
+<IconButton on:click={() => (showLobbySettings = true)} class="material-icons">settings</IconButton>
 
 <style>
   .settings {

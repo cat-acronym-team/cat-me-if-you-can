@@ -1,5 +1,6 @@
 <script lang="ts">
   import SelectAvatar from "$components/SelectAvatar.svelte";
+  import Header from "$components/Header.svelte";
   import Dialog, { Title, Content, Actions } from "@smui/dialog";
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
@@ -164,6 +165,8 @@
     password = "";
   }
 </script>
+
+<Header />
 
 <main class="settings-wrapper">
   <h2 class="mdc-typography--headline2">Account Settings</h2>
