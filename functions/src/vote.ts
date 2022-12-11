@@ -11,10 +11,10 @@ export function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lob
   let mostValue = 0;
 
   for (const uid in lobbyData.players) {
-    if (players[uid].votes > mostValue) {
+    if (players[uid].votes > mostValue || players[uid].votes > lobbyData.skipVote) {
       most = uid;
       mostValue = players[uid].votes;
-    } else if (players[uid].votes == mostValue) {
+    } else if (players[uid].votes == mostValue || players[uid].votes == lobbyData.skipVote) {
       most = null;
     }
   }

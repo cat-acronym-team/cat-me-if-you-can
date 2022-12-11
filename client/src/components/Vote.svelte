@@ -11,7 +11,7 @@
   export let lobby: Lobby;
   export let lobbyCode: string;
 
-  let votedFor: string | undefined; // uid of the person that's been voted
+  let votedFor: string | null | undefined; // uid of player that is voted out or skip (null)
   let unsubscribeVote: Unsubscribe | undefined;
 
   onMount(() => {
@@ -46,13 +46,24 @@
             {#if alive}
               Answer: {promptAnswer ?? "no answer"}
             {:else}
-              Im dead
+              I'm dead
             {/if}
           </div>
         </button>
-        <span class="mdc-typography--heading6">{votes ?? 0}</span>
+        <span class="mdc-typography--heading6">{votes}</span>
       </div>
     {/each}
+    <div class="vote-container">
+      <button
+        class="avatar {votedFor === null ? 'selected' : ''}"
+        on:click={() => addVote(lobbyCode, $user?.uid ?? "", null)}
+      >
+        <img src="/avatars/0.webp" alt={avatarAltText[0]} />
+        <span class="mdc-typography--subtitle1">Skip</span>
+        <div class="mdc-typography--caption">Vote for no cat</div>
+      </button>
+      <span class="mdc-typography--heading6">{lobby.skipVote}</span>
+    </div>
   </div>
 </div>
 

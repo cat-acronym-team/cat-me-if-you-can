@@ -58,6 +58,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
         timeJoined: firestore.Timestamp.now(),
       },
     },
+    skipVote: 0,
     bannedPlayers: [],
     state: "WAIT",
     lobbySettings: {
@@ -427,10 +428,13 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
       return;
     }
 
-    const { players } = lobbyData;
+    const { players, skipVote: oldSkipVote } = lobbyData;
+    let skipVote = oldSkipVote;
 
     // decrement old target
-    if (oldVoteDoc != undefined) {
+    if (oldVoteDoc != undefined && oldVoteDoc.target == null) {
+      skipVote -= 1;
+    } else if (oldVoteDoc != undefined && oldVoteDoc.target != null) {
       const oldTarget = players[oldVoteDoc.target];
       if (oldTarget.votes != 0) {
         oldTarget.votes -= 1;
@@ -438,9 +442,34 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
     }
 
     // increment new target
-    players[latestVoteDoc.target].votes += 1;
+    if (latestVoteDoc.target == null) {
+      skipVote += 1;
+    } else {
+      players[latestVoteDoc.target].votes += 1;
+    }
 
-    transaction.update(lobbyDocRef, { players });
+    let totalVotes = 0;
+    let livingPlayers = 0;
+    for (const uid in players) {
+      totalVotes += players[uid].votes;
+    }
+    totalVotes += skipVote;
+
+    for (const uid in lobbyData.players) {
+      if (lobbyData.players[uid].alive) {
+        livingPlayers++;
+      }
+    }
+
+    if (
+      totalVotes == livingPlayers &&
+      lobbyData.expiration.toMillis() > firestore.Timestamp.now().toMillis() + 10 * 1000
+    ) {
+      const expiration = firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 10 * 1000);
+      transaction.update(lobbyDocRef, { players, skipVote, expiration });
+    } else {
+      transaction.update(lobbyDocRef, { players, skipVote });
+    }
   });
 });
 

@@ -86,8 +86,8 @@ service cloud.firestore {
       match /votes/{uid} {
         function checkTarget(){
           return request.resource.data.keys().hasOnly(['target'])
-            && request.resource.data.target is string
-            && lobbyData().players[uid].alive;
+            && (request.resource.data.target == null || (request.resource.data.target is string
+            && lobbyData().players[uid].alive));
         }
         function notPastTarget(){
           return checkTarget() && request.resource.data.target != resource.data.target;
