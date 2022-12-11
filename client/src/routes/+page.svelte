@@ -115,14 +115,15 @@
 
 <style>
   main {
+    box-sizing: border-box;
     display: grid;
     justify-items: center;
     grid-template-rows: auto auto 1fr;
     height: 100%;
-    margin-top: 64px;
     gap: 12px;
     padding: 16px;
     --scale: min(calc(5vw + 12px), max(8vh, 16px));
+    padding-top: 80px;
   }
 
   .banner {
