@@ -20,6 +20,7 @@
   "devDependencies": {
     "@material/typography": "^14.0.0",
     "@playwright/test": "^1.25.0",
+    "@smui-extra/badge": "^7.0.0-beta.0",
     "@smui/button": "^7.0.0-beta.0",
     "@smui/circular-progress": "^7.0.0-beta.0",
     "@smui/dialog": "^7.0.0-beta.0",
