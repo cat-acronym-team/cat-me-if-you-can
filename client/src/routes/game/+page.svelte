@@ -33,6 +33,8 @@
   $: countdownVisible = lobby != undefined && DISPLAY_TIMERS[lobby.state] == true;
   let timer: ReturnType<typeof setInterval>;
 
+  let errorMessage: string = "";
+
   function updateCountdown() {
     if (lobby == undefined) {
       throw new Error("attempted to update countdown when lobby is undefined");
@@ -76,20 +78,34 @@
     updateCountdown();
 
     // We want them to subscribe to the lobby on mount
-    unsubscribeLobby = onSnapshot(lobbyDocRef, (doc) => {
-      // will change lobby to the new doc data
-      lobby = doc.data();
-      clearInterval(timer);
-      if (lobby != undefined) {
-        timer = setInterval(updateCountdown, 500);
+    unsubscribeLobby = onSnapshot(
+      lobbyDocRef,
+      (doc) => {
+        // will change lobby to the new doc data
+        lobby = doc.data();
+        clearInterval(timer);
+        if (lobby != undefined) {
+          timer = setInterval(updateCountdown, 500);
+        }
+      },
+      (err) => {
+        console.error(err);
+        errorMessage = err instanceof Error ? err.message : String(err);
       }
-    });
+    );
 
     // We want them to subscribe to the privatePlayer on mount
-    unsubscribePrivatePlayer = onSnapshot(privatePlayerDocRef, (doc) => {
-      // will change privatePlayer to the new doc data
-      privatePlayer = doc.data();
-    });
+    unsubscribePrivatePlayer = onSnapshot(
+      privatePlayerDocRef,
+      (doc) => {
+        // will change privatePlayer to the new doc data
+        privatePlayer = doc.data();
+      },
+      (err) => {
+        console.error(err);
+        errorMessage = err instanceof Error ? err.message : String(err);
+      }
+    );
   });
 
   onDestroy(() => {
@@ -174,6 +190,9 @@
   {/if}
 
   <div class="scroll-container">
+    {#if errorMessage !== ""}
+      <p class="error">{errorMessage}</p>
+    {/if}
     {#if $user == null || lobby == undefined || lobbyCode == null || (countdown < 0 && countdownVisible)}
       <div class="spinner-wraper">
         <CircularProgress indeterminate />
@@ -202,7 +221,7 @@
     {:else if lobby.state === "RESULT"}
       <Result {lobby} />
     {:else if lobby.state === "END"}
-      <WinLoss {lobbyCode} {lobby} {privatePlayer} />
+      <WinLoss {lobby} {privatePlayer} />
     {:else}
       <p class="error">unknown lobby state: {lobby.state}</p>
     {/if}

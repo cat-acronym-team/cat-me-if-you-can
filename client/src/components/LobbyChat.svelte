@@ -4,7 +4,7 @@
   import IconButton from "@smui/icon-button";
   import Badge from "@smui-extra/badge";
   import { onDestroy } from "svelte";
-  import { onSnapshot, orderBy, query, where } from "firebase/firestore";
+  import { onSnapshot, orderBy, type Query, query, where } from "firebase/firestore";
   import type { LobbyChatMessage, Lobby } from "$lib/firebase/firestore-types/lobby";
   import type { Unsubscribe } from "firebase/auth";
   import { getLobbyChatCollection } from "$lib/firebase/firestore-collections";
@@ -24,7 +24,7 @@
 
   $: lobby, onLobbyChange();
   function onLobbyChange() {
-    let messageQuery;
+    let messageQuery: Query<LobbyChatMessage>;
     if (userInfo == undefined) {
       return;
     } else if (userInfo.alive) {
@@ -33,12 +33,19 @@
       messageQuery = query(getLobbyChatCollection(lobbyCode), orderBy("timestamp", "asc"));
     }
     unsubscribeChatMessages?.();
-    unsubscribeChatMessages = onSnapshot(messageQuery, (collection) => {
-      chatMessages = collection.docs.map((message) => message.data());
-      if (showLobbyChat || readMessages > chatMessages.length) {
-        readMessages = chatMessages.length;
+    unsubscribeChatMessages = onSnapshot(
+      messageQuery,
+      (collection) => {
+        chatMessages = collection.docs.map((message) => message.data());
+        if (showLobbyChat || readMessages > chatMessages.length) {
+          readMessages = chatMessages.length;
+        }
+      },
+      (err) => {
+        console.error(err);
+        errorMessage = err instanceof Error ? err.message : String(err);
       }
-    });
+    );
   }
 
   onDestroy(() => {
@@ -57,6 +64,7 @@
       errorMessage = "";
     } catch (err) {
       // catch and display error
+      console.error(err);
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
