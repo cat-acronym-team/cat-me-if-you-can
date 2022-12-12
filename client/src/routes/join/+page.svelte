@@ -113,9 +113,7 @@
 
 <div class="cat-join-container">
   <h2 class="mdc-typography--headline2">Join Lobby!</h2>
-  {#if errorMessage !== ""}
-    <p class="error">{errorMessage}</p>
-  {/if}
+  <p class="error">{errorMessage}</p>
   <form on:submit|preventDefault={joinLobby}>
     <div>
       <Textfield
@@ -151,8 +149,10 @@
 
 <style>
   .cat-join-container {
-    width: 60%;
-    margin: auto;
+    height: 100%;
+    display: grid;
+    grid-template-rows: 1fr auto auto 1fr;
+    place-items: center;
     text-align: center;
   }
 
@@ -160,11 +160,5 @@
     display: grid;
     place-items: center;
     gap: 12px;
-  }
-
-  @media only screen and (min-width: 1000px) {
-    .cat-join-container {
-      width: 30%;
-    }
   }
 </style>
