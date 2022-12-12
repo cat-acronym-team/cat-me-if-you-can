@@ -62,6 +62,7 @@
       goto("/game?code=" + response.data.code);
     } catch (err) {
       waiting = false;
+      console.error(err);
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
@@ -74,6 +75,7 @@
       goto("/join");
     } catch (err) {
       waiting = false;
+      console.error(err);
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }

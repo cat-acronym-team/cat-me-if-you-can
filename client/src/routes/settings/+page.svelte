@@ -38,9 +38,15 @@
     unsubscribeUserData?.();
 
     // subscribe to new user doc
-    unsubscribeUserData = onSnapshot(userDataDocRef, (doc) => {
-      userData = doc.data();
-    });
+    unsubscribeUserData = onSnapshot(
+      userDataDocRef,
+      (doc) => {
+        userData = doc.data();
+      },
+      (err) => {
+        preferenceErrorMessage = getErrorMsg(err);
+      }
+    );
   }
 
   onDestroy(() => {
@@ -71,7 +77,7 @@
         await updateDoc(userDataDocRef, newPreferences);
       }
     } catch (error) {
-      preferenceErrorMessage = error instanceof Error ? error.message : String(error);
+      preferenceErrorMessage = getErrorMsg(error);
     }
   }
 
@@ -105,6 +111,7 @@
   let deleteErr = "";
 
   function getErrorMsg(error: unknown): string {
+    console.error(error);
     let errorMsg = error instanceof Error ? error.message : String(error);
     switch (errorMsg) {
       case "Firebase: Password should be at least 6 characters (auth/weak-password).":

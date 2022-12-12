@@ -21,6 +21,7 @@
   let errorMessage: string = "";
 
   function getErrorMsg(error: unknown): string {
+    console.error(error);
     let errorMsg = error instanceof Error ? error.message : String(error);
     switch (errorMsg) {
       case "Firebase: Error (auth/user-not-found).":

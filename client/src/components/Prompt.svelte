@@ -43,6 +43,7 @@
       await setDoc(answerDoc, { answer });
       displayAnswer = answer;
     } catch (error) {
+      console.error(error);
       errorMessage = error instanceof Error ? error.message : String(error);
     }
   }
