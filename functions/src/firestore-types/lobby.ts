@@ -121,7 +121,7 @@ export type Lobby = {
   /**
    * the role that won the game
    */
-  winner?: Role;
+  winner?: "CAT" | "CATFISH";
 
   /**
    * the uid of the player that was voted off for the round
