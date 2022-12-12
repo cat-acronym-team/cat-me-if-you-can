@@ -507,26 +507,27 @@ export const verifyExpiration = functions.https.onCall(async (data, context): Pr
     // if the timer sent is equal or greater than
     // change to the next phase
 
-    // TODO: potential if checks for other states that require a timer
-    // if the state is chat then delete chatrooms
-    if (lobby.state === "ROLE") {
-      await startPrompt(lobbyDoc, transaction);
-    }
-    if (lobby.state === "PROMPT") {
-      await collectPromptAnswers(lobbyDoc, transaction);
-    }
-    if (lobby.state === "CHAT") {
-      await setAndDeleteAnswers(lobby, lobbyDocRef, transaction);
-    }
-    // Applies the stats once the timer on the end screen ends
-    if (lobby.state === "END") {
-      await endGameProcess(lobby, lobbyDocRef, transaction);
-    }
-    if (lobby.state === "VOTE") {
-      findVoteOff(lobby, lobbyDocRef, transaction);
-    }
-    if (lobby.state === "RESULT") {
-      await determineWinner(lobbyDoc, transaction);
+    switch (lobby.state) {
+      case "ROLE":
+        await startPrompt(lobbyDoc, transaction);
+        break;
+      case "PROMPT":
+        await collectPromptAnswers(lobbyDoc, transaction);
+        break;
+      case "CHAT":
+        await setAndDeleteAnswers(lobby, lobbyDocRef, transaction);
+        break;
+      case "END":
+        await endGameProcess(lobby, lobbyDocRef, transaction);
+        break;
+      case "VOTE":
+        findVoteOff(lobby, lobbyDocRef, transaction);
+        break;
+      case "RESULT":
+        await determineWinner(lobbyDoc, transaction);
+        break;
+      default:
+        throw new functions.https.HttpsError("failed-precondition", "Lobby is in an invalid state.");
     }
   });
 
