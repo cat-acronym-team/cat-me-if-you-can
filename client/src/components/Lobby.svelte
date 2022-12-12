@@ -52,6 +52,7 @@
       await changeAvatar({ lobbyCode, avatar });
       errorMessage = "";
     } catch (err) {
+      console.error(err);
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
@@ -62,6 +63,7 @@
       await startGame({ code: lobbyCode });
     } catch (err) {
       waiting = false;
+      console.error(err);
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
@@ -72,6 +74,7 @@
       await leaveLobby({ code: lobbyCode });
     } catch (err) {
       waiting = false;
+      console.error(err);
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }

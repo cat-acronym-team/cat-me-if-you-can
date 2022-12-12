@@ -33,39 +33,50 @@
       roomQuerry = query(chatRoomCollection, where("pair", "array-contains", user.uid));
     }
 
-    unsubscribeChatRooms = onSnapshot(roomQuerry, (roomsSnapshot) => {
-      // skip if chatRoom not found yet
-      if (roomsSnapshot.docs.length == 0) {
-        return;
-      }
-
-      // store chatroom id
-      chatRoomId = roomsSnapshot.docs[0].id;
-
-      // process chatroom data
-      const chatRoom = roomsSnapshot.docs[0].data();
-      if (isStalker || isSpectator) {
-        // get pairInfo
-        pairInfo = chatRoom.pair.map((uid) => lobby.players[uid]) as [Player, Player];
-      } else {
-        // Get partnerInfo
-        const partner = chatRoom.pair.find((uid) => user.uid !== uid);
-        if (partner !== undefined) {
-          partnerInfo = lobby.players[partner];
+    unsubscribeChatRooms = onSnapshot(
+      roomQuerry,
+      (roomsSnapshot) => {
+        // skip if chatRoom not found yet
+        if (roomsSnapshot.docs.length == 0) {
+          return;
         }
-      }
 
-      // unsubscribe to old chatRoom if it exists
-      unsubscribeChatMessages?.();
+        // store chatroom id
+        chatRoomId = roomsSnapshot.docs[0].id;
 
-      // subscribe to new chatRoom
-      unsubscribeChatMessages = onSnapshot(
-        query(getChatRoomMessagesCollection(lobbyCode, chatRoomId), orderBy("timestamp", "asc")),
-        (collection) => {
-          chatMessages = collection.docs.map((message) => message.data());
+        // process chatroom data
+        const chatRoom = roomsSnapshot.docs[0].data();
+        if (isStalker || isSpectator) {
+          // get pairInfo
+          pairInfo = chatRoom.pair.map((uid) => lobby.players[uid]) as [Player, Player];
+        } else {
+          // Get partnerInfo
+          const partner = chatRoom.pair.find((uid) => user.uid !== uid);
+          if (partner !== undefined) {
+            partnerInfo = lobby.players[partner];
+          }
         }
-      );
-    });
+
+        // unsubscribe to old chatRoom if it exists
+        unsubscribeChatMessages?.();
+
+        // subscribe to new chatRoom
+        unsubscribeChatMessages = onSnapshot(
+          query(getChatRoomMessagesCollection(lobbyCode, chatRoomId), orderBy("timestamp", "asc")),
+          (collection) => {
+            chatMessages = collection.docs.map((message) => message.data());
+          },
+          (err) => {
+            console.error(err);
+            errorMessage = err instanceof Error ? err.message : String(err);
+          }
+        );
+      },
+      (err) => {
+        console.error(err);
+        errorMessage = err instanceof Error ? err.message : String(err);
+      }
+    );
   });
 
   onDestroy(() => {
@@ -86,7 +97,8 @@
       // if there's an error message then clear it
       errorMessage = "";
     } catch (err) {
-      // catch and display erro
+      // catch and display error
+      console.error(err);
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }

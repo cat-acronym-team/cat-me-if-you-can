@@ -20,13 +20,22 @@
   let catRatio: number;
   let catfishRatio: number;
 
+  let errorMessage: string = "";
+
   onMount(() => {
     const userId = $page.url.searchParams.get("user");
 
     if (userId !== null) {
-      unsubscribeUser = onSnapshot(doc(userCollection, userId), (userDoc) => {
-        userInfo = userDoc.data();
-      });
+      unsubscribeUser = onSnapshot(
+        doc(userCollection, userId),
+        (userDoc) => {
+          userInfo = userDoc.data();
+        },
+        (err) => {
+          console.error(err);
+          errorMessage = err instanceof Error ? err.message : String(err);
+        }
+      );
     }
   });
 
@@ -47,6 +56,9 @@
 <Header />
 
 <main>
+  {#if errorMessage !== ""}
+    <p class="error">{errorMessage}</p>
+  {/if}
   {#if $user == null}
     <div class="spinner-wraper">
       <CircularProgress indeterminate />
