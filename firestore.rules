@@ -29,7 +29,7 @@ service cloud.firestore {
             && request.resource.data.answer == request.resource.data.answer.trim();
         }
 
-        allow create: if request.auth.uid == uid && validAnswer() && inLobby() && lobbyData().state == "PROMPT";
+        allow write: if request.auth.uid == uid && validAnswer() && inLobby() && lobbyData().state == "PROMPT";
       }
 
       match /chatRooms/{roomId} {
@@ -86,8 +86,8 @@ service cloud.firestore {
       match /votes/{uid} {
         function checkTarget(){
           return request.resource.data.keys().hasOnly(['target'])
-            && request.resource.data.target is string
-            && request.resource.data.target in lobbyData().alivePlayers;
+            && (request.resource.data.target == null || (request.resource.data.target is string
+            && request.resource.data.target in lobbyData().alivePlayers));
         }
         function notPastTarget(){
           return checkTarget() && request.resource.data.target != resource.data.target;

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import SigninButton from "$components/SigninButton.svelte";
+  import AccountButton from "$components/AccountButton.svelte";
+  import Header from "$components/Header.svelte";
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
@@ -74,6 +75,7 @@
     } catch (err) {
       waiting = false;
       // if the lobby doesn't exist then error is thrown
+      console.error(err);
       errorMessage = err instanceof Error ? err.message : String(err);
       if (errorMessage == "You are already in the lobby!") {
         waiting = true;
@@ -106,15 +108,13 @@
   }
 </script>
 
-<header>
-  <SigninButton {userData} />
-</header>
+<Header>
+  <AccountButton slot="top-right" {userData} />
+</Header>
 
 <div class="cat-join-container">
   <h2 class="mdc-typography--headline2">Join Lobby!</h2>
-  {#if errorMessage !== ""}
-    <p class="error">{errorMessage}</p>
-  {/if}
+  <p class="error">{errorMessage}</p>
   <form on:submit|preventDefault={joinLobby}>
     <div>
       <Textfield
@@ -149,17 +149,11 @@
 </div>
 
 <style>
-  header {
-    height: 64px;
-    display: flex;
-    justify-content: right;
-    align-items: center;
-    padding-right: 16px;
-  }
-
   .cat-join-container {
-    width: 60%;
-    margin: auto;
+    height: 100%;
+    display: grid;
+    grid-template-rows: 1fr auto auto 1fr;
+    place-items: center;
     text-align: center;
   }
 
@@ -167,11 +161,5 @@
     display: grid;
     place-items: center;
     gap: 12px;
-  }
-
-  @media only screen and (min-width: 1000px) {
-    .cat-join-container {
-      width: 30%;
-    }
   }
 </style>

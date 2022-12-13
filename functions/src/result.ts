@@ -56,6 +56,7 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
     // set their votes to zero
     for (const player of currentPlayers) {
       player.votes = 0;
+      delete player.promptAnswer;
     }
   }
 
@@ -73,7 +74,7 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
   } else {
     // PROMPT
     await startPrompt(lobbyDoc, transaction);
-    transaction.update(lobbyDoc.ref, { players: currentPlayers });
+    transaction.update(lobbyDoc.ref, { players: currentPlayers, skipVote: 0 });
   }
 
   for (const voteDoc of voteDocs.docs) {

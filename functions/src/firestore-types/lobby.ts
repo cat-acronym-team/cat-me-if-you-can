@@ -77,12 +77,12 @@ export const GAME_STATE_DURATIONS_MIN: { [state in ConfigurableTimer]: number } 
  */
 export const GAME_STATE_DURATIONS_DEFAULT: { [state in GameState]: number } = {
   WAIT: 2 * 60 * 60,
-  ROLE: 15,
-  PROMPT: 60,
+  ROLE: 7,
+  PROMPT: 45,
   CHAT: 2 * 60,
   VOTE: 3 * 60,
-  RESULT: 10,
-  END: 10,
+  RESULT: 7,
+  END: 7,
 };
 
 /**
@@ -128,13 +128,19 @@ export type Lobby = {
   /**
    * the role that won the game
    */
-  winner?: Role;
+  winner?: "CAT" | "CATFISH";
 
   /**
    * the uid of the player that was voted off for the round
    * @note this can be a uid, NONE, or undefined
    */
   votedOff?: string | "NONE";
+
+  /**
+   *
+   * number of people who skipped voting
+   */
+  skipVote: number;
 
   /**
    * settings that can be edited in the lobby
@@ -203,9 +209,9 @@ export function promptAnswerValidator(displayName: string): { valid: true } | { 
  */
 export type Vote = {
   /**
-   * the UID of the player that the player owning this document has voted for
+   * the UID of the player or skip that the player owning this document has voted for
    */
-  target: string;
+  target: string | null;
 };
 
 /**

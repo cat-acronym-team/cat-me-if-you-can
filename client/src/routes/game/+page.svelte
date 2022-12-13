@@ -8,6 +8,8 @@
   import Result from "$components/Result.svelte";
   import CircularProgress from "@smui/circular-progress";
   import LobbyChat from "$components/LobbyChat.svelte";
+  import Header from "$components/Header.svelte";
+  import LobbySettings from "$components/LobbySettings.svelte";
 
   import { onSnapshot, doc, getDoc, type Unsubscribe } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
@@ -30,6 +32,8 @@
   let countdown = GAME_STATE_DURATIONS_DEFAULT.WAIT;
   $: countdownVisible = lobby != undefined && DISPLAY_TIMERS[lobby.state] == true;
   let timer: ReturnType<typeof setInterval>;
+
+  let errorMessage: string = "";
 
   function updateCountdown() {
     if (lobby == undefined) {
@@ -74,20 +78,34 @@
     updateCountdown();
 
     // We want them to subscribe to the lobby on mount
-    unsubscribeLobby = onSnapshot(lobbyDocRef, (doc) => {
-      // will change lobby to the new doc data
-      lobby = doc.data();
-      clearInterval(timer);
-      if (lobby != undefined) {
-        timer = setInterval(updateCountdown, 500);
+    unsubscribeLobby = onSnapshot(
+      lobbyDocRef,
+      (doc) => {
+        // will change lobby to the new doc data
+        lobby = doc.data();
+        clearInterval(timer);
+        if (lobby != undefined) {
+          timer = setInterval(updateCountdown, 500);
+        }
+      },
+      (err) => {
+        console.error(err);
+        errorMessage = err instanceof Error ? err.message : String(err);
       }
-    });
+    );
 
     // We want them to subscribe to the privatePlayer on mount
-    unsubscribePrivatePlayer = onSnapshot(privatePlayerDocRef, (doc) => {
-      // will change privatePlayer to the new doc data
-      privatePlayer = doc.data();
-    });
+    unsubscribePrivatePlayer = onSnapshot(
+      privatePlayerDocRef,
+      (doc) => {
+        // will change privatePlayer to the new doc data
+        privatePlayer = doc.data();
+      },
+      (err) => {
+        console.error(err);
+        errorMessage = err instanceof Error ? err.message : String(err);
+      }
+    );
   });
 
   onDestroy(() => {
@@ -119,7 +137,7 @@
   }
 
   $: countdown, checkTimerExpiration();
-  function checkTimerExpiration() {
+  async function checkTimerExpiration() {
     if (
       lobby != null &&
       lobbyCode != null &&
@@ -127,12 +145,39 @@
       ((lobby.uids[0] === $user?.uid && countdown < 0) || countdown < -5)
     ) {
       clearInterval(timer);
-      verifyExpiration({ code: lobbyCode });
+      try {
+        await verifyExpiration({ code: lobbyCode });
+      } catch (error) {
+        if (error instanceof Error && error.message.includes("early")) {
+          console.info(error);
+        } else {
+          console.error(error);
+        }
+      }
     }
   }
 </script>
 
 <svelte:window on:beforeunload={onbeforeunload} />
+
+<Header>
+  <div class="buttons" slot="top-right">
+    {#if lobbyCode !== null && lobby !== undefined && $user != null}
+      {#if lobby.state === "WAIT"}
+        <LobbyChat {lobby} {lobbyCode} />
+        {#if $user.uid === lobby.uids[0]}
+          <LobbySettings {lobby} {lobbyCode} />
+        {/if}
+      {:else if lobby.state === "PROMPT" || lobby.state === "CHAT"}
+        {#if !lobby.alivePlayers.includes($user.uid)}
+          <LobbyChat {lobby} {lobbyCode} />
+        {/if}
+      {:else if lobby.state === "VOTE"}
+        <LobbyChat {lobby} {lobbyCode} />
+      {/if}
+    {/if}
+  </div>
+</Header>
 
 <!-- I do this check because the html was rendering the Lobby component before the onmount happened due to lobby having default values -->
 <!-- So the code was displaying undefined in the Lobby Component -->
@@ -145,12 +190,14 @@
   {/if}
 
   <div class="scroll-container">
+    {#if errorMessage !== ""}
+      <p class="error">{errorMessage}</p>
+    {/if}
     {#if $user == null || lobby == undefined || lobbyCode == null || (countdown < 0 && countdownVisible)}
       <div class="spinner-wraper">
         <CircularProgress indeterminate />
       </div>
     {:else if lobby.state === "WAIT"}
-      <LobbyChat {lobby} {lobbyCode} />
       <LobbyComponent {lobbyCode} {lobby} />
     {:else if privatePlayer == undefined}
       <div class="spinner-wraper">
@@ -159,15 +206,10 @@
     {:else if lobby.state === "ROLE"}
       <Role {privatePlayer} />
     {:else if lobby.state === "PROMPT"}
-      {#if !lobby.alivePlayers.includes($user.uid)}
-        <LobbyChat {lobby} {lobbyCode} />
-      {:else}
+      {#if lobby.alivePlayers.includes($user.uid)}
         <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
       {/if}
     {:else if lobby.state === "CHAT"}
-      {#if !lobby.alivePlayers.includes($user.uid)}
-        <LobbyChat {lobby} {lobbyCode} />
-      {/if}
       <ChatRoom
         {lobby}
         {lobbyCode}
@@ -175,12 +217,11 @@
         isSpectator={!lobby.alivePlayers.includes($user.uid)}
       />
     {:else if lobby.state === "VOTE"}
-      <LobbyChat {lobby} {lobbyCode} />
       <Vote {lobby} {lobbyCode} />
     {:else if lobby.state === "RESULT"}
       <Result {lobby} />
     {:else if lobby.state === "END"}
-      <WinLoss {lobbyCode} {lobby} {privatePlayer} />
+      <WinLoss {lobby} {privatePlayer} />
     {:else}
       <p class="error">unknown lobby state: {lobby.state}</p>
     {/if}
@@ -193,6 +234,13 @@
     display: grid;
     grid-template-areas: "header" "scroll-container";
     grid-template-rows: 64px 1fr;
+  }
+
+  .buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    align-items: center;
   }
 
   main.has-countdown {

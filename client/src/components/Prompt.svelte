@@ -12,12 +12,14 @@
 
   export let lobbyCode: string;
 
+  let errorMessage: string | undefined;
+
   let answer = "";
   let dirty = false;
 
   $: answerDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
 
-  $: error = getErrorMessage(answer);
+  $: validationError = getErrorMessage(answer);
 
   function getErrorMessage(answer: string): string | undefined {
     const trimmed = answer.trim();
@@ -31,12 +33,19 @@
     }
   }
   let displayAnswer = "";
-  function submitAnswer() {
-    if (error != undefined) {
+  async function submitAnswer() {
+    if (validationError != undefined) {
       return;
     }
-    displayAnswer = answer;
-    setDoc(answerDoc, { answer });
+    errorMessage = undefined;
+    try {
+      answer = answer.trim();
+      await setDoc(answerDoc, { answer });
+      displayAnswer = answer;
+    } catch (error) {
+      console.error(error);
+      errorMessage = error instanceof Error ? error.message : String(error);
+    }
   }
 </script>
 
@@ -45,21 +54,26 @@
 
   <div class="input">
     <Textfield
-      textarea
+      variant="outlined"
       input$id="prompt-answer"
       input$maxlength={50}
       bind:value={answer}
       bind:dirty
-      invalid={dirty && error != undefined}
+      invalid={dirty && validationError != undefined}
       required
     >
-      <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
-      <CharacterCounter slot="internalCounter">0 / 100</CharacterCounter>
+      <svelte:fragment slot="helper">
+        <HelperText validationMsg>{validationError ?? ""}</HelperText>
+        <CharacterCounter slot="internalCounter">0 / 50</CharacterCounter>
+      </svelte:fragment>
     </Textfield>
 
     <div class="button-wraper">
-      <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
+      <Button variant="raised" type="submit" disabled={validationError != undefined}><Label>Done</Label></Button>
     </div>
+    {#if errorMessage != undefined}
+      <p class="error">{errorMessage}</p>
+    {/if}
   </div>
   {#if displayAnswer != ""}
     <p>Your Answer: {displayAnswer}</p>
@@ -80,6 +94,7 @@
   }
 
   .button-wraper {
+    margin-top: 16px;
     display: grid;
     justify-content: end;
   }

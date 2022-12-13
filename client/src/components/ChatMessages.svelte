@@ -36,12 +36,13 @@
   });
 
   let messagesElement: HTMLElement;
-  function scrollToBottom() {
+  export async function scrollToBottom() {
+    await tick();
     messagesElement?.scroll({ top: messagesElement.scrollHeight, behavior: "smooth" });
   }
 
   // when the messages change, scroll to the bottom after svelte is done updating the DOM
-  $: displayMessages, tick().then(scrollToBottom);
+  $: displayMessages, scrollToBottom();
 
   let message = "";
   $: messageValidation = chatMessageValidator(message.trim());
@@ -61,14 +62,19 @@
   <div class="messages" bind:this={messagesElement}>
     <slot name="before-messages" />
     {#each displayMessages as message}
-      <div class="message {message.sender == $user?.uid ? 'current-user' : ''}">
+      <div
+        class="message"
+        class:current-user={message.sender == $user?.uid}
+        class:dead={"alive" in message && !message.alive}
+      >
         <div class="avatar">
           <img src="/avatars/{message.avatar}.webp" alt={avatarAltText[message.avatar]} />
         </div>
         <div class="display-name mdc-typography--body2">{message.displayName}</div>
         <div
-          class="text mdc-typography--body1 {lobby.alivePlayers.includes(message.sender) ? '' : 'userDead'}"
-          style="background-color: {avatarColors[message.avatar]}; color: {onAvatarColors[message.avatar]};"
+          class="text mdc-typography--body1"
+          style:background-color={avatarColors[message.avatar]}
+          style:color={onAvatarColors[message.avatar]}
         >
           {message.text}
         </div>
@@ -149,14 +155,17 @@
     justify-content: end;
   }
 
-  .userDead {
-    filter: grayscale(80%);
-    opacity: 0.5;
+  .dead .text {
+    filter: grayscale(50%);
   }
 
   .avatar {
     grid-area: avatar;
     align-self: end;
+  }
+
+  .dead .avatar {
+    opacity: 0.5;
   }
 
   .avatar img {
@@ -180,6 +189,7 @@
     padding: 12px;
     margin-bottom: 16px;
     border-radius: 24px 24px 24px 0;
+    word-break: break-word;
   }
 
   .current-user .text {

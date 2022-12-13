@@ -21,7 +21,7 @@ import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
-import { deleteChatRooms, deleteLobbyChatMessages } from "./chat";
+import { deleteChatCollections, setAndDeleteAnswers, deleteLobbyChatMessages } from "./chat";
 import { assignRole } from "./role";
 import { endGameProcess } from "./winloss";
 import { findVoteOff } from "./vote";
@@ -58,6 +58,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
         votes: 0,
       },
     ],
+    skipVote: 0,
     bannedPlayers: [],
     state: "WAIT",
     alivePlayers: [context.auth.uid],
@@ -170,6 +171,16 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     // throw an error if the lobby is already full
     if (uids.length >= maxPlayers) {
       throw new functions.https.HttpsError("failed-precondition", "Lobby is full!");
+    }
+
+    // throws an error if current display name is already taken
+    for (const player in players) {
+      if (players[player].displayName == userInfo.displayName) {
+        throw new functions.https.HttpsError(
+          "already-exists",
+          userInfo.displayName + " is already taken in this lobby!"
+        );
+      }
     }
 
     // change avatar randomly if it is already taken
@@ -367,7 +378,6 @@ export async function collectPromptAnswers(
 
   for (const promptAnswerDoc of promptAnswerDocs.docs) {
     promptAnswers.set(promptAnswerDoc.id, promptAnswerDoc.data().answer);
-    transaction.delete(promptAnswerDoc.ref);
   }
 
   // expiration set
@@ -379,7 +389,10 @@ export async function collectPromptAnswers(
   const { pairs, stalker } = generatePairs(lobbyData);
 
   if (stalker != undefined) {
-    getPrivatePlayerCollection(lobbyDoc.ref).doc(stalker).update({ stalker: true });
+    const stalkerPrivatePlayer = getPrivatePlayerCollection(lobbyDoc.ref).doc(stalker);
+
+    // make player the stalker
+    transaction.update(stalkerPrivatePlayer, { stalker: true });
   }
 
   // create a chatroom for each pair
@@ -429,10 +442,13 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
       return;
     }
 
-    const { players, uids } = lobbyData;
+    const { players, uids, skipVote: oldSkipVote } = lobbyData;
+    let skipVote = oldSkipVote;
 
     // decrement old target
-    if (oldVoteDoc != undefined) {
+    if (oldVoteDoc != undefined && oldVoteDoc.target == null) {
+      skipVote -= 1;
+    } else if (oldVoteDoc != undefined && oldVoteDoc.target != null) {
       const oldTarget = players[uids.indexOf(oldVoteDoc.target)];
       if (oldTarget.votes != 0) {
         oldTarget.votes -= 1;
@@ -440,9 +456,27 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
     }
 
     // increment new target
-    players[uids.indexOf(latestVoteDoc.target)].votes += 1;
+    if (latestVoteDoc.target == null) {
+      skipVote += 1;
+    } else {
+      players[uids.indexOf(latestVoteDoc.target)].votes += 1;
+    }
 
-    transaction.update(lobbyDocRef, { players });
+    let totalVotes = 0;
+    for (const player of players) {
+      totalVotes += player.votes;
+    }
+    totalVotes += skipVote;
+
+    if (
+      totalVotes == lobbyData.alivePlayers.length &&
+      lobbyData.expiration.toMillis() > firestore.Timestamp.now().toMillis() + 10 * 1000
+    ) {
+      const expiration = firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 10 * 1000);
+      transaction.update(lobbyDocRef, { players, skipVote, expiration });
+    } else {
+      transaction.update(lobbyDocRef, { players, skipVote });
+    }
   });
 });
 
@@ -478,28 +512,34 @@ export const verifyExpiration = functions.https.onCall(async (data, context): Pr
     // if the timer sent is equal or greater than
     // change to the next phase
 
-    // TODO: potential if checks for other states that require a timer
-    // if the state is chat then delete chatrooms
-    if (lobby.state === "ROLE") {
-      await startPrompt(lobbyDoc, transaction);
-    }
-    if (lobby.state === "PROMPT") {
-      await collectPromptAnswers(lobbyDoc, transaction);
-    }
-    if (lobby.state === "CHAT") {
-      await deleteChatRooms(lobby, lobbyDocRef, transaction);
-    }
-    // Applies the stats once the timer on the end screen ends
-    if (lobby.state === "END") {
-      await endGameProcess(lobby, lobbyDocRef, transaction);
-    }
-    if (lobby.state === "VOTE") {
-      findVoteOff(lobby, lobbyDocRef, transaction);
-    }
-    if (lobby.state === "RESULT") {
-      await determineWinner(lobbyDoc, transaction);
+    switch (lobby.state) {
+      case "ROLE":
+        await startPrompt(lobbyDoc, transaction);
+        break;
+      case "PROMPT":
+        await collectPromptAnswers(lobbyDoc, transaction);
+        break;
+      case "CHAT":
+        await setAndDeleteAnswers(lobby, lobbyDocRef, transaction);
+        break;
+      case "END":
+        await endGameProcess(lobby, lobbyDocRef, transaction);
+        break;
+      case "VOTE":
+        findVoteOff(lobby, lobbyDocRef, transaction);
+        break;
+      case "RESULT":
+        await determineWinner(lobbyDoc, transaction);
+        break;
+      default:
+        throw new functions.https.HttpsError("failed-precondition", "Lobby is in an invalid state.");
     }
   });
+
+  if (lobby?.state == "CHAT") {
+    await deleteChatCollections(lobbyDocRef);
+  }
+
   if (lobby?.state == "VOTE") {
     await deleteLobbyChatMessages(lobbyDocRef);
   }

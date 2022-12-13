@@ -10,8 +10,8 @@ export function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lob
   const [most, secondMost]: Player[] = JSON.parse(JSON.stringify(players)).sort((a: Player, b: Player) => {
     return b.votes - a.votes;
   });
-  // if they're not equal then most is voted off
-  if (most.votes != secondMost.votes) {
+  // if they're not equal and have less votes than skip then most is voted off
+  if (most.votes != secondMost.votes && most.votes > lobbyData.skipVote) {
     // find index of most in the players array
     let mostIndex: number | undefined;
     for (let i = 0; i < players.length; i++) {
