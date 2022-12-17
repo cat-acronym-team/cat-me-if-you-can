@@ -10,4 +10,8 @@
     height: 100vh;
     height: 100dvh;
   }
+
+  :global(a.mdc-icon-button) {
+    color: inherit;
+  }
 </style>

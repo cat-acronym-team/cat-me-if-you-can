@@ -161,7 +161,7 @@
 <svelte:window on:beforeunload={onbeforeunload} />
 
 <Header>
-  <div class="buttons" slot="top-right">
+  <svelte:fragment slot="top-right">
     {#if lobbyCode !== null && lobby !== undefined && $user != null}
       {#if lobby.state === "WAIT"}
         <LobbyChat {lobby} {lobbyCode} />
@@ -176,7 +176,7 @@
         <LobbyChat {lobby} {lobbyCode} />
       {/if}
     {/if}
-  </div>
+  </svelte:fragment>
 </Header>
 
 <!-- I do this check because the html was rendering the Lobby component before the onmount happened due to lobby having default values -->
@@ -234,13 +234,6 @@
     display: grid;
     grid-template-areas: "header" "scroll-container";
     grid-template-rows: 64px 1fr;
-  }
-
-  .buttons {
-    display: flex;
-    gap: 8px;
-    justify-content: space-between;
-    align-items: center;
   }
 
   main.has-countdown {

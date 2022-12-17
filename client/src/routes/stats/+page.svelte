@@ -1,4 +1,5 @@
 <script lang="ts">
+  import IconButton from "@smui/icon-button";
   import CircularProgress from "@smui/circular-progress";
   import Header from "$components/Header.svelte";
 
@@ -53,7 +54,9 @@
   });
 </script>
 
-<Header />
+<Header>
+  <IconButton slot="top-left" class="material-icons" href="/">arrow_back</IconButton>
+</Header>
 
 <main>
   {#if errorMessage !== ""}

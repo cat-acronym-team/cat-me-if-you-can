@@ -173,7 +173,9 @@
   }
 </script>
 
-<Header />
+<Header>
+  <IconButton slot="top-left" class="material-icons" href="/">arrow_back</IconButton>
+</Header>
 
 <main class="settings-wrapper">
   <h2 class="mdc-typography--headline2">Account Settings</h2>
