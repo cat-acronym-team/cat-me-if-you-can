@@ -9,14 +9,7 @@ import {
   userCollection,
 } from "./firestore-collections";
 import { isLobbyRequest, isLobbySettingsRequest, LobbyCreationResponse } from "./firebase-functions-types";
-import {
-  AVATARS,
-  GAME_STATE_DURATIONS_DEFAULT,
-  GAME_STATE_DURATIONS_MAX,
-  GAME_STATE_DURATIONS_MIN,
-  Lobby,
-  Vote,
-} from "./firestore-types/lobby";
+import { AVATARS, GAME_STATE_DURATIONS_DEFAULT, Lobby, Vote } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
 import { generatePairs } from "./util";
 import { db } from "./app";

@@ -1,4 +1,4 @@
-import { GAME_STATE_DURATIONS_MAX, GAME_STATE_DURATIONS_MIN, LobbySettings } from "./firestore-types/lobby";
+import { GAME_STATE_DURATIONS_MAX, GAME_STATE_DURATIONS_MIN, type LobbySettings } from "./firestore-types/lobby";
 
 export type LobbyRequest = { code: string };
 
