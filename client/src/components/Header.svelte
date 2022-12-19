@@ -13,7 +13,6 @@
   .header {
     display: flex;
     gap: 8px;
-    /* justify-content: space-between; */
     align-items: center;
     position: absolute;
     top: 8px;
