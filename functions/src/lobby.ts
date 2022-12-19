@@ -272,21 +272,6 @@ export const applyLobbySettings = functions.https.onCall(async (data: unknown, c
 
   const settings = data.lobbySettings;
 
-  if (settings.catfishAmount < 1 || settings.catfishAmount > 3) {
-    throw new functions.https.HttpsError("permission-denied", "Cannot have less than 1 or more than 3 catfish!");
-  }
-
-  if (
-    settings.promptTime < GAME_STATE_DURATIONS_MIN.PROMPT ||
-    settings.promptTime > GAME_STATE_DURATIONS_MAX.PROMPT ||
-    settings.chatTime < GAME_STATE_DURATIONS_MIN.CHAT ||
-    settings.chatTime > GAME_STATE_DURATIONS_MAX.CHAT ||
-    settings.voteTime < GAME_STATE_DURATIONS_MIN.VOTE ||
-    settings.voteTime > GAME_STATE_DURATIONS_MAX.VOTE
-  ) {
-    throw new functions.https.HttpsError("permission-denied", "Timer must be within the proper range!");
-  }
-
   await db.runTransaction(async (transaction) => {
     // get lobby doc
     const lobby = lobbyCollection.doc(data.code);
