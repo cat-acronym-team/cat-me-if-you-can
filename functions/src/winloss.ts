@@ -60,7 +60,7 @@ export async function endGameProcess(
       if (player.role == undefined) {
         functions.logger.error("This player's role doesn't exist!");
         return;
-      } else if (players[uid].role == "SPECTATOR") {
+      } else if (player.role == "SPECTATOR") {
         return;
       }
 
