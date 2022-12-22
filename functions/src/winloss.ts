@@ -28,7 +28,7 @@ export const lobbyReturn = functions.https.onCall(async (data: unknown, context)
 
     const lobbyData = lobbyDoc.data() as Lobby;
     // check if host
-    if (auth.uid === lobbyData.host) {
+    if (auth.uid !== lobbyData.host) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
     }
 
@@ -58,6 +58,7 @@ export async function endGameProcess(
       const userDoc = await transaction.get(userDocRef);
 
       if (player.role == undefined) {
+        functions.logger.error("This player's role doesn't exist!");
         return;
       } else if (players[uid].role == "SPECTATOR") {
         return;
