@@ -1,11 +1,12 @@
 <script lang="ts">
-  import type { Player, Lobby } from "$lib/firebase/firestore-types/lobby";
+  import AvatarImg from "./AvatarImg.svelte";
   import Ripple from "@smui/ripple";
+  import type { Player, Lobby } from "$lib/firebase/firestore-types/lobby";
   import { stalkChatroom } from "$lib/firebase/firebase-functions";
   import { getChatRoomCollection } from "$lib/firebase/firestore-collections";
   import { getDocs } from "firebase/firestore";
   import { onMount } from "svelte";
-  import { avatarAltText, avatarColors, avatars } from "$lib/avatar";
+  import { avatarColors } from "$lib/avatar";
   import { generateHclGradient } from "$lib/color";
 
   export let lobby: Lobby;
@@ -55,11 +56,11 @@
       )};"
     >
       <div class="button-content base-theme-colors">
-        <img src={avatars[chatroom.players[0].avatar]} alt={avatarAltText[chatroom.players[0].avatar]} />
+        <AvatarImg avatar={chatroom.players[0].avatar} />
         <span class="first-name mdc-typography--headline6">{chatroom.players[0].displayName}</span>
 
         <span class="second-name mdc-typography--headline6">{chatroom.players[1].displayName}</span>
-        <img src={avatars[chatroom.players[1].avatar]} alt={avatarAltText[chatroom.players[1].avatar]} />
+        <AvatarImg avatar={chatroom.players[1].avatar} />
       </div>
     </button>
   {/each}
@@ -102,13 +103,13 @@
     border-radius: 24px;
   }
 
-  .button-content > img {
+  .button-content > :global(img) {
     width: 64px;
     height: 64px;
     object-fit: cover;
   }
 
-  .button-content > img:first-of-type {
+  .button-content > :global(img:first-of-type) {
     transform: scaleX(-1);
   }
 
@@ -118,7 +119,7 @@
       padding-inline: 24px;
     }
 
-    .button-content > img {
+    .button-content > :global(img) {
       display: none;
     }
   }

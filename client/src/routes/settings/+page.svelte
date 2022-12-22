@@ -1,12 +1,13 @@
 <script lang="ts">
   import SelectAvatar from "$components/SelectAvatar.svelte";
   import Header from "$components/Header.svelte";
+  import ProviderButtons from "$components/ProviderButtons.svelte";
+  import AvatarImg from "$components/AvatarImg.svelte";
   import Dialog, { Title, Content, Actions } from "@smui/dialog";
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
-  import { avatarAltText, avatars } from "$lib/avatar";
   import type { Avatar } from "$lib/firebase/firestore-types/lobby";
   import {
     deleteAccount,
@@ -23,7 +24,6 @@
   import { userCollection } from "$lib/firebase/firestore-collections";
   import { authStore as user } from "$stores/auth";
   import { onDestroy } from "svelte";
-  import ProviderButtons from "$components/ProviderButtons.svelte";
 
   let userData: UserData | undefined = undefined;
   let userDataDocRef: DocumentReference<UserData> | undefined = undefined;
@@ -182,7 +182,7 @@
 
   <div class="preferences">
     <div class="avatar">
-      <img src={avatars[userData?.avatar ?? 0]} alt={avatarAltText[userData?.avatar ?? 0]} />
+      <AvatarImg avatar={userData?.avatar ?? 0} />
       {#if userData?.displayName != undefined}
         <IconButton class="material-icons" on:click={() => (showAvatarDialog = true)}>edit</IconButton>
       {/if}
@@ -354,7 +354,7 @@
     width: 128px;
   }
 
-  .avatar > img {
+  .avatar > :global(img) {
     height: 100%;
     width: 100%;
   }
