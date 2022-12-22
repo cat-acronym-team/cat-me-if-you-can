@@ -57,9 +57,8 @@ export async function setAndDeleteAnswers(
   // iterate through promptAnswer docs and place the answer on their player object and delete the doc
   for (const promptAnswerDoc of promptAnswersSnapshot.docs) {
     const promptData = promptAnswerDoc.data();
-    const promptAns = promptData.answer;
 
-    players[promptAnswerDoc.id].promptAnswer = promptAns;
+    players[promptAnswerDoc.id].promptAnswer = promptData.answer;
 
     transaction.delete(promptAnswerDoc.ref);
   }
