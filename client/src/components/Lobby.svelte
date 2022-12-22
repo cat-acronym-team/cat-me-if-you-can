@@ -3,13 +3,23 @@
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
   import { page } from "$app/stores";
-  import type { Lobby } from "$lib/firebase/firestore-types/lobby";
+  import type { Avatar, Lobby } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
-  import { startGame } from "$lib/firebase/firebase-functions";
+  import { changeAvatar, startGame, leaveLobby } from "$lib/firebase/firebase-functions";
+  import { goto } from "$app/navigation";
+  import { authStore as user } from "../store/auth";
 
   // Props
   export let lobbyCode: string;
   export let lobby: Lobby;
+  let errorMessage: string = "";
+  $: minPlayers = lobby.lobbySettings.catfishAmount * 2 + 2;
+
+  /**
+   * variable that will be set true if the corresponding function has no errors thrown
+   * this will then allow the button to be pressed again if there is an error thrown
+   */
+  let waiting: boolean = false;
 
   // better link to share since it's redirecting to this page anyways
   // Josh's suggestion that I agreed on
@@ -35,32 +45,89 @@
   function copyLink() {
     navigator.clipboard.writeText(url);
   }
-</script>
 
-<main>
-  <div class="container">
-    <div class="lobby-info">
-      <h3>Code: {lobbyCode}</h3>
-      <h3>Players: {lobby.players.length}</h3>
-    </div>
-    <SelectAvatar {lobby} {lobbyCode} />
-    <div class="start">
-      <Button on:click={() => startGame({ code: lobbyCode })}><Label>Start Game</Label></Button>
-    </div>
-    <div class="buttons">
-      <h3 class="invite-link">Invite Link: {url}</h3>
-      <IconButton class="material-icons" on:click={copyLink}>content_copy</IconButton>
-      {#if canShare}<IconButton class="material-icons" on:click={share}>share</IconButton>{/if}
-    </div>
-  </div>
-</main>
-
-<style>
-  main {
-    justify-content: center;
+  async function onAvatarSelect(avatar: Avatar) {
+    try {
+      await changeAvatar({ lobbyCode, avatar });
+      errorMessage = "";
+    } catch (err) {
+      console.error(err);
+      errorMessage = err instanceof Error ? err.message : String(err);
+    }
   }
 
-  .start {
+  async function start() {
+    waiting = true;
+    try {
+      await startGame({ code: lobbyCode });
+    } catch (err) {
+      waiting = false;
+      console.error(err);
+      errorMessage = err instanceof Error ? err.message : String(err);
+    }
+  }
+
+  async function leave() {
+    waiting = true;
+    try {
+      await leaveLobby({ code: lobbyCode });
+    } catch (err) {
+      waiting = false;
+      console.error(err);
+      errorMessage = err instanceof Error ? err.message : String(err);
+    }
+  }
+</script>
+
+<div class="container">
+  <div class="lobby-info">
+    <h3>Code: {lobbyCode}</h3>
+    <h3>Players: {lobby.players.length} / 8</h3>
+    {#if lobby.players.length < minPlayers}
+      <!-- Display the number of players needed to start the current game session -->
+      {#if minPlayers - lobby.players.length !== 1}
+        <!-- Grammar check -->
+        <h3 class="error">{minPlayers - lobby.players.length} more players required to start game...</h3>
+      {:else}
+        <h3 class="error">1 more player required to start game...</h3>
+      {/if}
+    {:else}
+      <h3 class="error">Waiting for host to start game...</h3>
+    {/if}
+  </div>
+  <SelectAvatar {lobby} {lobbyCode} on:change={(event) => onAvatarSelect(event.detail.value)} />
+  {#if $user?.uid === lobby.uids[0]}
+    <div class="actions">
+      <Button on:click={start} disabled={lobby.players.length < minPlayers || waiting}>
+        <Label>Start Game</Label>
+      </Button>
+    </div>
+  {/if}
+  <div class="actions">
+    <Button
+      on:click={async () => {
+        await leave();
+        goto("/");
+      }}
+      disabled={waiting}
+    >
+      <Label>Leave Lobby</Label>
+    </Button>
+  </div>
+  <div class="actions">
+    {#if errorMessage !== ""}
+      <p class="error">{errorMessage}</p>
+    {/if}
+  </div>
+  <div class="buttons">
+    <h3 class="invite-link">Invite Link: {url}</h3>
+    <IconButton class="material-icons" on:click={copyLink}>content_copy</IconButton>
+    {#if canShare}<IconButton class="material-icons" on:click={share}>share</IconButton>{/if}
+  </div>
+</div>
+
+<style>
+  .actions {
     display: grid;
     place-items: center;
   }
@@ -68,6 +135,12 @@
   .buttons {
     display: grid;
     grid-template-columns: 1fr auto auto;
+  }
+
+  .error {
+    text-align: center;
+    margin: auto 0;
+    padding: 20px;
   }
 
   .invite-link {

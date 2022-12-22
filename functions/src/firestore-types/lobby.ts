@@ -23,7 +23,12 @@ export type Player = {
   /**
    * the number of players that have voted for this player
    */
-  votes?: number;
+  votes: number;
+
+  /**
+   * the role that the player played; used at the end of the game
+   */
+  role?: Role;
 
   /**
    * the answer for their prompt
@@ -31,17 +36,62 @@ export type Player = {
   promptAnswer?: string;
 };
 
-export type GameState = "WAIT" | "PROMPT" | "CHAT" | "VOTE" | "END";
+export type LobbySettings = {
+  /**
+   * the number of players that will be catfish
+   */
+  catfishAmount: 1 | 2 | 3;
+
+  /**
+   * duration in seconds for the PROMPT game state
+   */
+  promptTime: number;
+
+  /**
+   * duration in seconds for the CHAT game state
+   */
+  chatTime: number;
+
+  /**
+   * duration in seconds for the VOTE game state
+   */
+  voteTime: number;
+};
+
+export type GameState = "WAIT" | "ROLE" | "PROMPT" | "CHAT" | "VOTE" | "RESULT" | "END";
+
+export const configurableTimers = ["PROMPT", "CHAT", "VOTE"] as const;
+export type ConfigurableTimer = typeof configurableTimers[number];
+
+/**
+ * the minimum duration in seconds for each game state
+ */
+export const GAME_STATE_DURATIONS_MIN: { [state in ConfigurableTimer]: number } = {
+  PROMPT: 30,
+  CHAT: 60,
+  VOTE: 60,
+};
 
 /**
  * the duration in seconds for each game state
  */
-export const GAME_STATE_DURATIONS: { [state in GameState]: number } = {
+export const GAME_STATE_DURATIONS_DEFAULT: { [state in GameState]: number } = {
   WAIT: 2 * 60 * 60,
-  PROMPT: 60,
+  ROLE: 7,
+  PROMPT: 45,
   CHAT: 2 * 60,
   VOTE: 3 * 60,
-  END: 10,
+  RESULT: 7,
+  END: 7,
+};
+
+/**
+ * the maximum duration in seconds for each game state
+ */
+export const GAME_STATE_DURATIONS_MAX: { [state in ConfigurableTimer]: number } = {
+  PROMPT: 2 * 60,
+  CHAT: 5 * 60,
+  VOTE: 5 * 60,
 };
 
 /**
@@ -68,13 +118,45 @@ export type Lobby = {
   /**
    * expiration time of the current phase with a timer
    */
-  expiration?: Timestamp;
+  expiration: Timestamp;
+
+  /**
+   * array of alive players
+   */
+  alivePlayers: string[];
+
+  /**
+   * the role that won the game
+   */
+  winner?: "CAT" | "CATFISH";
+
+  /**
+   * the uid of the player that was voted off for the round
+   * @note this can be a uid, NONE, or undefined
+   */
+  votedOff?: string | "NONE";
+
+  /**
+   *
+   * number of people who skipped voting
+   */
+  skipVote: number;
+
+  /**
+   * settings that can be edited in the lobby
+   */
+  lobbySettings: LobbySettings;
+
+  /*
+   * array of uids of banned players
+   */
+  bannedPlayers: string[];
 };
 
 /**
  * the role of a player
  */
-export type Role = "CAT" | "CATFISH";
+export type Role = "CAT" | "CATFISH" | "SPECTATOR";
 
 /**
  * the type of documents `/lobbies/{code}/privatePlayers/{uid}`
@@ -84,6 +166,11 @@ export type PrivatePlayer = {
    * the role of the player
    */
   role: Role;
+
+  /**
+   * states if a user is a stalker or not
+   */
+  stalker: boolean;
 
   /**
    * the prompt that the user will be shown (this varies on the role)
@@ -122,9 +209,9 @@ export function promptAnswerValidator(displayName: string): { valid: true } | { 
  */
 export type Vote = {
   /**
-   * the UID of the player that the player owning this document has voted for
+   * the UID of the player or skip that the player owning this document has voted for
    */
-  target: string;
+  target: string | null;
 };
 
 /**

@@ -2,13 +2,20 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /lobbies/{code} {
-      // to combat the delete room issue where the host is potentially stalker
-      // allow the second player in the lobby to be co-host 
-      // since in the future the second player in the lobby might become host if the host leaves
-      function isHost(){
-        return request.auth.uid == resource.data.uids[0] || request.auth.uid == resource.data.uids[1];
-      }
+
       allow get: if true;
+
+      function lobbyData(){
+        return get(/databases/$(database)/documents/lobbies/$(code)).data;
+      }
+
+      function inLobby(){
+        return request.auth.uid in lobbyData().uids;
+      }
+
+      function isAlive(){
+        return request.auth.uid in lobbyData().alivePlayers;
+      }
 
       match /privatePlayers/{uid} {
         allow get: if request.auth.uid == uid;
@@ -16,12 +23,13 @@ service cloud.firestore {
 
       match /promptAnswers/{uid} {
         function validAnswer() {
-          return request.resource.data.answer is string
+          return request.resource.data.keys().hasOnly(['answer'])
+            && request.resource.data.answer is string
             && 0 < request.resource.data.answer.size() && request.resource.data.answer.size() <= 50
             && request.resource.data.answer == request.resource.data.answer.trim();
         }
 
-        allow create: if request.auth.uid == uid && validAnswer() && request.resource.data.keys().hasOnly(['answer']);
+        allow write: if request.auth.uid == uid && validAnswer() && inLobby() && lobbyData().state == "PROMPT";
       }
 
       match /chatRooms/{roomId} {
@@ -32,12 +40,17 @@ service cloud.firestore {
         function inPair(){
           return request.auth.uid in roomData().pair 
         }
+        function isStalker(){
+          return get(/databases/$(database)/documents/lobbies/$(code)/privatePlayers/$(request.auth.uid)).data.stalker == true;
+        }
         function canRead(){
           return inPair() || request.auth.uid in roomData().viewers ;
         }
+
+
         // firestore didn't like me using the above function for chatroom
         // I think its because the info is in the resource object
-        allow read: if request.auth.uid in resource.data.pair || request.auth.uid in resource.data.viewers ;
+        allow read: if request.auth.uid in resource.data.pair || request.auth.uid in resource.data.viewers || isStalker() || !isAlive();
         match /chatMessages/{messageId}{
 
           function validateChatMessage() {
@@ -51,11 +64,44 @@ service cloud.firestore {
           allow create: if inPair() && validateChatMessage();
         }
       }
+
+      match /chatMessages/{messageId}{
+        function validateLobbyChatMessage() {
+          return request.resource.data.keys().hasOnly(['sender', 'text', 'timestamp', 'alive'])
+            && request.resource.data.sender == request.auth.uid && request.resource.data.text is string 
+            && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 100
+            && request.resource.data.text.trim() == request.resource.data.text
+            && request.resource.data.timestamp is timestamp && request.resource.data.timestamp == request.time
+            && request.resource.data.alive == isAlive();
+        }
+        function chatSenderAlive(){
+          return resource.data.alive;
+        }
+        //if in lobby and message sender is alive allow read
+        //if in lobby and player is dead allow read
+        allow read: if inLobby() && (chatSenderAlive() || ! isAlive());
+        allow create: if validateLobbyChatMessage();
+      }
+
+      match /votes/{uid} {
+        function checkTarget(){
+          return request.resource.data.keys().hasOnly(['target'])
+            && (request.resource.data.target == null || (request.resource.data.target is string
+            && request.resource.data.target in lobbyData().alivePlayers));
+        }
+        function notPastTarget(){
+          return checkTarget() && request.resource.data.target != resource.data.target;
+        }
+
+        allow get: if request.auth.uid == uid;
+        allow create: if request.auth.uid == uid && inLobby() && checkTarget() && isAlive();
+        allow update: if request.auth.uid == uid && inLobby() && notPastTarget() && isAlive();
+      }
     }
 
     match /users/{userId} {
-      function validateAttrs(){
-        return request.resource.data.keys().hasOnly(['displayName', 'avatar'])
+      function validateDisplayAndAvatar(){
+        return request.resource.data.keys().hasOnly(['displayName', 'avatar', 'catWins', 'catfishWins', 'playedAsCat', 'playedAsCatfish'])
           && request.resource.data.displayName is string && request.resource.data.displayName.size() >= 3 
           && request.resource.data.displayName.size() <= 15 
           && request.resource.data.displayName == request.resource.data.displayName.trim()
@@ -63,10 +109,23 @@ service cloud.firestore {
           && request.resource.data.avatar is number && int(request.resource.data.avatar) == request.resource.data.avatar 
           && request.resource.data.avatar >= 0 && request.resource.data.avatar <=12;
       }
+      function statsAreZero() {
+        return request.resource.data.catWins == 0 
+          && request.resource.data.catfishWins == 0
+          && request.resource.data.playedAsCat == 0 
+          && request.resource.data.playedAsCatfish == 0;
+      }
+      function statsAreNotChanged(){
+        return request.resource.data.catWins == resource.data.catWins
+          && request.resource.data.catfishWins == resource.data.catfishWins
+          && request.resource.data.playedAsCat == resource.data.playedAsCat
+          && request.resource.data.playedAsCatfish == resource.data.playedAsCatfish
+      }
 
       // allows anyone to read that information
       allow read;
-      allow create, update: if request.auth.uid == userId && validateAttrs();
+      allow create: if request.auth.uid == userId && validateDisplayAndAvatar() && statsAreZero();
+      allow update: if request.auth.uid == userId && validateDisplayAndAvatar() && statsAreNotChanged();
     }
   }
 }

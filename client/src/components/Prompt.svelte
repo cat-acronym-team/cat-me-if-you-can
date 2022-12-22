@@ -2,6 +2,7 @@
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
+  import CharacterCounter from "@smui/textfield/character-counter";
   import { getPromptAnswerCollection } from "$lib/firebase/firestore-collections";
   import { doc, setDoc } from "firebase/firestore";
 
@@ -11,12 +12,14 @@
 
   export let lobbyCode: string;
 
+  let errorMessage: string | undefined;
+
   let answer = "";
   let dirty = false;
 
   $: answerDoc = doc(getPromptAnswerCollection(lobbyCode), uid);
 
-  $: error = getErrorMessage(answer);
+  $: validationError = getErrorMessage(answer);
 
   function getErrorMessage(answer: string): string | undefined {
     const trimmed = answer.trim();
@@ -29,13 +32,20 @@
       return "Answer must be less than 50 characters";
     }
   }
-
-  function submitAnswer() {
-    if (error != undefined) {
+  let displayAnswer = "";
+  async function submitAnswer() {
+    if (validationError != undefined) {
       return;
     }
-
-    setDoc(answerDoc, { answer });
+    errorMessage = undefined;
+    try {
+      answer = answer.trim();
+      await setDoc(answerDoc, { answer });
+      displayAnswer = answer;
+    } catch (error) {
+      console.error(error);
+      errorMessage = error instanceof Error ? error.message : String(error);
+    }
   }
 </script>
 
@@ -43,18 +53,49 @@
   <label class="mdc-typography--headline5" for="prompt-answer">{prompt ?? "Loading prompt..."}</label>
 
   <div class="input">
-    <Textfield input$id="prompt-answer" bind:value={answer} bind:dirty invalid={dirty && error != undefined} required>
-      <HelperText validationMsg slot="helper">{error ?? ""}</HelperText>
+    <Textfield
+      variant="outlined"
+      input$id="prompt-answer"
+      input$maxlength={50}
+      bind:value={answer}
+      bind:dirty
+      invalid={dirty && validationError != undefined}
+      required
+    >
+      <svelte:fragment slot="helper">
+        <HelperText validationMsg>{validationError ?? ""}</HelperText>
+        <CharacterCounter slot="internalCounter">0 / 50</CharacterCounter>
+      </svelte:fragment>
     </Textfield>
-    <Button type="submit" disabled={error != undefined}><Label>Done</Label></Button>
+
+    <div class="button-wraper">
+      <Button variant="raised" type="submit" disabled={validationError != undefined}><Label>Done</Label></Button>
+    </div>
+    {#if errorMessage != undefined}
+      <p class="error">{errorMessage}</p>
+    {/if}
   </div>
+  {#if displayAnswer != ""}
+    <p>Your Answer: {displayAnswer}</p>
+  {/if}
 </form>
 
 <style>
   .wraper {
     height: 100%;
+    padding-inline: 36px;
     display: grid;
     grid-template-rows: 1fr 1fr 1fr;
     place-items: center;
+  }
+
+  .input :global(.mdc-text-field) {
+    width: min(calc(100vw - 96px), 600px);
+  }
+
+  .button-wraper {
+    margin-top: 16px;
+    display: grid;
+    justify-content: end;
   }
 </style>

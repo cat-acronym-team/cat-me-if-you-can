@@ -13,10 +13,12 @@
 
 :root {
   color-scheme: light;
+  --primary-theme-color: #{theme.$primary};
 }
 
 html,
-body {
+body,
+.base-theme-colors {
   background-color: theme.$background;
   color: theme.$on-surface;
 }

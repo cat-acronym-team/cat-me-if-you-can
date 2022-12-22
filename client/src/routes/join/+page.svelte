@@ -1,5 +1,6 @@
 <script lang="ts">
-  import SigninButton from "$components/SigninButton.svelte";
+  import AccountButton from "$components/AccountButton.svelte";
+  import Header from "$components/Header.svelte";
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
@@ -11,7 +12,6 @@
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import { page } from "$app/stores";
-  import type { User } from "firebase/auth";
 
   let userData: UserData | undefined;
   let errorMessage: string = "";
@@ -19,11 +19,18 @@
 
   let name: string = "";
   let nameDirty: boolean = false;
-  $: nameValidation = displayNameValidator(name);
+  $: nameValidation = displayNameValidator(name.trim());
 
   let code: string = "";
   let codeDirty: boolean = false;
   $: codeValidation = lobbyCodeValidator(code);
+
+  /**
+   * variable that will be set true if the corresponding function has no errors thrown
+   * this will then allow the button to be pressed again if there is an error thrown
+   */
+
+  let waiting: boolean = false;
 
   function lobbyCodeValidator(code: string): { valid: true } | { valid: false; reason: string } {
     if (code.length === 0) {
@@ -55,8 +62,10 @@
       code = queryCode;
     }
   });
+
   async function joinLobby() {
     code = code.toLowerCase();
+    waiting = true;
     try {
       await saveOrCreate($user, userData, name.trim());
       // enter lobby with the user's info
@@ -64,9 +73,12 @@
       // go to game page
       goto(`/game?code=${code}`);
     } catch (err) {
+      waiting = false;
       // if the lobby doesn't exist then error is thrown
+      console.error(err);
       errorMessage = err instanceof Error ? err.message : String(err);
       if (errorMessage == "You are already in the lobby!") {
+        waiting = true;
         goto(`/game?code=${code}`);
       }
       // this checks if the query code is set
@@ -96,15 +108,13 @@
   }
 </script>
 
-<header>
-  <SigninButton />
-</header>
+<Header>
+  <AccountButton slot="top-right" {userData} />
+</Header>
 
 <div class="cat-join-container">
   <h2 class="mdc-typography--headline2">Join Lobby!</h2>
-  {#if errorMessage !== ""}
-    <p class="error">{errorMessage}</p>
-  {/if}
+  <p class="error">{errorMessage}</p>
   <form on:submit|preventDefault={joinLobby}>
     <div>
       <Textfield
@@ -132,22 +142,18 @@
         <HelperText validationMsg slot="helper">{codeValidation.valid ? "" : codeValidation.reason}</HelperText>
       </Textfield>
     </div>
-    <Button disabled={!nameValidation.valid || !codeValidation.valid}><Label>Join</Label></Button>
+    <Button disabled={!nameValidation.valid || !codeValidation.valid || waiting}>
+      <Label>Join</Label>
+    </Button>
   </form>
 </div>
 
 <style>
-  header {
-    height: 64px;
-    display: flex;
-    justify-content: right;
-    align-items: center;
-    padding-right: 16px;
-  }
-
   .cat-join-container {
-    width: 60%;
-    margin: auto;
+    height: 100%;
+    display: grid;
+    grid-template-rows: 1fr auto auto 1fr;
+    place-items: center;
     text-align: center;
   }
 
@@ -155,11 +161,5 @@
     display: grid;
     place-items: center;
     gap: 12px;
-  }
-
-  @media only screen and (min-width: 1000px) {
-    .cat-join-container {
-      width: 30%;
-    }
   }
 </style>

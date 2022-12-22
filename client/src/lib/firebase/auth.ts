@@ -8,6 +8,9 @@ import {
   signInAnonymously,
   signOut,
   signInWithEmailAndPassword,
+  linkWithPopup,
+  updatePassword,
+  type User,
 } from "firebase/auth";
 
 // Google login/signup
@@ -35,16 +38,73 @@ export async function loginAnonymous() {
   return await signInAnonymously(auth);
 }
 
-export function deleteAccount() {
+export async function deleteAccount() {
   const user = auth.currentUser;
-
   if (user == null) {
     throw new Error("User is not defined.");
   }
 
-  deleteUser(user);
+  await deleteUser(user);
+}
+
+export function linkWithGoogle(user: User | null) {
+  if (user == null) {
+    throw new Error("Not signed in");
+  }
+
+  const google = new GoogleAuthProvider();
+  return linkWithPopup(user, google);
+}
+
+export function linkWithMicrosoft(user: User | null) {
+  if (user == null) {
+    throw new Error("Not signed in");
+  }
+
+  const microsoft = new OAuthProvider("microsoft.com");
+  return linkWithPopup(user, microsoft);
+}
+
+export function linkWithPassword(password: string) {
+  const user = auth.currentUser;
+  if (user == null) {
+    throw new Error("Not Signed In");
+  }
+
+  return updatePassword(user, password);
+}
+
+export function hasGoogleProvider(user: User | null) {
+  if (user == null) {
+    return false;
+  }
+
+  const signInMethods = user.providerData;
+
+  for (const provider of signInMethods) {
+    if (provider.providerId == "google.com") {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function hasMicrosoftProvider(user: User | null) {
+  if (user == null) {
+    return false;
+  }
+
+  const signInMethods = user.providerData;
+
+  for (const provider of signInMethods) {
+    if (provider.providerId == "microsoft.com") {
+      return true;
+    }
+  }
+  return false;
 }
 
 export function logOut() {
+  window.location.href = "/";
   return signOut(auth);
 }

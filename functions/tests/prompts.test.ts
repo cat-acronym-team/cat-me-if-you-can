@@ -9,10 +9,10 @@ describe("prompts", () => {
     }
   });
 
-  it("should only have prompts that start with a capital letter and end with a question mark", () => {
+  it("should only have prompts that start with a capital letter and end with a question mark or period", () => {
     for (const category of catagories) {
       for (const prompt of promptsByCategory[category]) {
-        expect(prompt).to.match(/^[A-Z].*\?$/);
+        expect(prompt).to.match(/^[A-Z].*[?.]$/);
       }
     }
   });
