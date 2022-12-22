@@ -33,7 +33,7 @@
     "@sveltejs/kit": "next",
     "@types/d3-interpolate": "^3.0.1",
     "@typescript-eslint/eslint-plugin": "^5.47.0",
-    "@typescript-eslint/parser": "^5.46.1",
+    "@typescript-eslint/parser": "^5.47.0",
     "eslint": "^8.30.0",
     "eslint-plugin-svelte3": "^4.0.0",
     "smui-theme": "^7.0.0-beta.0",
