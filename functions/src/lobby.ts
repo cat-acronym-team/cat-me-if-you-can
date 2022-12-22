@@ -18,7 +18,7 @@ import {
   Vote,
 } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
-import { generatePairs } from "./util";
+import { generatePairs, updateHost } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 import { deleteChatCollections, setAndDeleteAnswers, deleteLobbyChatMessages } from "./chat";
@@ -107,11 +107,11 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
     }
 
     // check if the request is coming from the host of the game
-    const { players, lobbySettings } = lobby.data() as Lobby;
+    const { players, lobbySettings, host } = lobby.data() as Lobby;
 
     const minPlayers = lobbySettings.catfishAmount * 2 + 2;
 
-    if (auth.uid !== lobby.data()?.host) {
+    if (auth.uid !== host) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
     }
 
@@ -235,7 +235,7 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
     }
 
     // get lobby data
-    const { players, host } = lobbyInfo.data() as Lobby;
+    const { players } = lobbyInfo.data() as Lobby;
 
     delete players[auth.uid];
 
@@ -243,24 +243,10 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
     if (Object.keys(players).length === 0) {
       transaction.delete(lobby);
     } else {
-      // if he's the host do this check
-      let newHost: string | undefined;
-      let earliestJoinedTime = firestore.Timestamp.now();
-
-      if (auth.uid == host) {
-        for (const uid in players) {
-          const currentPlayerTimeJoined = players[uid].timeJoined;
-          if (currentPlayerTimeJoined.toMillis() < earliestJoinedTime.toMillis()) {
-            earliestJoinedTime = currentPlayerTimeJoined;
-            newHost = uid;
-          }
-        }
-      }
-
       // Remove player from the lobby
       transaction.update(lobby, {
         players,
-        host: newHost ?? host,
+        host: updateHost(lobbyInfo.data(), auth.uid),
       });
     }
   });

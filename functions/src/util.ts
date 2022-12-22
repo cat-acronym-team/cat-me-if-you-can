@@ -1,3 +1,4 @@
+import { firestore } from "firebase-admin";
 import { Lobby } from "./firestore-types/lobby";
 
 export type GeneratedPairs = {
@@ -33,4 +34,25 @@ export function generatePairs(lobbyData: Lobby): GeneratedPairs {
   }
 
   return { pairs, stalker };
+}
+
+export function updateHost(lobbyData: Lobby | undefined, uidToRemove: string) {
+  // get lobby data
+  const { players, host } = lobbyData as Lobby;
+
+  // if he's the host do this check
+  let newHost: string | undefined;
+  let earliestJoinedTime = firestore.Timestamp.now();
+
+  if (uidToRemove == host) {
+    for (const uid in players) {
+      const currentPlayerTimeJoined = players[uid].timeJoined;
+      if (currentPlayerTimeJoined.toMillis() < earliestJoinedTime.toMillis()) {
+        earliestJoinedTime = currentPlayerTimeJoined;
+        newHost = uid;
+      }
+    }
+  }
+
+  return newHost;
 }

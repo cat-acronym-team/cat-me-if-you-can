@@ -4,6 +4,7 @@ import { isKickBanRequest } from "./firebase-functions-types";
 import { db } from "./app";
 import { firestore } from "firebase-admin";
 import { Lobby } from "./firestore-types/lobby";
+import { updateHost } from "./util";
 
 export const kick = functions.https.onCall((data: unknown, context): Promise<void> => {
   const auth = context.auth;
@@ -26,37 +27,16 @@ export const kick = functions.https.onCall((data: unknown, context): Promise<voi
       throw new functions.https.HttpsError("permission-denied", "User making request is not the host.");
     }
 
-    const { players, host } = lobbyData as Lobby;
-    const newPlayers: Lobby["players"] = {};
+    const { players } = lobbyData as Lobby;
 
-    for (const uid in players) {
-      if (uid !== data.uid) {
-        newPlayers[uid] = players[uid];
-      }
-    }
+    delete players[data.uid];
 
     if (Object.keys(players).length === 1) {
       transaction.delete(lobbyRef);
     } else {
-      // if he's the host do this check
-      let newHost: string | undefined;
-      let earliestJoinedTime = firestore.Timestamp.now();
-
-      if (data.uid == host) {
-        for (const uid in players) {
-          const currentPlayerTimeJoined = players[uid].timeJoined.seconds * 1000;
-          if (currentPlayerTimeJoined < earliestJoinedTime.toMillis() && uid != data.uid) {
-            earliestJoinedTime = players[uid].timeJoined;
-            newHost = uid;
-          }
-        }
-      } else {
-        newHost = auth.uid;
-      }
-
       transaction.update(lobbyRef, {
-        players: newPlayers,
-        host: newHost ?? host,
+        players,
+        host: updateHost(lobbyData, data.uid),
       });
     }
   });
@@ -83,38 +63,17 @@ export const ban = functions.https.onCall((data: unknown, context): Promise<void
       throw new functions.https.HttpsError("permission-denied", "User making request is not the host.");
     }
 
-    const { players, host } = lobbyData as Lobby;
-    const newPlayers: Lobby["players"] = {};
+    const { players } = lobbyData as Lobby;
 
-    for (const uid in players) {
-      if (uid !== data.uid) {
-        newPlayers[uid] = players[uid];
-      }
-    }
+    delete players[data.uid];
 
     if (Object.keys(players).length === 1) {
       transaction.delete(lobbyRef);
     } else {
-      // if he's the host do this check
-      let newHost: string | undefined;
-      let earliestJoinedTime = firestore.Timestamp.now();
-
-      if (data.uid == host) {
-        for (const uid in players) {
-          const currentPlayerTimeJoined = players[uid].timeJoined.seconds * 1000;
-          if (currentPlayerTimeJoined < earliestJoinedTime.toMillis() && uid != data.uid) {
-            earliestJoinedTime = players[uid].timeJoined;
-            newHost = uid;
-          }
-        }
-      } else {
-        newHost = auth.uid;
-      }
-
       transaction.update(lobbyRef, {
         bannedPlayers: firestore.FieldValue.arrayUnion(data.uid),
-        players: newPlayers,
-        host: newHost ?? host,
+        players,
+        host: updateHost(lobbyData, data.uid),
       });
     }
   });
