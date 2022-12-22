@@ -1,6 +1,10 @@
 <script lang="ts">
   import FullScreenTransition from "./FullScreenTransition.svelte";
   import type { Lobby, PrivatePlayer, Role } from "$lib/firebase/firestore-types/lobby";
+  import catWinImage from "$lib/images/winloss/cat-win.webp";
+  import catLossImage from "$lib/images/winloss/cat-loss.webp";
+  import catfishWinImage from "$lib/images/winloss/catfish-win.webp";
+  import catfishLossImage from "$lib/images/winloss/catfish-loss.webp";
 
   export let lobby: Lobby;
   export let privatePlayer: PrivatePlayer;
@@ -51,14 +55,14 @@
     CAT: {
       CAT: {
         banner: "Hooray!<br />You have sniffed out the cat fish!",
-        imageSrc: "/images/winloss/cat-win.webp",
+        imageSrc: catWinImage,
         get description() {
           return `${catfishList} ${were()} sentenced to 9 lives in purrison!`;
         },
       },
       CATFISH: {
         banner: "You have cat to be kitten me!",
-        imageSrc: "/images/winloss/cat-loss.webp",
+        imageSrc: catLossImage,
         get description() {
           return `${catfishList} ${have()} taken over the litter!`;
         },
@@ -67,26 +71,26 @@
     CATFISH: {
       CAT: {
         banner: "You have been caught (and released)!<br />Might as well have been a <b>clown</b> fish...",
-        imageSrc: "/images/winloss/catfish-loss.webp",
+        imageSrc: catfishLossImage,
         description: "You should go back to your sea ani-anim-aneme... home",
       },
       CATFISH: {
         banner: "O-fish-ally the greatest!<br />Way to deceive your furry friends!",
-        imageSrc: "/images/winloss/catfish-win.webp",
+        imageSrc: catfishWinImage,
         description: "You have successfully taken over the litter!",
       },
     },
     SPECTATOR: {
       CAT: {
         banner: "The cats have sniffed out the catfish!",
-        imageSrc: "/images/winloss/cat-win.webp",
+        imageSrc: catWinImage,
         description: "You will be able to join the next game!",
       },
       CATFISH: {
         get banner() {
           return `The impawsters ${were()} not caught!`;
         },
-        imageSrc: "/images/winloss/catfish-win.webp",
+        imageSrc: catfishWinImage,
         description: "You will be able to join the next game!",
       },
     },
