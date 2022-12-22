@@ -8,25 +8,22 @@ export function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lob
 
   // find the player with the most votes
   let most: string | null = null;
-  let mostValue = 0;
+  let mostValue = lobbyData.skipVote;
 
   for (const uid in lobbyData.players) {
-    if (players[uid].votes > mostValue || players[uid].votes > lobbyData.skipVote) {
+    if (players[uid].votes > mostValue) {
       most = uid;
       mostValue = players[uid].votes;
-    } else if (players[uid].votes == mostValue || players[uid].votes == lobbyData.skipVote) {
+    } else if (players[uid].votes == mostValue) {
       most = null;
     }
   }
 
-  // if they're not equal then most is voted off
+  // If most is not null then vote off the player with the most votes
   if (most != null) {
-    // replace the shallow one copy object with the deep copy object changes
-    if (most != undefined) {
-      players[most].alive = false;
-      // save their uid
-      votedOff = most;
-    }
+    players[most].alive = false;
+    // save their uid
+    votedOff = most;
   }
 
   const expiration = firestore.Timestamp.fromMillis(
