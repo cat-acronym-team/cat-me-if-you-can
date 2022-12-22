@@ -87,7 +87,7 @@ service cloud.firestore {
         function checkTarget(){
           return request.resource.data.keys().hasOnly(['target'])
             && (request.resource.data.target == null || (request.resource.data.target is string
-            && lobbyData().players[uid].alive));
+            && lobbyData().players[request.resource.data.target].alive));
         }
         function notPastTarget(){
           return checkTarget() && request.resource.data.target != resource.data.target;
