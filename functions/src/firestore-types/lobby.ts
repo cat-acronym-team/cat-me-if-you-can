@@ -130,7 +130,7 @@ export type Lobby = {
   votedOff?: string | "NONE";
 
   /**
-   * number of people who skipped voting
+   * number of people who chose skip in the voting phase
    */
   skipVote: number;
 
@@ -144,7 +144,7 @@ export type Lobby = {
    */
   bannedPlayers: string[];
 
-  /*
+  /**
    * settings that can be edited in the lobby
    */
   lobbySettings: LobbySettings;
