@@ -5,7 +5,7 @@
   import { getChatRoomCollection } from "$lib/firebase/firestore-collections";
   import { getDocs } from "firebase/firestore";
   import { onMount } from "svelte";
-  import { avatarAltText, avatarColors } from "$lib/avatar";
+  import { avatarAltText, avatarColors, avatars } from "$lib/avatar";
   import { generateHclGradient } from "$lib/color";
 
   export let lobby: Lobby;
@@ -55,11 +55,11 @@
       )};"
     >
       <div class="button-content base-theme-colors">
-        <img src="/avatars/{chatroom.players[0].avatar}.webp" alt={avatarAltText[chatroom.players[0].avatar]} />
+        <img src={avatars[chatroom.players[0].avatar]} alt={avatarAltText[chatroom.players[0].avatar]} />
         <span class="first-name mdc-typography--headline6">{chatroom.players[0].displayName}</span>
 
         <span class="second-name mdc-typography--headline6">{chatroom.players[1].displayName}</span>
-        <img src="/avatars/{chatroom.players[1].avatar}.webp" alt={avatarAltText[chatroom.players[1].avatar]} />
+        <img src={avatars[chatroom.players[1].avatar]} alt={avatarAltText[chatroom.players[1].avatar]} />
       </div>
     </button>
   {/each}

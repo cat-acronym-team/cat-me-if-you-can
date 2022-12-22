@@ -4,7 +4,7 @@
   import type { Lobby, Avatar } from "$lib/firebase/firestore-types/lobby";
   import { createEventDispatcher } from "svelte";
   import { authStore as user } from "$stores/auth";
-  import { avatarAltText } from "$lib/avatar";
+  import { avatarAltText, avatars } from "$lib/avatar";
 
   export let selectedAvatar: 0 | Avatar = 0;
   export let lobby: Lobby | undefined = undefined;
@@ -17,6 +17,7 @@
   type AvatarChoice = {
     avatar: Avatar;
     altText: string;
+    image: string;
     displayName?: string;
     uid?: string;
     available: boolean;
@@ -27,7 +28,13 @@
     const newAvatarChoices: AvatarChoice[] = [];
 
     for (let i = 1; i <= 12; i++) {
-      newAvatarChoices.push({ avatar: i as Avatar, altText: avatarAltText[i], available: true, selected: false });
+      newAvatarChoices.push({
+        avatar: i as Avatar,
+        altText: avatarAltText[i],
+        image: avatars[i],
+        available: true,
+        selected: false,
+      });
     }
 
     if (lobby != undefined) {
@@ -64,13 +71,13 @@
 </script>
 
 <div class="grid {lobby != undefined ? 'lobby' : ''}">
-  {#each avatarChoices as { avatar, altText, displayName, uid, available, selected }}
+  {#each avatarChoices as { avatar, altText, image, displayName, uid, available, selected }}
     <div class="parent">
       {#if uid != undefined && lobbyCode != undefined && $user !== null && lobby !== undefined}
         <PlayerMenu {lobbyCode} {uid} {lobby} />
       {/if}
       <button class="avatar" on:click={() => selectAvatar(avatar)} disabled={!available} aria-selected={selected}>
-        <img src="/avatars/{avatar}.webp" alt={altText} />
+        <img src={image} alt={altText} />
         {#if lobby != undefined}
           <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
         {/if}

@@ -10,7 +10,7 @@
     type LobbyChatMessage,
     type Player,
   } from "$lib/firebase/firestore-types/lobby";
-  import { avatarAltText, avatarColors, onAvatarColors } from "$lib/avatar";
+  import { avatarAltText, avatarColors, avatars, onAvatarColors } from "$lib/avatar";
   import { authStore as user } from "$stores/auth";
   import { createEventDispatcher, tick } from "svelte";
 
@@ -68,7 +68,7 @@
         class:dead={"alive" in message && !message.alive}
       >
         <div class="avatar">
-          <img src="/avatars/{message.avatar}.webp" alt={avatarAltText[message.avatar]} />
+          <img src={avatars[message.avatar]} alt={avatarAltText[message.avatar]} />
         </div>
         <div class="display-name mdc-typography--body2">{message.displayName}</div>
         <div

@@ -6,7 +6,7 @@
   import IconButton from "@smui/icon-button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
-  import { avatarAltText } from "$lib/avatar";
+  import { avatarAltText, avatars } from "$lib/avatar";
   import type { Avatar } from "$lib/firebase/firestore-types/lobby";
   import {
     deleteAccount,
@@ -182,7 +182,7 @@
 
   <div class="preferences">
     <div class="avatar">
-      <img src="/avatars/{userData?.avatar ?? 0}.webp" alt={avatarAltText[userData?.avatar ?? 0]} />
+      <img src={avatars[userData?.avatar ?? 0]} alt={avatarAltText[userData?.avatar ?? 0]} />
       {#if userData?.displayName != undefined}
         <IconButton class="material-icons" on:click={() => (showAvatarDialog = true)}>edit</IconButton>
       {/if}
