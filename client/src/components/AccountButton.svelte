@@ -146,7 +146,7 @@
 <div class="account-container">
   <!-- If you are not signed in show this  -->
   {#if $user == null}
-    <Button class="material-icons" on:click={() => (showSignInDialog = true)}><Label>Sign In</Label></Button>
+    <Button on:click={() => (showSignInDialog = true)}><Label>Sign In</Label></Button>
     <!-- If you show account and dropdown -->
   {:else}
     <IconButton class="material-icons" on:click={() => menu.setOpen(true)}>account_circle</IconButton>
