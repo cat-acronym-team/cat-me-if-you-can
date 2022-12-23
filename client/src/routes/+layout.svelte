@@ -5,7 +5,6 @@
 <slot />
 
 <style>
-  @import "@fontsource/material-icons";
   @import "@fontsource/roboto/300";
   @import "@fontsource/roboto/400";
   @import "@fontsource/roboto/500";

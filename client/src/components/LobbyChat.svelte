@@ -2,6 +2,8 @@
   import Dialog, { Header, Title, Content } from "@smui/dialog";
   import ChatMessages from "./ChatMessages.svelte";
   import IconButton from "@smui/icon-button";
+  import Mdi from "$components/Mdi.svelte";
+  import { mdiClose, mdiMessage, mdiMessageText } from "@mdi/js";
   import Badge from "@smui-extra/badge";
   import { onDestroy } from "svelte";
   import { onSnapshot, orderBy, type Query, query, where } from "firebase/firestore";
@@ -80,7 +82,7 @@
   id="lobby-chat-dialog"
   ><Header>
     <Title id="lobby-chat-title">Lobby Chat</Title>
-    <IconButton action="close" class="material-icons">close</IconButton>
+    <IconButton action="close"><Mdi path={mdiClose} /></IconButton>
   </Header>
   <Content id="lobby-dialog-content">
     <div class="lobby-chat-message">
@@ -103,9 +105,8 @@
     scrollToBottom();
     readMessages = chatMessages.length;
   }}
-  class="material-icons"
 >
-  chat
+  <Mdi path={mdiMessageText} />
   {#if readMessages < chatMessages.length}
     <Badge position="inset" aria-label="unread messages count">{chatMessages.length - readMessages}</Badge>
   {/if}

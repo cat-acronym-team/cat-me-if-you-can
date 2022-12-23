@@ -2,6 +2,8 @@
   import IconButton from "@smui/icon-button";
   import Menu from "@smui/menu";
   import List, { Item, Text } from "@smui/list";
+  import Mdi from "$components/Mdi.svelte";
+  import { mdiDotsVertical } from "@mdi/js";
   import { kick, ban } from "$lib/firebase/firebase-functions";
   import type { Lobby } from "$lib/firebase/firestore-types/lobby";
   import { authStore as user } from "$stores/auth";
@@ -15,7 +17,7 @@
 </script>
 
 <div id="icon-id">
-  <IconButton class="material-icons" on:click={() => menu.setOpen(true)}>more_vert</IconButton>
+  <IconButton on:click={() => menu.setOpen(true)}><Mdi path={mdiDotsVertical} /></IconButton>
   <Menu bind:this={menu}>
     <List>
       {#if $user !== null}
