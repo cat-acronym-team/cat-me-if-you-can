@@ -1,4 +1,4 @@
-import { firestore } from "firebase-admin";
+import { Timestamp, FieldValue, Transaction, DocumentSnapshot, DocumentReference } from "firebase-admin/firestore";
 import * as functions from "firebase-functions";
 import {
   getChatRoomCollection,
@@ -68,7 +68,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
       chatTime: GAME_STATE_DURATIONS_DEFAULT.CHAT,
       voteTime: GAME_STATE_DURATIONS_DEFAULT.VOTE,
     },
-    expiration: firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 3_600_000 * 3),
+    expiration: Timestamp.fromMillis(Timestamp.now().toMillis() + 3_600_000 * 3),
   };
 
   // try making lobby 5 times before giving up
@@ -194,24 +194,24 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
       const privatePlayerDocRef = privatePlayerCollection.doc(user.id);
       transaction.create(privatePlayerDocRef, { role: "SPECTATOR", stalker: false });
       transaction.update(lobby, {
-        players: firestore.FieldValue.arrayUnion({
+        players: FieldValue.arrayUnion({
           displayName: userInfo.displayName,
           avatar: userInfo.avatar,
           alive: false,
           votes: 0,
         }),
-        uids: firestore.FieldValue.arrayUnion(auth.uid),
+        uids: FieldValue.arrayUnion(auth.uid),
       });
     } else {
       // add player
       transaction.update(lobby, {
-        players: firestore.FieldValue.arrayUnion({
+        players: FieldValue.arrayUnion({
           displayName: userInfo.displayName,
           avatar: userInfo.avatar,
           alive: true,
           votes: 0,
         }),
-        uids: firestore.FieldValue.arrayUnion(auth.uid),
+        uids: FieldValue.arrayUnion(auth.uid),
       });
     }
   });
@@ -252,8 +252,8 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
     } else {
       // Remove player from the lobby
       transaction.update(lobby, {
-        players: firestore.FieldValue.arrayRemove(players[playerPos]),
-        uids: firestore.FieldValue.arrayRemove(auth.uid),
+        players: FieldValue.arrayRemove(players[playerPos]),
+        uids: FieldValue.arrayRemove(auth.uid),
       });
     }
   });
@@ -308,7 +308,7 @@ export const applyLobbySettings = functions.https.onCall(async (data: unknown, c
 });
 
 export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate(async (change, context) => {
-  const lobbyDocRef = change.after.ref as firestore.DocumentReference<Lobby>;
+  const lobbyDocRef = change.after.ref as DocumentReference<Lobby>;
   const lobby = change.after.data() as Lobby;
   const lobbyBefore = change.before.data() as Lobby;
   let hasChanged = lobby.players.length != lobbyBefore.players.length;
@@ -326,7 +326,7 @@ export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onU
   }
 });
 
-export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
+export async function startPrompt(lobbyDoc: DocumentSnapshot<Lobby>, transaction: Transaction) {
   const [catPrompt, catfishPrompt] = getRandomPromptPair();
 
   const privatePlayerCollection = getPrivatePlayerCollection(lobbyDoc.ref);
@@ -353,17 +353,12 @@ export async function startPrompt(lobbyDoc: firestore.DocumentSnapshot<Lobby>, t
     });
   }
 
-  const expiration = firestore.Timestamp.fromMillis(
-    firestore.Timestamp.now().toMillis() + lobbyData.lobbySettings.promptTime * 1000
-  );
+  const expiration = Timestamp.fromMillis(Timestamp.now().toMillis() + lobbyData.lobbySettings.promptTime * 1000);
 
   transaction.update(lobbyDoc.ref, { state: "PROMPT", expiration });
 }
 
-export async function collectPromptAnswers(
-  lobbyDoc: firestore.DocumentSnapshot<Lobby>,
-  transaction: firestore.Transaction
-) {
+export async function collectPromptAnswers(lobbyDoc: DocumentSnapshot<Lobby>, transaction: Transaction) {
   const lobbyData = lobbyDoc.data();
 
   if (lobbyData == undefined) {
@@ -381,9 +376,7 @@ export async function collectPromptAnswers(
   }
 
   // expiration set
-  const expiration = firestore.Timestamp.fromMillis(
-    firestore.Timestamp.now().toMillis() + lobbyData.lobbySettings.chatTime * 1000
-  );
+  const expiration = Timestamp.fromMillis(Timestamp.now().toMillis() + lobbyData.lobbySettings.chatTime * 1000);
   transaction.update(lobbyDoc.ref, { state: "CHAT", expiration });
 
   const { pairs, stalker } = generatePairs(lobbyData);
@@ -407,14 +400,14 @@ export async function collectPromptAnswers(
     transaction.create(messageRef1, {
       sender: one,
       text: oneAnswer,
-      timestamp: firestore.Timestamp.now(),
+      timestamp: Timestamp.now(),
       isPromptAnswer: true,
     });
     const messageRef2 = getChatRoomMessagesCollection(roomRef).doc(two);
     transaction.create(messageRef2, {
       sender: two,
       text: twoAnswer,
-      timestamp: firestore.Timestamp.now(),
+      timestamp: Timestamp.now(),
       isPromptAnswer: true,
     });
   }
@@ -470,9 +463,9 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
 
     if (
       totalVotes == lobbyData.alivePlayers.length &&
-      lobbyData.expiration.toMillis() > firestore.Timestamp.now().toMillis() + 10 * 1000
+      lobbyData.expiration.toMillis() > Timestamp.now().toMillis() + 10 * 1000
     ) {
-      const expiration = firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 10 * 1000);
+      const expiration = Timestamp.fromMillis(Timestamp.now().toMillis() + 10 * 1000);
       transaction.update(lobbyDocRef, { players, skipVote, expiration });
     } else {
       transaction.update(lobbyDocRef, { players, skipVote });

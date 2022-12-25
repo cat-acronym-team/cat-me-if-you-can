@@ -1,6 +1,7 @@
-import * as admin from "firebase-admin";
+import { initializeApp } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
 
-admin.initializeApp();
+initializeApp();
 
-export const db = admin.firestore();
+export const db = getFirestore();
 db.settings({ ignoreUndefinedProperties: true });

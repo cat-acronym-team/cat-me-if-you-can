@@ -1,4 +1,4 @@
-import { firestore } from "firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
 import type { DocumentSnapshot, Transaction } from "firebase-admin/firestore";
 import { getPrivatePlayerCollection, getVoteCollection } from "./firestore-collections";
 import { GAME_STATE_DURATIONS_DEFAULT, Lobby, Player } from "./firestore-types/lobby";
@@ -67,9 +67,7 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
   // update the lobby doc with the new information
   if (winner != undefined) {
     // END
-    const expiration = firestore.Timestamp.fromMillis(
-      firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS_DEFAULT.END * 1000
-    );
+    const expiration = Timestamp.fromMillis(Timestamp.now().toMillis() + GAME_STATE_DURATIONS_DEFAULT.END * 1000);
     transaction.update(lobbyDoc.ref, { state: "END", players: alteredPlayers, winner, expiration });
   } else {
     // PROMPT
