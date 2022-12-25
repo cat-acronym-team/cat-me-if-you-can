@@ -1,7 +1,7 @@
 import { firestore } from "firebase-admin";
 import type { DocumentSnapshot, Transaction } from "firebase-admin/firestore";
 import { getPrivatePlayerCollection, getVoteCollection } from "./firestore-collections";
-import { GAME_STATE_DURATIONS_DEFAULT, Lobby, Player, Role } from "./firestore-types/lobby";
+import { GAME_STATE_DURATIONS_DEFAULT, Lobby, Player } from "./firestore-types/lobby";
 import { startPrompt } from "./lobby";
 
 export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transaction: Transaction) {
@@ -13,7 +13,7 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
 
   const { uids } = lobbyData;
   const { players: currentPlayers } = lobbyData;
-  let winner: Role | undefined;
+  let winner: Lobby["winner"];
   const alteredPlayers: Player[] = JSON.parse(JSON.stringify(currentPlayers));
 
   // check the alive cats vs alive catfishes
