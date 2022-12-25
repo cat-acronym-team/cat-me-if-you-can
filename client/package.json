@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "d3-interpolate": "^3.0.1",
-    "firebase": "^9.10.0"
+    "firebase": "^9.15.0"
   },
   "type": "module"
 }
