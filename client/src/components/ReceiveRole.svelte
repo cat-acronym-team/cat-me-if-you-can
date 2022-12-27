@@ -1,8 +1,14 @@
 <script lang="ts">
   import FullScreenTransition from "./FullScreenTransition.svelte";
-  import type { PrivatePlayer, Role } from "$lib/firebase/firestore-types/lobby";
+  import type { PrivatePlayer, Role, Lobby } from "$lib/firebase/firestore-types/lobby";
+  import { doc, getDocs, query, where } from "firebase/firestore";
+  import { getPrivatePlayerCollection, lobbyCollection } from "$lib/firebase/firestore-collections";
 
   export let privatePlayer: PrivatePlayer;
+  export let lobbyCode: string;
+  export let lobby: Lobby;
+
+  const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
 
   const ROLES: {
     [key in Role]: { name: string; imageSrc: string; description: string };
@@ -24,13 +30,39 @@
     },
   };
 
+  async function getCatfishes() {
+    // we only want to get all the catfishes if the current player is a catfish
+    if (privatePlayer.role === "CATFISH") {
+      const { uids, players } = lobby;
+
+      const lobbyDocRef = doc(lobbyCollection, lobbyCode);
+      const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
+
+      const catfishQuery = query<PrivatePlayer>(privatePlayerCollection, where("role", "==", "CATFISH"));
+
+      const catfishes = await getDocs(catfishQuery);
+
+      const catfishNames = catfishes.docs.map((catfish) => players[uids.indexOf(catfish.id)].displayName);
+
+      return catfishNames;
+    }
+    return null;
+  }
+
   $: role = ROLES[privatePlayer.role];
+  $: catfishes = getCatfishes();
 </script>
 
 <FullScreenTransition imageSrc={role.imageSrc} imageAlt="">
   <svelte:fragment slot="banner">Time to find your purrfect match!</svelte:fragment>
   <svelte:fragment slot="image-subtext">
-    You are a <span class={role.name.toLowerCase()}>{role.name}</span>
+    {#await catfishes then catfishes}
+      {#if catfishes === null || catfishes.length == 1}
+        You are a <span class={role.name.toLowerCase()}>{role.name}</span>
+      {:else}
+        {formatter.format(catfishes)} are the <span class={role.name.toLowerCase()}>{role.name}</span>
+      {/if}
+    {/await}
   </svelte:fragment>
   <svelte:fragment slot="description">{role.description}</svelte:fragment>
 </FullScreenTransition>
