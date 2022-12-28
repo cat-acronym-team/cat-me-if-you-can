@@ -5,7 +5,8 @@
   import Menu from "@smui/menu";
   import List, { Item, Separator, Text } from "@smui/list";
   import Dialog, { Header, Title, Content } from "@smui/dialog";
-  import { Icon } from "@smui/common";
+  import Mdi from "$components/Mdi.svelte";
+  import { mdiAccountCircle, mdiEmail, mdiEye, mdiEyeOff } from "@mdi/js";
   import { authStore as user } from "$stores/auth";
   import { loginWithGoogle, loginWithMicrosoft, loginWithEmail, logOut, createUser } from "$lib/firebase/auth";
   import type { UserData } from "$lib/firebase/firestore-types/users";
@@ -104,11 +105,11 @@
     <div class="buttons">
       <ProviderButtons on:google-clicked={googleLogin} on:microsoft-clicked={microsoftLogin} />
       <Button id="sign-in-with-email" variant="raised" on:click={signInDropDown}>
-        <Icon class="material-icons">email</Icon>
+        <Mdi path={mdiEmail} />
         <Label>Sign in with email</Label>
       </Button>
       <Button id="sign-up-with-email" variant="raised" on:click={createAccountDropDown}>
-        <Icon class="material-icons">email</Icon>
+        <Mdi path={mdiEmail} />
         <Label>Sign up with email</Label>
       </Button>
       {#if selectedForm != "NONE"}
@@ -128,8 +129,8 @@
               toggle
               bind:pressed={showPassword}
             >
-              <Icon class="material-icons" on>visibility</Icon>
-              <Icon class="material-icons">visibility_off</Icon>
+              <Mdi path={mdiEye} on />
+              <Mdi path={mdiEyeOff} />
             </IconButton>
           </Textfield>
           {#if errorMessage !== ""}
@@ -146,10 +147,10 @@
 <div class="account-container">
   <!-- If you are not signed in show this  -->
   {#if $user == null}
-    <Button class="material-icons" on:click={() => (showSignInDialog = true)}><Label>Sign In</Label></Button>
+    <Button on:click={() => (showSignInDialog = true)}><Label>Sign In</Label></Button>
     <!-- If you show account and dropdown -->
   {:else}
-    <IconButton class="material-icons" on:click={() => menu.setOpen(true)}>account_circle</IconButton>
+    <IconButton on:click={() => menu.setOpen(true)}><Mdi path={mdiAccountCircle} /></IconButton>
     <Menu bind:this={menu}>
       <List>
         <Item tag="a" href="/settings"><Text>Account Settings</Text></Item>

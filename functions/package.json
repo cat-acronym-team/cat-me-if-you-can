@@ -12,19 +12,19 @@
     "test": "mocha -r ts-node/register 'tests/**/*.test.ts'"
   },
   "engines": {
-    "node": "16"
+    "node": "18"
   },
   "main": "lib/index.js",
   "dependencies": {
-    "@types/node": "^18.11.17",
+    "@types/node": "^18.11.18",
     "firebase-admin": "^11.4.1",
     "firebase-functions": "^4.1.1"
   },
   "devDependencies": {
     "@types/chai": "^4.3.4",
     "@types/mocha": "^10.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.47.0",
-    "@typescript-eslint/parser": "^5.47.0",
+    "@typescript-eslint/eslint-plugin": "^5.47.1",
+    "@typescript-eslint/parser": "^5.47.1",
     "chai": "^4.3.7",
     "eslint": "^8.30.0",
     "eslint-config-prettier": "^8.5.0",
