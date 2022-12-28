@@ -4,6 +4,8 @@
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
   import Slider from "@smui/slider";
+  import Mdi from "$components/Mdi.svelte";
+  import { mdiClose, mdiCog } from "@mdi/js";
   import {
     GAME_STATE_DURATIONS_MIN,
     GAME_STATE_DURATIONS_MAX,
@@ -55,7 +57,7 @@
   surface$style="max-width: 700px;"
   ><Header>
     <Title id="settings-dialog-title">Lobby Settings</Title>
-    <IconButton action="close" class="material-icons">close</IconButton>
+    <IconButton action="close"><Mdi path={mdiClose} /></IconButton>
   </Header>
   <Content id="settings-dialog-content">
     <div class="settings">
@@ -102,7 +104,7 @@
   </Actions>
 </Dialog>
 
-<IconButton on:click={() => (showLobbySettings = true)} class="material-icons">settings</IconButton>
+<IconButton on:click={() => (showLobbySettings = true)}><Mdi path={mdiCog} /></IconButton>
 
 <style>
   .settings {

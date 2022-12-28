@@ -1,4 +1,4 @@
-import { firestore } from "firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
 import type { DocumentReference, Transaction } from "firebase-admin/firestore";
 import { db } from "./app";
 import {
@@ -20,7 +20,7 @@ export async function deleteLobbyChatMessages(lobbyDoc: DocumentReference<Lobby>
   await batch.commit();
 }
 
-export async function deleteChatCollections(lobbyDoc: firestore.DocumentReference<Lobby>) {
+export async function deleteChatCollections(lobbyDoc: DocumentReference<Lobby>) {
   const batch = db.batch();
 
   const chatRooms = await getChatRoomCollection(lobbyDoc).get();
@@ -65,9 +65,7 @@ export async function setAndDeleteAnswers(
     transaction.delete(promptAnswerDoc.ref);
   }
 
-  const expiration = firestore.Timestamp.fromMillis(
-    firestore.Timestamp.now().toMillis() + lobbyData.lobbySettings.voteTime * 1000
-  );
+  const expiration = Timestamp.fromMillis(Timestamp.now().toMillis() + lobbyData.lobbySettings.voteTime * 1000);
 
   transaction.update(lobbyDoc, { state: "VOTE", expiration, players });
 }

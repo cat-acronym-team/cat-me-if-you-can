@@ -1,8 +1,8 @@
 import { GAME_STATE_DURATIONS_DEFAULT, Lobby } from "./firestore-types/lobby";
 import { getPrivatePlayerCollection } from "./firestore-collections";
-import { firestore } from "firebase-admin";
+import { DocumentSnapshot, Timestamp, Transaction } from "firebase-admin/firestore";
 
-export function assignRole(lobbySnap: firestore.DocumentSnapshot<Lobby>, transaction: firestore.Transaction) {
+export function assignRole(lobbySnap: DocumentSnapshot<Lobby>, transaction: Transaction) {
   const lobbyData = lobbySnap.data();
   // lobby reference used for getPrivatePlayerCollection and transaction
   const lobby = lobbySnap.ref;
@@ -36,8 +36,6 @@ export function assignRole(lobbySnap: firestore.DocumentSnapshot<Lobby>, transac
   }
 
   // expiration
-  const expiration = firestore.Timestamp.fromMillis(
-    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS_DEFAULT.ROLE * 1000
-  );
+  const expiration = Timestamp.fromMillis(Timestamp.now().toMillis() + GAME_STATE_DURATIONS_DEFAULT.ROLE * 1000);
   transaction.update(lobby, { state: "ROLE", expiration });
 }
