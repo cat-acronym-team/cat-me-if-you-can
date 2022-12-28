@@ -35,7 +35,8 @@ export const kick = functions.https.onCall((data: unknown, context): Promise<voi
       transaction.delete(lobbyRef);
     } else {
       transaction.update(lobbyRef, {
-        players,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+        players: players satisfies Lobby["players"] as any,
         host: updateHost(lobbyData, data.uid),
       });
     }
@@ -72,7 +73,8 @@ export const ban = functions.https.onCall((data: unknown, context): Promise<void
     } else {
       transaction.update(lobbyRef, {
         bannedPlayers: FieldValue.arrayUnion(data.uid),
-        players,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+        players: players satisfies Lobby["players"] as any,
         host: updateHost(lobbyData, data.uid),
       });
     }

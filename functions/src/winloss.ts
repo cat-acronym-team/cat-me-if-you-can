@@ -114,7 +114,8 @@ export async function endGameProcess(
 
   transaction.update(lobbyDocRef, {
     state: "WAIT",
-    players,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+    players: players satisfies Lobby["players"] as any,
     winner: FieldValue.delete(),
     votedOff: FieldValue.delete(),
     expiration: Timestamp.fromMillis(Timestamp.now().toMillis() + 3_600_000 * 3),

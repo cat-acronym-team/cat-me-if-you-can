@@ -65,11 +65,21 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
   if (winner != undefined) {
     // END
     const expiration = Timestamp.fromMillis(Timestamp.now().toMillis() + GAME_STATE_DURATIONS_DEFAULT.END * 1000);
-    transaction.update(lobbyDoc.ref, { state: "END", players, winner, expiration });
+    transaction.update(lobbyDoc.ref, {
+      state: "END",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+      players: players satisfies Lobby["players"] as any,
+      winner,
+      expiration,
+    });
   } else {
     // PROMPT
     await startPrompt(lobbyDoc, transaction);
-    transaction.update(lobbyDoc.ref, { players, skipVote: 0 });
+    transaction.update(lobbyDoc.ref, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+      players: players satisfies Lobby["players"] as any,
+      skipVote: 0,
+    });
   }
 
   for (const voteDoc of voteDocs.docs) {

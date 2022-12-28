@@ -200,7 +200,8 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
       timeJoined: Timestamp.now(),
     };
 
-    transaction.update(lobby, { players });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+    transaction.update(lobby, { players: players satisfies Lobby["players"] as any });
   });
 });
 
@@ -238,7 +239,8 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
     } else {
       // Remove player from the lobby
       transaction.update(lobby, {
-        players,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+        players: players satisfies Lobby["players"] as any,
         host: updateHost(lobbyInfo.data(), auth.uid),
       });
     }
@@ -422,9 +424,18 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
 
     if (totalVotes == livingPlayers && lobbyData.expiration.toMillis() > Timestamp.now().toMillis() + 10 * 1000) {
       const expiration = Timestamp.fromMillis(Timestamp.now().toMillis() + 10 * 1000);
-      transaction.update(lobbyDocRef, { players, skipVote, expiration });
+      transaction.update(lobbyDocRef, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+        players: players satisfies Lobby["players"] as any,
+        skipVote,
+        expiration,
+      });
     } else {
-      transaction.update(lobbyDocRef, { players, skipVote });
+      transaction.update(lobbyDocRef, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+        players: players satisfies Lobby["players"] as any,
+        skipVote,
+      });
     }
   });
 });

@@ -31,7 +31,8 @@ export function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lob
   transaction.update(lobbyDocRef, {
     state: "RESULT",
     votedOff: votedOff ?? "NONE",
-    players: players,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+    players: players satisfies Lobby["players"] as any,
     expiration,
   });
 }
