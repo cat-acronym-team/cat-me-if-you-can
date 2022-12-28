@@ -37,7 +37,6 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
       if (privatePlayer.role == "CATFISH" && player.alive) {
         aliveCatfishes += 1;
       }
-      // add their role to their altered player object
       player.role = privatePlayer.role;
     }
   }
