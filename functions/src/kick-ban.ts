@@ -2,7 +2,7 @@ import * as functions from "firebase-functions";
 import { lobbyCollection } from "./firestore-collections";
 import { isKickBanRequest } from "./firebase-functions-types";
 import { db } from "./app";
-import { firestore } from "firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 import { Lobby } from "./firestore-types/lobby";
 import { updateHost } from "./util";
 
@@ -71,7 +71,7 @@ export const ban = functions.https.onCall((data: unknown, context): Promise<void
       transaction.delete(lobbyRef);
     } else {
       transaction.update(lobbyRef, {
-        bannedPlayers: firestore.FieldValue.arrayUnion(data.uid),
+        bannedPlayers: FieldValue.arrayUnion(data.uid),
         players,
         host: updateHost(lobbyData, data.uid),
       });
