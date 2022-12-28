@@ -2,6 +2,8 @@
   import SelectAvatar from "./SelectAvatar.svelte";
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
+  import Mdi from "$components/Mdi.svelte";
+  import { mdiContentCopy, mdiShareVariant } from "@mdi/js";
   import { page } from "$app/stores";
   import type { Avatar, Lobby } from "$lib/firebase/firestore-types/lobby";
   import { onMount } from "svelte";
@@ -122,8 +124,8 @@
   </div>
   <div class="buttons">
     <h3 class="invite-link">Invite Link: {url}</h3>
-    <IconButton class="material-icons" on:click={copyLink}>content_copy</IconButton>
-    {#if canShare}<IconButton class="material-icons" on:click={share}>share</IconButton>{/if}
+    <IconButton on:click={copyLink}><Mdi path={mdiContentCopy} /></IconButton>
+    {#if canShare}<IconButton on:click={share}><Mdi path={mdiShareVariant} /></IconButton>{/if}
   </div>
 </div>
 

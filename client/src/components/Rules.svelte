@@ -2,6 +2,8 @@
   import "@material/typography/mdc-typography.scss";
   import IconButton from "@smui/icon-button";
   import Dialog, { Header, Title, Content } from "@smui/dialog";
+  import Mdi from "$components/Mdi.svelte";
+  import { mdiClose, mdiHelpCircle } from "@mdi/js";
 
   let showRulesDialog = false;
 </script>
@@ -14,7 +16,7 @@
 >
   <Header>
     <Title id="rules-dialog-title">Help</Title>
-    <IconButton action="close" class="material-icons">close</IconButton>
+    <IconButton action="close"><Mdi path={mdiClose} /></IconButton>
   </Header>
   <Content id="rules-dialog-content">
     <h3 class="mdc-typography--headline5">Setting</h3>
@@ -175,7 +177,7 @@
   </Content>
 </Dialog>
 
-<IconButton class="material-icons" on:click={() => (showRulesDialog = true)}>help</IconButton>
+<IconButton on:click={() => (showRulesDialog = true)}><Mdi path={mdiHelpCircle} /></IconButton>
 
 <style>
   h3 {

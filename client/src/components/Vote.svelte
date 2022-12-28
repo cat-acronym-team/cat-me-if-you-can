@@ -1,9 +1,9 @@
 <script lang="ts">
+  import AvatarImg from "./AvatarImg.svelte";
   import type { Lobby } from "$lib/firebase/firestore-types/lobby";
   import { addVote } from "$lib/firebase/vote";
   import { authStore as user } from "$stores/auth";
   import { onDestroy, onMount } from "svelte";
-  import { avatarAltText } from "$lib/avatar";
   import { doc, onSnapshot } from "firebase/firestore";
   import { getVoteCollection } from "$lib/firebase/firestore-collections";
   import type { Unsubscribe } from "firebase/auth";
@@ -55,7 +55,7 @@
     {#each Object.entries(lobby.players) as [uid, { avatar, displayName, votes, alive, promptAnswer }]}
       <div class="vote-container {!alive ? 'dead' : ''}">
         <button class="avatar {votedFor == uid ? 'selected' : ''}" disabled={!alive} on:click={() => vote(uid)}>
-          <img src="/avatars/{avatar}.webp" alt={avatarAltText[avatar]} />
+          <AvatarImg {avatar} />
           <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
           <div class="mdc-typography--caption">
             {#if alive}
@@ -70,7 +70,7 @@
     {/each}
     <div class="vote-container">
       <button class="avatar {votedFor === null ? 'selected' : ''}" on:click={() => vote(null)}>
-        <img src="/avatars/0.webp" alt={avatarAltText[0]} />
+        <AvatarImg avatar={0} />
         <span class="mdc-typography--subtitle1">Skip</span>
         <div class="mdc-typography--caption">Vote for no cat</div>
       </button>
@@ -114,7 +114,7 @@
     border: 1px currentColor solid;
   }
 
-  .avatar img {
+  .avatar :global(img) {
     height: 18vmin;
     width: 18vmin;
     background-size: contain;

@@ -1,12 +1,15 @@
 <script lang="ts">
   import SelectAvatar from "$components/SelectAvatar.svelte";
   import Header from "$components/Header.svelte";
+  import ProviderButtons from "$components/ProviderButtons.svelte";
+  import AvatarImg from "$components/AvatarImg.svelte";
   import Dialog, { Title, Content, Actions } from "@smui/dialog";
   import Button, { Label } from "@smui/button";
   import IconButton from "@smui/icon-button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
-  import { avatarAltText } from "$lib/avatar";
+  import Mdi from "$components/Mdi.svelte";
+  import { mdiArrowLeft, mdiEye, mdiEyeOff, mdiPencil } from "@mdi/js";
   import type { Avatar } from "$lib/firebase/firestore-types/lobby";
   import {
     deleteAccount,
@@ -17,13 +20,11 @@
     hasGoogleProvider,
     hasMicrosoftProvider,
   } from "$lib/firebase/auth";
-  import { Icon } from "@smui/common";
   import { displayNameValidator, type UserData } from "$lib/firebase/firestore-types/users";
   import { doc, DocumentReference, onSnapshot, setDoc, updateDoc, type Unsubscribe } from "firebase/firestore";
   import { userCollection } from "$lib/firebase/firestore-collections";
   import { authStore as user } from "$stores/auth";
   import { onDestroy } from "svelte";
-  import ProviderButtons from "$components/ProviderButtons.svelte";
 
   let userData: UserData | undefined = undefined;
   let userDataDocRef: DocumentReference<UserData> | undefined = undefined;
@@ -174,7 +175,7 @@
 </script>
 
 <Header>
-  <IconButton slot="top-left" class="material-icons" href="/">arrow_back</IconButton>
+  <IconButton slot="top-left" href="/"><Mdi path={mdiArrowLeft} /></IconButton>
 </Header>
 
 <main class="settings-wrapper">
@@ -182,19 +183,18 @@
 
   <div class="preferences">
     <div class="avatar">
-      <img src="/avatars/{userData?.avatar ?? 0}.webp" alt={avatarAltText[userData?.avatar ?? 0]} />
+      <AvatarImg avatar={userData?.avatar ?? 0} />
       {#if userData?.displayName != undefined}
-        <IconButton class="material-icons" on:click={() => (showAvatarDialog = true)}>edit</IconButton>
+        <IconButton on:click={() => (showAvatarDialog = true)}><Mdi path={mdiPencil} /></IconButton>
       {/if}
     </div>
 
     <div class="mdc-typography--headline3">
       {userData?.displayName ?? "No Name"}<IconButton
-        class="material-icons"
         on:click={() => {
           newDisplayName = userData?.displayName ?? "";
           showDisplayNameDialog = true;
-        }}>edit</IconButton
+        }}><Mdi path={mdiPencil} /></IconButton
       >
     </div>
   </div>
@@ -303,8 +303,8 @@
           toggle
           bind:pressed={showPassword}
         >
-          <Icon class="material-icons" on>visibility</Icon>
-          <Icon class="material-icons">visibility_off</Icon>
+          <Mdi path={mdiEye} on />
+          <Mdi path={mdiEyeOff} />
         </IconButton>
       </Textfield>
     </Content>
@@ -354,7 +354,7 @@
     width: 128px;
   }
 
-  .avatar > img {
+  .avatar > :global(img) {
     height: 100%;
     width: 100%;
   }

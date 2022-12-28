@@ -14,12 +14,12 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "eslint .",
     "prepare": "npm run smui-theme-light && npm run smui-theme-dark",
-    "smui-theme-light": "smui-theme compile static/smui.css -i src/theme",
-    "smui-theme-dark": "smui-theme compile static/smui-dark.css -i src/theme/dark"
+    "smui-theme-light": "smui-theme compile src/theme/output/smui-light.css -i src/theme/light",
+    "smui-theme-dark": "smui-theme compile src/theme/output/smui-dark.css -i src/theme/dark"
   },
   "devDependencies": {
     "@material/typography": "^14.0.0",
-    "@playwright/test": "^1.25.0",
+    "@playwright/test": "^1.29.1",
     "@smui-extra/badge": "^7.0.0-beta.0",
     "@smui/button": "^7.0.0-beta.0",
     "@smui/circular-progress": "^7.0.0-beta.0",
@@ -32,19 +32,22 @@
     "@sveltejs/adapter-static": "^1.0.0-next.43",
     "@sveltejs/kit": "next",
     "@types/d3-interpolate": "^3.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.47.0",
-    "@typescript-eslint/parser": "^5.47.0",
+    "@typescript-eslint/eslint-plugin": "^5.47.1",
+    "@typescript-eslint/parser": "^5.47.1",
     "eslint": "^8.30.0",
     "eslint-plugin-svelte3": "^4.0.0",
     "smui-theme": "^7.0.0-beta.0",
-    "svelte": "^3.54.0",
+    "svelte": "^3.55.0",
     "svelte-check": "^2.7.1",
-    "svelte-preprocess": "^4.10.6",
+    "svelte-preprocess": "^5.0.0",
     "tslib": "^2.4.1",
     "typescript": "^4.9.4",
     "vite": "^3.1.0"
   },
   "dependencies": {
+    "@fontsource/roboto": "^4.5.8",
+    "@fontsource/roboto-mono": "^4.5.8",
+    "@mdi/js": "^7.1.96",
     "d3-interpolate": "^3.0.1",
     "firebase": "^9.10.0"
   },

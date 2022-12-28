@@ -1,15 +1,18 @@
 <script lang="ts">
+  import AvatarImg from "./AvatarImg.svelte";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
   import CharacterCounter from "@smui/textfield/character-counter";
   import IconButton from "@smui/icon-button";
+  import Mdi from "$components/Mdi.svelte";
+  import { mdiSend } from "@mdi/js";
   import {
     chatMessageValidator,
     type ChatMessage,
     type Lobby,
     type LobbyChatMessage,
   } from "$lib/firebase/firestore-types/lobby";
-  import { avatarAltText, avatarColors, onAvatarColors } from "$lib/avatar";
+  import { avatarColors, onAvatarColors } from "$lib/avatar";
   import { authStore as user } from "$stores/auth";
   import { createEventDispatcher, tick } from "svelte";
 
@@ -57,7 +60,7 @@
         class:dead={"alive" in message && !message.alive}
       >
         <div class="avatar">
-          <img src="/avatars/{message.avatar}.webp" alt={avatarAltText[message.avatar]} />
+          <AvatarImg avatar={message.avatar} />
         </div>
         <div class="display-name mdc-typography--body2">{message.displayName}</div>
         <div
@@ -88,10 +91,9 @@
           type="submit"
           disabled={message == "" || messageInvalid}
           slot="trailingIcon"
-          class="material-icons"
           on:click={() => textfield.focus()}
         >
-          send
+          <Mdi path={mdiSend} />
         </IconButton>
         <svelte:fragment slot="helper">
           <HelperText validationMsg>{messageValidation.valid ? "" : messageValidation.reason}</HelperText>
@@ -157,14 +159,14 @@
     opacity: 0.5;
   }
 
-  .avatar img {
+  .avatar :global(img) {
     display: block;
     width: 64px;
     height: 64px;
     transform: scaleX(-1);
   }
 
-  .current-user .avatar img {
+  .current-user .avatar :global(img) {
     transform: scaleX(1);
   }
 
