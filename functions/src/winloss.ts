@@ -40,6 +40,9 @@ export const lobbyReturn = functions.https.onCall(async (data: unknown, context)
   });
 });
 
+/**
+ * Applies the stats once the timer on the end screen ends
+ */
 export async function endGameProcess(
   lobbyData: Lobby,
   lobbyDocRef: firestore.DocumentReference<Lobby>,
@@ -57,6 +60,8 @@ export async function endGameProcess(
 
       if (players[index].role == undefined) {
         functions.logger.error("This player's role doesn't exist!");
+        return;
+      } else if (players[index].role == "SPECTATOR") {
         return;
       }
 

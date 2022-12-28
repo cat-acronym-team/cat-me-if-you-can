@@ -1,6 +1,7 @@
 <script lang="ts">
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
+  import CharacterCounter from "@smui/textfield/character-counter";
   import IconButton from "@smui/icon-button";
   import {
     chatMessageValidator,
@@ -9,7 +10,7 @@
     type LobbyChatMessage,
     type Player,
   } from "$lib/firebase/firestore-types/lobby";
-  import { avatarAltText, avatarColors } from "$lib/avatar";
+  import { avatarAltText, avatarColors, onAvatarColors } from "$lib/avatar";
   import { authStore as user } from "$stores/auth";
   import { createEventDispatcher, tick } from "svelte";
 
@@ -35,12 +36,13 @@
   });
 
   let messagesElement: HTMLElement;
-  function scrollToBottom() {
+  export async function scrollToBottom() {
+    await tick();
     messagesElement?.scroll({ top: messagesElement.scrollHeight, behavior: "smooth" });
   }
 
   // when the messages change, scroll to the bottom after svelte is done updating the DOM
-  $: displayMessages, tick().then(scrollToBottom);
+  $: displayMessages, scrollToBottom();
 
   let message = "";
   $: messageValidation = chatMessageValidator(message.trim());
@@ -60,12 +62,20 @@
   <div class="messages" bind:this={messagesElement}>
     <slot name="before-messages" />
     {#each displayMessages as message}
-      <div class="message {message.sender == $user?.uid ? 'current-user' : ''}">
+      <div
+        class="message"
+        class:current-user={message.sender == $user?.uid}
+        class:dead={"alive" in message && !message.alive}
+      >
         <div class="avatar">
           <img src="/avatars/{message.avatar}.webp" alt={avatarAltText[message.avatar]} />
         </div>
         <div class="display-name mdc-typography--body2">{message.displayName}</div>
-        <div class="text mdc-typography--body1" style="background-color: {avatarColors[message.avatar]}">
+        <div
+          class="text mdc-typography--body1"
+          style:background-color={avatarColors[message.avatar]}
+          style:color={onAvatarColors[message.avatar]}
+        >
           {message.text}
         </div>
       </div>
@@ -83,6 +93,7 @@
         invalid={messageInvalid}
         input$autofocus
         input$enterkeyhint="send"
+        input$maxlength={100}
       >
         <IconButton
           type="submit"
@@ -93,7 +104,10 @@
         >
           send
         </IconButton>
-        <HelperText validationMsg slot="helper">{messageValidation.valid ? "" : messageValidation.reason}</HelperText>
+        <svelte:fragment slot="helper">
+          <HelperText validationMsg>{messageValidation.valid ? "" : messageValidation.reason}</HelperText>
+          <CharacterCounter>0 / 100</CharacterCounter>
+        </svelte:fragment>
       </Textfield>
     </form>
   {/if}
@@ -141,9 +155,17 @@
     justify-content: end;
   }
 
+  .dead .text {
+    filter: grayscale(50%);
+  }
+
   .avatar {
     grid-area: avatar;
     align-self: end;
+  }
+
+  .dead .avatar {
+    opacity: 0.5;
   }
 
   .avatar img {
@@ -167,7 +189,7 @@
     padding: 12px;
     margin-bottom: 16px;
     border-radius: 24px 24px 24px 0;
-    color: black;
+    word-break: break-word;
   }
 
   .current-user .text {
@@ -186,6 +208,6 @@
   }
 
   form :global(.mdc-text-field-helper-line) {
-    padding-inline-start: var(--mdc-shape-small);
+    padding-inline: var(--mdc-shape-small);
   }
 </style>

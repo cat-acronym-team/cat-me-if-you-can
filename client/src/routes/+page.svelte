@@ -1,5 +1,6 @@
 <script lang="ts">
-  import SigninButton from "$components/SigninButton.svelte";
+  import AccountButton from "$components/AccountButton.svelte";
+  import Header from "$components/Header.svelte";
   import Button, { Label } from "@smui/button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
@@ -13,9 +14,15 @@
 
   let name: string = "";
   let nameDirty: boolean = false;
-  $: nameValidation = displayNameValidator(name);
+  $: nameValidation = displayNameValidator(name.trim());
 
   let errorMessage: string = "";
+
+  /**
+   * variable that will be set true if the corresponding function has no errors thrown
+   * this will then allow the button to be pressed again if there is an error thrown
+   */
+  let waiting: boolean = false;
 
   // update user once auth store changes
   $: user = $authStore;
@@ -45,6 +52,7 @@
   }
 
   async function createLobbyHandler() {
+    waiting = true;
     try {
       // Create User
       await saveOrCreate(user, userData, name.trim());
@@ -53,34 +61,38 @@
       // go to game page
       goto("/game?code=" + response.data.code);
     } catch (err) {
+      waiting = false;
+      console.error(err);
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
   async function joinLobbyHandler() {
+    waiting = true;
     try {
       // Create User
       await saveOrCreate(user, userData, name.trim());
       // go to join page
       goto("/join");
     } catch (err) {
+      waiting = false;
+      console.error(err);
       errorMessage = err instanceof Error ? err.message : String(err);
     }
   }
 </script>
 
-<header>
-  <SigninButton {userData} />
-</header>
+<Header>
+  <AccountButton slot="top-right" {userData} />
+</Header>
 
-<main class="cat-main-container">
-  <div class="cat-main">
-    <div class="logo-container">
-      <img src="https://picsum.photos/500/300" alt="our logo" />
-    </div>
-    <div class="cat-main-buttons">
-      {#if errorMessage !== ""}
-        <p class="error">{errorMessage}</p>
-      {/if}
+<main>
+  <img class="banner" src="/images/banner.webp" alt="" />
+  <h1 class="mdc-typography--headline1">Cat Me If You Can</h1>
+  <div class="form">
+    {#if errorMessage !== ""}
+      <p class="error">{errorMessage}</p>
+    {/if}
+    <div class="textbox">
       <Textfield
         type="text"
         label="Display name"
@@ -91,66 +103,56 @@
       >
         <HelperText validationMsg slot="helper">{nameValidation.valid ? "" : nameValidation.reason}</HelperText>
       </Textfield>
-      <Button on:click|once={createLobbyHandler} disabled={!nameValidation.valid}><Label>Create Lobby</Label></Button>
-      <Button on:click|once={joinLobbyHandler} disabled={!nameValidation.valid}><Label>Join Lobby</Label></Button>
+    </div>
+    <div class="buttons">
+      <Button on:click={createLobbyHandler} disabled={!nameValidation.valid || waiting} variant="raised">
+        <Label>Create Lobby</Label>
+      </Button>
+      <Button on:click={joinLobbyHandler} disabled={!nameValidation.valid || waiting} variant="raised">
+        <Label>Join Lobby</Label>
+      </Button>
     </div>
   </div>
 </main>
 
 <style>
-  /* Phone Styles */
-  header {
-    height: 64px;
-    display: flex;
-    justify-content: right;
-    align-items: center;
-    padding-right: 16px;
-  }
-
-  .logo-container {
-    width: 50%;
-    margin: auto;
-  }
-  .logo-container img {
-    width: 100%;
-  }
-  .cat-main-container {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 70%;
-  }
-  .cat-main {
-    width: 100%;
+  main {
+    box-sizing: border-box;
+    display: grid;
+    justify-items: center;
+    grid-template-rows: auto auto 1fr;
     height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    margin-top: auto;
-    margin-bottom: auto;
-  }
-  .cat-main-buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 70%;
-    margin: auto;
+    gap: 12px;
+    --scale: min(calc(5vw + 12px), max(8vh, 16px));
+    padding: 16px;
+    padding-top: 80px;
   }
 
-  /* Tablet Styles */
-  @media only screen and (min-width: 700px) {
-    .logo-container {
-      width: 40%;
-    }
+  .banner {
+    width: min(100%, calc(var(--scale) * 10));
   }
-  /* Desktop Styles */
-  @media only screen and (min-width: 1000px) {
-    .logo-container {
-      width: 20%;
-    }
-    .cat-main-buttons {
-      width: 35%;
-    }
+
+  h1 {
+    margin: 0;
+    padding: 0;
+    font-size: var(--scale);
+    line-height: var(--scale);
+  }
+
+  .form {
+    display: grid;
+    gap: 16px;
+    justify-items: center;
+    align-content: center;
+  }
+
+  .textbox {
+    width: 200px;
+    display: grid;
+  }
+
+  .buttons {
+    display: grid;
+    gap: inherit;
   }
 </style>

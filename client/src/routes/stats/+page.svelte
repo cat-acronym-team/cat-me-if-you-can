@@ -1,5 +1,7 @@
 <script lang="ts">
+  import IconButton from "@smui/icon-button";
   import CircularProgress from "@smui/circular-progress";
+  import Header from "$components/Header.svelte";
 
   import { authStore as user } from "$stores/auth";
   import type { UserData } from "$lib/firebase/firestore-types/users";
@@ -19,13 +21,22 @@
   let catRatio: number;
   let catfishRatio: number;
 
+  let errorMessage: string = "";
+
   onMount(() => {
     const userId = $page.url.searchParams.get("user");
 
     if (userId !== null) {
-      unsubscribeUser = onSnapshot(doc(userCollection, userId), (userDoc) => {
-        userInfo = userDoc.data();
-      });
+      unsubscribeUser = onSnapshot(
+        doc(userCollection, userId),
+        (userDoc) => {
+          userInfo = userDoc.data();
+        },
+        (err) => {
+          console.error(err);
+          errorMessage = err instanceof Error ? err.message : String(err);
+        }
+      );
     }
   });
 
@@ -43,58 +54,65 @@
   });
 </script>
 
+<Header>
+  <IconButton slot="top-left" class="material-icons" href="/">arrow_back</IconButton>
+</Header>
+
 <main>
+  {#if errorMessage !== ""}
+    <p class="error">{errorMessage}</p>
+  {/if}
   {#if $user == null}
     <div class="spinner-wraper">
       <CircularProgress indeterminate />
     </div>
   {:else if userInfo == undefined}
-    <h1>Sad Kitty... No Stats Here</h1>
+    <h1 class="mdc-typography--headline2">Sad Kitty... No Stats Here</h1>
   {:else}
-    <h1>{userInfo.displayName} Stats</h1>
-    <div class="userInfo-container">
+    <h1 class="mdc-typography--headline2">{userInfo.displayName} Stats</h1>
+    <div class="user-info-container">
       <div class="totals">
-        <div>
-          <h3>Total Games Played</h3>
+        <label class="mdc-typography--headline4">
+          Total Games Played
           <output>{totalPlayed}</output>
-        </div>
-        <div>
-          <h3>Total Win/Loss Ratio</h3>
+        </label>
+        <label class="mdc-typography--headline4">
+          Total Win/Loss Ratio
           <output>{isNaN(totalWinRatio) || !isFinite(totalWinRatio) ? "N/A" : totalWinRatio.toFixed(2)}</output>
-        </div>
+        </label>
       </div>
-      <div>
-        <h3>Cat Wins</h3>
+      <label class="mdc-typography--headline4">
+        Cat Wins
         <output>{userInfo.catWins}</output>
-      </div>
-      <div>
-        <h3>Cat Losses</h3>
+      </label>
+      <label class="mdc-typography--headline4">
+        Cat Losses
         <output>{catLosses}</output>
-      </div>
-      <div>
-        <h3>Games Played As Cat</h3>
+      </label>
+      <label class="mdc-typography--headline4">
+        Games Played As Cat
         <output>{userInfo.playedAsCat}</output>
-      </div>
-      <div>
-        <h3>Win/Loss Ratio as Cat</h3>
+      </label>
+      <label class="mdc-typography--headline4">
+        Win/Loss Ratio as Cat
         <output>{isNaN(catRatio) || !isFinite(catRatio) ? "N/A" : catRatio.toFixed(2)}</output>
-      </div>
-      <div>
-        <h3>Catfish Wins</h3>
+      </label>
+      <label class="mdc-typography--headline4">
+        Catfish Wins
         <output>{userInfo.catfishWins}</output>
-      </div>
-      <div>
-        <h3>Catfish Losses</h3>
+      </label>
+      <label class="mdc-typography--headline4">
+        Catfish Losses
         <output>{catfishLosses}</output>
-      </div>
-      <div>
-        <h3>Games Played As Catfish</h3>
+      </label>
+      <label class="mdc-typography--headline4">
+        Games Played As Catfish
         <output>{userInfo.playedAsCatfish}</output>
-      </div>
-      <div>
-        <h3>Win/Loss Ratio as Catfish</h3>
+      </label>
+      <label class="mdc-typography--headline4">
+        Win/Loss Ratio as Catfish
         <output>{isNaN(catfishRatio) || !isFinite(catfishRatio) ? "N/A" : catfishRatio.toFixed(2)}</output>
-      </div>
+      </label>
     </div>
   {/if}
 </main>
@@ -103,7 +121,6 @@
   main {
     box-sizing: border-box;
     height: 100%;
-    overflow: auto;
     padding-top: 64px;
   }
 
@@ -119,38 +136,34 @@
     grid-template-rows: 128px;
     place-items: stretch;
   }
+
   h1 {
     text-align: center;
-    text-decoration: underline;
-    font-size: 2em;
   }
-  h3,
-  output {
-    font-size: 1.3em;
-  }
-  .userInfo-container {
+
+  .user-info-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    width: 80%;
     margin: auto;
     text-align: center;
+    gap: 24px;
   }
+
   .totals {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-column: 1/-1;
     text-align: center;
+    gap: 24px;
   }
 
-  @media only screen and (min-width: 1000px) {
-    h1 {
-      font-size: 3em;
-    }
-    h3,
-    output {
-      font-size: 2em;
-    }
-    .userInfo-container {
+  label {
+    display: grid;
+    gap: 12px;
+  }
+
+  @media (min-width: 1080px) {
+    .user-info-container {
       grid-template-columns: repeat(4, 1fr);
     }
   }

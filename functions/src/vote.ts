@@ -1,6 +1,6 @@
 import { firestore } from "firebase-admin";
 import type { DocumentReference, Transaction } from "firebase-admin/firestore";
-import { GAME_STATE_DURATIONS, Lobby, Player } from "./firestore-types/lobby";
+import { GAME_STATE_DURATIONS_DEFAULT, Lobby, Player } from "./firestore-types/lobby";
 
 export function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lobby>, transaction: Transaction) {
   const { players, uids } = lobbyData;
@@ -10,8 +10,8 @@ export function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lob
   const [most, secondMost]: Player[] = JSON.parse(JSON.stringify(players)).sort((a: Player, b: Player) => {
     return b.votes - a.votes;
   });
-  // if they're not equal then most is voted off
-  if (most.votes != secondMost.votes) {
+  // if they're not equal and have less votes than skip then most is voted off
+  if (most.votes != secondMost.votes && most.votes > lobbyData.skipVote) {
     // find index of most in the players array
     let mostIndex: number | undefined;
     for (let i = 0; i < players.length; i++) {
@@ -28,7 +28,7 @@ export function findVoteOff(lobbyData: Lobby, lobbyDocRef: DocumentReference<Lob
     }
   }
   const expiration = firestore.Timestamp.fromMillis(
-    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS.RESULT * 1000
+    firestore.Timestamp.now().toMillis() + GAME_STATE_DURATIONS_DEFAULT.RESULT * 1000
   );
   // update the state of the game
   transaction.update(lobbyDocRef, {

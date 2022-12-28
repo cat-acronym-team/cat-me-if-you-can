@@ -1,4 +1,4 @@
-export const catagories = ["animals", "food", "people"] as const;
+export const catagories = ["animals", "food", "people", "movies"] as const;
 
 export type Category = typeof catagories[number];
 

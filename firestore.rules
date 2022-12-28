@@ -3,6 +3,8 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /lobbies/{code} {
 
+      allow get: if true;
+
       function lobbyData(){
         return get(/databases/$(database)/documents/lobbies/$(code)).data;
       }
@@ -14,8 +16,6 @@ service cloud.firestore {
       function isAlive(){
         return request.auth.uid in lobbyData().alivePlayers;
       }
-
-      allow get: if true;
 
       match /privatePlayers/{uid} {
         allow get: if request.auth.uid == uid;
@@ -29,7 +29,7 @@ service cloud.firestore {
             && request.resource.data.answer == request.resource.data.answer.trim();
         }
 
-        allow create: if request.auth.uid == uid && validAnswer() && inLobby() && lobbyData().state == "PROMPT";
+        allow write: if request.auth.uid == uid && validAnswer() && inLobby() && lobbyData().state == "PROMPT";
       }
 
       match /chatRooms/{roomId} {
@@ -50,7 +50,7 @@ service cloud.firestore {
 
         // firestore didn't like me using the above function for chatroom
         // I think its because the info is in the resource object
-        allow read: if request.auth.uid in resource.data.pair || request.auth.uid in resource.data.viewers || isStalker() ;
+        allow read: if request.auth.uid in resource.data.pair || request.auth.uid in resource.data.viewers || isStalker() || !isAlive();
         match /chatMessages/{messageId}{
 
           function validateChatMessage() {
@@ -86,8 +86,8 @@ service cloud.firestore {
       match /votes/{uid} {
         function checkTarget(){
           return request.resource.data.keys().hasOnly(['target'])
-            && request.resource.data.target is string
-            && request.resource.data.target in lobbyData().alivePlayers;
+            && (request.resource.data.target == null || (request.resource.data.target is string
+            && request.resource.data.target in lobbyData().alivePlayers));
         }
         function notPastTarget(){
           return checkTarget() && request.resource.data.target != resource.data.target;
@@ -124,7 +124,7 @@ service cloud.firestore {
 
       // allows anyone to read that information
       allow read;
-      allow create: if request.auth.uid == userId && validateDisplayAndAvatar() && statsAreZero()
+      allow create: if request.auth.uid == userId && validateDisplayAndAvatar() && statsAreZero();
       allow update: if request.auth.uid == userId && validateDisplayAndAvatar() && statsAreNotChanged();
     }
   }

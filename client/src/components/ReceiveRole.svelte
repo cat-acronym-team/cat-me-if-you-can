@@ -1,114 +1,59 @@
 <script lang="ts">
-  import { GAME_STATE_DURATIONS, type Lobby, type PrivatePlayer } from "$lib/firebase/firestore-types/lobby";
-  import { onMount } from "svelte";
-  import { authStore as user } from "$stores/auth";
-  import { verifyExpiration } from "$lib/firebase/firebase-functions";
+  import FullScreenTransition from "./FullScreenTransition.svelte";
+  import type { PrivatePlayer, Role } from "$lib/firebase/firestore-types/lobby";
 
-  export let lobby: Lobby;
-  export let lobbyCode: string;
   export let privatePlayer: PrivatePlayer;
 
-  let countdown = GAME_STATE_DURATIONS.VOTE;
-  let timer: ReturnType<typeof setInterval>;
+  const ROLES: {
+    [key in Role]: { name: string; imageSrc: string; description: string };
+  } = {
+    CAT: {
+      name: "Cat",
+      imageSrc: "/images/role/cat.webp",
+      description: "Use your inner Purrlock Holmes and find the catfish!",
+    },
+    CATFISH: {
+      name: "Catfish",
+      imageSrc: "/images/role/catfish.webp",
+      description: "Try to cat-mo-flauge with the rest of the cats!",
+    },
+    SPECTATOR: {
+      name: "Spectator",
+      imageSrc: "",
+      description: "Please wait till the game finishes to play.",
+    },
+  };
 
-  onMount(() => {
-    timer = setInterval(() => {
-      if (lobby.expiration != undefined) {
-        const diff = Math.floor((lobby.expiration.toMillis() - Date.now()) / 1000);
-        countdown = diff;
-      }
-    }, 500);
-  });
-
-  $: if (countdown <= 0 && lobby.uids[0] == $user?.uid) {
-    clearInterval(timer);
-    verifyExpiration({ code: lobbyCode });
-  }
-  $: if (countdown <= -5) {
-    clearInterval(timer);
-    verifyExpiration({ code: lobbyCode });
-  }
+  $: role = ROLES[privatePlayer.role];
 </script>
 
-{#if privatePlayer !== undefined}
-  <div class="container">
-    <div class="header">Time to find your purrfect match!</div>
-
-    {#if privatePlayer.role == "CAT"}
-      <div class="role">
-        You are a <span class="green">{privatePlayer.role}</span>
-      </div>
-      <p class="description">Use your inner Purrlock Holmes and find the catfish!</p>
-      <div class="imgContainer">
-        <img src="/images/role/Cat.png" alt="cat" />
-      </div>
-    {:else}
-      <div class="role">
-        You are a <span class="red">{privatePlayer.role}</span>
-      </div>
-      <p class="description">Try to cat-mo-flauge with the rest of the cats!</p>
-      <div class="imgContainer">
-        <img src="/images/role/Catfish.png" alt="catfish" />
-      </div>
-    {/if}
-  </div>
-{/if}
+<FullScreenTransition imageSrc={role.imageSrc} imageAlt="">
+  <svelte:fragment slot="banner">Time to find your purrfect match!</svelte:fragment>
+  <svelte:fragment slot="image-subtext">
+    You are a <span class={role.name.toLowerCase()}>{role.name}</span>
+  </svelte:fragment>
+  <svelte:fragment slot="description">{role.description}</svelte:fragment>
+</FullScreenTransition>
 
 <style>
-  .container {
-    position: relative;
-    height: 100vh;
+  .cat,
+  .catfish,
+  .spectator {
+    font-weight: bolder;
   }
 
-  .header {
-    position: absolute;
-    width: 85%;
-    height: 10%;
-    font-size: 4em;
-    font-weight: bold;
-    left: 7.5%;
-    top: 0%;
-    text-align: center;
+  .cat {
+    /* Material Blue 700 */
+    color: #1976d2;
   }
 
-  .role {
-    position: absolute;
-    width: 70%;
-    height: 30%;
-    left: 15%;
-    top: 15%;
-    font-size: 4em;
-    text-align: center;
+  .catfish {
+    /* Material Red 800 */
+    color: #d32f2f;
   }
 
-  .description {
-    position: absolute;
-    font-size: 3em;
-    width: 75%;
-    left: 12.5%;
-    top: 70%;
-    text-align: center;
-  }
-
-  .imgContainer {
-    position: absolute;
-    width: 30%;
-    left: 35%;
-    top: 30%;
-    height: 35%;
-  }
-
-  img {
-    height: 100%;
-    width: 100%;
-    padding-bottom: 20%;
-  }
-
-  .green {
-    color: green;
-  }
-
-  .red {
-    color: red;
+  .spectator {
+    /* Material Blue Grey 500 */
+    color: #607d8b;
   }
 </style>
