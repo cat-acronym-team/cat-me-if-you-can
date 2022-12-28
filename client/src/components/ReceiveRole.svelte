@@ -1,6 +1,8 @@
 <script lang="ts">
   import FullScreenTransition from "./FullScreenTransition.svelte";
   import type { PrivatePlayer, Role } from "$lib/firebase/firestore-types/lobby";
+  import catImage from "$lib/images/role/cat.webp";
+  import catfishImage from "$lib/images/role/catfish.webp";
 
   export let privatePlayer: PrivatePlayer;
 
@@ -9,12 +11,12 @@
   } = {
     CAT: {
       name: "Cat",
-      imageSrc: "/images/role/cat.webp",
+      imageSrc: catImage,
       description: "Use your inner Purrlock Holmes and find the catfish!",
     },
     CATFISH: {
       name: "Catfish",
-      imageSrc: "/images/role/catfish.webp",
+      imageSrc: catfishImage,
       description: "Try to cat-mo-flauge with the rest of the cats!",
     },
     SPECTATOR: {

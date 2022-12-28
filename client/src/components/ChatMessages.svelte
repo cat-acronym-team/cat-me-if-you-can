@@ -1,4 +1,5 @@
 <script lang="ts">
+  import AvatarImg from "./AvatarImg.svelte";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
   import CharacterCounter from "@smui/textfield/character-counter";
@@ -10,7 +11,7 @@
     type LobbyChatMessage,
     type Player,
   } from "$lib/firebase/firestore-types/lobby";
-  import { avatarAltText, avatarColors, onAvatarColors } from "$lib/avatar";
+  import { avatarColors, onAvatarColors } from "$lib/avatar";
   import { authStore as user } from "$stores/auth";
   import { createEventDispatcher, tick } from "svelte";
 
@@ -68,7 +69,7 @@
         class:dead={"alive" in message && !message.alive}
       >
         <div class="avatar">
-          <img src="/avatars/{message.avatar}.webp" alt={avatarAltText[message.avatar]} />
+          <AvatarImg avatar={message.avatar} />
         </div>
         <div class="display-name mdc-typography--body2">{message.displayName}</div>
         <div
@@ -168,14 +169,14 @@
     opacity: 0.5;
   }
 
-  .avatar img {
+  .avatar :global(img) {
     display: block;
     width: 64px;
     height: 64px;
     transform: scaleX(-1);
   }
 
-  .current-user .avatar img {
+  .current-user .avatar :global(img) {
     transform: scaleX(1);
   }
 
