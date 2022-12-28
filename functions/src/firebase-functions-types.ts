@@ -1,4 +1,4 @@
-import type { LobbySettings } from "./firestore-types/lobby";
+import { GAME_STATE_DURATIONS_MAX, GAME_STATE_DURATIONS_MIN, type LobbySettings } from "./firestore-types/lobby";
 
 export type LobbyRequest = { code: string };
 
@@ -63,8 +63,8 @@ export function isLobbySettingsRequest(data: unknown): data is LobbySettingsRequ
   }
 
   if (
-    (data as LobbySettingsRequest).lobbySettings.promptTime < 30 ||
-    (data as LobbySettingsRequest).lobbySettings.promptTime > 120
+    (data as LobbySettingsRequest).lobbySettings.promptTime < GAME_STATE_DURATIONS_MIN.PROMPT ||
+    (data as LobbySettingsRequest).lobbySettings.promptTime > GAME_STATE_DURATIONS_MAX.PROMPT
   ) {
     return false;
   }
@@ -74,8 +74,8 @@ export function isLobbySettingsRequest(data: unknown): data is LobbySettingsRequ
   }
 
   if (
-    (data as LobbySettingsRequest).lobbySettings.chatTime < 60 ||
-    (data as LobbySettingsRequest).lobbySettings.chatTime > 300
+    (data as LobbySettingsRequest).lobbySettings.chatTime < GAME_STATE_DURATIONS_MIN.CHAT ||
+    (data as LobbySettingsRequest).lobbySettings.chatTime > GAME_STATE_DURATIONS_MAX.CHAT
   ) {
     return false;
   }
@@ -85,8 +85,8 @@ export function isLobbySettingsRequest(data: unknown): data is LobbySettingsRequ
   }
 
   if (
-    (data as LobbySettingsRequest).lobbySettings.voteTime < 60 ||
-    (data as LobbySettingsRequest).lobbySettings.voteTime > 300
+    (data as LobbySettingsRequest).lobbySettings.voteTime < GAME_STATE_DURATIONS_MIN.VOTE ||
+    (data as LobbySettingsRequest).lobbySettings.voteTime > GAME_STATE_DURATIONS_MAX.VOTE
   ) {
     return false;
   }
