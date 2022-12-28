@@ -2,7 +2,8 @@
   import IconButton from "@smui/icon-button";
   import CircularProgress from "@smui/circular-progress";
   import Header from "$components/Header.svelte";
-
+  import Mdi from "$components/Mdi.svelte";
+  import { mdiArrowLeft } from "@mdi/js";
   import { authStore as user } from "$stores/auth";
   import type { UserData } from "$lib/firebase/firestore-types/users";
   import { doc, onSnapshot } from "firebase/firestore";
@@ -55,7 +56,7 @@
 </script>
 
 <Header>
-  <IconButton slot="top-left" class="material-icons" href="/">arrow_back</IconButton>
+  <IconButton slot="top-left" href="/"><Mdi path={mdiArrowLeft} /></IconButton>
 </Header>
 
 <main>

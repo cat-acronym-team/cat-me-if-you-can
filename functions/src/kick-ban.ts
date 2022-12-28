@@ -2,7 +2,7 @@ import * as functions from "firebase-functions";
 import { lobbyCollection } from "./firestore-collections";
 import { isKickBanRequest } from "./firebase-functions-types";
 import { db } from "./app";
-import { firestore } from "firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 
 export const kick = functions.https.onCall((data: unknown, context): Promise<void> => {
   const auth = context.auth;
@@ -27,8 +27,8 @@ export const kick = functions.https.onCall((data: unknown, context): Promise<voi
 
     const playerPos = lobbyData.uids.indexOf(data.uid);
     transaction.update(lobbyRef, {
-      players: firestore.FieldValue.arrayRemove(lobbyData.players[playerPos]),
-      uids: firestore.FieldValue.arrayRemove(data.uid),
+      players: FieldValue.arrayRemove(lobbyData.players[playerPos]),
+      uids: FieldValue.arrayRemove(data.uid),
     });
   });
 });
@@ -56,9 +56,9 @@ export const ban = functions.https.onCall((data: unknown, context): Promise<void
 
     const playerPos = lobbyData.uids.indexOf(data.uid);
     transaction.update(lobbyRef, {
-      bannedPlayers: firestore.FieldValue.arrayUnion(data.uid),
-      players: firestore.FieldValue.arrayRemove(lobbyData.players[playerPos]),
-      uids: firestore.FieldValue.arrayRemove(data.uid),
+      bannedPlayers: FieldValue.arrayUnion(data.uid),
+      players: FieldValue.arrayRemove(lobbyData.players[playerPos]),
+      uids: FieldValue.arrayRemove(data.uid),
     });
   });
 });
