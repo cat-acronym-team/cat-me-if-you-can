@@ -20,6 +20,11 @@ module.exports = {
     "/lib/**/*", // Ignore built files.
   ],
   plugins: ["@typescript-eslint", "import"],
+  settings: {
+    "import/resolver": {
+      typescript: {},
+    },
+  },
   rules: {
     "spaced-comment": "warn",
     "no-warning-comments": "warn",
