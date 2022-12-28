@@ -3,7 +3,7 @@
   import ChatMessages from "./ChatMessages.svelte";
   import IconButton from "@smui/icon-button";
   import Mdi from "$components/Mdi.svelte";
-  import { mdiClose, mdiMessage, mdiMessageText } from "@mdi/js";
+  import { mdiClose, mdiMessageText } from "@mdi/js";
   import Badge from "@smui-extra/badge";
   import { onDestroy } from "svelte";
   import { onSnapshot, orderBy, type Query, query, where } from "firebase/firestore";

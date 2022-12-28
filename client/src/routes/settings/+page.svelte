@@ -10,7 +10,6 @@
   import HelperText from "@smui/textfield/helper-text";
   import Mdi from "$components/Mdi.svelte";
   import { mdiArrowLeft, mdiEye, mdiEyeOff, mdiPencil } from "@mdi/js";
-  import { avatarAltText } from "$lib/avatar";
   import type { Avatar } from "$lib/firebase/firestore-types/lobby";
   import {
     deleteAccount,
@@ -21,7 +20,6 @@
     hasGoogleProvider,
     hasMicrosoftProvider,
   } from "$lib/firebase/auth";
-  import { Icon } from "@smui/common";
   import { displayNameValidator, type UserData } from "$lib/firebase/firestore-types/users";
   import { doc, DocumentReference, onSnapshot, setDoc, updateDoc, type Unsubscribe } from "firebase/firestore";
   import { userCollection } from "$lib/firebase/firestore-collections";
