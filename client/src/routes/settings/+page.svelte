@@ -8,6 +8,8 @@
   import IconButton from "@smui/icon-button";
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
+  import Mdi from "$components/Mdi.svelte";
+  import { mdiArrowLeft, mdiEye, mdiEyeOff, mdiPencil } from "@mdi/js";
   import type { Avatar } from "$lib/firebase/firestore-types/lobby";
   import {
     deleteAccount,
@@ -18,7 +20,6 @@
     hasGoogleProvider,
     hasMicrosoftProvider,
   } from "$lib/firebase/auth";
-  import { Icon } from "@smui/common";
   import { displayNameValidator, type UserData } from "$lib/firebase/firestore-types/users";
   import { doc, DocumentReference, onSnapshot, setDoc, updateDoc, type Unsubscribe } from "firebase/firestore";
   import { userCollection } from "$lib/firebase/firestore-collections";
@@ -174,7 +175,7 @@
 </script>
 
 <Header>
-  <IconButton slot="top-left" class="material-icons" href="/">arrow_back</IconButton>
+  <IconButton slot="top-left" href="/"><Mdi path={mdiArrowLeft} /></IconButton>
 </Header>
 
 <main class="settings-wrapper">
@@ -184,17 +185,16 @@
     <div class="avatar">
       <AvatarImg avatar={userData?.avatar ?? 0} />
       {#if userData?.displayName != undefined}
-        <IconButton class="material-icons" on:click={() => (showAvatarDialog = true)}>edit</IconButton>
+        <IconButton on:click={() => (showAvatarDialog = true)}><Mdi path={mdiPencil} /></IconButton>
       {/if}
     </div>
 
     <div class="mdc-typography--headline3">
       {userData?.displayName ?? "No Name"}<IconButton
-        class="material-icons"
         on:click={() => {
           newDisplayName = userData?.displayName ?? "";
           showDisplayNameDialog = true;
-        }}>edit</IconButton
+        }}><Mdi path={mdiPencil} /></IconButton
       >
     </div>
   </div>
@@ -303,8 +303,8 @@
           toggle
           bind:pressed={showPassword}
         >
-          <Icon class="material-icons" on>visibility</Icon>
-          <Icon class="material-icons">visibility_off</Icon>
+          <Mdi path={mdiEye} on />
+          <Mdi path={mdiEyeOff} />
         </IconButton>
       </Textfield>
     </Content>

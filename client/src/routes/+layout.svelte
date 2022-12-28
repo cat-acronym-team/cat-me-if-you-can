@@ -14,6 +14,12 @@
 </svelte:head>
 
 <style>
+  @import "@fontsource/roboto/300";
+  @import "@fontsource/roboto/400";
+  @import "@fontsource/roboto/500";
+  @import "@fontsource/roboto/700";
+  @import "@fontsource/roboto-mono";
+
   :global(body) {
     margin: 0;
     height: 100vh;

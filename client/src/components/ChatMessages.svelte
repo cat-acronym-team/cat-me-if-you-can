@@ -4,6 +4,8 @@
   import HelperText from "@smui/textfield/helper-text";
   import CharacterCounter from "@smui/textfield/character-counter";
   import IconButton from "@smui/icon-button";
+  import Mdi from "$components/Mdi.svelte";
+  import { mdiSend } from "@mdi/js";
   import {
     chatMessageValidator,
     type ChatMessage,
@@ -100,10 +102,9 @@
           type="submit"
           disabled={message == "" || messageInvalid}
           slot="trailingIcon"
-          class="material-icons"
           on:click={() => textfield.focus()}
         >
-          send
+          <Mdi path={mdiSend} />
         </IconButton>
         <svelte:fragment slot="helper">
           <HelperText validationMsg>{messageValidation.valid ? "" : messageValidation.reason}</HelperText>
