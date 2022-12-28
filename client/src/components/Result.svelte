@@ -1,7 +1,7 @@
 <script lang="ts">
   import FullScreenTransition from "./FullScreenTransition.svelte";
   import type { Lobby, Player } from "$lib/firebase/firestore-types/lobby";
-  import { avatarAltText } from "$lib/avatar";
+  import { avatarAltText, avatars } from "$lib/avatar";
 
   export let lobby: Lobby;
 
@@ -11,7 +11,7 @@
 
   $: if (lobby.votedOff != undefined && lobby.votedOff != "NONE") {
     votedOffUser = lobby.players[lobby.uids.indexOf(lobby.votedOff)];
-    imageSrc = `/avatars/${votedOffUser.avatar}.webp`;
+    imageSrc = avatars[votedOffUser.avatar];
     imageAlt = avatarAltText[votedOffUser.avatar];
   } else {
     votedOffUser = undefined;

@@ -86,7 +86,7 @@
 </Header>
 
 <main>
-  <img class="banner" src="/images/banner.webp" alt="" />
+  <img class="banner" src="/banner.webp" alt="" />
   <h1 class="mdc-typography--headline1">Cat Me If You Can</h1>
   <div class="form">
     {#if errorMessage !== ""}
