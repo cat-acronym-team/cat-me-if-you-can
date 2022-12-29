@@ -2,6 +2,7 @@ import * as functions from "firebase-functions";
 import { isChangeAvatarData } from "./functions-types/avatar";
 import { lobbyCollection } from "./firestore-collections";
 import { db } from "./app";
+import { Lobby } from "./firestore-types/lobby";
 
 export const changeAvatar = functions.https.onCall((data: unknown, context): Promise<void> => {
   const auth = context.auth;
@@ -34,6 +35,7 @@ export const changeAvatar = functions.https.onCall((data: unknown, context): Pro
 
     lobbyData.players[auth.uid].avatar = data.avatar;
 
-    await transaction.update(lobbyDocRef, lobbyData);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+    await transaction.update(lobbyDocRef, lobbyData satisfies Lobby as any);
   });
 });

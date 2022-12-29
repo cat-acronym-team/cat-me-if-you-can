@@ -65,5 +65,10 @@ export async function setAndDeleteAnswers(
 
   const expiration = Timestamp.fromMillis(Timestamp.now().toMillis() + lobbyData.lobbySettings.voteTime * 1000);
 
-  transaction.update(lobbyDoc, { state: "VOTE", expiration, players });
+  transaction.update(lobbyDoc, {
+    state: "VOTE",
+    expiration,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+    players: players satisfies Lobby["players"] as any,
+  });
 }
