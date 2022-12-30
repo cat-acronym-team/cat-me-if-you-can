@@ -1,4 +1,4 @@
-import { firestore } from "firebase-admin";
+import { DocumentReference, FieldValue, Timestamp, Transaction } from "firebase-admin/firestore";
 import * as functions from "firebase-functions";
 import { db } from "./app";
 import { getPrivatePlayerCollection, lobbyCollection, userCollection } from "./firestore-collections";
@@ -45,8 +45,8 @@ export const lobbyReturn = functions.https.onCall(async (data: unknown, context)
  */
 export async function endGameProcess(
   lobbyData: Lobby,
-  lobbyDocRef: firestore.DocumentReference<Lobby>,
-  transaction: firestore.Transaction
+  lobbyDocRef: DocumentReference<Lobby>,
+  transaction: Transaction
 ) {
   // apply the stats
   let { players } = lobbyData;
@@ -66,25 +66,25 @@ export async function endGameProcess(
       }
 
       const newStats: {
-        playedAsCat?: firestore.FieldValue;
-        playedAsCatfish?: firestore.FieldValue;
-        catWins?: firestore.FieldValue;
-        catfishWins?: firestore.FieldValue;
+        playedAsCat?: FieldValue;
+        playedAsCatfish?: FieldValue;
+        catWins?: FieldValue;
+        catfishWins?: FieldValue;
       } = {};
 
       // increment played as role
       if (players[index].role == "CAT") {
-        newStats.playedAsCat = firestore.FieldValue.increment(1);
+        newStats.playedAsCat = FieldValue.increment(1);
       } else {
-        newStats.playedAsCatfish = firestore.FieldValue.increment(1);
+        newStats.playedAsCatfish = FieldValue.increment(1);
       }
 
       // increment wins
       if (winner == "CAT" && players[index].role == "CAT") {
-        newStats.catWins = firestore.FieldValue.increment(1);
+        newStats.catWins = FieldValue.increment(1);
       }
       if (winner == "CATFISH" && players[index].role == "CATFISH") {
-        newStats.catfishWins = firestore.FieldValue.increment(1);
+        newStats.catfishWins = FieldValue.increment(1);
       }
       // update their user doc
       if (userDoc.exists) {
@@ -114,8 +114,8 @@ export async function endGameProcess(
   transaction.update(lobbyDocRef, {
     state: "WAIT",
     players,
-    winner: firestore.FieldValue.delete(),
-    votedOff: firestore.FieldValue.delete(),
-    expiration: firestore.Timestamp.fromMillis(firestore.Timestamp.now().toMillis() + 3_600_000 * 3),
+    winner: FieldValue.delete(),
+    votedOff: FieldValue.delete(),
+    expiration: Timestamp.fromMillis(Timestamp.now().toMillis() + 3_600_000 * 3),
   });
 }
