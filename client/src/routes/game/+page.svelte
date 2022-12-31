@@ -11,7 +11,7 @@
   import Header from "$components/Header.svelte";
   import LobbySettings from "$components/LobbySettings.svelte";
 
-  import { onSnapshot, doc, getDoc, type Unsubscribe } from "firebase/firestore";
+  import { onSnapshot, doc, getDoc, type Unsubscribe, query, where, CollectionReference } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
   import { getPrivatePlayerCollection, lobbyCollection } from "$lib/firebase/firestore-collections";
   import { GAME_STATE_DURATIONS_DEFAULT, type Lobby, type PrivatePlayer } from "$lib/firebase/firestore-types/lobby";
@@ -28,6 +28,11 @@
 
   let privatePlayer: PrivatePlayer | undefined = undefined;
   let unsubscribePrivatePlayer: Unsubscribe | undefined = undefined;
+
+  let privatePlayerCollection: CollectionReference<PrivatePlayer>;
+
+  let catfishes: string[] | undefined = undefined; // undefined for cats or spectators | string[] for catfishes
+  let unsubscribeCatfishes: Unsubscribe | undefined = undefined;
 
   let countdown = GAME_STATE_DURATIONS_DEFAULT.WAIT;
   $: countdownVisible = lobby != undefined && DISPLAY_TIMERS[lobby.state] == true;
@@ -72,7 +77,7 @@
       return;
     }
 
-    const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
+    privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
     const privatePlayerDocRef = doc(privatePlayerCollection, $user.uid);
 
     updateCountdown();
@@ -115,6 +120,8 @@
     unsubscribeLobby?.();
     // unsub from privatePlayer
     unsubscribePrivatePlayer?.();
+    // unsub from catfishes query
+    unsubscribeCatfishes?.();
   });
 
   function errorToJoin(errorMessage: string) {
@@ -154,6 +161,25 @@
           console.error(error);
         }
       }
+    }
+  }
+
+  $: privatePlayer, getCatfishes();
+  function getCatfishes() {
+    // if the current player is a catfish we want them to know all the other catfishes
+    if (privatePlayer !== undefined && privatePlayer.role == "CATFISH") {
+      const catfishQuery = query<PrivatePlayer>(privatePlayerCollection, where("role", "==", "CATFISH"));
+
+      unsubscribeCatfishes = onSnapshot(
+        catfishQuery,
+        (queryCollection) => {
+          catfishes = queryCollection.docs.map((doc) => doc.id);
+        },
+        (err) => {
+          console.error(err);
+          errorMessage = err instanceof Error ? err.message : String(err);
+        }
+      );
     }
   }
 </script>
@@ -204,7 +230,7 @@
         <CircularProgress indeterminate />
       </div>
     {:else if lobby.state === "ROLE"}
-      <Role {lobbyCode} {lobby} {privatePlayer} />
+      <Role {lobby} {privatePlayer} {catfishes} />
     {:else if lobby.state === "PROMPT"}
       {#if lobby.alivePlayers.includes($user.uid)}
         <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
@@ -213,11 +239,12 @@
       <ChatRoom
         {lobby}
         {lobbyCode}
+        {catfishes}
         isStalker={privatePlayer.stalker}
         isSpectator={!lobby.alivePlayers.includes($user.uid)}
       />
     {:else if lobby.state === "VOTE"}
-      <Vote {lobby} {lobbyCode} />
+      <Vote {lobby} {lobbyCode} {catfishes} />
     {:else if lobby.state === "RESULT"}
       <Result {lobby} />
     {:else if lobby.state === "END"}

@@ -1,11 +1,11 @@
 <script lang="ts">
   import FullScreenTransition from "./FullScreenTransition.svelte";
-  import type { PrivatePlayer, Role } from "$lib/firebase/firestore-types/lobby";
+  import type { Lobby, PrivatePlayer, Role } from "$lib/firebase/firestore-types/lobby";
   import catImage from "$lib/images/role/cat.webp";
   import catfishImage from "$lib/images/role/catfish.webp";
 
   export let privatePlayer: PrivatePlayer;
-  export let lobbyCode: string;
+  export let catfishes: string[] | undefined; // undefined for cats or spectators | string[] for catfishes
   export let lobby: Lobby;
 
   const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
@@ -30,39 +30,29 @@
     },
   };
 
-  async function getCatfishes() {
-    // we only want to get all the catfishes if the current player is a catfish
-    if (privatePlayer.role === "CATFISH") {
-      const { uids, players } = lobby;
-
-      const lobbyDocRef = doc(lobbyCollection, lobbyCode);
-      const privatePlayerCollection = getPrivatePlayerCollection(lobbyDocRef);
-
-      const catfishQuery = query<PrivatePlayer>(privatePlayerCollection, where("role", "==", "CATFISH"));
-
-      const catfishes = await getDocs(catfishQuery);
-
-      const catfishNames = catfishes.docs.map((catfish) => players[uids.indexOf(catfish.id)].displayName);
-
-      return catfishNames;
+  function getCatfishNames() {
+    if (catfishes == undefined) {
+      return;
     }
-    return null;
+
+    const { uids, players } = lobby;
+
+    const catfishNames = catfishes.map((catfishId) => players[uids.indexOf(catfishId)].displayName);
+
+    return catfishNames;
   }
 
   $: role = ROLES[privatePlayer.role];
-  $: catfishes = getCatfishes();
 </script>
 
 <FullScreenTransition imageSrc={role.imageSrc} imageAlt="">
   <svelte:fragment slot="banner">Time to find your purrfect match!</svelte:fragment>
   <svelte:fragment slot="image-subtext">
-    {#await catfishes then catfishes}
-      {#if catfishes === null || catfishes.length == 1}
-        You are a <span class={role.name.toLowerCase()}>{role.name}</span>
-      {:else}
-        {formatter.format(catfishes)} are the <span class={role.name.toLowerCase()}>{role.name}</span>
-      {/if}
-    {/await}
+    {#if catfishes === undefined || catfishes.length == 1}
+      You are a <span class={role.name.toLowerCase()}>{role.name}</span>
+    {:else}
+      {formatter.format(getCatfishNames() ?? "")} are the <span class={role.name.toLowerCase()}>{role.name}</span>
+    {/if}
   </svelte:fragment>
   <svelte:fragment slot="description">{role.description}</svelte:fragment>
 </FullScreenTransition>
@@ -79,7 +69,7 @@
     color: #1976d2;
   }
 
-  .catfish {
+  :global(.catfish) {
     /* Material Red 800 */
     color: #d32f2f;
   }
