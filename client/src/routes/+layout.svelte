@@ -9,8 +9,8 @@
 
 <svelte:head>
   <!-- SMUI Styles -->
-  <link rel="stylesheet" href={smuiLightCssUrl} media="(prefers-color-scheme: light)" />
-  <link rel="stylesheet" href={smuiDarkCssUrl} media="(prefers-color-scheme: dark)" />
+  <link rel="stylesheet" href={smuiLightCssUrl.split("?")[0]} media="(prefers-color-scheme: light)" />
+  <link rel="stylesheet" href={smuiDarkCssUrl.split("?")[0]} media="(prefers-color-scheme: dark)" />
 </svelte:head>
 
 <style>
