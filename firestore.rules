@@ -23,8 +23,12 @@ service cloud.firestore {
           return get(/databases/$(database)/documents/lobbies/$(code)/privatePlayers/$(request.auth.uid)).data.role == "CATFISH";
         }
 
+        function isCatfishResource(){
+          return resource.data.role == "CATFISH"
+        }
+
         allow get: if request.auth.uid == uid;
-        allow list: if isCatfish();
+        allow list: if isCatfish() && isCatfishResource();
       }
 
       match /promptAnswers/{uid} {
