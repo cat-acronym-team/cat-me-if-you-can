@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase-admin/firestore";
 import type { DocumentSnapshot, Transaction } from "firebase-admin/firestore";
 import { getPrivatePlayerCollection, getVoteCollection } from "./firestore-collections";
-import { GAME_STATE_DURATIONS_DEFAULT, Lobby } from "./firestore-types/lobby";
+import { GAME_STATE_DURATIONS_DEFAULT, Lobby, Player } from "./firestore-types/lobby";
 import { startPrompt } from "./lobby";
 
 export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transaction: Transaction) {
@@ -13,13 +13,14 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
 
   const { players } = lobbyData;
   let winner: Lobby["winner"];
+  const alteredPlayers: Player[] = JSON.parse(JSON.stringify(players));
 
   // check the alive cats vs alive catfishes
   let aliveCats = 0;
   let aliveCatfishes = 0;
   const privatePlayerCollection = getPrivatePlayerCollection(lobbyDoc.ref);
 
-  for (const uid in players) {
+  for (const uid in alteredPlayers) {
     const privatePlayerRef = privatePlayerCollection.doc(uid);
 
     const privatePlayerDoc = await transaction.get(privatePlayerRef);
@@ -29,7 +30,7 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
     if (privatePlayer == undefined) {
       continue;
     } else {
-      const player = players[uid];
+      const player = alteredPlayers[uid];
 
       if (privatePlayer.role == "CAT" && player.alive) {
         aliveCats += 1;
@@ -68,7 +69,7 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
     transaction.update(lobbyDoc.ref, {
       state: "END",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
-      players: players satisfies Lobby["players"] as any,
+      players: alteredPlayers satisfies Player[] as any,
       winner,
       expiration,
     });
