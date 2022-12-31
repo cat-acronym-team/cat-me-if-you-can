@@ -14,7 +14,7 @@
     // if the user navigates to `/offline` manually, redirect them to `/`
     const url = new URL(window.location.href);
     if (url.pathname == "/offline") {
-      goto("/");
+      goto("/", { replaceState: true });
     }
   });
 
