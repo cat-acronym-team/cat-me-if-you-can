@@ -1,6 +1,8 @@
 <script lang="ts">
+  import Button, { Label } from "@smui/button";
+  import Mdi from "$components/Mdi.svelte";
+  import { mdiRefresh } from "@mdi/js";
   import { goto } from "$app/navigation";
-  import Button, { Label, Icon } from "@smui/button";
   import { onMount } from "svelte";
 
   /** true if the user is offline false if the user has some other connection issue */
@@ -12,7 +14,7 @@
     // if the user navigates to `/offline` manually, redirect them to `/`
     const url = new URL(window.location.href);
     if (url.pathname == "/offline") {
-      goto("/");
+      goto("/", { replaceState: true });
     }
   });
 
@@ -39,7 +41,7 @@
     {/if}
   </p>
   <Button on:click={reload} variant="raised">
-    <Icon class="material-icons">refresh</Icon>
+    <Mdi path={mdiRefresh} />
     <Label>Try Again</Label>
   </Button>
 </main>
