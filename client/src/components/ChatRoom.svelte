@@ -14,8 +14,10 @@
   export let lobbyCode: string;
   export let isStalker: boolean;
   export let isSpectator: boolean;
+  export let catfishes: string[] | undefined; // undefined for cats or spectators | string[] for catfishes
   // variables
   let user = $authStore as User;
+  let partner: string | undefined = undefined;
   let partnerInfo: Player | undefined;
   let pairInfo: [Player, Player] | undefined;
   let chatRoomId: string | undefined = undefined;
@@ -51,7 +53,7 @@
           pairInfo = chatRoom.pair.map((uid) => lobby.players[lobby.uids.indexOf(uid)]) as [Player, Player];
         } else {
           // Get partnerInfo
-          const partner = chatRoom.pair.find((uid) => user.uid !== uid);
+          partner = chatRoom.pair.find((uid) => user.uid !== uid);
           if (partner !== undefined) {
             partnerInfo = lobby.players[lobby.uids.indexOf(partner)];
           }
@@ -116,7 +118,9 @@
     >
       <div slot="before-messages" class="matched-with mdc-typography--headline5">
         {#if partnerInfo !== undefined}
-          You matched with {partnerInfo.displayName}
+          You matched with <span class={catfishes?.includes(partner ?? "") ? "catfish" : ""}
+            >{partnerInfo.displayName}</span
+          >
         {:else if pairInfo !== undefined}
           {pairInfo[0].displayName} matched with {pairInfo[1].displayName}
         {/if}
