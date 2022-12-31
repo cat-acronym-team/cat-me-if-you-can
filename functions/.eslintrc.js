@@ -26,7 +26,7 @@ module.exports = {
     },
   },
   rules: {
-    "spaced-comment": "warn",
+    "spaced-comment": ["warn", "always", { markers: ["/"] }],
     "no-warning-comments": "warn",
     "no-throw-literal": "warn",
     "require-await": "warn",
