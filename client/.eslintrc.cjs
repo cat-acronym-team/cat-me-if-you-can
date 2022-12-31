@@ -19,7 +19,7 @@ module.exports = {
   },
   rules: {
     "@typescript-eslint/no-inferrable-types": "off",
-    "spaced-comment": "warn",
+    "spaced-comment": ["warn", "always", { markers: ["/"] }],
     "no-warning-comments": "warn",
     "no-throw-literal": "warn",
     "require-await": "warn",
