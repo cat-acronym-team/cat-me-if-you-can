@@ -4,7 +4,7 @@ import { isKickBanRequest } from "./firebase-functions-types";
 import { db } from "./app";
 import { FieldValue } from "firebase-admin/firestore";
 import { Lobby } from "./firestore-types/lobby";
-//import { updateHost } from "./util";
+import { updateHost } from "./util";
 
 export const kick = functions.https.onCall((data: unknown, context): Promise<void> => {
   const auth = context.auth;
@@ -27,17 +27,17 @@ export const kick = functions.https.onCall((data: unknown, context): Promise<voi
       throw new functions.https.HttpsError("permission-denied", "User making request is not the host.");
     }
 
-    const { players } = lobbyData as Lobby;
+    const { players, host } = lobbyData as Lobby;
 
     delete players[data.uid];
 
-    if (Object.keys(players).length === 1) {
+    if (Object.keys(players).length === 0) {
       transaction.delete(lobbyRef);
     } else {
       transaction.update(lobbyRef, {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
         players: players satisfies Lobby["players"] as any,
-        //host: updateHost(lobbyData),
+        host: updateHost(players) ?? host,
       });
     }
   });
@@ -64,18 +64,18 @@ export const ban = functions.https.onCall((data: unknown, context): Promise<void
       throw new functions.https.HttpsError("permission-denied", "User making request is not the host.");
     }
 
-    const { players } = lobbyData as Lobby;
+    const { players, host } = lobbyData as Lobby;
 
     delete players[data.uid];
 
-    if (Object.keys(players).length === 1) {
+    if (Object.keys(players).length === 0) {
       transaction.delete(lobbyRef);
     } else {
       transaction.update(lobbyRef, {
         bannedPlayers: FieldValue.arrayUnion(data.uid),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
         players: players satisfies Lobby["players"] as any,
-        //host: updateHost(lobbyData),
+        host: updateHost(players) ?? host,
       });
     }
   });
