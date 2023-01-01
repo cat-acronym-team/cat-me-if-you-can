@@ -26,7 +26,8 @@
     height: 100dvh;
   }
 
-  :global(a.mdc-icon-button) {
+  :global(a.mdc-icon-button),
+  :global(a.mdc-icon-button:visited) {
     color: inherit;
   }
 </style>
