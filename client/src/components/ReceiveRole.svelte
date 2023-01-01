@@ -5,7 +5,7 @@
   import catfishImage from "$lib/images/role/catfish.webp";
 
   export let privatePlayer: PrivatePlayer;
-  export let catfishes: string[] | undefined; // undefined for cats or spectators | string[] for catfishes
+  export let catfishes: string[]; // empty for cats or spectators | at least 1 for catfishes
   export let lobby: Lobby;
 
   const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
@@ -48,7 +48,7 @@
 <FullScreenTransition imageSrc={role.imageSrc} imageAlt="">
   <svelte:fragment slot="banner">Time to find your purrfect match!</svelte:fragment>
   <svelte:fragment slot="image-subtext">
-    {#if catfishes === undefined || catfishes.length == 1}
+    {#if catfishes.length < 2}
       You are a <span class={role.name.toLowerCase()}>{role.name}</span>
     {:else}
       {formatter.format(getCatfishNames() ?? "")} are the <span class={role.name.toLowerCase()}>{role.name}</span>
@@ -69,7 +69,7 @@
     color: #1976d2;
   }
 
-  :global(.catfish) {
+  .catfish {
     /* Material Red 800 */
     color: #d32f2f;
   }

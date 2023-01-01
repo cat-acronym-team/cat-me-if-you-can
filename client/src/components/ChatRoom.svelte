@@ -14,7 +14,7 @@
   export let lobbyCode: string;
   export let isStalker: boolean;
   export let isSpectator: boolean;
-  export let catfishes: string[] | undefined; // undefined for cats or spectators | string[] for catfishes
+  export let catfishes: string[]; // empty for cats or spectators | at least one for catfishes
   // variables
   let user = $authStore as User;
   let partner: string | undefined = undefined;
@@ -118,9 +118,7 @@
     >
       <div slot="before-messages" class="matched-with mdc-typography--headline5">
         {#if partnerInfo !== undefined}
-          You matched with <span class={catfishes?.includes(partner ?? "") ? "catfish" : ""}
-            >{partnerInfo.displayName}</span
-          >
+          You matched with <span class:catfish={catfishes.includes(partner ?? "")}>{partnerInfo.displayName}</span>
         {:else if pairInfo !== undefined}
           {pairInfo[0].displayName} matched with {pairInfo[1].displayName}
         {/if}
