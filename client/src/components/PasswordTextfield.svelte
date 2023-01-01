@@ -16,6 +16,7 @@
   bind:value
   required
   input$autocomplete={autocomplete}
+  input$minlength={6}
 >
   <IconButton
     type="button"
