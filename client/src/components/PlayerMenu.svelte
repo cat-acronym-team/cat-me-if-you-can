@@ -17,7 +17,7 @@
 </script>
 
 <div id="icon-id">
-  <IconButton on:click={() => menu.setOpen(true)}><Mdi path={mdiDotsVertical} /></IconButton>
+  <IconButton on:click={() => menu.setOpen(true)} aria-label="options"><Mdi path={mdiDotsVertical} /></IconButton>
   <Menu bind:this={menu}>
     <List>
       {#if $user !== null}

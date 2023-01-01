@@ -82,7 +82,7 @@
   id="lobby-chat-dialog"
   ><Header>
     <Title id="lobby-chat-title">Lobby Chat</Title>
-    <IconButton action="close"><Mdi path={mdiClose} /></IconButton>
+    <IconButton action="close" aria-label="close"><Mdi path={mdiClose} /></IconButton>
   </Header>
   <Content id="lobby-dialog-content">
     <div class="lobby-chat-message">
@@ -105,6 +105,7 @@
     scrollToBottom();
     readMessages = chatMessages.length;
   }}
+  aria-label="chat"
 >
   <Mdi path={mdiMessageText} />
   {#if readMessages < chatMessages.length}
