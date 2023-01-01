@@ -31,7 +31,7 @@
 
   let privatePlayerCollection: CollectionReference<PrivatePlayer>;
 
-  let catfishes: string[] | undefined = undefined; // undefined for cats or spectators | string[] for catfishes
+  let catfishes: string[] = []; // empty for cats or spectators | at least one for catfishes
   let unsubscribeCatfishes: Unsubscribe | undefined = undefined;
 
   let countdown = GAME_STATE_DURATIONS_DEFAULT.WAIT;
@@ -170,16 +170,22 @@
     if (privatePlayer !== undefined && privatePlayer.role == "CATFISH") {
       const catfishQuery = query<PrivatePlayer>(privatePlayerCollection, where("role", "==", "CATFISH"));
 
-      unsubscribeCatfishes = onSnapshot(
-        catfishQuery,
-        (queryCollection) => {
-          catfishes = queryCollection.docs.map((doc) => doc.id);
-        },
-        (err) => {
-          console.error(err);
-          errorMessage = err instanceof Error ? err.message : String(err);
-        }
-      );
+      // only allow subscribing during ROLE phase
+      if (lobby?.state == "ROLE") {
+        unsubscribeCatfishes = onSnapshot(
+          catfishQuery,
+          (queryCollection) => {
+            catfishes = queryCollection.docs.map((doc) => doc.id);
+          },
+          (err) => {
+            console.error(err);
+            errorMessage = err instanceof Error ? err.message : String(err);
+          }
+        );
+      } else {
+        // otherwise unsubscribe
+        unsubscribeCatfishes?.();
+      }
     }
   }
 </script>
