@@ -16,7 +16,7 @@
 >
   <Header>
     <Title id="rules-dialog-title">Help</Title>
-    <IconButton action="close"><Mdi path={mdiClose} /></IconButton>
+    <IconButton action="close" aria-label="close"><Mdi path={mdiClose} /></IconButton>
   </Header>
   <Content id="rules-dialog-content">
     <h3 class="mdc-typography--headline5">Setting</h3>
@@ -177,7 +177,7 @@
   </Content>
 </Dialog>
 
-<IconButton on:click={() => (showRulesDialog = true)}><Mdi path={mdiHelpCircle} /></IconButton>
+<IconButton on:click={() => (showRulesDialog = true)} aria-label="help"><Mdi path={mdiHelpCircle} /></IconButton>
 
 <style>
   h3 {
