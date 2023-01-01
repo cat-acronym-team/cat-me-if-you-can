@@ -3,6 +3,14 @@
 
   import smuiLightCssUrl from "../theme/output/smui-light.css?url";
   import smuiDarkCssUrl from "../theme/output/smui-dark.css?url";
+
+  import { page } from "$app/stores";
+  import { goto } from "$app/navigation";
+
+  // redirect users from *.firebaseapp.com to *.web.app
+  if ($page.url.host.includes(".firebaseapp.com")) {
+    goto($page.url.href.replace(".firebaseapp.com", ".web.app"), { replaceState: true });
+  }
 </script>
 
 <slot />
