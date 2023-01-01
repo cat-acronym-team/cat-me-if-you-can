@@ -5,7 +5,7 @@ import { build } from "$service-worker";
 
 const CACHE = "cat-me-if-you-can";
 
-const ASSETS = [...build, "/offline", "/favicon.ico", "/favicon.png", "/images/banner.webp"];
+const ASSETS = [...build, "/offline", "/favicon.ico", "/favicon.png", "/banner.webp", "/banner-small.webp"];
 
 self.addEventListener("install", (event) => {
   // Create a new cache and add all files to it
