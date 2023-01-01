@@ -56,7 +56,7 @@
 </script>
 
 <Header>
-  <IconButton slot="top-left" href="/"><Mdi path={mdiArrowLeft} /></IconButton>
+  <IconButton slot="top-left" href="/" aria-label="back"><Mdi path={mdiArrowLeft} /></IconButton>
 </Header>
 
 <main>
