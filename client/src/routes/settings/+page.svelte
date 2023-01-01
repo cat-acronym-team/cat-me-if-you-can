@@ -9,7 +9,7 @@
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
   import Mdi from "$components/Mdi.svelte";
-  import { mdiArrowLeft, mdiEye, mdiEyeOff, mdiPencil } from "@mdi/js";
+  import { mdiArrowLeft, mdiPencil } from "@mdi/js";
   import type { Avatar } from "$lib/firebase/firestore-types/lobby";
   import {
     deleteAccount,
@@ -25,6 +25,7 @@
   import { userCollection } from "$lib/firebase/firestore-collections";
   import { authStore as user } from "$stores/auth";
   import { onDestroy } from "svelte";
+  import PasswordTextfield from "$components/PasswordTextfield.svelte";
 
   let userData: UserData | undefined = undefined;
   let userDataDocRef: DocumentReference<UserData> | undefined = undefined;
@@ -101,7 +102,6 @@
 
   let showDeletionPrompt = false;
   let showOptions = false;
-  let showPassword = false;
   let errPrompt = false;
   let linkPass = false;
 
@@ -289,24 +289,7 @@
   <Dialog bind:open={showOptions} aria-labelledby="set-password-title" aria-describedby="link-options-content">
     <Title id="set-password-title">Set Password</Title>
     <Content id="set-password-content">
-      <Textfield
-        name="password"
-        label="Password"
-        type={showPassword ? "text" : "password"}
-        bind:value={password}
-        required
-      >
-        <IconButton
-          type="button"
-          on:click={(event) => event.preventDefault()}
-          slot="trailingIcon"
-          toggle
-          bind:pressed={showPassword}
-        >
-          <Mdi path={mdiEye} on />
-          <Mdi path={mdiEyeOff} />
-        </IconButton>
-      </Textfield>
+      <PasswordTextfield bind:value={password} autocomplete="new-password" />
     </Content>
 
     <Actions>
