@@ -34,7 +34,7 @@
     "@types/d3-interpolate": "^3.0.1",
     "@typescript-eslint/eslint-plugin": "^5.47.1",
     "@typescript-eslint/parser": "^5.47.1",
-    "eslint": "^8.30.0",
+    "eslint": "^8.31.0",
     "eslint-plugin-svelte3": "^4.0.0",
     "smui-theme": "^7.0.0-beta.0",
     "svelte": "^3.55.0",
