@@ -103,6 +103,7 @@
           disabled={message == "" || messageInvalid}
           slot="trailingIcon"
           on:click={() => textfield.focus()}
+          aria-label="send"
         >
           <Mdi path={mdiSend} />
         </IconButton>

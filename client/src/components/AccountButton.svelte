@@ -136,7 +136,7 @@
     <Button on:click={() => (showSignInDialog = true)}><Label>Sign In</Label></Button>
     <!-- If you show account and dropdown -->
   {:else}
-    <IconButton on:click={() => menu.setOpen(true)}><Mdi path={mdiAccountCircle} /></IconButton>
+    <IconButton on:click={() => menu.setOpen(true)} aria-label="account"><Mdi path={mdiAccountCircle} /></IconButton>
     <Menu bind:this={menu}>
       <List>
         <Item tag="a" href="/settings"><Text>Account Settings</Text></Item>

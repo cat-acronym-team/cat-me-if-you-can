@@ -175,7 +175,7 @@
 </script>
 
 <Header>
-  <IconButton slot="top-left" href="/"><Mdi path={mdiArrowLeft} /></IconButton>
+  <IconButton slot="top-left" href="/" aria-label="back"><Mdi path={mdiArrowLeft} /></IconButton>
 </Header>
 
 <main class="settings-wrapper">
@@ -185,12 +185,13 @@
     <div class="avatar">
       <AvatarImg avatar={userData?.avatar ?? 0} />
       {#if userData?.displayName != undefined}
-        <IconButton on:click={() => (showAvatarDialog = true)}><Mdi path={mdiPencil} /></IconButton>
+        <IconButton on:click={() => (showAvatarDialog = true)} aria-label="edit"><Mdi path={mdiPencil} /></IconButton>
       {/if}
     </div>
 
     <div class="mdc-typography--headline3">
       {userData?.displayName ?? "No Name"}<IconButton
+        aria-label="edit"
         on:click={() => {
           newDisplayName = userData?.displayName ?? "";
           showDisplayNameDialog = true;
