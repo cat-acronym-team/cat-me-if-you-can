@@ -1,6 +1,6 @@
 export const catagories = ["animals", "food", "people", "movies"] as const;
 
-export type Category = typeof catagories[number];
+export type Category = (typeof catagories)[number];
 
 export const promptsByCategory = {} as { [category in Category]: string[] };
 
