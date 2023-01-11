@@ -2,7 +2,7 @@ import type { Timestamp } from "firebase-admin/firestore";
 
 export const AVATARS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
 
-export type Avatar = typeof AVATARS[number];
+export type Avatar = (typeof AVATARS)[number];
 
 export type Player = {
   /**
@@ -66,7 +66,7 @@ export type LobbySettings = {
 export type GameState = "WAIT" | "ROLE" | "PROMPT" | "CHAT" | "VOTE" | "RESULT" | "END";
 
 export const configurableTimers = ["PROMPT", "CHAT", "VOTE"] as const;
-export type ConfigurableTimer = typeof configurableTimers[number];
+export type ConfigurableTimer = (typeof configurableTimers)[number];
 
 /**
  * the minimum duration in seconds for each game state

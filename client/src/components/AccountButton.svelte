@@ -6,11 +6,12 @@
   import List, { Item, Separator, Text } from "@smui/list";
   import Dialog, { Header, Title, Content } from "@smui/dialog";
   import Mdi from "$components/Mdi.svelte";
-  import { mdiAccountCircle, mdiEmail, mdiEye, mdiEyeOff } from "@mdi/js";
+  import { mdiAccountCircle, mdiEmail } from "@mdi/js";
   import { authStore as user } from "$stores/auth";
   import { loginWithGoogle, loginWithMicrosoft, loginWithEmail, logOut, createUser } from "$lib/firebase/auth";
   import type { UserData } from "$lib/firebase/firestore-types/users";
   import ProviderButtons from "./ProviderButtons.svelte";
+  import PasswordTextfield from "./PasswordTextfield.svelte";
 
   export let userData: UserData | undefined;
   let showSignInDialog = false;
@@ -18,7 +19,6 @@
   let email = "";
   let password = "";
   let selectedForm: "SIGN_IN" | "SIGN_UP" | "NONE" = "NONE";
-  let showPassword = false;
   let errorMessage: string = "";
 
   function getErrorMsg(error: unknown): string {
@@ -115,25 +115,10 @@
       {#if selectedForm != "NONE"}
         <form on:submit|preventDefault={selectedForm == "SIGN_IN" ? submitLogin : createAccount}>
           <Textfield label="Email" type="email" bind:value={email} required input$autocomplete="username" />
-          <Textfield
-            label="Password"
-            type={showPassword ? "text" : "password"}
+          <PasswordTextfield
             bind:value={password}
-            required
-            input$autocomplete={selectedForm == "SIGN_IN" ? "current-password" : "new-password"}
-          >
-            <IconButton
-              type="button"
-              on:click={(event) => event.preventDefault()}
-              slot="trailingIcon"
-              toggle
-              bind:pressed={showPassword}
-              aria-label="show password"
-            >
-              <Mdi path={mdiEye} on />
-              <Mdi path={mdiEyeOff} />
-            </IconButton>
-          </Textfield>
+            autocomplete={selectedForm == "SIGN_IN" ? "current-password" : "new-password"}
+          />
           {#if errorMessage !== ""}
             <p class="error">{errorMessage}</p>
           {/if}
