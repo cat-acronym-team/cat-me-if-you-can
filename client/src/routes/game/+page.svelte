@@ -172,6 +172,9 @@
 
       // only allow subscribing during ROLE phase
       if (lobby?.state == "ROLE") {
+        // unsubscribe if we have a current subscription
+        unsubscribeCatfishes?.();
+
         unsubscribeCatfishes = onSnapshot(
           catfishQuery,
           (queryCollection) => {
