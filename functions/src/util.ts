@@ -38,12 +38,12 @@ export function generatePairs(lobbyData: Lobby): GeneratedPairs {
 
 export function updateHost(players: { [uid: string]: Player }) {
   let newHost: string | undefined;
-  let earliestJoinedTime = Timestamp.now();
+  let earliestJoinedTime = Timestamp.now().toMillis();
 
   for (const uid in players) {
-    const currentPlayerTimeJoined = players[uid].timeJoined;
+    const currentPlayerTimeJoined = players[uid].timeJoined.toMillis();
 
-    if (currentPlayerTimeJoined.toMillis() < earliestJoinedTime.toMillis()) {
+    if (currentPlayerTimeJoined < earliestJoinedTime) {
       earliestJoinedTime = currentPlayerTimeJoined;
       newHost = uid;
     }
