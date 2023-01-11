@@ -61,9 +61,9 @@
           on:click={() => vote(lobby.uids[i])}
         >
           <AvatarImg {avatar} />
-          <span class="mdc-typography--subtitle1 " class:catfish={catfishes.includes(lobby.uids[i])}
-            >{displayName ?? ""}</span
-          >
+          <span class="mdc-typography--subtitle1" class:catfish={catfishes.includes(lobby.uids[i])}>
+            {displayName ?? ""}
+          </span>
           <div class="mdc-typography--caption">
             {#if alive}
               Answer: {promptAnswer ?? "no answer"}
