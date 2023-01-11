@@ -10,6 +10,7 @@
 
   export let lobby: Lobby;
   export let lobbyCode: string;
+  export let catfishes: string[]; // empty for cats or spectators | at least one for catfishes
 
   let errorMessage: string = "";
 
@@ -60,7 +61,9 @@
           on:click={() => vote(lobby.uids[i])}
         >
           <AvatarImg {avatar} />
-          <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
+          <span class="mdc-typography--subtitle1" class:catfish={catfishes.includes(lobby.uids[i])}>
+            {displayName ?? ""}
+          </span>
           <div class="mdc-typography--caption">
             {#if alive}
               Answer: {promptAnswer ?? "no answer"}
