@@ -11,7 +11,6 @@
     type ChatMessage,
     type Lobby,
     type LobbyChatMessage,
-    type Player,
   } from "$lib/firebase/firestore-types/lobby";
   import { avatarColors, onAvatarColors } from "$lib/avatar";
   import { authStore as user } from "$stores/auth";
@@ -23,18 +22,8 @@
 
   const dispatch = createEventDispatcher<{ send: { text: string } }>();
 
-  $: playersMap = generatePlayersMap(lobby);
-
-  function generatePlayersMap(lobby: Lobby) {
-    const map = new Map<string, Player>();
-    for (let i = 0; i < lobby.players.length; i++) {
-      map.set(lobby.uids[i], lobby.players[i]);
-    }
-    return map;
-  }
-
   $: displayMessages = messages.map((message) => {
-    const { avatar, displayName } = playersMap.get(message.sender) ?? { avatar: 0, displayName: "Unknown Player" };
+    const { avatar, displayName } = lobby.players[message.sender] ?? { avatar: 0, displayName: "Unknown Player" };
     return { ...message, avatar, displayName };
   });
 

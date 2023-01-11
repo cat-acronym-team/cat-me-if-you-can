@@ -28,7 +28,7 @@ export const lobbyReturn = functions.https.onCall(async (data: unknown, context)
 
     const lobbyData = lobbyDoc.data() as Lobby;
     // check if host
-    if (auth.uid !== lobbyData.uids[0]) {
+    if (auth.uid !== lobbyData.host) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
     }
 
@@ -49,19 +49,18 @@ export async function endGameProcess(
   transaction: Transaction
 ) {
   // apply the stats
-  let { players } = lobbyData;
-  const { uids, winner } = lobbyData;
+  const { players, winner } = lobbyData;
 
   // update each players doc
   await Promise.all(
-    uids.map(async (uid, index) => {
+    Object.entries(lobbyData.players).map(async ([uid, player]) => {
       const userDocRef = userCollection.doc(uid);
       const userDoc = await transaction.get(userDocRef);
 
-      if (players[index].role == undefined) {
+      if (player.role == undefined) {
         functions.logger.error("This player's role doesn't exist!");
         return;
-      } else if (players[index].role == "SPECTATOR") {
+      } else if (player.role == "SPECTATOR") {
         return;
       }
 
@@ -73,17 +72,17 @@ export async function endGameProcess(
       } = {};
 
       // increment played as role
-      if (players[index].role == "CAT") {
+      if (player.role == "CAT") {
         newStats.playedAsCat = FieldValue.increment(1);
       } else {
         newStats.playedAsCatfish = FieldValue.increment(1);
       }
 
       // increment wins
-      if (winner == "CAT" && players[index].role == "CAT") {
+      if (winner == "CAT" && player.role == "CAT") {
         newStats.catWins = FieldValue.increment(1);
       }
-      if (winner == "CATFISH" && players[index].role == "CATFISH") {
+      if (winner == "CATFISH" && player.role == "CATFISH") {
         newStats.catfishWins = FieldValue.increment(1);
       }
       // update their user doc
@@ -95,17 +94,19 @@ export async function endGameProcess(
   );
 
   // reset the lobby
-  players = players.map(({ role, ...rest }) => {
-    return { ...rest, alive: true, votes: 0 };
-  });
+  for (const uid in players) {
+    players[uid].alive = true;
+    players[uid].votes = 0;
+    delete players[uid].role;
+  }
 
   // create a WriteBatch
   const batch = db.batch();
   const privatePlayerCollectionRef = getPrivatePlayerCollection(lobbyDocRef);
 
   // loop through each doc in the private player collection via uid and delete them one-by-one
-  for (let i = 0; i < uids.length; i++) {
-    const playerDoc = privatePlayerCollectionRef.doc(uids[i]);
+  for (const uid in lobbyData.players) {
+    const playerDoc = privatePlayerCollectionRef.doc(uid);
     // delete each private player document with the WriteBatch
     batch.delete(playerDoc);
   }
@@ -113,7 +114,8 @@ export async function endGameProcess(
 
   transaction.update(lobbyDocRef, {
     state: "WAIT",
-    players,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+    players: players satisfies Lobby["players"] as any,
     winner: FieldValue.delete(),
     votedOff: FieldValue.delete(),
     expiration: Timestamp.fromMillis(Timestamp.now().toMillis() + 3_600_000 * 3),

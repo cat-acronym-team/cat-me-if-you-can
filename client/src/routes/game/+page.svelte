@@ -62,9 +62,8 @@
       errorToJoin("Lobby doesnt exist!");
       return;
     }
-
-    // check for user being null so privatePlayerDocRef can work
-    if ($user === null || !lobby.uids.includes($user.uid)) {
+    // if the user isn't signed in or not apart of this lobby then redirect them
+    if ($user === null || !($user.uid in lobby.players)) {
       // then return to join
       goto(`/join?code=${lobbyCode}`, {
         replaceState: true,
@@ -129,7 +128,7 @@
   }
 
   // Reactive Calls
-  $: if (lobby !== undefined && $user !== null && !lobby.uids.includes($user.uid)) {
+  $: if (lobby !== undefined && $user !== null && !($user.uid in lobby.players)) {
     // then return to join
     goto(`/join?code=${lobbyCode}`, {
       replaceState: true,
@@ -142,7 +141,7 @@
       lobby != null &&
       lobbyCode != null &&
       DISPLAY_TIMERS[lobby.state] != null &&
-      ((lobby.uids[0] === $user?.uid && countdown < 0) || countdown < -5)
+      ((lobby.host === $user?.uid && countdown < 0) || countdown < -5)
     ) {
       clearInterval(timer);
       try {
@@ -165,11 +164,11 @@
     {#if lobbyCode !== null && lobby !== undefined && $user != null}
       {#if lobby.state === "WAIT"}
         <LobbyChat {lobby} {lobbyCode} />
-        {#if $user.uid === lobby.uids[0]}
+        {#if $user.uid === lobby.host}
           <LobbySettings {lobby} {lobbyCode} />
         {/if}
       {:else if lobby.state === "PROMPT" || lobby.state === "CHAT"}
-        {#if !lobby.alivePlayers.includes($user.uid)}
+        {#if !lobby.players[$user.uid].alive}
           <LobbyChat {lobby} {lobbyCode} />
         {/if}
       {:else if lobby.state === "VOTE"}
@@ -206,16 +205,11 @@
     {:else if lobby.state === "ROLE"}
       <Role {privatePlayer} />
     {:else if lobby.state === "PROMPT"}
-      {#if lobby.alivePlayers.includes($user.uid)}
+      {#if lobby.players[$user.uid].alive}
         <Prompt prompt={privatePlayer.prompt} uid={$user.uid} {lobbyCode} />
       {/if}
     {:else if lobby.state === "CHAT"}
-      <ChatRoom
-        {lobby}
-        {lobbyCode}
-        isStalker={privatePlayer.stalker}
-        isSpectator={!lobby.alivePlayers.includes($user.uid)}
-      />
+      <ChatRoom {lobby} {lobbyCode} isStalker={privatePlayer.stalker} isSpectator={!lobby.players[$user.uid].alive} />
     {:else if lobby.state === "VOTE"}
       <Vote {lobby} {lobbyCode} />
     {:else if lobby.state === "RESULT"}
