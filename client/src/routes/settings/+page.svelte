@@ -9,7 +9,7 @@
   import Textfield from "@smui/textfield";
   import HelperText from "@smui/textfield/helper-text";
   import Mdi from "$components/Mdi.svelte";
-  import { mdiArrowLeft, mdiEye, mdiEyeOff, mdiPencil } from "@mdi/js";
+  import { mdiArrowLeft, mdiPencil } from "@mdi/js";
   import type { Avatar } from "$lib/firebase/firestore-types/lobby";
   import {
     deleteAccount,
@@ -25,6 +25,7 @@
   import { userCollection } from "$lib/firebase/firestore-collections";
   import { authStore as user } from "$stores/auth";
   import { onDestroy } from "svelte";
+  import PasswordTextfield from "$components/PasswordTextfield.svelte";
 
   let userData: UserData | undefined = undefined;
   let userDataDocRef: DocumentReference<UserData> | undefined = undefined;
@@ -101,7 +102,6 @@
 
   let showDeletionPrompt = false;
   let showOptions = false;
-  let showPassword = false;
   let errPrompt = false;
   let linkPass = false;
 
@@ -175,7 +175,7 @@
 </script>
 
 <Header>
-  <IconButton slot="top-left" href="/"><Mdi path={mdiArrowLeft} /></IconButton>
+  <IconButton slot="top-left" href="/" aria-label="back"><Mdi path={mdiArrowLeft} /></IconButton>
 </Header>
 
 <main class="settings-wrapper">
@@ -185,12 +185,13 @@
     <div class="avatar">
       <AvatarImg avatar={userData?.avatar ?? 0} />
       {#if userData?.displayName != undefined}
-        <IconButton on:click={() => (showAvatarDialog = true)}><Mdi path={mdiPencil} /></IconButton>
+        <IconButton on:click={() => (showAvatarDialog = true)} aria-label="edit"><Mdi path={mdiPencil} /></IconButton>
       {/if}
     </div>
 
     <div class="mdc-typography--headline3">
       {userData?.displayName ?? "No Name"}<IconButton
+        aria-label="edit"
         on:click={() => {
           newDisplayName = userData?.displayName ?? "";
           showDisplayNameDialog = true;
@@ -289,24 +290,7 @@
   <Dialog bind:open={showOptions} aria-labelledby="set-password-title" aria-describedby="link-options-content">
     <Title id="set-password-title">Set Password</Title>
     <Content id="set-password-content">
-      <Textfield
-        name="password"
-        label="Password"
-        type={showPassword ? "text" : "password"}
-        bind:value={password}
-        required
-      >
-        <IconButton
-          type="button"
-          on:click={(event) => event.preventDefault()}
-          slot="trailingIcon"
-          toggle
-          bind:pressed={showPassword}
-        >
-          <Mdi path={mdiEye} on />
-          <Mdi path={mdiEyeOff} />
-        </IconButton>
-      </Textfield>
+      <PasswordTextfield bind:value={password} autocomplete="new-password" />
     </Content>
 
     <Actions>

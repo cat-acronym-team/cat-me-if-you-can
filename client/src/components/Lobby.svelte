@@ -123,8 +123,8 @@
   </div>
   <div class="buttons">
     <h3 class="invite-link">Invite Link: {url}</h3>
-    <IconButton on:click={copyLink}><Mdi path={mdiContentCopy} /></IconButton>
-    {#if canShare}<IconButton on:click={share}><Mdi path={mdiShareVariant} /></IconButton>{/if}
+    <IconButton on:click={copyLink} aria-label="copy"><Mdi path={mdiContentCopy} /></IconButton>
+    {#if canShare}<IconButton on:click={share} aria-label="share"><Mdi path={mdiShareVariant} /></IconButton>{/if}
   </div>
 </div>
 

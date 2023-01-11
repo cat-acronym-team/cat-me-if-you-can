@@ -57,7 +57,7 @@
   surface$style="max-width: 700px;"
   ><Header>
     <Title id="settings-dialog-title">Lobby Settings</Title>
-    <IconButton action="close"><Mdi path={mdiClose} /></IconButton>
+    <IconButton action="close" aria-label="close"><Mdi path={mdiClose} /></IconButton>
   </Header>
   <Content id="settings-dialog-content">
     <div class="settings">
@@ -104,7 +104,7 @@
   </Actions>
 </Dialog>
 
-<IconButton on:click={() => (showLobbySettings = true)}><Mdi path={mdiCog} /></IconButton>
+<IconButton on:click={() => (showLobbySettings = true)} aria-label="settings"><Mdi path={mdiCog} /></IconButton>
 
 <style>
   .settings {
