@@ -229,7 +229,7 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
     }
 
     // get lobby data
-    const { players, host } = lobbyInfo.data() as Lobby;
+    const { players } = lobbyInfo.data() as Lobby;
 
     delete players[auth.uid];
 
@@ -241,7 +241,7 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
       transaction.update(lobby, {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
         players: players satisfies Lobby["players"] as any,
-        host: updateHost(players) ?? host,
+        host: updateHost(players),
       });
     }
   });

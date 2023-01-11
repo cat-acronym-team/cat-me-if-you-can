@@ -27,7 +27,7 @@ export const kick = functions.https.onCall((data: unknown, context): Promise<voi
       throw new functions.https.HttpsError("permission-denied", "User making request is not the host.");
     }
 
-    const { players, host } = lobbyData as Lobby;
+    const { players } = lobbyData as Lobby;
 
     delete players[data.uid];
 
@@ -37,7 +37,7 @@ export const kick = functions.https.onCall((data: unknown, context): Promise<voi
       transaction.update(lobbyRef, {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
         players: players satisfies Lobby["players"] as any,
-        host: updateHost(players) ?? host,
+        host: updateHost(players),
       });
     }
   });
@@ -64,7 +64,7 @@ export const ban = functions.https.onCall((data: unknown, context): Promise<void
       throw new functions.https.HttpsError("permission-denied", "User making request is not the host.");
     }
 
-    const { players, host } = lobbyData as Lobby;
+    const { players } = lobbyData as Lobby;
 
     delete players[data.uid];
 
@@ -75,7 +75,7 @@ export const ban = functions.https.onCall((data: unknown, context): Promise<void
         bannedPlayers: FieldValue.arrayUnion(data.uid),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
         players: players satisfies Lobby["players"] as any,
-        host: updateHost(players) ?? host,
+        host: updateHost(players),
       });
     }
   });
