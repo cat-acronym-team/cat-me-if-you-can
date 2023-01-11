@@ -31,10 +31,6 @@
   };
 
   function getCatfishNames() {
-    if (catfishes == undefined) {
-      return;
-    }
-
     const { uids, players } = lobby;
 
     const catfishNames = catfishes.map((catfishId) => players[uids.indexOf(catfishId)].displayName);
@@ -62,20 +58,5 @@
   .catfish,
   .spectator {
     font-weight: bolder;
-  }
-
-  .cat {
-    /* Material Blue 700 */
-    color: #1976d2;
-  }
-
-  .catfish {
-    /* Material Red 800 */
-    color: #d32f2f;
-  }
-
-  .spectator {
-    /* Material Blue Grey 500 */
-    color: #607d8b;
   }
 </style>
