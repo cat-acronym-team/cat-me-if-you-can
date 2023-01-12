@@ -2,6 +2,7 @@
   "$schema": "https://json.schemastore.org/web-manifest-combined.json",
   "id": "cat-me-if-you-can",
   "name": "Cat Me If You Can",
+  "short_name": "CMIYC",
   "description": "You are a very lonely cat, looking for another furry friend so you decide to try out online dating. In comes a brand new, top-of-the-line dating app, Cat Me if You Can!",
   "categories": ["games"],
   "start_url": "/",
