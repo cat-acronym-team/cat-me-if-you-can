@@ -46,5 +46,12 @@
       "type": "image/webp",
       "purpose": "maskable"
     }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id={PUBLIC_ANDROID_APP_ID}",
+      "id": "{PUBLIC_ANDROID_APP_ID}"
+    }
   ]
 }
