@@ -35,6 +35,12 @@
       "purpose": "maskable"
     },
     {
+      "src": "/manifest/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
       "src": "/manifest/maskable-512.webp",
       "sizes": "512x512",
       "type": "image/webp",
