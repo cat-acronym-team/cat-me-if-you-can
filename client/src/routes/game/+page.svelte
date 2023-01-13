@@ -10,6 +10,8 @@
   import LobbyChat from "$components/LobbyChat.svelte";
   import Header from "$components/Header.svelte";
   import LobbySettings from "$components/LobbySettings.svelte";
+  import IconButton from "@smui/icon-button";
+  import Mdi from "$components/Mdi.svelte";
 
   import { onSnapshot, doc, getDoc, type Unsubscribe } from "firebase/firestore";
   import { onMount, onDestroy } from "svelte";
@@ -18,8 +20,9 @@
   import { page } from "$app/stores";
   import { authStore as user } from "$stores/auth";
   import { goto } from "$app/navigation";
-  import { verifyExpiration } from "$lib/firebase/firebase-functions";
+  import { removeFromChatroom, verifyExpiration } from "$lib/firebase/firebase-functions";
   import { formatTimer, DISPLAY_TIMERS } from "$lib/time";
+  import { mdiArrowLeft } from "@mdi/js";
 
   let lobbyCode: string | null = null;
 
@@ -32,6 +35,8 @@
   let countdown = GAME_STATE_DURATIONS_DEFAULT.WAIT;
   $: countdownVisible = lobby != undefined && DISPLAY_TIMERS[lobby.state] == true;
   let timer: ReturnType<typeof setInterval>;
+
+  let spectatorChatroomId: string | undefined = undefined;
 
   let errorMessage: string = "";
 
@@ -161,6 +166,24 @@
 <svelte:window on:beforeunload={onbeforeunload} />
 
 <Header>
+  <svelte:fragment slot="top-left">
+    {#if lobbyCode !== null && lobby !== undefined && $user != null}
+      {#if lobby.state === "CHAT"}
+        {#if !lobby.alivePlayers.includes($user.uid) && spectatorChatroomId !== undefined}
+          <IconButton
+            on:click|once={async () => {
+              await removeFromChatroom({ code: lobbyCode, chatId: spectatorChatroomId });
+              // make it undefined because we don't want the back button to show on the select a chat view
+              spectatorChatroomId = undefined;
+            }}
+          >
+            <Mdi path={mdiArrowLeft} />
+          </IconButton>
+        {/if}
+      {/if}
+    {/if}
+  </svelte:fragment>
+  
   <svelte:fragment slot="top-right">
     {#if lobbyCode !== null && lobby !== undefined && $user != null}
       {#if lobby.state === "WAIT"}
@@ -215,6 +238,9 @@
         {lobbyCode}
         isStalker={privatePlayer.stalker}
         isSpectator={!lobby.alivePlayers.includes($user.uid)}
+        on:chatId={(event) => {
+          spectatorChatroomId = event.detail.chatRoomId;
+        }}
       />
     {:else if lobby.state === "VOTE"}
       <Vote {lobby} {lobbyCode} />
