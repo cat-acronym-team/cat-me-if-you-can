@@ -170,8 +170,14 @@
     {#if lobbyCode !== null && lobby !== undefined && $user != null}
       {#if lobby.state === "CHAT"}
         {#if !lobby.alivePlayers.includes($user.uid) && spectatorChatroomId !== undefined}
+          {console.log(lobbyCode, spectatorChatroomId)}
           <IconButton
             on:click|once={async () => {
+              // doesn't recognize the svelte if checks above
+              if (lobbyCode == null || spectatorChatroomId == undefined) {
+                return;
+              }
+
               await removeFromChatroom({ code: lobbyCode, chatId: spectatorChatroomId });
               // make it undefined because we don't want the back button to show on the select a chat view
               spectatorChatroomId = undefined;
@@ -183,7 +189,7 @@
       {/if}
     {/if}
   </svelte:fragment>
-  
+
   <svelte:fragment slot="top-right">
     {#if lobbyCode !== null && lobby !== undefined && $user != null}
       {#if lobby.state === "WAIT"}
