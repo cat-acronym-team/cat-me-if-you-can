@@ -1,6 +1,6 @@
 import { PUBLIC_USE_EMULATORS, PUBLIC_FIREBASE_CONFIG } from "$env/static/public";
 import { initializeApp, type FirebaseOptions } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, type Analytics } from "firebase/analytics";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
@@ -42,7 +42,11 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const functions = getFunctions(app);
-export const analytics = getAnalytics(app);
+export let analytics: Analytics;
+
+if (typeof window !== "undefined") {
+  analytics = getAnalytics(app);
+}
 
 auth.onAuthStateChanged((user) => {
   authStore.set(user);
