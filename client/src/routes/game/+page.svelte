@@ -170,7 +170,6 @@
     {#if lobbyCode !== null && lobby !== undefined && $user != null}
       {#if lobby.state === "CHAT"}
         {#if !lobby.alivePlayers.includes($user.uid) && spectatorChatroomId !== undefined}
-          {console.log(lobbyCode, spectatorChatroomId)}
           <IconButton
             on:click|once={async () => {
               // doesn't recognize the svelte if checks above
