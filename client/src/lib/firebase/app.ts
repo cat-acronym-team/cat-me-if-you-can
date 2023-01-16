@@ -19,6 +19,7 @@ if (PUBLIC_FIREBASE_CONFIG === "staging") {
     storageBucket: "cat-me-if-you-can-game-dev.appspot.com",
     messagingSenderId: "694545219858",
     appId: "1:694545219858:web:2a3f2ca632e247121333cb",
+    measurementId: "G-4JE1BZR910",
   };
 } else if (PUBLIC_FIREBASE_CONFIG === "production") {
   firebaseConfig = {
@@ -28,6 +29,7 @@ if (PUBLIC_FIREBASE_CONFIG === "staging") {
     storageBucket: "cat-me-if-you-can-game.appspot.com",
     messagingSenderId: "205088834267",
     appId: "1:205088834267:web:dac48e8f7d9532e2a042fe",
+    measurementId: "G-RS9KEVPKF4",
   };
 } else {
   throw new Error("Invalid PUBLIC_FIREBASE_CONFIG");
