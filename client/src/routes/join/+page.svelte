@@ -12,6 +12,8 @@
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import { page } from "$app/stores";
+  import { analytics } from "$lib/firebase/app";
+  import { logEvent } from "firebase/analytics";
 
   let userData: UserData | undefined;
   let errorMessage: string = "";
@@ -70,6 +72,10 @@
       await saveOrCreate($user, userData, name.trim());
       // enter lobby with the user's info
       await findAndJoinLobby(code);
+
+      // log joining
+      logEvent(analytics, "lobby-join");
+
       // go to game page
       goto(`/game?code=${code}`);
     } catch (err) {

@@ -10,6 +10,8 @@
   import { changeAvatar, startGame, leaveLobby } from "$lib/firebase/firebase-functions";
   import { goto } from "$app/navigation";
   import { authStore as user } from "../store/auth";
+  import { logEvent } from "firebase/analytics";
+  import { analytics } from "$lib/firebase/app";
 
   // Props
   export let lobbyCode: string;
@@ -62,6 +64,9 @@
     waiting = true;
     try {
       await startGame({ code: lobbyCode });
+
+      // log games started
+      logEvent(analytics, "start-game");
     } catch (err) {
       waiting = false;
       console.error(err);

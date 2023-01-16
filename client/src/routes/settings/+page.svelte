@@ -26,6 +26,8 @@
   import { authStore as user } from "$stores/auth";
   import { onDestroy } from "svelte";
   import PasswordTextfield from "$components/PasswordTextfield.svelte";
+  import { logEvent } from "firebase/analytics";
+  import { analytics } from "$lib/firebase/app";
 
   let userData: UserData | undefined = undefined;
   let userDataDocRef: DocumentReference<UserData> | undefined = undefined;
@@ -132,6 +134,10 @@
   async function verifyDelete() {
     try {
       await deleteAccount();
+
+      // log account deletions
+      logEvent(analytics, "account-deletion");
+
       // If no error
       window.location.href = "/";
     } catch (err) {

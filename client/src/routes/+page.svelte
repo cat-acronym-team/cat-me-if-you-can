@@ -9,6 +9,8 @@
   import { displayNameValidator, type UserData } from "$lib/firebase/firestore-types/users";
   import { goto } from "$app/navigation";
   import { authStore } from "$stores/auth";
+  import { analytics } from "$lib/firebase/app";
+  import { logEvent } from "firebase/analytics";
 
   let userData: UserData | undefined;
 
@@ -58,6 +60,10 @@
       await saveOrCreate(user, userData, name.trim());
       // Create Lobby
       const response = await createLobby();
+
+      // log lobbies created
+      logEvent(analytics, "lobby-creation");
+
       // go to game page
       goto("/game?code=" + response.data.code);
     } catch (err) {
