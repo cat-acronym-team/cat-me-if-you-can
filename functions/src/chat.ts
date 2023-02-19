@@ -1,4 +1,5 @@
-import { Timestamp } from "firebase-admin/firestore";
+import * as functions from "firebase-functions";
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import type { DocumentReference, Transaction } from "firebase-admin/firestore";
 import { db } from "./app";
 import {
@@ -7,8 +8,10 @@ import {
   getPrivatePlayerCollection,
   getLobbyChatCollection,
   getPromptAnswerCollection,
+  lobbyCollection,
 } from "./firestore-collections";
 import { Lobby } from "./firestore-types/lobby";
+import { isStalkChatroomRequest as isLeaveLobbyRequest } from "./firebase-functions-types";
 
 export async function deleteLobbyChatMessages(lobbyDoc: DocumentReference<Lobby>) {
   const messages = await getLobbyChatCollection(lobbyDoc).get();
@@ -69,3 +72,29 @@ export async function setAndDeleteAnswers(
 
   transaction.update(lobbyDoc, { state: "VOTE", expiration, players });
 }
+
+export const removeFromChatroom = functions.https.onCall((data: unknown, context): Promise<void> => {
+  const auth = context.auth;
+  if (auth === undefined) {
+    throw new functions.https.HttpsError("permission-denied", "User is not Authenticated");
+  }
+
+  if (!isLeaveLobbyRequest(data)) {
+    throw new functions.https.HttpsError("invalid-argument", "Data is not of isLeaveLobbyRequest type");
+  }
+
+  const lobbyDocRef = lobbyCollection.doc(data.code);
+  return db.runTransaction(async (transaction) => {
+    const chatRoomCollection = getChatRoomCollection(lobbyDocRef);
+    const chatRoomRef = chatRoomCollection.doc(data.chatId);
+
+    const chatRoom = await transaction.get(chatRoomRef);
+    if (!chatRoom.exists) {
+      throw new functions.https.HttpsError("not-found", "Chatroom not found");
+    }
+
+    transaction.update(chatRoomRef, {
+      viewers: FieldValue.arrayRemove(auth.uid),
+    });
+  });
+});

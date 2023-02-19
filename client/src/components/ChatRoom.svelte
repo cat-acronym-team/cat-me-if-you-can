@@ -1,7 +1,7 @@
 <script lang="ts">
   import ChatMessages from "$components/ChatMessages.svelte";
   import Stalker from "$components/Stalker.svelte";
-  import { onMount, onDestroy } from "svelte";
+  import { onMount, onDestroy, createEventDispatcher } from "svelte";
   import { authStore } from "$stores/auth";
   import { onSnapshot, orderBy, Query, query, where, type Unsubscribe } from "firebase/firestore";
   import type { ChatMessage, ChatRoom, Lobby, Player } from "$lib/firebase/firestore-types/lobby";
@@ -24,6 +24,9 @@
   let unsubscribeChatRooms: Unsubscribe | undefined = undefined;
   let unsubscribeChatMessages: Unsubscribe | undefined = undefined;
 
+  // dispatch only for spectators
+  const dispatch = createEventDispatcher<{ chatId: { chatRoomId: string } }>();
+
   onMount(() => {
     const chatRoomCollection = getChatRoomCollection(lobbyCode);
     let roomQuerry: Query<ChatRoom>;
@@ -38,6 +41,11 @@
       (roomsSnapshot) => {
         // skip if chatRoom not found yet
         if (roomsSnapshot.docs.length == 0) {
+          // this means they left this room
+          // will render the stalker component
+          if (chatRoomId !== undefined) {
+            chatRoomId = undefined;
+          }
           return;
         }
 
@@ -101,6 +109,15 @@
       console.error(err);
       errorMessage = err instanceof Error ? err.message : String(err);
     }
+  }
+
+  // once the spectator clicked on the room
+  // we want to pass up the id to the game page
+  // that is so when we leave the chatroom we know exactly the chatroom we need to leave from
+  $: if (chatRoomId !== undefined && isSpectator) {
+    dispatch("chatId", {
+      chatRoomId,
+    });
   }
 </script>
 

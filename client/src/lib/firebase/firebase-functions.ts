@@ -6,6 +6,7 @@ import type {
   StalkChatroomRequest,
   LobbySettingsRequest,
   KickBanRequest,
+  LeaveLobbyRequest,
 } from "./firebase-functions-types";
 import type { ChangeAvatarData } from "./functions-types/avatar";
 
@@ -20,3 +21,4 @@ export const changeAvatar = httpsCallable<ChangeAvatarData, void>(functions, "ch
 export const verifyExpiration = httpsCallable<LobbyRequest, void>(functions, "verifyExpiration");
 export const kick = httpsCallable<KickBanRequest, void>(functions, "kick");
 export const ban = httpsCallable<KickBanRequest, void>(functions, "ban");
+export const removeFromChatroom = httpsCallable<LeaveLobbyRequest, void>(functions, "removeFromChatroom");
