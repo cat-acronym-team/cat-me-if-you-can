@@ -15,7 +15,7 @@
   // format a string list to have commas and "and" when needed
   const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
   // get the list of catfishes from lobby.ts and put them into a variable
-  $: catfishes = lobby.players
+  $: catfishes = Object.values(lobby.players)
     .filter((p) => {
       return p.role == "CATFISH";
     })

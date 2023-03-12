@@ -1,4 +1,4 @@
-import { Timestamp, FieldValue, Transaction, DocumentSnapshot, DocumentReference } from "firebase-admin/firestore";
+import { Timestamp, Transaction, DocumentSnapshot } from "firebase-admin/firestore";
 import * as functions from "firebase-functions";
 import {
   getChatRoomCollection,
@@ -11,7 +11,7 @@ import {
 import { isLobbyRequest, isLobbySettingsRequest, LobbyCreationResponse } from "./firebase-functions-types";
 import { AVATARS, GAME_STATE_DURATIONS_DEFAULT, Lobby, Vote } from "./firestore-types/lobby";
 import { UserData } from "./firestore-types/users";
-import { generatePairs } from "./util";
+import { generatePairs, updateHost } from "./util";
 import { db } from "./app";
 import { getRandomPromptPair } from "./prompts";
 import { deleteChatCollections, setAndDeleteAnswers, deleteLobbyChatMessages } from "./chat";
@@ -42,19 +42,18 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
   }
 
   const lobbyData: Lobby = {
-    uids: [context.auth.uid],
-    players: [
-      {
+    players: {
+      [context.auth.uid]: {
         alive: true,
         avatar: userData.avatar || AVATARS[Math.floor(Math.random() * AVATARS.length)],
         displayName: userData.displayName,
         votes: 0,
+        timeJoined: Timestamp.now(),
       },
-    ],
+    },
     skipVote: 0,
     bannedPlayers: [],
     state: "WAIT",
-    alivePlayers: [context.auth.uid],
     lobbySettings: {
       catfishAmount: 1,
       promptTime: GAME_STATE_DURATIONS_DEFAULT.PROMPT,
@@ -62,6 +61,7 @@ export const createLobby = functions.https.onCall(async (data: unknown, context)
       voteTime: GAME_STATE_DURATIONS_DEFAULT.VOTE,
     },
     expiration: Timestamp.fromMillis(Timestamp.now().toMillis() + 3_600_000 * 3),
+    host: context.auth.uid,
   };
 
   // try making lobby 5 times before giving up
@@ -98,17 +98,18 @@ export const startGame = functions.https.onCall(async (data: unknown, context): 
     if (lobby.exists === false) {
       throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
+
     // check if the request is coming from the host of the game
-    const { uids, lobbySettings } = lobby.data() as Lobby;
+    const { players, lobbySettings, host } = lobby.data() as Lobby;
 
     const minPlayers = lobbySettings.catfishAmount * 2 + 2;
 
-    if (auth.uid !== uids[0]) {
+    if (auth.uid !== host) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
     }
 
     // throw an error if there aren't enough players in the lobby
-    if (uids.length < minPlayers) {
+    if (Object.keys(players).length < minPlayers) {
       throw new functions.https.HttpsError("failed-precondition", "Not enough players to start the game!");
     }
 
@@ -150,8 +151,8 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     const userInfo = user.data() as UserData;
 
     // get lobby data
-    const { players, uids, bannedPlayers } = lobbyInfo.data() as Lobby;
-    if (uids.includes(auth.uid)) {
+    const { players, bannedPlayers } = lobbyInfo.data() as Lobby;
+    if (auth.uid in players) {
       throw new functions.https.HttpsError("already-exists", "You are already in the lobby!");
     }
 
@@ -162,7 +163,7 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     }
 
     // throw an error if the lobby is already full
-    if (uids.length >= maxPlayers) {
+    if (Object.keys(players).length >= maxPlayers) {
       throw new functions.https.HttpsError("failed-precondition", "Lobby is full!");
     }
 
@@ -177,36 +178,30 @@ export const joinLobby = functions.https.onCall((data: unknown, context): Promis
     }
 
     // change avatar randomly if it is already taken
-    const takenAvatars = players.map((player) => player.avatar);
+    const takenAvatars = Object.values(players).map((player) => player.avatar);
     while (userInfo.avatar == 0 || takenAvatars.includes(userInfo.avatar)) {
       userInfo.avatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
     }
 
-    // add spectator
+    // Check if the lobby state is not wait
+    let alive = true;
     if (lobbyData.state != "WAIT") {
       const privatePlayerDocRef = privatePlayerCollection.doc(user.id);
       transaction.create(privatePlayerDocRef, { role: "SPECTATOR", stalker: false });
-      transaction.update(lobby, {
-        players: FieldValue.arrayUnion({
-          displayName: userInfo.displayName,
-          avatar: userInfo.avatar,
-          alive: false,
-          votes: 0,
-        }),
-        uids: FieldValue.arrayUnion(auth.uid),
-      });
-    } else {
-      // add player
-      transaction.update(lobby, {
-        players: FieldValue.arrayUnion({
-          displayName: userInfo.displayName,
-          avatar: userInfo.avatar,
-          alive: true,
-          votes: 0,
-        }),
-        uids: FieldValue.arrayUnion(auth.uid),
-      });
+      alive = false;
     }
+
+    // add player
+    players[auth.uid] = {
+      alive,
+      avatar: userInfo.avatar,
+      displayName: userInfo.displayName,
+      votes: 0,
+      timeJoined: Timestamp.now(),
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+    transaction.update(lobby, { players: players satisfies Lobby["players"] as any });
   });
 });
 
@@ -234,19 +229,19 @@ export const leaveLobby = functions.https.onCall((data: unknown, context): Promi
     }
 
     // get lobby data
-    const { players, uids } = lobbyInfo.data() as Lobby;
+    const { players } = lobbyInfo.data() as Lobby;
 
-    // Get position of the Player
-    const playerPos = uids.indexOf(auth.uid);
+    delete players[auth.uid];
 
     // If the last player is leaving delete the document instead
-    if (uids.length === 1) {
+    if (Object.keys(players).length === 0) {
       transaction.delete(lobby);
     } else {
       // Remove player from the lobby
       transaction.update(lobby, {
-        players: FieldValue.arrayRemove(players[playerPos]),
-        uids: FieldValue.arrayRemove(auth.uid),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+        players: players satisfies Lobby["players"] as any,
+        host: updateHost(players),
       });
     }
   });
@@ -274,8 +269,8 @@ export const applyLobbySettings = functions.https.onCall(async (data: unknown, c
       throw new functions.https.HttpsError("not-found", "Lobby doesn't exist!");
     }
     // check if the request is coming from the host of the game
-    const { uids } = lobbyInfo.data() as Lobby;
-    if (auth.uid !== uids[0]) {
+    const { host } = lobbyInfo.data() as Lobby;
+    if (auth.uid !== host) {
       throw new functions.https.HttpsError("permission-denied", "Not the host of the game!");
     }
 
@@ -283,25 +278,6 @@ export const applyLobbySettings = functions.https.onCall(async (data: unknown, c
       lobbySettings: settings,
     });
   });
-});
-
-export const onLobbyUpdate = functions.firestore.document("/lobbies/{code}").onUpdate(async (change, context) => {
-  const lobbyDocRef = change.after.ref as DocumentReference<Lobby>;
-  const lobby = change.after.data() as Lobby;
-  const lobbyBefore = change.before.data() as Lobby;
-  let hasChanged = lobby.players.length != lobbyBefore.players.length;
-  const alivePlayers = [];
-  for (let i = 0; i < lobby.uids.length; i++) {
-    if (!hasChanged && lobby.players[i].alive != lobbyBefore.players[i].alive) {
-      hasChanged = true;
-    }
-    if (lobby.players[i].alive) {
-      alivePlayers.push(lobby.uids[i]);
-    }
-  }
-  if (hasChanged) {
-    await lobbyDocRef.update({ alivePlayers: alivePlayers });
-  }
 });
 
 export async function startPrompt(lobbyDoc: DocumentSnapshot<Lobby>, transaction: Transaction) {
@@ -316,7 +292,7 @@ export async function startPrompt(lobbyDoc: DocumentSnapshot<Lobby>, transaction
   }
 
   const privatePlayerDocs = await Promise.all(
-    lobbyData.uids.map((uid) => transaction.get(privatePlayerCollection.doc(uid)))
+    Object.keys(lobbyData.players).map((uid) => transaction.get(privatePlayerCollection.doc(uid)))
   );
 
   for (const privatePlayerDoc of privatePlayerDocs) {
@@ -413,14 +389,14 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
       return;
     }
 
-    const { players, uids, skipVote: oldSkipVote } = lobbyData;
+    const { players, skipVote: oldSkipVote } = lobbyData;
     let skipVote = oldSkipVote;
 
     // decrement old target
     if (oldVoteDoc != undefined && oldVoteDoc.target == null) {
       skipVote -= 1;
     } else if (oldVoteDoc != undefined && oldVoteDoc.target != null) {
-      const oldTarget = players[uids.indexOf(oldVoteDoc.target)];
+      const oldTarget = players[oldVoteDoc.target];
       if (oldTarget.votes != 0) {
         oldTarget.votes -= 1;
       }
@@ -430,23 +406,36 @@ export const onVoteWrite = functions.firestore.document("/lobbies/{code}/votes/{
     if (latestVoteDoc.target == null) {
       skipVote += 1;
     } else {
-      players[uids.indexOf(latestVoteDoc.target)].votes += 1;
+      players[latestVoteDoc.target].votes += 1;
     }
 
     let totalVotes = 0;
-    for (const player of players) {
-      totalVotes += player.votes;
+    let livingPlayers = 0;
+    for (const uid in players) {
+      totalVotes += players[uid].votes;
     }
     totalVotes += skipVote;
 
-    if (
-      totalVotes == lobbyData.alivePlayers.length &&
-      lobbyData.expiration.toMillis() > Timestamp.now().toMillis() + 10 * 1000
-    ) {
+    for (const uid in lobbyData.players) {
+      if (lobbyData.players[uid].alive) {
+        livingPlayers++;
+      }
+    }
+
+    if (totalVotes == livingPlayers && lobbyData.expiration.toMillis() > Timestamp.now().toMillis() + 10 * 1000) {
       const expiration = Timestamp.fromMillis(Timestamp.now().toMillis() + 10 * 1000);
-      transaction.update(lobbyDocRef, { players, skipVote, expiration });
+      transaction.update(lobbyDocRef, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+        players: players satisfies Lobby["players"] as any,
+        skipVote,
+        expiration,
+      });
     } else {
-      transaction.update(lobbyDocRef, { players, skipVote });
+      transaction.update(lobbyDocRef, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+        players: players satisfies Lobby["players"] as any,
+        skipVote,
+      });
     }
   });
 });

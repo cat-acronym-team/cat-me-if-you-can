@@ -13,18 +13,20 @@ export function assignRole(lobbySnap: DocumentSnapshot<Lobby>, transaction: Tran
   }
 
   // Gets uids from lobby.
-  const { uids } = lobbyData;
+  const { players } = lobbyData;
 
   // The uids of the players that will be catfish
   const catfishUids = new Set<string>();
 
   // Adds catfish to catfishUids until there are numCatFish catfish.
+  const uidArray = Object.keys(players);
+
   while (catfishUids.size < lobbyData.lobbySettings.catfishAmount) {
-    catfishUids.add(uids[Math.floor(Math.random() * uids.length)]);
+    catfishUids.add(uidArray[Math.floor(Math.random() * uidArray.length)]);
   }
   const privatePlayerCollection = getPrivatePlayerCollection(lobby);
 
-  for (const uid of uids) {
+  for (const uid in players) {
     const privatePlayerDocRef = privatePlayerCollection.doc(uid);
 
     // check set to catfish if it is inside catfishUids

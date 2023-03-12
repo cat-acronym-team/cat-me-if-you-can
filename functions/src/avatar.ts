@@ -2,6 +2,7 @@ import * as functions from "firebase-functions";
 import { isChangeAvatarData } from "./functions-types/avatar";
 import { lobbyCollection } from "./firestore-collections";
 import { db } from "./app";
+import { Lobby } from "./firestore-types/lobby";
 
 export const changeAvatar = functions.https.onCall((data: unknown, context): Promise<void> => {
   const auth = context.auth;
@@ -23,18 +24,18 @@ export const changeAvatar = functions.https.onCall((data: unknown, context): Pro
       throw new functions.https.HttpsError("not-found", "Lobby does not exist.");
     }
 
-    const playerIndex = lobbyData.uids.findIndex((uid) => uid === auth.uid);
-    if (playerIndex == -1) {
+    if (!(auth.uid in lobbyData.players)) {
       throw new functions.https.HttpsError("permission-denied", "User is not in the lobby.");
     }
 
-    const taken = lobbyData.players.some((player) => player.avatar === data.avatar);
+    const taken = Object.values(lobbyData.players).some((player) => player.avatar === data.avatar);
     if (taken) {
       throw new functions.https.HttpsError("already-exists", "Avatar is already taken.");
     }
 
-    lobbyData.players[playerIndex].avatar = data.avatar;
+    lobbyData.players[auth.uid].avatar = data.avatar;
 
-    await transaction.update(lobbyDocRef, lobbyData);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+    await transaction.update(lobbyDocRef, lobbyData satisfies Lobby as any);
   });
 });
