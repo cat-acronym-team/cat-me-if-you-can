@@ -6,6 +6,6 @@
     "emulators:preview": "npm --prefix functions run build && npm --prefix client run build:test && firebase emulators:start --project stage"
   },
   "devDependencies": {
-    "prettier": "^2.8.6"
+    "prettier": "^2.8.7"
   }
 }
