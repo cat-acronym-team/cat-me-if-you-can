@@ -1,5 +1,6 @@
 import { PUBLIC_USE_EMULATORS, PUBLIC_FIREBASE_CONFIG } from "$env/static/public";
 import { initializeApp, type FirebaseOptions } from "firebase/app";
+import { getAnalytics, type Analytics } from "firebase/analytics";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
@@ -19,6 +20,7 @@ if (PUBLIC_FIREBASE_CONFIG === "staging") {
     storageBucket: "cat-me-if-you-can-game-dev.appspot.com",
     messagingSenderId: "694545219858",
     appId: "1:694545219858:web:2a3f2ca632e247121333cb",
+    measurementId: "G-4JE1BZR910",
   };
 } else if (PUBLIC_FIREBASE_CONFIG === "production") {
   firebaseConfig = {
@@ -28,6 +30,7 @@ if (PUBLIC_FIREBASE_CONFIG === "staging") {
     storageBucket: "cat-me-if-you-can-game.appspot.com",
     messagingSenderId: "205088834267",
     appId: "1:205088834267:web:dac48e8f7d9532e2a042fe",
+    measurementId: "G-RS9KEVPKF4",
   };
 } else {
   throw new Error("Invalid PUBLIC_FIREBASE_CONFIG");
@@ -39,6 +42,11 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const functions = getFunctions(app);
+export let analytics: Analytics;
+
+if (typeof window !== "undefined") {
+  analytics = getAnalytics(app);
+}
 
 auth.onAuthStateChanged((user) => {
   authStore.set(user);

@@ -12,6 +12,8 @@
   import type { UserData } from "$lib/firebase/firestore-types/users";
   import ProviderButtons from "./ProviderButtons.svelte";
   import PasswordTextfield from "./PasswordTextfield.svelte";
+  import { logEvent } from "firebase/analytics";
+  import { analytics } from "$lib/firebase/app";
 
   export let userData: UserData | undefined;
   let showSignInDialog = false;
@@ -39,6 +41,11 @@
   async function createAccount() {
     try {
       await createUser(email, password);
+
+      // log sign up method
+      logEvent(analytics, "sign_up", {
+        method: "email",
+      });
       errorMessage = "";
     } catch (err) {
       errorMessage = getErrorMsg(err);
@@ -73,6 +80,12 @@
   async function googleLogin() {
     try {
       await loginWithGoogle();
+      // I understand this means login and signup but we currently have no way to tell the difference
+      // Once you loggedin/signup you stay loggedin/signup unless you log out or use a different device
+      // I'm willing to change this if anyone has a better idea to represent this event
+      logEvent(analytics, "sign_up", {
+        method: "Google",
+      });
       errorMessage = "";
     } catch (err) {
       errorMessage = getErrorMsg(err);
@@ -85,6 +98,12 @@
   async function microsoftLogin() {
     try {
       await loginWithMicrosoft();
+      // I understand this means login and signup but we currently have no way to tell the difference
+      // Once you loggedin/signup you stay loggedin/signup unless you log out or use a different device
+      // I'm willing to change this if anyone has a better idea to represent this event
+      logEvent(analytics, "sign_up", {
+        method: "Microsoft",
+      });
       errorMessage = "";
     } catch (err) {
       errorMessage = getErrorMsg(err);

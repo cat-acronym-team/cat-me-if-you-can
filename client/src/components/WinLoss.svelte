@@ -5,6 +5,8 @@
   import catLossImage from "$lib/images/winloss/cat-loss.webp";
   import catfishWinImage from "$lib/images/winloss/catfish-win.webp";
   import catfishLossImage from "$lib/images/winloss/catfish-loss.webp";
+  import { analytics } from "$lib/firebase/app";
+  import { logEvent } from "firebase/analytics";
 
   export let lobby: Lobby;
   export let privatePlayer: PrivatePlayer;
@@ -97,6 +99,9 @@
   };
 
   $: state = STATES[privatePlayer.role][lobby.winner as "CAT" | "CATFISH"];
+
+  // log games ended
+  logEvent(analytics, "end-game");
 </script>
 
 <FullScreenTransition imageSrc={state.imageSrc} imageAlt="">
