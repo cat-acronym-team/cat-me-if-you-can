@@ -1,10 +1,14 @@
 <script lang="ts">
   import FullScreenTransition from "./FullScreenTransition.svelte";
-  import type { PrivatePlayer, Role } from "$lib/firebase/firestore-types/lobby";
+  import type { Lobby, PrivatePlayer, Role } from "$lib/firebase/firestore-types/lobby";
   import catImage from "$lib/images/role/cat.webp";
   import catfishImage from "$lib/images/role/catfish.webp";
 
   export let privatePlayer: PrivatePlayer;
+  export let catfishes: string[]; // empty for cats or spectators | at least 1 for catfishes
+  export let lobby: Lobby;
+
+  const formatter = new Intl.ListFormat("en", { style: "long", type: "conjunction" });
 
   const ROLES: {
     [key in Role]: { name: string; imageSrc: string; description: string };
@@ -26,13 +30,25 @@
     },
   };
 
+  function getCatfishNames() {
+    const { uids, players } = lobby;
+
+    const catfishNames = catfishes.map((catfishId) => players[uids.indexOf(catfishId)].displayName);
+
+    return catfishNames;
+  }
+
   $: role = ROLES[privatePlayer.role];
 </script>
 
 <FullScreenTransition imageSrc={role.imageSrc} imageAlt="">
   <svelte:fragment slot="banner">Time to find your purrfect match!</svelte:fragment>
   <svelte:fragment slot="image-subtext">
-    You are a <span class={role.name.toLowerCase()}>{role.name}</span>
+    {#if catfishes.length < 2}
+      You are a <span class={role.name.toLowerCase()}>{role.name}</span>
+    {:else}
+      {formatter.format(getCatfishNames() ?? "")} are the <span class={role.name.toLowerCase()}>{role.name}</span>
+    {/if}
   </svelte:fragment>
   <svelte:fragment slot="description">{role.description}</svelte:fragment>
 </FullScreenTransition>
@@ -42,20 +58,5 @@
   .catfish,
   .spectator {
     font-weight: bolder;
-  }
-
-  .cat {
-    /* Material Blue 700 */
-    color: #1976d2;
-  }
-
-  .catfish {
-    /* Material Red 800 */
-    color: #d32f2f;
-  }
-
-  .spectator {
-    /* Material Blue Grey 500 */
-    color: #607d8b;
   }
 </style>
