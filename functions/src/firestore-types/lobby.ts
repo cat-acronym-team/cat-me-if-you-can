@@ -26,6 +26,11 @@ export type Player = {
   votes: number;
 
   /**
+   * timestamp of when the the player joined the lobby
+   */
+  timeJoined: Timestamp;
+
+  /**
    * the role that the player played; used at the end of the game
    */
   role?: Role;
@@ -99,16 +104,9 @@ export const GAME_STATE_DURATIONS_MAX: { [state in ConfigurableTimer]: number } 
  */
 export type Lobby = {
   /**
-   * the UIDs of the players in this lobby
-   */
-  uids: string[];
-
-  /**
    * data about each player in the lobby
-   *
-   * @note uids[x] and players[x] belong to the same player
    */
-  players: Player[];
+  players: { [uid: string]: Player };
 
   /**
    * the current state of the game
@@ -119,11 +117,6 @@ export type Lobby = {
    * expiration time of the current phase with a timer
    */
   expiration: Timestamp;
-
-  /**
-   * array of alive players
-   */
-  alivePlayers: string[];
 
   /**
    * the role that won the game
@@ -137,20 +130,24 @@ export type Lobby = {
   votedOff?: string | "NONE";
 
   /**
-   *
-   * number of people who skipped voting
+   * number of people who chose skip in the voting phase
    */
   skipVote: number;
 
   /**
    * settings that can be edited in the lobby
    */
-  lobbySettings: LobbySettings;
+  host: string;
 
-  /*
+  /**
    * array of uids of banned players
    */
   bannedPlayers: string[];
+
+  /**
+   * settings that can be edited in the lobby
+   */
+  lobbySettings: LobbySettings;
 };
 
 /**

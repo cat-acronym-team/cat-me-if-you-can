@@ -10,7 +10,7 @@
   let imageAlt: string;
 
   $: if (lobby.votedOff != undefined && lobby.votedOff != "NONE") {
-    votedOffUser = lobby.players[lobby.uids.indexOf(lobby.votedOff)];
+    votedOffUser = lobby.players[lobby.votedOff];
     imageSrc = avatars[votedOffUser.avatar];
     imageAlt = avatarAltText[votedOffUser.avatar];
   } else {

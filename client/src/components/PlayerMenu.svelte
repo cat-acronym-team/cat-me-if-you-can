@@ -21,7 +21,7 @@
   <Menu bind:this={menu}>
     <List>
       {#if $user !== null}
-        {#if lobby.uids[0] === $user.uid}
+        {#if lobby.host === $user.uid}
           <Item on:SMUI:action={() => kick({ code: lobbyCode, uid: uid })}>
             <Text>Kick</Text>
           </Item>

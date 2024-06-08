@@ -9,11 +9,12 @@
   import { onMount } from "svelte";
   import { changeAvatar, startGame, leaveLobby } from "$lib/firebase/firebase-functions";
   import { goto } from "$app/navigation";
-  import { authStore as user } from "../store/auth";
+  import { authStore as user } from "$stores/auth";
 
   // Props
   export let lobbyCode: string;
   export let lobby: Lobby;
+  $: playersLength = Object.keys(lobby.players).length;
   let errorMessage: string = "";
   $: minPlayers = lobby.lobbySettings.catfishAmount * 2 + 2;
 
@@ -84,12 +85,12 @@
 <div class="container">
   <div class="lobby-info">
     <h3>Code: {lobbyCode}</h3>
-    <h3>Players: {lobby.players.length} / 8</h3>
-    {#if lobby.players.length < minPlayers}
+    <h3>Players: {playersLength} / 8</h3>
+    {#if playersLength < minPlayers}
       <!-- Display the number of players needed to start the current game session -->
-      {#if minPlayers - lobby.players.length !== 1}
+      {#if minPlayers - playersLength !== 1}
         <!-- Grammar check -->
-        <h3 class="error">{minPlayers - lobby.players.length} more players required to start game...</h3>
+        <h3 class="error">{minPlayers - playersLength} more players required to start game...</h3>
       {:else}
         <h3 class="error">1 more player required to start game...</h3>
       {/if}
@@ -98,11 +99,11 @@
     {/if}
   </div>
   <SelectAvatar {lobby} {lobbyCode} on:change={(event) => onAvatarSelect(event.detail.value)} />
-  {#if $user?.uid === lobby.uids[0]}
+  {#if $user?.uid === lobby.host}
     <div class="actions">
-      <Button on:click={start} disabled={lobby.players.length < minPlayers || waiting}>
-        <Label>Start Game</Label>
-      </Button>
+      <Button on:click={() => start()} disabled={playersLength < minPlayers || waiting}
+        ><Label>Start Game</Label></Button
+      >
     </div>
   {/if}
   <div class="actions">

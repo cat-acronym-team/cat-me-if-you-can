@@ -1,4 +1,5 @@
-import { Lobby } from "./firestore-types/lobby";
+import { Timestamp } from "firebase-admin/firestore";
+import { Lobby, Player } from "./firestore-types/lobby";
 
 export type GeneratedPairs = {
   pairs: { one: string; two: string }[];
@@ -11,11 +12,12 @@ export function generatePairs(lobbyData: Lobby): GeneratedPairs {
 
   // get only the uids of alive players
   const aliveUids: string[] = [];
-  lobbyData.players.forEach((player, playerIndex) => {
-    if (player.alive) {
-      aliveUids.push(lobbyData.uids[playerIndex]);
+
+  for (const uid in lobbyData.players) {
+    if (lobbyData.players[uid].alive) {
+      aliveUids.push(uid);
     }
-  });
+  }
 
   // pairs up on the alive players
   while (aliveUids.length > 1) {
@@ -32,4 +34,20 @@ export function generatePairs(lobbyData: Lobby): GeneratedPairs {
   }
 
   return { pairs, stalker };
+}
+
+export function updateHost(players: { [uid: string]: Player }) {
+  let newHost: string | undefined;
+  let earliestJoinedTime = Timestamp.now().toMillis();
+
+  for (const uid in players) {
+    const currentPlayerTimeJoined = players[uid].timeJoined.toMillis();
+
+    if (currentPlayerTimeJoined < earliestJoinedTime) {
+      earliestJoinedTime = currentPlayerTimeJoined;
+      newHost = uid;
+    }
+  }
+
+  return newHost;
 }

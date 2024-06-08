@@ -22,7 +22,7 @@
     unsubscribeVote = onSnapshot(
       voteDoc,
       (doc) => {
-        if (!doc.exists() || !lobby.alivePlayers.includes($user?.uid ?? "")) {
+        if (!doc.exists() || !lobby.players[$user?.uid ?? ""].alive) {
           return;
         }
         votedFor = doc.data().target;
@@ -52,13 +52,9 @@
 <div class="voting">
   <p class="mdc-typography--headline4">Vote out the catfish</p>
   <div class="voting-grid">
-    {#each lobby.players as { avatar, displayName, votes, alive, promptAnswer }, i}
+    {#each Object.entries(lobby.players) as [uid, { avatar, displayName, votes, alive, promptAnswer }]}
       <div class="vote-container {!alive ? 'dead' : ''}">
-        <button
-          class="avatar {votedFor == lobby.uids[i] ? 'selected' : ''}"
-          disabled={!lobby.alivePlayers.includes($user?.uid ?? "") || !alive}
-          on:click={() => vote(lobby.uids[i])}
-        >
+        <button class="avatar {votedFor == uid ? 'selected' : ''}" disabled={!alive} on:click={() => vote(uid)}>
           <AvatarImg {avatar} />
           <span class="mdc-typography--subtitle1">{displayName ?? ""}</span>
           <div class="mdc-typography--caption">

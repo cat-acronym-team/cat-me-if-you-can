@@ -22,7 +22,7 @@
     const chatSnapshot = await getDocs(chatCollection);
     chatrooms = chatSnapshot.docs.map((room) => ({
       id: room.id,
-      players: room.data().pair.map((uid) => lobby.players[lobby.uids.indexOf(uid)]) as [Player, Player],
+      players: room.data().pair.map((uid) => lobby.players[uid]) as [Player, Player],
     }));
   });
 

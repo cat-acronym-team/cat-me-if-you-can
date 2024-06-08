@@ -11,17 +11,16 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
     throw new Error("Lobby not found");
   }
 
-  const { uids } = lobbyData;
-  const { players: currentPlayers } = lobbyData;
+  const { players } = lobbyData;
   let winner: Lobby["winner"];
-  const alteredPlayers: Player[] = JSON.parse(JSON.stringify(currentPlayers));
+  const alteredPlayers: Player[] = JSON.parse(JSON.stringify(players));
 
   // check the alive cats vs alive catfishes
   let aliveCats = 0;
   let aliveCatfishes = 0;
   const privatePlayerCollection = getPrivatePlayerCollection(lobbyDoc.ref);
 
-  for (const uid of uids) {
+  for (const uid in alteredPlayers) {
     const privatePlayerRef = privatePlayerCollection.doc(uid);
 
     const privatePlayerDoc = await transaction.get(privatePlayerRef);
@@ -31,7 +30,7 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
     if (privatePlayer == undefined) {
       continue;
     } else {
-      const player = alteredPlayers[uids.indexOf(uid)];
+      const player = alteredPlayers[uid];
 
       if (privatePlayer.role == "CAT" && player.alive) {
         aliveCats += 1;
@@ -39,7 +38,6 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
       if (privatePlayer.role == "CATFISH" && player.alive) {
         aliveCatfishes += 1;
       }
-      // add their role to their altered player object
       player.role = privatePlayer.role;
     }
   }
@@ -54,9 +52,9 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
   // if there's no winner clear out the votes for the current player
   if (winner == undefined) {
     // set their votes to zero
-    for (const player of currentPlayers) {
-      player.votes = 0;
-      delete player.promptAnswer;
+    for (const uid in players) {
+      players[uid].votes = 0;
+      delete players[uid].promptAnswer;
     }
   }
 
@@ -68,11 +66,21 @@ export async function determineWinner(lobbyDoc: DocumentSnapshot<Lobby>, transac
   if (winner != undefined) {
     // END
     const expiration = Timestamp.fromMillis(Timestamp.now().toMillis() + GAME_STATE_DURATIONS_DEFAULT.END * 1000);
-    transaction.update(lobbyDoc.ref, { state: "END", players: alteredPlayers, winner, expiration });
+    transaction.update(lobbyDoc.ref, {
+      state: "END",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+      players: alteredPlayers satisfies Player[] as any,
+      winner,
+      expiration,
+    });
   } else {
     // PROMPT
     await startPrompt(lobbyDoc, transaction);
-    transaction.update(lobbyDoc.ref, { players: currentPlayers, skipVote: 0 });
+    transaction.update(lobbyDoc.ref, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+      players: players satisfies Lobby["players"] as any,
+      skipVote: 0,
+    });
   }
 
   for (const voteDoc of voteDocs.docs) {

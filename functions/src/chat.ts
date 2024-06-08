@@ -44,7 +44,7 @@ export async function setAndDeleteAnswers(
   lobbyDoc: DocumentReference<Lobby>,
   transaction: Transaction
 ) {
-  const { players, uids } = lobbyData;
+  const { players } = lobbyData;
   const promptAnswersSnapshot = await transaction.get(getPromptAnswerCollection(lobbyDoc));
 
   // delete stalker
@@ -57,15 +57,18 @@ export async function setAndDeleteAnswers(
   // iterate through promptAnswer docs and place the answer on their player object and delete the doc
   for (const promptAnswerDoc of promptAnswersSnapshot.docs) {
     const promptData = promptAnswerDoc.data();
-    const promptAns = promptData.answer;
 
-    const playerIndex = uids.indexOf(promptAnswerDoc.id);
-    players[playerIndex].promptAnswer = promptAns;
+    players[promptAnswerDoc.id].promptAnswer = promptData.answer;
 
     transaction.delete(promptAnswerDoc.ref);
   }
 
   const expiration = Timestamp.fromMillis(Timestamp.now().toMillis() + lobbyData.lobbySettings.voteTime * 1000);
 
-  transaction.update(lobbyDoc, { state: "VOTE", expiration, players });
+  transaction.update(lobbyDoc, {
+    state: "VOTE",
+    expiration,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Workaround for https://github.com/googleapis/nodejs-firestore/issues/1808
+    players: players satisfies Lobby["players"] as any,
+  });
 }
